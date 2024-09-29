@@ -1,24 +1,13 @@
-import logo from './logo.svg';
 import './App.css';
-
+import AdminCard from './Shared/Components/AdminCard/adminsCard.js';
+import GenericDialog from './Shared/Components/GenericDialog/genericDialog.js';
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+   
+      <AdminCard  title="Lizard"
+      description="Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all continents except Antarctica."
+      imageUrl="/static/images/cards/contemplative-reptile.jpg"/>
+ 
   );
 }
 
