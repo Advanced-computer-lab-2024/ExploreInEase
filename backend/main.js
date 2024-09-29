@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 const express = require('express')
-const workoutRoutes = require('./routes/workouts')
+// const userRoutes = require('./src/components/users/userRoutes')
 const { default: mongoose } = require('mongoose')
 
 // express app
@@ -18,7 +18,7 @@ ACLapp.use((req, res, next) => {
 })
 
 //routes
-ACLapp.use('/api/workouts', workoutRoutes)
+// ACLapp.use('/users/createTourist', userRoutes)
 
 
 //connect to db
