@@ -44,11 +44,13 @@ const getAllCategories = async (req, res) => {
   }
 };
 
-// Update an activity category by name
-const updateCategoryByName = async (req, res) => {
-  const { categoryName } = req.params;
+// Update an activity category by ID
+const updateCategoryById = async (req, res) => {
+  const { id } = req.params; 
+  const updateData = req.body; // Get the update data from the request body
+
   try {
-    const updatedCategory = await eventService.updateCategoryByName(categoryName, req.body);
+    const updatedCategory = await eventService.updateCategoryById(id, updateData);
     if (!updatedCategory) {
       return res.status(404).json({ message: 'Category not found' });
     }
@@ -59,21 +61,20 @@ const updateCategoryByName = async (req, res) => {
   }
 };
 
-// Delete an activity category by name
-const deleteCategoryByName = async (req, res) => {
-  const { categoryName } = req.params;
+const deleteCategoryById = async (req, res) => {
+  const { id } = req.params; // Get the ID from the URL
+  
+
   try {
-    const deletedCategory = await eventService.deleteCategoryByName(categoryName);
-    if (!deletedCategory) {
-      return res.status(404).json({ message: 'Category not found' });
-    }
-    return res.status(204).send(); 
+      const result = await eventService.deleteCategoryById(id); 
+      if (!result) {
+          return res.status(404).json({ message: 'Category not found' });
+      }
+      res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
-    console.error('Error deleting category:', error.message);
-    return res.status(500).json({ message: error.message });
+      res.status(500).json({ message: 'Server error', error });
   }
 };
-
 
 //CRUD PREFTAGS
 
@@ -102,13 +103,16 @@ const getAllTags = async (req, res) => {
   }
 };
 
-// Update a preference tag by its name
-const updateTagByName = async (req, res) => {
-  const { tagName } = req.params; // Assuming the name is passed in the URL
-  const updatedData = req.body;
+// Update a preference tag by its _id
+const updateTagById = async (req, res) => {
+  const { id } = req.params; // Get the id from the URL
+  const updatedData = req.body; // Get the updated data from the request body
 
   try {
-    const updatedTag = await eventService.updateTagByName(tagName, updatedData);
+    const updatedTag = await eventService.updateTagById(id, updatedData);
+    if (!updatedTag) {
+      return res.status(404).json({ message: 'Tag not found' });
+    }
     return res.status(200).json(updatedTag);
   } catch (error) {
     console.error('Error updating tag:', error.message);
@@ -116,13 +120,16 @@ const updateTagByName = async (req, res) => {
   }
 };
 
-// Delete a preference tag by its name
-const deleteTagByName = async (req, res) => {
-  const { tagName } = req.params; // Assuming the name is passed in the URL
+// Delete a preference tag by its _id
+const deleteTagById = async (req, res) => {
+  const { id } = req.params; // Get the id from the URL
 
   try {
-    const deletedTag = await eventService.deleteTagByName(tagName);
-    return res.status(200).json(deletedTag);
+    const deletedTag = await eventService.deleteTagById(id);
+    if (!deletedTag) {
+      return res.status(404).json({ message: 'Tag not found' });
+    }
+    return res.status(200).json({ message: 'Tag deleted successfully' });
   } catch (error) {
     console.error('Error deleting tag:', error.message);
     return res.status(500).json({ message: error.message });
@@ -134,11 +141,11 @@ module.exports = {
     getUserEvents,
     createCategory,
     getAllCategories,
-    updateCategoryByName,
-    deleteCategoryByName,
+    updateCategoryById,
+    deleteCategoryById,
     createTag,
     getAllTags,
-    updateTagByName,
-    deleteTagByName,
+    updateTagById,
+    deleteTagById,
   };
   

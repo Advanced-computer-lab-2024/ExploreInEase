@@ -2,7 +2,7 @@ const userService = require('../users/userService');
 
 // Delete user by username
 const deleteUserByUsername = async (req, res) => {
-    const { username } = req.params;
+    const { username } = req.body;
 
     // Validation
     if (!username || typeof username !== 'string') {
@@ -25,17 +25,17 @@ const deleteUserByUsername = async (req, res) => {
 
 // Add a new tourismGovernor or a new Admin
 const addGovernerOrAdmin = async (req, res) => {
-    const { username, password, type } = req.body;
+    const { username, password, type,email } = req.body;
 
     // Check if username and password are provided
     if (!username || !password || !type) {
-        return res.status(400).json({ message: "Username and password are required." });
+        return res.status(400).json({ message: "Username and password and usertype are required." });
     }
 
 
     try {
         // Send data to the service layer to create a new tourismGovernor
-        const result = await userService.addGovernerOrAdmin(username, password, type);
+        const result = await userService.addGovernerOrAdmin(username, password, type,email);
         res.status(201).json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });
