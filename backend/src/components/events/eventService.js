@@ -1,5 +1,5 @@
-const eventRepository = require('./eventRepository');
-const User = require('../models/user'); 
+const eventRepository = require('../events/eventRepository');
+const User = require('../../models/user'); 
 
 
 

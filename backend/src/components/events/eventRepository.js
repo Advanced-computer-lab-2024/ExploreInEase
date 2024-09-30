@@ -1,8 +1,8 @@
-const HistoricalPlace = require('../models/historicalPlace');
-const Itinerary = require('../models/itinerary');
-const Activity = require('../models/activity');
-const ActivityCategory = require('./models/activityCategory'); 
-const PreferenceTags = require('./models/preferenceTags'); 
+const HistoricalPlace = require('../../models/historicalPlace');
+const Itinerary = require('../../models/itinerary');
+const Activity = require('../../models/activity');
+const ActivityCategory = require('../../models/activityCategory'); 
+const PreferenceTags = require('../../models/preferenceTags'); 
 
 
 // Function to get historical places created by a user

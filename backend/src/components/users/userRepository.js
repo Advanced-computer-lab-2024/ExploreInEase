@@ -1,5 +1,5 @@
-const Users = require('../models/user');
-const Tourist = require('../models/tourist');
+const Users = require('../../models/user');
+
 
 // Delete user from Users table
 const deleteUser = async (username) => {

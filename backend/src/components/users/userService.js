@@ -1,4 +1,4 @@
-const userRepository = require('./userRepository');
+const userRepository = require('../users/userRepository');
 
 const deleteUserByUsername = async (username) => {
     // Try to delete from both tables (users and tourists)

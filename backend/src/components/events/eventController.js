@@ -1,4 +1,4 @@
-const eventService = require('./eventService');
+const eventService = require('../events/eventService');
 
 //Get all my events by username
 const getUserEvents = async (req, res) => {

@@ -1,7 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const router = express.Router()
-const eventController = require('./eventController');
+const eventController = require('../events/eventController');
 
 // Route to get user events
 router.get('/user/GetMyEvents', eventController.getUserEvents);
