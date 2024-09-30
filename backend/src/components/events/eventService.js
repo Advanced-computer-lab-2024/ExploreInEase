@@ -43,14 +43,14 @@ const getAllCategories = async () => {
   return await eventRepository.getAllCategories();
 };
 
-// Update an activity category by name
-const updateCategoryByName = async (categoryName, updatedData) => {
-  return await eventRepository.updateCategoryByName(categoryName, updatedData);
+// Delete a category by ID
+const deleteCategoryById = async (id) => {
+  return await eventRepository.deleteCategoryById(id);
 };
 
-// Delete an activity category by name
-const deleteCategoryByName = async (categoryName) => {
-  return await eventRepository.deleteCategoryByName(categoryName);
+// Update a category by ID
+const updateCategoryById = async (id, updateData) => {
+  return await eventRepository.updateCategoryById(id, updateData);
 };
 
 
@@ -66,27 +66,27 @@ const createTag = async (tagData) => {
     return await eventRepository.getAllTags();
   };
   
-  // Update a preference tag by name
-  const updateTagByName = async (tagName, updatedData) => {
-    return await eventRepository.updateTagByName(tagName, updatedData);
-  };
-  
-  // Delete a preference tag by name
-  const deleteTagByName = async (tagName) => {
-    return await eventRepository.deleteTagByName(tagName);
-  };
-  
+  // Update a preference tag by _id
+const updateTagById = async (id, updatedData) => {
+  return await eventRepository.updateTagById(id, updatedData);
+};
+
+// Delete a preference tag by _id
+const deleteTagById = async (id) => {
+  return await eventRepository.deleteTagById(id);
+};
+
 
 
 module.exports = {
   getUserEvents,
   createCategory,
   getAllCategories,
-  updateCategoryByName,
-  deleteCategoryByName,
+  updateCategoryById,
+  deleteCategoryById,
   createTag,
   getAllTags,
-  updateTagByName,
-  deleteTagByName,
+  updateTagById,
+  deleteTagById,
 };
 

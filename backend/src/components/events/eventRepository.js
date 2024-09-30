@@ -34,18 +34,26 @@ const getAllCategories = async () => {
   return await ActivityCategory.find();
 };
 
-// Update an activity category by name
-const updateCategoryByName = async (categoryName, updatedData) => {
-  return await ActivityCategory.findOneAndUpdate(
-    { categoryName: categoryName },
-    updatedData,
-    { new: true }
-  );
+// Delete a category by ID
+const deleteCategoryById = async (id) => {
+  try {
+      const result = await ActivityCategory.findByIdAndDelete(id);
+      return result ? true : false; // Return true if a category was deleted
+  } catch (error) {
+      console.error(`Error deleting category: ${error.message}`);
+      return false;
+  }
 };
 
-// Delete an activity category by name
-const deleteCategoryByName = async (categoryName) => {
-  return await ActivityCategory.findOneAndDelete({ categoryName: categoryName });
+// Update a category by ID
+const updateCategoryById = async (id, updateData) => {
+  try {
+      const updatedCategory = await ActivityCategory.findByIdAndUpdate(id, updateData, { new: true });
+      return updatedCategory; // Return the updated category
+  } catch (error) {
+      console.error(`Error updating category: ${error.message}`);
+      return null; // Return null if the update fails
+  }
 };
 
 
@@ -63,19 +71,16 @@ const getAllTags = async () => {
   return await PreferenceTags.find();
 };
 
-// Update a preference tag by its name
-const updateTagByName = async (tagName, updatedData) => {
-  return await PreferenceTags.findOneAndUpdate(
-    { tags: tagName },
-    updatedData,
-    { new: true }
-  );
+// Update a preference tag by its _id
+const updateTagById = async (id, updatedData) => {
+  return await PreferenceTags.findByIdAndUpdate(id, updatedData, { new: true });
 };
 
-// Delete a preference tag by its name
-const deleteTagByName = async (tagName) => {
-  return await PreferenceTags.findOneAndDelete({ tags: tagName });
+// Delete a preference tag by its _id
+const deleteTagById = async (id) => {
+  return await PreferenceTags.findByIdAndDelete(id);
 };
+
 
   
 
@@ -86,12 +91,12 @@ module.exports = {
   getActivitiesByUsername,
   createCategory,
   getAllCategories,
-  updateCategoryByName,
-  deleteCategoryByName,
+  updateCategoryById,
+  deleteCategoryById,
   createTag,
   getAllTags,
-  updateTagByName,
-  deleteTagByName,
+  updateTagById,
+  deleteTagById,
 };
 
 

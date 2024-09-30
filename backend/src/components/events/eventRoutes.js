@@ -7,27 +7,27 @@ const eventController = require('../events/eventController');
 router.get('/user/GetMyEvents', eventController.getUserEvents);
 
 // Create activity category
-router.post('/categories', eventController.createCategory);
+router.post('/createCategory', eventController.createCategory);
 
 // Read all activity categories
-router.get('/categories', eventController.getAllCategories); 
+router.get('/getAllCategories', eventController.getAllCategories); 
 
 // Update by name activity category
-router.put('/categories/:categoryName', eventController.updateCategoryByName);
+router.put('/updateCategoryById/:id', eventController.updateCategoryById);
 
 // Delete by name activity category
-router.delete('/categories/:categoryName', eventController.deleteCategoryByName); 
+router.delete('/deleteCategoryById/:id', eventController.deleteCategoryById); 
 
 // Create a new preference tag
-router.post('/tags', eventController.createTag);
+router.post('/createTag', eventController.createTag);
 
 // Get all preference tags
-router.get('/tags', eventController.getAllTags);
+router.get('/getAllTags', eventController.getAllTags);
 
 // Update a preference tag by name
-router.put('/tags/:tagName', eventController.updateTagByName);
+router.put('/updateTagById/:id', eventController.updateTagById);
 
 // Delete a preference tag by name
-router.delete('/tags/:tagName', eventController.deleteTagByName);
+router.delete('/deleteTagById/:id', eventController.deleteTagById);
 
 module.exports = router;

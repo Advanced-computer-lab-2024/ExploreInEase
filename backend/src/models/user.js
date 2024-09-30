@@ -24,8 +24,7 @@ const UsersSchema = new Schema({
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         },
         unique: true,
-        match: [/\S+@\S+\.\S+/, 'Invalid email format'],
-        lowercase: true
+        
     },
     nationalId: {
         type: String,

@@ -10,11 +10,12 @@ const deleteUserByUsername = async (username) => {
 };
 
 
-const addGovernerOrAdmin = async (username, password, type) => {
+const addGovernerOrAdmin = async (username, password, type,email) => {
     const newUser = {
         username: username,
         password: password,
-        type: type // The type can be 'admin' or 'tourismGovernor'
+        type: type, // The type can be 'admin' or 'tourismGovernor'
+        email: email
     };
 
     return await userRepository.addGovernerOrAdmin(newUser);
