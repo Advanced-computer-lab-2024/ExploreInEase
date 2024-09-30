@@ -19,7 +19,10 @@ const UsersSchema = new Schema({
     },
     email: {
         type: String,
-        required: [true, 'Email is required'],
+        required: function() {
+            // Required for specific types
+            return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
+        },
         unique: true,
         match: [/\S+@\S+\.\S+/, 'Invalid email format'],
         lowercase: true

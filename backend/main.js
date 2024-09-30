@@ -1,37 +1,33 @@
 require('dotenv').config()
 
 const express = require('express')
-// const userRoutes = require('./src/components/users/userRoutes')
-const { default: mongoose } = require('mongoose')
-
-// express app
+const mongoose = require('mongoose')
+const userRoutes = require('./src/components/users/userRoutes') 
+const eventRoutes = require('./src/components/events/eventRoutes')
+// Express app
 const ACLapp = express()
 
-
-// middleware
+// Middleware to parse JSON
 ACLapp.use(express.json())
 
-
+// Logging middleware (optional, just for debugging)
 ACLapp.use((req, res, next) => {
     console.log(req.path, req.method)
     next()
 })
 
-//routes
-// ACLapp.use('/users/createTourist', userRoutes)
+// Routes
+ACLapp.use('/api', userRoutes) 
+ACLapp.use('/api', eventRoutes) 
 
-
-//connect to db
-mongoose.connect(process.env.MONGO_URI)
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
-        //listen for requests
+        // Start listening for requests
         ACLapp.listen(process.env.PORT, () => {
-            console.log('connected to db & listening on port ',process.env.PORT)
+            console.log(`Connected to DB & listening on port ${process.env.PORT}`)
         })
     })
     .catch((error) => {
-        console.log(error)
+        console.log('Error connecting to MongoDB:', error)
     })
-
-
-
