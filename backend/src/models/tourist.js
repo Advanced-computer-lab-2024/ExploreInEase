@@ -44,21 +44,21 @@ const TouristSchema = new Schema({
         enum: ['Job', 'Student'], // Restrict to either 'Job' or 'Student'
         required: true
     },
-    itinerary: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Itinerary', // Foreign key reference to Itinerary schema
-        required: true
-    },
-    activityId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity', // Foreign key reference to Activity schema
-        required: true
-    },
-    historicalplaceId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
-        required: true
-    },
+    // itinerary: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Itinerary', // Foreign key reference to Itinerary schema
+    //     required: true
+    // },
+    // activityId: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Activity', // Foreign key reference to Activity schema
+    //     required: true
+    // },
+    // historicalplaceId: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
+    //     required: true
+    // },
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
         default: ''
@@ -81,11 +81,11 @@ const TouristSchema = new Schema({
         default: 0,
         min: 0 // Ensures points cannot go below zero
     },
-    wishlists: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product', // Assuming you have a Product schema for products in the wishlist
-        required: false
-    }],
+    // wishlists: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Product', // Assuming you have a Product schema for products in the wishlist
+    //     required: false
+    // }],
     wallet: {
         type: Number,
         default: 0, // Starting wallet balance
@@ -97,12 +97,12 @@ const TouristSchema = new Schema({
 });
 
 // Middleware to hash password before saving
-TouristSchema.pre('save', async function(next) {
-    if (this.isModified('password')) {
-        this.password = await hashPassword(this.password); // Assumes hashPassword is a function to hash the password
-    }
-    next();
-});
+// TouristSchema.pre('save', async function(next) {
+//     if (this.isModified('password')) {
+//         this.password = await hashPassword(this.password); // Assumes hashPassword is a function to hash the password
+//     }
+//     next();
+// });
 
 // Model the schema
 const Tourist = mongoose.model('Tourist', TouristSchema);
