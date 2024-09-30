@@ -50,7 +50,7 @@ const itinerarySchema = new Schema({
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Assuming 'User' is the creator of the itinerary
+    ref: 'Users', // Assuming 'User' is the creator of the itinerary
     required: true,
   },
   flag: {
