@@ -33,11 +33,7 @@ const activitySchema = new Schema({
     ref: 'ActivityCategory', 
     required: true,
   },
-  tags: {
-    type: [String],
-    ref: 'PreferenceTags', 
-   
-  },
+  
   specialDiscounts: {
     type: Number, 
   },
