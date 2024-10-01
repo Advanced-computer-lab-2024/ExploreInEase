@@ -21,9 +21,12 @@ const addGovernerOrAdmin = async (username, password, type,email) => {
     return await userRepository.addGovernerOrAdmin(newUser);
 };
 
+// Retrieve list of available products
+const getAvailableProducts = async () => {
+    return await userRepository.getAllAvailableProducts();
+}
 
 
 
 
-
-module.exports = { deleteUserByUsername,addGovernerOrAdmin };
+module.exports = { deleteUserByUsername,addGovernerOrAdmin,getAvailableProducts };

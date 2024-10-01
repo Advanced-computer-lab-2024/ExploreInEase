@@ -1,5 +1,5 @@
 const Users = require('../../models/user');
-
+const Product = require('../../models/product'); 
 
 // Delete user from Users table
 const deleteUser = async (username) => {
@@ -40,4 +40,15 @@ const addGovernerOrAdmin = async (userData) => {
 };
 
 
-module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin };
+// Fetch all available products with details
+const getAllAvailableProducts = async () => {
+    try {
+        return await Product.find({ isActive: true })
+            .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name') // Only fetch necessary fields
+            .populate('sellerId', 'name type'); // Assuming 'sellerId' is a reference to a User or Seller collection
+    } catch (error) {
+        throw new Error(`Error fetching products: ${error.message}`);
+    }
+};
+
+module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, getAllAvailableProducts};

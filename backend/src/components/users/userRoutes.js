@@ -6,6 +6,7 @@ const userController = require('../users/userController');
 
 router.delete('/deleteUserByUsername', userController.deleteUserByUsername);
 router.post('/addGovernerOrAdmin', userController.addGovernerOrAdmin);
+router.get('/getAvailableProducts', userController.getAvailableProducts);
 
 
 
