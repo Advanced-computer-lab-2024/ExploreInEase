@@ -38,9 +38,6 @@ const deleteUserByIdAndType = async (req, res) => {
     }
 };
 
-module.exports = {
-    deleteUserByIdAndType,
-};
 
 
 // Add a new tourismGovernor or a new Admin
