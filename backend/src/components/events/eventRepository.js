@@ -5,20 +5,22 @@ const ActivityCategory = require('../../models/activityCategory');
 const PreferenceTags = require('../../models/preferenceTags'); 
 
 
-// Function to get historical places created by a user
-const getHistoricalPlacesByUsername = async (userId) => {
+// Function to get historical places by userId
+const getHistoricalPlacesByUserId = async (userId) => {
   return await HistoricalPlace.find({ created_by: userId });
 };
 
-// Function to get itineraries created by a user
-const getItinerariesByUsername = async (userId) => {
+// Function to get itineraries by userId
+const getItinerariesByUserId = async (userId) => {
   return await Itinerary.find({ created_by: userId });
 };
 
-// Function to get activities created by a user
-const getActivitiesByUsername = async (userId) => {
+// Function to get activities by userId
+const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId });
 };
+
+
 
 
 //CDUD ACTIVITY CATEGORY
@@ -86,9 +88,6 @@ const deleteTagById = async (id) => {
 
 
 module.exports = {
-  getHistoricalPlacesByUsername,
-  getItinerariesByUsername,
-  getActivitiesByUsername,
   createCategory,
   getAllCategories,
   updateCategoryById,
@@ -97,6 +96,9 @@ module.exports = {
   getAllTags,
   updateTagById,
   deleteTagById,
+  getHistoricalPlacesByUserId,
+  getItinerariesByUserId,
+  getActivitiesByUserId
 };
 
 

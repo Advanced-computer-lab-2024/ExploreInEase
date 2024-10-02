@@ -4,7 +4,7 @@ const router = express.Router()
 const eventController = require('../events/eventController');
 
 // Route to get user events
-router.get('/user/GetMyEvents', eventController.getUserEvents);
+router.get('/GetMyEvents', eventController.getUserEvents);
 
 // Create activity category
 router.post('/createCategory', eventController.createCategory);

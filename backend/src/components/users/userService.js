@@ -1,12 +1,22 @@
 const userRepository = require('../users/userRepository');
 
-const deleteUserByUsername = async (username) => {
-    // Try to delete from both tables (users and tourists)
-    const deletedUser = await userRepository.deleteUser(username);
-    const deletedTourist = await userRepository.deleteTourist(username);
+const getUserById = async (id) => {
+    // Retrieve the user from the Users table based on id
+    return await userRepository.findUserById(id);
+};
 
-    // Return true if a user/tourist was deleted from either table
-    return deletedUser || deletedTourist;
+const deleteUserByIdAndType = async (_id, userType) => {
+    let result = false;
+
+    if (userType === 'tourist') {
+        // Delete from Tourist table
+        result = await userRepository.deleteTouristById(_id);
+    } else {
+        // Delete from Users table for other user types
+        result = await userRepository.deleteUserById(_id);
+    }
+
+    return result;
 };
 
 
@@ -24,6 +34,17 @@ const addGovernerOrAdmin = async (username, password, type,email) => {
 
 
 
+const fetchAllUsersAndTourists = async () => {
+    try {
+        const users = await userRepository.fetchAllUsers();
+        const tourists = await userRepository.fetchAllTourists();
+        return { users, tourists };
+    } catch (error) {
+        throw new Error(`Error fetching users and tourists: ${error.message}`);
+    }
+};
 
 
-module.exports = { deleteUserByUsername,addGovernerOrAdmin };
+
+module.exports = { deleteUserByIdAndType, addGovernerOrAdmin, fetchAllUsersAndTourists,getUserById, deleteUserByIdAndType };
+

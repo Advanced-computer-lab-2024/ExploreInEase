@@ -3,27 +3,27 @@ const User = require('../../models/user');
 
 
 
-const getUserEvents = async (username, userType) => {
-  const user = await User.findOne({ username });
+const getUserEvents = async (_id, userType) => {
+  const user = await User.findById(_id); // Find user by _id
   
   if (!user) {
-    throw new Error('User not found');
+      throw new Error('User not found');
   }
 
   let events;
 
   switch (userType) {
-    case 'tourismGovernor':
-      events = await eventRepository.getHistoricalPlacesByUsername(user._id);
-      break;
-    case 'tourGuide':
-      events = await eventRepository.getItinerariesByUsername(user._id);
-      break;
-    case 'advertiser':
-      events = await eventRepository.getActivitiesByUsername(user._id);
-      break;
-    default:
-      throw new Error('Invalid user type');
+      case 'tourismGovernor':
+          events = await eventRepository.getHistoricalPlacesByUserId(_id);
+          break;
+      case 'tourGuide':
+          events = await eventRepository.getItinerariesByUserId(_id);
+          break;
+      case 'advertiser':
+          events = await eventRepository.getActivitiesByUserId(_id);
+          break;
+      default:
+          throw new Error('Invalid userType');
   }
 
   return events;

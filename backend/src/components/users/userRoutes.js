@@ -4,8 +4,10 @@ const router = express.Router()
 const userController = require('../users/userController');
 
 
-router.delete('/deleteUserByUsername', userController.deleteUserByUsername);
+router.delete('/deleteUserByIdAndType', userController.deleteUserByIdAndType);
 router.post('/addGovernerOrAdmin', userController.addGovernerOrAdmin);
+router.get('/fetchAllUsersAndTourists', userController.fetchAllUsersAndTourists);
+
 
 
 

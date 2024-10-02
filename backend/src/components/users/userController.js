@@ -1,20 +1,35 @@
 const userService = require('../users/userService');
 
-// Delete user by username
-const deleteUserByUsername = async (req, res) => {
-    const { username } = req.body;
+// Delete user by _id and userType, ensuring self-id check
+const deleteUserByIdAndType = async (req, res) => {
+    const { _id, userType, selfId } = req.body;
 
     // Validation
-    if (!username || typeof username !== 'string') {
-        return res.status(400).json({ error: 'Invalid or missing username' });
+    if (!_id || !userType || !selfId) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
+
+    if (typeof _id !== 'string' || typeof userType !== 'string' || typeof selfId !== 'string') {
+        return res.status(400).json({ error: 'Invalid parameter types' });
     }
 
     try {
-        // Call the service to delete the user
-        const result = await userService.deleteUserByUsername(username);
+        // Check if the selfId belongs to an admin
+        const selfUser = await userService.getUserById(selfId);
+        if (!selfUser || selfUser.type !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized action' });
+        }
+
+        // Prevent self-deletion
+        if (_id === selfId) {
+            return res.status(400).json({ error: 'Cannot delete yourself' });
+        }
+
+        // Call the service to delete the user based on userType
+        const result = await userService.deleteUserByIdAndType(_id, userType);
 
         if (result) {
-            return res.status(200).json({ message: `User ${username} deleted successfully` });
+            return res.status(200).json({ message: `User with ID ${_id} deleted successfully` });
         } else {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -22,6 +37,11 @@ const deleteUserByUsername = async (req, res) => {
         return res.status(500).json({ error: 'An error occurred while deleting the user' });
     }
 };
+
+module.exports = {
+    deleteUserByIdAndType,
+};
+
 
 // Add a new tourismGovernor or a new Admin
 const addGovernerOrAdmin = async (req, res) => {
@@ -42,8 +62,17 @@ const addGovernerOrAdmin = async (req, res) => {
     }
 };
 
- 
+// Fetch all data from Users and Tourists tables
+const fetchAllUsersAndTourists = async (req, res) => {
+    try {
+        const data = await userService.fetchAllUsersAndTourists();
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error('Error fetching users and tourists:', error.message);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
 
 
 
-module.exports = { deleteUserByUsername ,addGovernerOrAdmin};
+module.exports = { deleteUserByIdAndType ,addGovernerOrAdmin,fetchAllUsersAndTourists};

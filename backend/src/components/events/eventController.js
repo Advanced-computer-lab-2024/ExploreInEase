@@ -1,25 +1,26 @@
 const eventService = require('../events/eventService');
 
-//Get all my events by username
+// Get all user events by _id and userType
 const getUserEvents = async (req, res) => {
-    const { username, userType } = req.params;
-  
-    if (typeof username !== 'string' || typeof userType !== 'string') {
-      return res.status(400).json({ error: 'Invalid username or usertype' });
+  const { _id, userType } = req.body;
+
+  // Validate input
+  if (!_id || !userType) {
+      return res.status(400).json({ message: "User ID and userType are required." });
   }
-  if (!username || !userType ) {
-      return res.status(400).json({ message: "Username and password are required." });
+
+  if (typeof _id !== 'string' || typeof userType !== 'string') {
+      return res.status(400).json({ error: 'Invalid userId or userType format' });
   }
-  
-    
-    try {
-      const events = await eventService.getUserEvents(username, userType);
+
+  try {
+      const events = await eventService.getUserEvents(_id, userType);
       return res.status(200).json(events);
-    } catch (error) {
+  } catch (error) {
       console.error('Error fetching user events:', error.message);
       return res.status(500).json({ message: error.message });
-    }
-  };
+  }
+};
   
 //CRUD ACTIVITY CATEGORY    
 // Create an activity category
