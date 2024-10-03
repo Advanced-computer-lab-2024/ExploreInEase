@@ -24,7 +24,6 @@ const UsersSchema = new Schema({
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         },
         unique: true,
-        
     },
     nationalId: {
         type: String,
@@ -100,6 +99,14 @@ const UsersSchema = new Schema({
         type: String,
         required: [true, 'User type is required'],
         enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] // User types
+    },
+    sellerType: {
+        type: String,
+        enum: ['VTP', 'external'], // Seller types
+        required: function() {
+            // Required for sellers
+            return this.type === 'seller';
+        }
     },
     selfPicture: {
         type: String,

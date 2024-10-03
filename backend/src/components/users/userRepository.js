@@ -56,16 +56,16 @@ const getAllAvailableProducts = async () => {
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }  // Only include products where takenQuantity < originalQuantity
         })
         .select('picture price description ratings reviews sellerId')  // Select only the required fields
-        .populate('sellerId', 'username');  // Populate only the seller's username
+        .populate('sellerId', 'username sellerType');  // Populate both username and type from sellerId
 
-        // Transform the result to include seller's username directly
+        // Transform the result to include seller's type directly
         const transformedProducts = availableProducts.map(product => ({
             picture: product.picture,
             price: product.price,
             description: product.description,
             ratings: product.ratings,
             reviews: product.reviews,
-            sellerName: product.sellerId.username  // Get the seller's username directly
+            sellerType: product.sellerId.sellerType  // Get the seller's type directly
         }));
 
         return transformedProducts;
@@ -73,6 +73,7 @@ const getAllAvailableProducts = async () => {
         throw new Error(`Error retrieving available products: ${error.message}`);
     }
 };
+
 
 // const getMaxProductPrice = async () => {
 //     try {
