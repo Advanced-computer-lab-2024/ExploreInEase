@@ -30,7 +30,12 @@ const getAvailableProducts = async () => {
 }
 
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
-    return await userRepository.getProductsByPriceRange(minPrice, maxPrice);
+    try {
+        // Call the repository to fetch products by price range
+        return await userRepository.getProductsByPriceRange(minPrice, maxPrice);
+    } catch (error) {
+        throw new Error(`Error fetching products by price range: ${error.message}`);
+    }
 };
 
 const updateProduct = async (productId, updatedProductData) => {

@@ -62,22 +62,38 @@ const getAllAvailableProducts = async () => {
     }
 };
 
-const getProductsByPriceRange = async (minPrice, maxPrice) => {
-    try{
-        const query = {
-            isActive: true,
-            price:{
-                $gte: minPrice || 0,
-                $lte: maxPrice || Infinity
-            }
-        };
-        return await Product.find(query)
-            .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name')
-            .populate('sellerId', 'name type');
-    } catch (error){
-        throw new Error ('Error fetching products by price range: ${error.message}');
+const getMaxProductPrice = async () => {
+    try {
+        // Find the product with the highest price
+        const maxPriceProduct = await Product.findOne({ isActive: true })
+            .sort({ price: -1 })  // Sort by price in descending order
+            .select('price');      // Select only the price field
+        
+        return maxPriceProduct ? maxPriceProduct.price : 0;  // Return the price or 0 if no product
+    } catch (error) {
+        throw new Error(`Error fetching max product price: ${error.message}`);
     }
-}
+};
+
+
+const getProductsByPriceRange = async (minPrice, maxPrice) => {
+    try {
+        // Query products within the price range and that are active
+        const products = await Product.find({
+            isActive: true,  // Assuming products have an isActive field to check availability
+            price: {
+                $gte: minPrice,  // Greater than or equal to minPrice
+                $lte: maxPrice   // Less than or equal to maxPrice
+            }
+        })
+        .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name')
+        .populate('sellerId', 'name type');  // Populate seller information
+
+        return products;
+    } catch (error) {
+        throw new Error(`Error querying products by price range: ${error.message}`);
+    }
+};
 
 const updateProduct = async (productId, updatedProductData) => {
     try {
