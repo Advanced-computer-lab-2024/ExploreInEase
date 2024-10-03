@@ -1,0 +1,72 @@
+/* App.css */
+
+.App {
+    display: flex;
+    justify-content: center; /* Centering the content horizontally */
+    align-items: center; /* Centering the content vertically */
+    height: 100vh; /* Full viewport height */
+    background-color: #f5f5f5; /* Light background color */
+    font-family: Arial, sans-serif; /* Font for the application */
+  }
+  
+  .form-container {
+    background-color: #fff; /* White background for the form container */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    padding: 20px; /* Inner spacing */
+    max-width: 400px; /* Max width of the form */
+    width: 100%; /* Full width on smaller screens */
+  }
+  
+  h1 {
+    text-align: center; /* Centering the heading */
+    margin-bottom: 20px; /* Spacing below the heading */
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: center; /* Centering buttons */
+    margin-bottom: 20px; /* Spacing below the button group */
+  }
+  
+  .role-button {
+    margin: 0 10px; /* Space between buttons */
+    padding: 10px 20px; /* Padding for button */
+    font-size: 16px; /* Font size for button text */
+    background-color: #007bff; /* Primary color */
+    color: white; /* Text color */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer on hover */
+    transition: background-color 0.3s; /* Transition for hover effect */
+  }
+  
+  .role-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  .role-button.active {
+    background-color: #0056b3; /* Darker color for active button */
+  }
+  
+  .form-content {
+    border-top: 1px solid #ddd; /* Top border for separation */
+    padding-top: 20px; /* Spacing above the form */
+  }
+  
+  /* New style for Register button */
+  .register-button {
+    background-color: #007bff; /* Blue background */
+    color: white; /* Text color */
+    padding: 10px 20px; /* Padding for button */
+    font-size: 16px; /* Font size */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer on hover */
+    transition: background-color 0.3s; /* Transition for hover effect */
+  }
+  
+  .register-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
