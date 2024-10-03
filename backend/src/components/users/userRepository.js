@@ -54,26 +54,38 @@ const getAllAvailableProducts = async () => {
         // Fetch products where the taken quantity is less than the original quantity (in stock)
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }  // Only include products where takenQuantity < originalQuantity
-        }).populate('sellerId');  // Populate seller information if needed
-        
-        return availableProducts;
+        })
+        .select('picture price description ratings reviews sellerId')  // Select only the required fields
+        .populate('sellerId', 'username');  // Populate only the seller's username
+
+        // Transform the result to include seller's username directly
+        const transformedProducts = availableProducts.map(product => ({
+            picture: product.picture,
+            price: product.price,
+            description: product.description,
+            ratings: product.ratings,
+            reviews: product.reviews,
+            sellerName: product.sellerId.username  // Get the seller's username directly
+        }));
+
+        return transformedProducts;
     } catch (error) {
         throw new Error(`Error retrieving available products: ${error.message}`);
     }
 };
 
-const getMaxProductPrice = async () => {
-    try {
-        // Find the product with the highest price
-        const maxPriceProduct = await Product.findOne({ isActive: true })
-            .sort({ price: -1 })  // Sort by price in descending order
-            .select('price');      // Select only the price field
+// const getMaxProductPrice = async () => {
+//     try {
+//         // Find the product with the highest price
+//         const maxPriceProduct = await Product.findOne({ isActive: true })
+//             .sort({ price: -1 })  // Sort by price in descending order
+//             .select('price');      // Select only the price field
         
-        return maxPriceProduct ? maxPriceProduct.price : 0;  // Return the price or 0 if no product
-    } catch (error) {
-        throw new Error(`Error fetching max product price: ${error.message}`);
-    }
-};
+//         return maxPriceProduct ? maxPriceProduct.price : 0;  // Return the price or 0 if no product
+//     } catch (error) {
+//         throw new Error(`Error fetching max product price: ${error.message}`);
+//     }
+// };
 
 
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
