@@ -42,8 +42,34 @@ const addGovernerOrAdmin = async (req, res) => {
     }
 };
 
+const addProduct = async (req, res) => {
+    const { productId, picture, price, description, sellerId, originalQuantity, name } = req.body;
 
-// Get a list of all available products
+    // Basic validation
+    if (!productId || !price || !originalQuantity || !name) {
+        return res.status(400).json({ message: "ProductId, price, original quantity, and name are required." });
+    }
+
+    const productData = {
+        productId,
+        picture,
+        price,
+        description,
+        sellerId,
+        originalQuantity,
+        takenQuantity: 0, // Initially, no quantity has been taken
+        name,
+        isActive: true // New products are active by default
+    };
+
+    try {
+        const newProduct = await userService.addProduct(productData);
+        res.status(201).json({ message: "Product added successfully", product: newProduct });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const getAvailableProducts = async (req, res) => {
     try {
         const products = await userService.getAvailableProducts();
@@ -53,11 +79,11 @@ const getAvailableProducts = async (req, res) => {
     }
 };
 
-// Get products filtered by price range
+
 const getProductsByPriceRange = async (req, res) => {
     const { minPrice, maxPrice } = req.query;
 
-    // Ensure minPrice and maxPrice are numbers or fallback to defaults
+    
     const min = parseFloat(minPrice) || 0;  // Default to 0 if not provided
     const max = parseFloat(maxPrice) || Infinity;  // Default to Infinity if not provided
 
@@ -72,4 +98,4 @@ const getProductsByPriceRange = async (req, res) => {
 
 
 
-module.exports = { deleteUserByUsername ,addGovernerOrAdmin ,getAvailableProducts, getProductsByPriceRange};
+module.exports = { deleteUserByUsername ,addGovernerOrAdmin , addProduct, getAvailableProducts, getProductsByPriceRange};

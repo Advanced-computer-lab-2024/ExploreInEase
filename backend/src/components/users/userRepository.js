@@ -40,12 +40,20 @@ const addGovernerOrAdmin = async (userData) => {
 };
 
 
-// Fetch all available products with details
+const addProduct = async (productData) => {
+    try {
+        const newProduct = new Product(productData);
+        return await newProduct.save(); 
+    } catch (error) {
+        throw new Error(`Error adding product: ${error.message}`);
+    }
+};
+
 const getAllAvailableProducts = async () => {
     try {
         return await Product.find({ isActive: true })
-            .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name') // Only fetch necessary fields
-            .populate('sellerId', 'name type'); // Assuming 'sellerId' is a reference to a User or Seller collection
+            .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name') 
+            .populate('sellerId', 'name type'); 
     } catch (error) {
         throw new Error(`Error fetching products: ${error.message}`);
     }
@@ -68,4 +76,4 @@ const getProductByPriceRange = async (minPrice, maxPrice) => {
     }
 }
 
-module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, getAllAvailableProducts, getProductByPriceRange};
+module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, addProduct, getAllAvailableProducts, getProductByPriceRange};

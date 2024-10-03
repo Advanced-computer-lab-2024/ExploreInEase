@@ -21,15 +21,16 @@ const addGovernerOrAdmin = async (username, password, type,email) => {
     return await userRepository.addGovernerOrAdmin(newUser);
 };
 
-// Retrieve list of available products
+const addProduct = async (productData) => {
+    return await userRepository.addProduct(productData);
+};
+
 const getAvailableProducts = async () => {
     return await userRepository.getAllAvailableProducts();
 }
 
-
-// Retrieve products filtered by price range
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
     return await userRepository.getProductsByPriceRange(minPrice, maxPrice);
 };
 
-module.exports = { deleteUserByUsername,addGovernerOrAdmin,getAvailableProducts, getProductsByPriceRange };
+module.exports = { deleteUserByUsername,addGovernerOrAdmin, addProduct, getAvailableProducts, getProductsByPriceRange };
