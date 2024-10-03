@@ -6,7 +6,8 @@ const GuideAdvertiserSignUp = () => {
   const [formData, setFormData] = useState({
     email: '',
     username: '',
-    password: ''
+    password: '',
+    role: 'tourGuide' // default selection
   });
   const [success, setSuccess] = useState('');
 
@@ -56,7 +57,21 @@ const GuideAdvertiserSignUp = () => {
           required
         />
 
-        <button type="submit">Register as Guide/Advertiser/Seller</button>
+        <label>Select Role:</label>
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="tourGuide">Tour Guide</option>
+          <option value="advertiser">Advertiser</option>
+          <option value="seller">Seller</option>
+        </select>
+
+        <button type="submit" className="blue-button">
+          Register as {formData.role === 'tourGuide' ? 'Tour Guide' : formData.role === 'advertiser' ? 'Advertiser' : 'Seller'}
+        </button>
       </form>
     </div>
   );
