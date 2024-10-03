@@ -44,21 +44,21 @@ const TouristSchema = new Schema({
         enum: ['Job', 'Student'], // Restrict to either 'Job' or 'Student'
         required: true
     },
-    // itinerary: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Itinerary', // Foreign key reference to Itinerary schema
-    //     required: true
-    // },
-    // activityId: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Activity', // Foreign key reference to Activity schema
-    //     required: true
-    // },
-    // historicalplaceId: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
-    //     required: true
-    // },
+    itineraryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Itinerary', // Foreign key reference to Itinerary schema
+        required: true
+    },
+    activityId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Activity', // Foreign key reference to Activity schema
+        required: true
+    },
+    historicalplaceId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
+        required: true
+    },
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
         default: ''

@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 // Define the schema for the activity
 const activitySchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   date: {
     type: Date,
     required: true,
@@ -33,11 +37,7 @@ const activitySchema = new Schema({
     ref: 'ActivityCategory', 
     required: true,
   },
-  tags: {
-    type: [String],
-    ref: 'PreferenceTags', 
-   
-  },
+  
   specialDiscounts: {
     type: Number, 
   },
