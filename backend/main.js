@@ -1,6 +1,8 @@
 require('dotenv').config()
 
 const express = require('express')
+const router = express.Router()
+
 // const userRoutes = require('./src/components/users/userRoutes')
 const { default: mongoose } = require('mongoose')
 
@@ -33,5 +35,7 @@ mongoose.connect(process.env.MONGO_URI)
         console.log(error)
     })
 
+const userRepository = require('./src/components/users/userRepository')
 
+router.get('/fetchAllUsers',userRepository.fetchAllUsers);
 
