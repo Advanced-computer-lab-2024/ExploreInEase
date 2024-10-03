@@ -10,9 +10,9 @@ const complaintSchema = new Schema({
   },
   problem: {
     type: String,
-    required: true,
+    require,
   },
-  dateOfComplaint: {
+  Date: {
     type: Date,
     default: Date.now, // bey7ot el date lew7adoo
   },

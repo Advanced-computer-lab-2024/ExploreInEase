@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Define the HistoricalPlaces schema
@@ -60,11 +60,18 @@ const historicalPlaceSchema = new Schema({
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users', // Assuming 'User' is the creator of the itinerary
+    ref: "Users", // Assuming 'User' is the creator of the itinerary
     required: true,
+  },
+  tags: {
+    type: [String],
+    ref: "PreferenceTags",
   },
 });
 
-// Create and export the model
-const HistoricalPlace = mongoose.model('HistoricalPlace', historicalPlaceSchema);
+//Create and export the model
+const HistoricalPlace = mongoose.model(
+  "HistoricalPlace",
+  historicalPlaceSchema
+);
 module.exports = HistoricalPlace;
