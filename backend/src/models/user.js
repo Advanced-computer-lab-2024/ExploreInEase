@@ -110,7 +110,7 @@ const UsersSchema = new Schema({
     },
     sellerType: {
         type: String,
-        enum: ['VTP', 'external'], // Seller types
+        enum: ['VTP', 'External'], // Seller types
         
     }
 
