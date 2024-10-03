@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 // Define the schema for the activity
 const activitySchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   date: {
     type: Date,
     required: true,
@@ -29,19 +33,17 @@ const activitySchema = new Schema({
     required: true,
   },
   category: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'ActivityCategory', 
     required: true,
   },
-  tags: {
-    type: [String],
-    enum: ['historic areas', 'beaches', 'family-friendly', 'shopping', 'budget family'],
-  },
+  
   specialDiscounts: {
     type: Number, 
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Users',
     required: true,
   },
   flag: {

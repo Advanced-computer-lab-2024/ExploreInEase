@@ -46,18 +46,21 @@ const historicalPlaceSchema = new Schema({
       required: true,
     },
   },
-  type: {
-    type: String,
-    required: true,
-  },
-  period: {
-    type: String,
-    required: true,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  created_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Users', // Assuming 'User' is the creator of the itinerary
+    required: true,
+  },
+  tags: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'historicalTags', // Assuming 'User' is the creator of the itinerary
+    required: true,
   }
+  
 });
 
 // Create and export the model
