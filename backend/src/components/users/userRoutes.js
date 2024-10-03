@@ -10,6 +10,7 @@ router.post('/addProduct', userController.addProduct);
 router.get('/getAvailableProducts', userController.getAvailableProducts);
 router.get('/filterProducts', userController.getProductsByPriceRange);
 router.put('/editProducts/:productId', userController.updateProduct);
+router.get('/sortProducts', userController.getAvailableProductsSortedByRatings);
 
 
 

@@ -37,4 +37,8 @@ const updateProduct = async (productId, updatedProductData) => {
     return await userRepository.updateProduct(productId, updatedProductData);
 };
 
-module.exports = { deleteUserByUsername,addGovernerOrAdmin, addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct};
+const getAvailableProductsSortedByRatings = async () => {
+    return await userRepository.getAvailableProductsSortedByRatings();
+};
+
+module.exports = { deleteUserByUsername,addGovernerOrAdmin, addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct, getAvailableProductsSortedByRatings};

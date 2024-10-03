@@ -51,11 +51,14 @@ const addProduct = async (productData) => {
 
 const getAllAvailableProducts = async () => {
     try {
-        return await Product.find({ isActive: true })
-            .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name') 
-            .populate('sellerId', 'name type'); 
+        // Fetch products where the taken quantity is less than the original quantity (in stock)
+        const availableProducts = await Product.find({
+            $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }  // Only include products where takenQuantity < originalQuantity
+        }).populate('sellerId');  // Populate seller information if needed
+        
+        return availableProducts;
     } catch (error) {
-        throw new Error(`Error fetching products: ${error.message}`);
+        throw new Error(`Error retrieving available products: ${error.message}`);
     }
 };
 
@@ -90,4 +93,18 @@ const updateProduct = async (productId, updatedProductData) => {
     }
 };
 
-module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, addProduct, getAllAvailableProducts, getProductsByPriceRange,updateProduct};
+const getAvailableProductsSortedByRatings = async () => {
+    try {
+        // Fetch all products and sort by ratings in ascending order (lowest to highest)
+        const products = await Product.find({})
+            .populate('sellerId')
+            .sort({ ratings: 1 });  // Sort by ratings in ascending order
+
+        return products;
+    } catch (error) {
+        throw new Error(`Error retrieving products: ${error.message}`);
+    }
+};
+
+
+module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, addProduct, getAllAvailableProducts, getProductsByPriceRange,updateProduct, getAvailableProductsSortedByRatings};

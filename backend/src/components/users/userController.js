@@ -117,5 +117,14 @@ const   updateProduct = async (req, res) => {
     }
 };
 
+const getAvailableProductsSortedByRatings = async (req, res) => {
+    try {
+        const products = await userService.getAvailableProductsSortedByRatings();
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
-module.exports = { deleteUserByUsername ,addGovernerOrAdmin , addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct};
+
+module.exports = { deleteUserByUsername ,addGovernerOrAdmin , addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct, getAvailableProductsSortedByRatings};
