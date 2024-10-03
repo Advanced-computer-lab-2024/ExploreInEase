@@ -46,8 +46,8 @@ const addProduct = async (req, res) => {
     const { productId, picture, price, description, sellerId, originalQuantity, name } = req.body;
 
     // Basic validation
-    if (!productId || !price || !originalQuantity || !name) {
-        return res.status(400).json({ message: "ProductId, price, original quantity, and name are required." });
+    if (!productId || !price || !originalQuantity || !name || !description || !sellerId || !picture) {
+        return res.status(400).json({ message: "ProductId, price, picture, original quantity, description, sellerId and name are required." });
     }
 
     const productData = {
@@ -95,7 +95,27 @@ const getProductsByPriceRange = async (req, res) => {
     }
 };
  
+const   updateProduct = async (req, res) => {
+    const { productId } = req.params;
+    const updatedProductData = req.body;
+
+    // Basic validation
+    if (!productId || !updatedProductData) {
+        return res.status(400).json({ message: "Product ID and updated data are required." });
+    }
+
+    try {
+        const updatedProduct = await userService.updateProduct(productId, updatedProductData);
+        
+        if (updatedProduct) {
+            return res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
+        } else {
+            return res.status(404).json({ message: "Product not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 
-
-module.exports = { deleteUserByUsername ,addGovernerOrAdmin , addProduct, getAvailableProducts, getProductsByPriceRange};
+module.exports = { deleteUserByUsername ,addGovernerOrAdmin , addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct};

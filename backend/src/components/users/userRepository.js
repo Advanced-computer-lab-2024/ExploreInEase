@@ -59,7 +59,7 @@ const getAllAvailableProducts = async () => {
     }
 };
 
-const getProductByPriceRange = async (minPrice, maxPrice) => {
+const getProductsByPriceRange = async (minPrice, maxPrice) => {
     try{
         const query = {
             isActive: true,
@@ -76,4 +76,18 @@ const getProductByPriceRange = async (minPrice, maxPrice) => {
     }
 }
 
-module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, addProduct, getAllAvailableProducts, getProductByPriceRange};
+const updateProduct = async (productId, updatedProductData) => {
+    try {
+        const updatedProduct = await Product.findOneAndUpdate(
+            { productId: productId },  // Find the product by productId
+            { $set: updatedProductData },  // Set the updated data
+            { new: true, runValidators: true }  // Return the updated document
+        );
+        
+        return updatedProduct;
+    } catch (error) {
+        throw new Error(`Error updating product: ${error.message}`);
+    }
+};
+
+module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, addProduct, getAllAvailableProducts, getProductsByPriceRange,updateProduct};

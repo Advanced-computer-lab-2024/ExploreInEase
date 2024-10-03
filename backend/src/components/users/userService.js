@@ -33,4 +33,8 @@ const getProductsByPriceRange = async (minPrice, maxPrice) => {
     return await userRepository.getProductsByPriceRange(minPrice, maxPrice);
 };
 
-module.exports = { deleteUserByUsername,addGovernerOrAdmin, addProduct, getAvailableProducts, getProductsByPriceRange };
+const updateProduct = async (productId, updatedProductData) => {
+    return await userRepository.updateProduct(productId, updatedProductData);
+};
+
+module.exports = { deleteUserByUsername,addGovernerOrAdmin, addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct};
