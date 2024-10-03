@@ -7,22 +7,23 @@ const userRepository = require('./userRepository')
 
 router.post('/tourGuide', userController.createTourGuide);
 router.get('/tourGuide/:id', userController.getTourGuide);
-router.put('/tourGuide/:id', userController.updateTourGuide);
+router.put('/updatedTourGuide/:id', userController.updateTourGuide);
 
 router.post('/advertiser', userController.createAdvertiser);
-router.get('/advertiser/:id', userController.getAdvertiser);
-router.put('/advertiser/:id', userController.updateAdvertiser);
+router.get('/advertiser/:_id', userController.getAdvertiser);
+router.put('/advertiser/:_id', userController.updateAdvertiser);
 
 router.post('/seller', userController.createSeller);
-router.get('/seller/:id', userController.getSeller);
-router.put('/seller/:id', userController.updateSeller);
+router.get('/seller/:_id', userController.getSeller);
+router.put('/seller/:_id', userController.updateSeller);
 
-router.get('/tourist/:id', userController.getTourist);
-router.put('/tourist/:id', userController.updateTourist);
+router.get('/tourist/:_id', userController.getTourist);
+router.put('/tourist/:_id', userController.updateTourist);
 
 router.get('/fetchAllUsers',userRepository.fetchAllUsers)
 
 module.exports = router;
+
 
 
 //flow : controller (checks valid inputs) -> service ( does the actual function i want) -> repo (deals with db)
