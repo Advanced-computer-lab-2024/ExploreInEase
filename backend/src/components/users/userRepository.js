@@ -51,4 +51,21 @@ const getAllAvailableProducts = async () => {
     }
 };
 
-module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, getAllAvailableProducts};
+const getProductByPriceRange = async (minPrice, maxPrice) => {
+    try{
+        const query = {
+            isActive: true,
+            price:{
+                $gte: minPrice || 0,
+                $lte: maxPrice || Infinity
+            }
+        };
+        return await Product.find(query)
+            .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name')
+            .populate('sellerId', 'name type');
+    } catch (error){
+        throw new Error ('Error fetching products by price range: ${error.message}');
+    }
+}
+
+module.exports = { deleteUser, deleteTourist,addGovernerOrAdmin, getAllAvailableProducts, getProductByPriceRange};

@@ -27,6 +27,9 @@ const getAvailableProducts = async () => {
 }
 
 
+// Retrieve products filtered by price range
+const getProductsByPriceRange = async (minPrice, maxPrice) => {
+    return await userRepository.getProductsByPriceRange(minPrice, maxPrice);
+};
 
-
-module.exports = { deleteUserByUsername,addGovernerOrAdmin,getAvailableProducts };
+module.exports = { deleteUserByUsername,addGovernerOrAdmin,getAvailableProducts, getProductsByPriceRange };

@@ -52,8 +52,24 @@ const getAvailableProducts = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Get products filtered by price range
+const getProductsByPriceRange = async (req, res) => {
+    const { minPrice, maxPrice } = req.query;
+
+    // Ensure minPrice and maxPrice are numbers or fallback to defaults
+    const min = parseFloat(minPrice) || 0;  // Default to 0 if not provided
+    const max = parseFloat(maxPrice) || Infinity;  // Default to Infinity if not provided
+
+    try {
+        const products = await userService.getProductsByPriceRange(min, max);
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
  
 
 
 
-module.exports = { deleteUserByUsername ,addGovernerOrAdmin ,getAvailableProducts};
+module.exports = { deleteUserByUsername ,addGovernerOrAdmin ,getAvailableProducts, getProductsByPriceRange};
