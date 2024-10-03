@@ -77,6 +77,10 @@ const itinerarySchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  isSpecial: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Create and export the model
