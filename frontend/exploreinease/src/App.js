@@ -1,3 +1,7 @@
+// Static Filter
+
+
+
 import React, { useState } from 'react';
 import {
   TextField,
@@ -11,13 +15,16 @@ import {
   CardContent,
   Typography,
   Grid,
+  Box,
+  Tabs,
+  Tab,
 } from '@mui/material';
 
-// Sample data
+// Sample data with 'type' field added
 const itemList = [
   {
     id: 1,
-    name: 'Package 1',
+    name: 'Activity 1',
     budget: 1000,
     price: 800,
     date: '2023-09-01',
@@ -26,10 +33,24 @@ const itemList = [
     language: 'English',
     preferences: 'Historic Areas',
     Tag: 'Monuments',
+    type: 'Activity',
   },
   {
     id: 2,
-    name: 'Package 2',
+    name: 'Activity 2',
+    budget: 2000,
+    price: 1200,
+    date: '2024-11-01',
+    rating: 2.5,
+    category: 'Party',
+    language: 'English',
+    preferences: 'Historic Areas',
+    Tag: 'Monuments',
+    type: 'Activity',
+  },
+  {
+    id: 3,
+    name: 'Itinerary 1',
     budget: 500,
     price: 400,
     date: '2024-01-15',
@@ -38,10 +59,24 @@ const itemList = [
     language: 'Spanish',
     preferences: 'Shopping',
     Tag: 'Palaces',
+    type: 'Itinerary',
   },
   {
-    id: 3,
-    name: 'Package 3',
+    id: 4,
+    name: 'Itinerary 2',
+    budget: 1500,
+    price: 1400,
+    date: '2021-02-27',
+    rating: 3.2,
+    category: 'Food',
+    language: 'English',
+    preferences: 'Beaches',
+    Tag: 'Palaces',
+    type: 'Itinerary',
+  },
+  {
+    id: 5,
+    name: 'Historical Place 1',
     budget: 2000,
     price: 1500,
     date: '2024-03-10',
@@ -50,6 +85,20 @@ const itemList = [
     language: 'English',
     preferences: 'Beaches',
     Tag: 'Museums',
+    type: 'HistoricalPlace',
+  },
+  {
+    id: 6,
+    name: 'Historical Place 2',
+    budget: 300,
+    price: 750,
+    date: '2022-06-13',
+    rating: 3.1,
+    category: 'Party',
+    language: 'English',
+    preferences: 'Beaches',
+    Tag: 'Museums',
+    type: 'HistoricalPlace',
   },
 ];
 
@@ -70,10 +119,12 @@ function App() {
     language: '',
     preferences: '',
     Tag: '',
+    search: '',
+    sortBy: '',
   });
 
   const [filteredData, setFilteredData] = useState(itemList);
-  const [role, setRole] = useState('Activities'); // Simulate user role
+  const [role, setRole] = useState('Main'); // Default to Main to show all
 
   // Handle Input Change
   const handleFilterChange = (e) => {
@@ -91,10 +142,25 @@ function App() {
     });
   };
 
+  const handleRoleChange = (event, newValue) => {
+    setRole(newValue);
+    applyFilters(newValue); // Apply filters immediately when changing tabs
+  };
+
   // Apply Filters
-  const applyFilters = () => {
+  const applyFilters = (roleToFilter = role) => {
     let data = itemList;
 
+    // Filter by role-specific type
+    if (roleToFilter === 'Activities') {
+      data = data.filter((item) => item.type === 'Activity');
+    } else if (roleToFilter === 'Itineraries') {
+      data = data.filter((item) => item.type === 'Itinerary');
+    } else if (roleToFilter === 'HistoricalPlaces') {
+      data = data.filter((item) => item.type === 'HistoricalPlace');
+    }
+
+    // Apply other filters
     if (filters.budget) {
       data = data.filter((item) => item.budget <= parseFloat(filters.budget));
     }
@@ -127,222 +193,215 @@ function App() {
       data = data.filter((item) => item.Tag === filters.Tag);
     }
 
+    // Search by name
+    if (filters.search) {
+      data = data.filter((item) =>
+        item.name.toLowerCase().includes(filters.search.toLowerCase())
+      );
+    }
+
+    // Sort logic
+    if (filters.sortBy === 'price') {
+      data = data.sort((a, b) => a.price - b.price);
+    } else if (filters.sortBy === 'rating') {
+      data = data.sort((a, b) => b.rating - a.rating);
+    }
+
     setFilteredData(data);
   };
 
   // Reset Filters
   const resetFilters = () => {
-    setFilters({ budget: '', price: '', date: '', rating: 0, category: '', language: '', preferences: '', Tag: '' });
+    setFilters({ budget: '', price: '', date: '', rating: 0, category: '', language: '', preferences: '', Tag: '', search: '', sortBy: '' });
     setFilteredData(itemList);
+    setRole('Main'); // Reset to main view
   };
 
   // Helper function to check if a field should be displayed for the current role
   const shouldDisplayField = (field) => {
-    return roleFields[role].includes(field);
+    return roleFields[role]?.includes(field);
   };
-  const dateObject = new Date('2022-5-3');
-  console.log(dateObject);
+
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
+        <Tabs value={role} onChange={handleRoleChange}>
+          <Tab label="Main" value="Main" />
+          <Tab label="Activities" value="Activities" />
+          <Tab label="Itineraries" value="Itineraries" />
+          <Tab label="Historical Places" value="HistoricalPlaces" />
+        </Tabs>
+      </Box>
 
-      <div style={{ width: '300px', padding: '20px', backgroundColor: '#f5f5f5' }}>
-        <h3>Filters</h3>
+      <div style={{ display: 'flex', flex: 1 }}>
+        <div style={{ width: '300px', padding: '20px', backgroundColor: '#f5f5f5' }}>
+          <h3>Filters</h3>
+          <TextField
+            label="Search by Name"
+            variant="outlined"
+            name="search"
+            value={filters.search}
+            onChange={handleFilterChange}
+            fullWidth
+            style={{ marginBottom: '20px' }}
+          />
 
+          <FormControl fullWidth style={{ marginBottom: '20px' }}>
+            <InputLabel>Sort By</InputLabel>
+            <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+              <MenuItem value="price">Price</MenuItem>
+              <MenuItem value="rating">Rating</MenuItem>
+            </Select>
+          </FormControl>
 
-        <FormControl fullWidth style={{ marginBottom: '20px' }}>
-          <InputLabel>Select Type</InputLabel>
-          <Select value={role} onChange={(e) => setRole(e.target.value)}>
-            <MenuItem value="HistoricalPlaces">Historical Places</MenuItem>
-            <MenuItem value="Activities">Activities</MenuItem>
-            <MenuItem value="Itineraries">Itineraries</MenuItem>
-          </Select>
-        </FormControl>
-
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-          {shouldDisplayField('budget') && (
-            <TextField
-              label="Budget"
-              variant="outlined"
-              name="budget"
-              value={filters.budget}
-              onChange={handleFilterChange}
-              fullWidth
-            />
-          )}
-
-
-          {shouldDisplayField('Tag') && (
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Tag</InputLabel>
-              <Select
-                label="Tag"
-                name="Tag"
-                value={filters.Tag}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {shouldDisplayField('budget') && (
+              <TextField
+                label="Budget"
+                variant="outlined"
+                name="budget"
+                value={filters.budget}
                 onChange={handleFilterChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value="Monuments">Monuments</MenuItem>
-                <MenuItem value="Palaces">Palaces</MenuItem>
-                <MenuItem value="Museums">Museums</MenuItem>
-              </Select>
-            </FormControl>
-          )}
-
-
-          {shouldDisplayField('date') && (
-            <TextField
-              label="Date"
-              variant="outlined"
-              name="date"
-              value={filters.date}
-              onChange={handleFilterChange}
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-          )}
-         
-
-
-
-          {shouldDisplayField('rating') && (
-            <div>
-              <label>Rating</label>
-              <Rating
-                name="rating"
-                value={filters.rating}
-                onChange={handleRatingChange}
+                fullWidth
               />
-            </div>
-          )}
+            )}
 
+            {shouldDisplayField('Tag') && (
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Tag</InputLabel>
+                <Select
+                  label="Tag"
+                  name="Tag"
+                  value={filters.Tag}
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value="Monuments">Monuments</MenuItem>
+                  <MenuItem value="Museums">Museums</MenuItem>
+                  <MenuItem value="Palaces">Palaces</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
-          {shouldDisplayField('category') && (
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Category</InputLabel>
-              <Select
-                label="Category"
-                name="category"
-                value={filters.category}
-                onChange={handleFilterChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value="Food">Food</MenuItem>
-                <MenuItem value="Concert">Concert</MenuItem>
-                <MenuItem value="Party">Party</MenuItem>
-              </Select>
-            </FormControl>
-          )}
-
-
-          {shouldDisplayField('preferences') && (
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Preferences</InputLabel>
-              <Select
+            {shouldDisplayField('preferences') && (
+              <TextField
                 label="Preferences"
+                variant="outlined"
                 name="preferences"
                 value={filters.preferences}
                 onChange={handleFilterChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value="Historic Areas">Historic Areas</MenuItem>
-                <MenuItem value="Shopping">Shopping</MenuItem>
-                <MenuItem value="Beaches">Beaches</MenuItem>
-                <MenuItem value="Family-Friendly">Family-Friendly</MenuItem>
-                <MenuItem value="Budget-Friendly">Budget-Friendly</MenuItem>
-              </Select>
-            </FormControl>
-          )}
+                fullWidth
+              />
+            )}
 
+            {shouldDisplayField('language') && (
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Language</InputLabel>
+                <Select
+                  label="Language"
+                  name="language"
+                  value={filters.language}
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value="English">English</MenuItem>
+                  <MenuItem value="Spanish">Spanish</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
-          {shouldDisplayField('language') && (
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Language</InputLabel>
-              <Select
-                label="Language"
-                name="language"
-                value={filters.language}
+            {shouldDisplayField('date') && (
+              <TextField
+                label="Date"
+                variant="outlined"
+                name="date"
+                type="date"
+                value={filters.date}
                 onChange={handleFilterChange}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value="English">English</MenuItem>
-                <MenuItem value="Spanish">Spanish</MenuItem>
-                <MenuItem value="Arabic">Arabic</MenuItem>
-                <MenuItem value="French">French</MenuItem>
-              </Select>
-            </FormControl>
-          )}
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            )}
 
+            {shouldDisplayField('category') && (
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Category</InputLabel>
+                <Select
+                  label="Category"
+                  name="category"
+                  value={filters.category}
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value="Food">Food</MenuItem>
+                  <MenuItem value="Party">Party</MenuItem>
+                  <MenuItem value="Concert">Concert</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
-          <Button variant="contained" color="primary" onClick={applyFilters} fullWidth>
+            {shouldDisplayField('rating') && (
+              <FormControl fullWidth>
+                <Typography component="legend">Rating</Typography>
+                <Rating
+                  name="rating"
+                  value={filters.rating}
+                  onChange={handleRatingChange}
+                  precision={0.5}
+                />
+              </FormControl>
+            )}
+          </div>
+
+          <Button
+            onClick={() => applyFilters()}
+            variant="contained"
+            color="primary"
+            fullWidth
+            style={{ marginTop: '20px' }}
+          >
             Apply Filters
           </Button>
-          <Button variant="outlined" color="secondary" onClick={resetFilters} fullWidth>
+
+          <Button
+            onClick={resetFilters}
+            variant="outlined"
+            color="secondary"
+            fullWidth
+            style={{ marginTop: '10px' }}
+          >
             Reset Filters
           </Button>
         </div>
-      </div>
 
-
-      <div style={{ flex: 1, padding: '20px' }}>
-        <h2>Packages List</h2>
-
-        {/* Grid layout for cards */}
-        <Grid container spacing={2}>
-          {filteredData.length > 0 ? (
-            filteredData.map((item) => (
+        <div style={{ flex: 1, padding: '20px' }}>
+          <Grid container spacing={3}>
+            {filteredData.map((item) => (
               <Grid item xs={12} sm={6} md={4} key={item.id}>
                 <Card>
                   <CardContent>
-                    <Typography variant="h6" component="div">
-                      {item.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Budget:</strong> ${item.budget}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Price:</strong> ${item.price}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Date:</strong> {item.date}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Rating:</strong>
-                      <Rating value={item.rating} readOnly precision={0.1} />
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Category:</strong> {item.category}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Tag:</strong> {item.Tag}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Language:</strong> {item.language}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Preferences:</strong> {item.preferences}
-                    </Typography>
+                    <Typography variant="h5">{item.name}</Typography>
+                    <Typography>Budget: {item.budget}</Typography>
+                    <Typography>Price: {item.price}</Typography>
+                    <Typography>Date: {item.date}</Typography>
+                    <Typography>Rating: {item.rating}</Typography>
+                    <Typography>Category: {item.category}</Typography>
+                    <Typography>Language: {item.language}</Typography>
+                    <Typography>Preferences: {item.preferences}</Typography>
+                    <Typography>Tag: {item.Tag}</Typography>
+                    <Typography>Type: {item.type}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
-            ))
-          ) : (
-            <Typography style={{ color: 'red' }}>No items found</Typography>
-          )}
-        </Grid>
+            ))}
+          </Grid>
+        </div>
       </div>
     </div>
   );
 }
 
 export default App;
+
