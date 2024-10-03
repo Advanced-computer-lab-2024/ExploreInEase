@@ -81,18 +81,26 @@ const getAvailableProducts = async (req, res) => {
 
 
 const getProductsByPriceRange = async (req, res) => {
-    const { minPrice, maxPrice } = req.query;
+    const { minPrice, maxPrice } = req.query; // Extract min and max price from query params
 
-    
-    const min = parseFloat(minPrice) || 0;  // Default to 0 if not provided
-    const max = parseFloat(maxPrice) || Infinity;  // Default to Infinity if not provided
+    // Create a filter object based on price
+    let filter = {};
+
+    if (minPrice != undefined) {
+        filter.price = { ...filter.price, $gte: minPrice }; // Filter products with price >= minPrice
+    }
+    if (maxPrice != undefined) {
+        filter.price = { ...filter.price, $lte: maxPrice }; // Filter products with price <= maxPrice
+    }
 
     try {
-        const products = await userService.getProductsByPriceRange(min, max);
-        res.status(200).json(products);
+        // Query the database for products matching the price filter
+        const products = await Product.find(filter);
+        res.status(200).send(products); // Send back the filtered products
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(400).send({ error: error.message });
     }
+
 };
  
 const   updateProduct = async (req, res) => {
