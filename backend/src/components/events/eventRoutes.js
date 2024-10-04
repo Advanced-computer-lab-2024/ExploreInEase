@@ -268,4 +268,105 @@ router.put('/updateTagById/:id', eventController.updateTagById);
 // Delete a preference tag by name
 router.delete('/deleteTagById/:id', eventController.deleteTagById);
 
+
+
+/**
+ * @swagger
+ * /upcomingEvents:
+ *   get:
+ *     summary: Retrieve all upcoming events
+ *     tags: [Events]
+ *     responses:
+ *       200:
+ *         description: A list of upcoming events
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                   location:
+ *                     type: object
+ *       500:
+ *         description: Server error
+ */
+router.get("/upcomingEvents", eventController.getUpcomingEvents);
+
+/**
+ * @swagger
+ * /filterUpcommingActivites:
+ *   get:
+ *     summary: Retrieve filtered upcoming activities
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: filters
+ *         schema:
+ *           type: object
+ *         required: false
+ *         description: Filters for activities
+ *     responses:
+ *       200:
+ *         description: A list of filtered upcoming activities
+ *       400:
+ *         description: Invalid filters
+ *       500:
+ *         description: Server error
+ */
+router.get("/filterUpcommingActivites", eventController.GetupcommingActivitesFilter);
+
+/**
+ * @swagger
+ * /filteritineraries:
+ *   get:
+ *     summary: Retrieve filtered itineraries
+ *     tags: [Itineraries]
+ *     parameters:
+ *       - in: query
+ *         name: filters
+ *         schema:
+ *           type: object
+ *         required: false
+ *         description: Filters for itineraries
+ *     responses:
+ *       200:
+ *         description: A list of filtered itineraries
+ *       400:
+ *         description: Invalid filters
+ *       500:
+ *         description: Server error
+ */
+router.get("/filteritineraries", eventController.getFilteredItineraries);
+
+/**
+ * @swagger
+ * /historicalPlacesByTags:
+ *   get:
+ *     summary: Retrieve historical places by tags
+ *     tags: [Historical Places]
+ *     parameters:
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         required: true
+ *         description: Tags to filter historical places
+ *     responses:
+ *       200:
+ *         description: A list of historical places matching the tags
+ *       400:
+ *         description: Invalid tags
+ *       500:
+ *         description: Server error
+ */
+router.get("/historicalPlacesByTags", eventController.filterHistoricalPlacesByTags);
+
+
 module.exports = router;
