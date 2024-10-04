@@ -111,7 +111,7 @@ const UsersSchema = new Schema({
     sellerType: {
         type: String,
         enum: ['VTP', 'External'], // Seller types
-        
+        default: 'External' // Set default value to 'External'
     }
 
 }, {
