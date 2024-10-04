@@ -212,5 +212,8 @@ module.exports = {
   getAllTags,
   updateTagById,
   deleteTagById,
+  CategoryNameToId,
+  getFilteredUpcomingActivities,
+  getAllUpcomingEvents
 };
 
