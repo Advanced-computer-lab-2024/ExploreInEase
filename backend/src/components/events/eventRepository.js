@@ -224,6 +224,10 @@ const getFilteredItineraries = async (filters) => {
   }
 };
 
+const createHistoricalTag = async (tagData) => {
+  const tag = new HistoricalTag(tagData);
+  return await tag.save();
+  };  
   
 
 
@@ -243,7 +247,8 @@ module.exports = {
   getFilteredActivities,
   getAllUpcomingEvents,
   getFilteredHistoricalPlaces,
-  getFilteredItineraries
+  getFilteredItineraries,
+  createHistoricalTag
 };
 
 

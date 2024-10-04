@@ -200,6 +200,9 @@ const getAllUpcomingEvents = async () => {
   }
 };
 
+const createHistoricalTag = async (tag) => {
+    return await eventRepository.createHistoricalTag(tag);
+    };
 
 
 module.exports = {
@@ -214,6 +217,7 @@ module.exports = {
   deleteTagById,
   CategoryNameToId,
   getFilteredUpcomingActivities,
-  getAllUpcomingEvents
+  getAllUpcomingEvents,
+  createHistoricalTag
 };
 

@@ -369,4 +369,34 @@ router.get("/filteritineraries", eventController.getFilteredItineraries);
 router.get("/historicalPlacesByTags", eventController.filterHistoricalPlacesByTags);
 
 
+/**
+ * @swagger
+ * /createHistoricalTag:
+ *   post:
+ *     summary: Create a new historical tag
+ *     tags: [Historical Tag]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/HistoricalTag'
+ *     responses:
+ *       201:
+ *         description: Historical tag created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HistoricalTag'
+ *       400:
+ *         description: Bad Request, validation errors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/createHistoricalTag', eventController.createHistoricalTag);
+
+
+
 module.exports = router;
