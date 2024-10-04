@@ -1,16 +1,15 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Define the Itinerary schema
 const itinerarySchema = new Schema({
   activities: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Activity', // Referencing the Activity schema
+    ref: 'Activity', 
     required: true,
   }],
   preftag: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'PreferenceTags', // Referencing the Activity schema
+    ref: 'PreferenceTags', 
     required: true,
   }],
   locations: {
@@ -26,11 +25,11 @@ const itinerarySchema = new Schema({
     required: true,
   },
   language: {
-    type: String, // Language used in the tour
+    type: String, 
     required: true,
   },
   price: {
-    type: Number, // Price of the tour
+    type: Number, 
     required: true,
   },
   dateTimeAvailable: {
@@ -42,25 +41,25 @@ const itinerarySchema = new Schema({
     default: false,
   },
   pickupLocation: {
-    type: String, // The location where participants are picked up
+    type: String, 
     required: true,
   },
   dropoffLocation: {
-    type: String, // The location where participants are dropped off
+    type: String, 
     required: true,
   },
   isActivated: {
-    type: Number, // Whether the itinerary is active or not
+    type: Number, 
     default: true,
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users', // Assuming 'User' is the creator of the itinerary
+    ref: 'Users', 
     required: true,
   },
   flag: {
     type: Number,
-    enum: [0, 1], // 0: inappropriate, 1: appropriate
+    enum: [0, 1], 
     default: 1,
   },
   rating: {
@@ -69,7 +68,7 @@ const itinerarySchema = new Schema({
     max: 5, // Rating on a scale of 0 to 5
   },
   comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Comments related to the itinerary
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     text: { type: String, required: true },
     date: { type: Date, default: Date.now },
   }],
@@ -83,6 +82,5 @@ const itinerarySchema = new Schema({
   },
 });
 
-// Create and export the model
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);
 module.exports = Itinerary;

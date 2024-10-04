@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Define the schema for the activity category
 const activityCategorySchema = new Schema({
   categoryName: {
     type: String,
@@ -10,7 +9,6 @@ const activityCategorySchema = new Schema({
   }
 });
 
-// Create and export the model
 const ActivityCategory = mongoose.model('ActivityCategory', activityCategorySchema);
 
 module.exports = ActivityCategory;

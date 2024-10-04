@@ -6,11 +6,11 @@ const ProductsSchema = new Schema({
     productId: {
         type: String,
         required: [true, 'Product ID is required'],
-        unique: true,              // Ensures each product has a unique ID
+        unique: true,              
         trim: true
     },
     picture: {
-        type: String,              // URL or path to the product image
+        type: String,              
         required: [true, 'Picture is required']
     },
     price: {
@@ -21,23 +21,23 @@ const ProductsSchema = new Schema({
     description: {
         type: String,
         required: [true, 'Description is required'],
-        minlength: 10               // Minimum length for description
+        minlength: 10               
     },
     sellerId: {
-        type: mongoose.Schema.Types.ObjectId, // Foreign key to reference the seller
-        ref: 'Users',               // Assuming you have a Users schema
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Users',               
         required: [true, 'Seller ID is required']
     },
     ratings: {
         type: Number,
         min: 0,
         max: 5,
-        default: 0                 // Default rating
+        default: 0                 
     },
     reviews: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Users',           // Assuming reviews are associated with Users
+            ref: 'Users',           
             required: true
         },
         comment: {
@@ -70,15 +70,15 @@ const ProductsSchema = new Schema({
         type: String,
         required: [true, 'Product name is required'],
         trim: true,
-        minlength: 1                // Minimum length for product name
+        minlength: 1                
     },
     isActive: {
         type: Boolean,
-        default: true               // Indicates whether the product is active or inactive
+        default: true               
     }
 }, {
-    timestamps: true,               // Automatically add createdAt and updatedAt fields
-    versionKey: false                // Disable the "__v" version key
+    timestamps: true,               
+    versionKey: false                
 });
 
 // Create the Products Model

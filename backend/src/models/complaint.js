@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const complaintSchema = new Schema({
   touristId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Tourist", // Reference to the Tourist model mesh el schema
+    ref: "Tourist",
     required: true,
   },
   problem: {
@@ -19,7 +19,7 @@ const complaintSchema = new Schema({
   status: {
     type: String,
     enum: ["pending", "resolved"], // Enum for status (resolved when there is a reply)
-    default: "pending", // Default status is pending
+    default: "pending", 
   },
   reply: {
     type: String,

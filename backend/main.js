@@ -14,7 +14,6 @@ const ACLapp = express();
 // Middleware to parse JSON
 ACLapp.use(express.json());
 
-// Logging middleware (optional, just for debugging)
 ACLapp.use((req, res, next) => {
     console.log(req.path, req.method);
     next();
@@ -25,7 +24,7 @@ ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);
 // Setup Swagger
-setupSwaggerDocs(ACLapp); // Add Swagger setup here
+setupSwaggerDocs(ACLapp); 
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

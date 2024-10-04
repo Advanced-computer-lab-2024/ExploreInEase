@@ -6,7 +6,7 @@ const orderSchema = new Schema(
   {
     touristId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Tourist", // Reference to the Tourist model
+      ref: "Tourist",
       required: true,
     },
     status: {
@@ -18,7 +18,7 @@ const orderSchema = new Schema(
     productIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product", // Reference to the Product model
+        ref: "Product", 
         required: true,
       },
     ],

@@ -41,31 +41,31 @@ const TouristSchema = new Schema({
     profession: {
         type: String,
         required: [true, 'profession is required'],
-        enum: ['Job', 'Student'], // Restrict to either 'Job' or 'Student'
+        enum: ['Job', 'Student'], 
         required: true
     },
     itineraryId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Itinerary', // Foreign key reference to Itinerary schema
+        ref: 'Itinerary', 
         required: true
     },
     activityId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity', // Foreign key reference to Activity schema
+        ref: 'Activity', 
         required: true
     },
     historicalplaceId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
+        ref: 'HistoricalPlace', 
         required: true
     },
     bookmark: {
-        type: String, // You can change this to a specific type based on the data you expect
+        type: String, 
         default: ''
     },
     createdAt: {
         type: Date,
-        default: Date.now, // Auto-sets to the current date/time
+        default: Date.now, 
         immutable: true // This value cannot be changed once set
     },
     addresses: [
@@ -81,19 +81,19 @@ const TouristSchema = new Schema({
         default: 0,
         min: 0 // Ensures points cannot go below zero
     },
-    // wishlists: [{
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Product', // Assuming you have a Product schema for products in the wishlist
-    //     required: false
-    // }],
+    wishlists: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product', 
+        required: false
+    }],
     wallet: {
         type: Number,
         default: 0, // Starting wallet balance
         min: 0 // Ensures wallet balance cannot be negative
     }
 }, {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
-    versionKey: false // Disable the version key field "__v"
+    timestamps: true, 
+    versionKey: false 
 });
 
 // Middleware to hash password before saving
@@ -104,7 +104,6 @@ const TouristSchema = new Schema({
 //     next();
 // });
 
-// Model the schema
 const Tourist = mongoose.model('Tourist', TouristSchema);
 
 module.exports = Tourist;
