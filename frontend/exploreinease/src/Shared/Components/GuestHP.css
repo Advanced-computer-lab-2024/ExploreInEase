@@ -71,7 +71,7 @@
 }
 
 .currency-symbol {
-    margin-right: 5px; /* Space between currency label and select */
+    margin-right: 10px; /* Space between currency label and select */
     font-weight: bold; /* Bold for better visibility */
 }
 

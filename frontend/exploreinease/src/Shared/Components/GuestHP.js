@@ -22,7 +22,7 @@ const HomePage = () => {
           <a href="https://www.google.com/">Activity Categories</a>
         </div>
         <div className="currency-selector">
-          <span className="currency-symbol">Currency:</span>
+          <span className="currency-symbol"></span>
           <select>
             <option value="usd">USD ($)</option>
             <option value="eur">EUR (€)</option>
