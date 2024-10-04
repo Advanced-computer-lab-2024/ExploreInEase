@@ -16,9 +16,10 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <a href="https://www.google.com/">Explore Activities and Itineraries and Historical Places</a>
-          <a href="https://www.google.com/">View Products</a>
-          <a href="https://www.google.com/">My Profile</a>
+          <a href="https://www.google.com/">Register</a>
+          <a href="https://www.google.com/">Upload Required Documents</a>
+          <a href="https://www.google.com/">View Step-by-Step Guide</a>
+          <a href="https://www.google.com/">Explore Activities and Itineraries</a>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

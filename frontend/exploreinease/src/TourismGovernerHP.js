@@ -16,9 +16,9 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <a href="https://www.google.com/">Explore Activities and Itineraries and Historical Places</a>
-          <a href="https://www.google.com/">View Products</a>
-          <a href="https://www.google.com/">My Profile</a>
+          <a href="https://www.google.com/">CRUD Historical Places and Museums</a>
+          <a href="https://www.google.com/">Create Historical Locations Tags</a>
+          <a href="https://www.google.com/">View Created Historical Places and Museums</a>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

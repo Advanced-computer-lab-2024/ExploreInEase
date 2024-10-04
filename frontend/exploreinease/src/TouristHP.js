@@ -1,4 +1,3 @@
-// src/Shared/Components/GuestHP.js
 import React from 'react';
 import logo from './logo.png'; // Adjust the path as needed
 import './HP.css'; // Import the CSS file
