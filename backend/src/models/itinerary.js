@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+// Define the Itinerary schema
 const itinerarySchema = new Schema({
   activities: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Activity', 
+    ref: 'Activity', // Referencing the Activity schema
     required: true,
   }],
   preftag: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'PreferenceTags', 
+    ref: 'PreferenceTags', // Referencing the Activity schema
     required: true,
   }],
   locations: {
@@ -25,11 +26,11 @@ const itinerarySchema = new Schema({
     required: true,
   },
   language: {
-    type: String, 
+    type: String, // Language used in the tour
     required: true,
   },
   price: {
-    type: Number, 
+    type: Number, // Price of the tour
     required: true,
   },
   dateTimeAvailable: {
@@ -41,34 +42,34 @@ const itinerarySchema = new Schema({
     default: false,
   },
   pickupLocation: {
-    type: String, 
+    type: String, // The location where participants are picked up
     required: true,
   },
   dropoffLocation: {
-    type: String, 
+    type: String, // The location where participants are dropped off
     required: true,
   },
   isActivated: {
-    type: Number, 
+    type: Number, // Whether the itinerary is active or not
     default: true,
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users', 
+    ref: 'Users', // Assuming 'User' is the creator of the itinerary
     required: true,
   },
   flag: {
     type: Number,
-    enum: [0, 1], 
+    enum: [0, 1], // 0: inappropriate, 1: appropriate
     default: 1,
   },
   rating: {
-    type: Number,
+    type: [Number], // Changed from Number to an array of Numbers
     min: 0,
     max: 5, // Rating on a scale of 0 to 5
   },
   comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' }, // Comments related to the itinerary
     text: { type: String, required: true },
     date: { type: Date, default: Date.now },
   }],
@@ -82,5 +83,6 @@ const itinerarySchema = new Schema({
   },
 });
 
+// Create and export the model
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);
 module.exports = Itinerary;
