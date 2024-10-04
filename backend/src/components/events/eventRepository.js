@@ -4,21 +4,27 @@ const Activity = require('../../models/activity');
 const ActivityCategory = require('../../models/activityCategory'); 
 const PreferenceTags = require('../../models/preferenceTags'); 
 
-
-// Function to get historical places by userId
-const getHistoricalPlacesByUserId = async (userId) => {
-  return await HistoricalPlace.find({ created_by: userId });
-};
-
-// Function to get itineraries by userId
-const getItinerariesByUserId = async (userId) => {
-  return await Itinerary.find({ created_by: userId });
-};
-
-// Function to get activities by userId
 const getActivitiesByUserId = async (userId) => {
-  return await Activity.find({ created_by: userId });
+  return await Activity.find({ created_by: userId })
+    .populate('category', 'categoryName') // Get categoryName from ActivityCategory
+    
+    .exec(); 
 };
+
+
+const getHistoricalPlacesByUserId = async (userId) => {
+  return await HistoricalPlace.find({ created_by: userId })
+    .populate('tags', 'type period') // Get type and period from historicalTags
+    .exec();
+};
+
+const getItinerariesByUserId = async (userId) => {
+  return await Itinerary.find({ created_by: userId })
+    .populate('activities') // Populate activities as per existing design
+    .populate('preftag', 'tags') // Get tags from PreferenceTags
+    .exec();
+};
+
 
 
 
