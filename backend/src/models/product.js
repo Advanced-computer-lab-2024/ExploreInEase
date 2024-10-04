@@ -25,7 +25,7 @@ const ProductsSchema = new Schema({
     },
     sellerId: {
         type: mongoose.Schema.Types.ObjectId, // Foreign key to reference the seller
-        ref: 'Users',               // Assuming you have a Users schema
+        ref: 'Users',               
         required: [true, 'Seller ID is required']
     },
     ratings: {

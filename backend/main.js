@@ -2,8 +2,10 @@ require('dotenv').config()
 
 const express = require('express')
 const mongoose = require('mongoose')
-const userRoutes = require('./src/components/users/userRoutes') 
-const eventRoutes = require('./src/components/events/eventRoutes')
+// const userRoutes = require('./src/components/users/userRoutes') 
+// const eventRoutes = require('./src/components/events/eventRoutes')
+const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes') 
+
 // Express app
 const ACLapp = express()
 
@@ -17,9 +19,9 @@ ACLapp.use((req, res, next) => {
 })
 
 // Routes
-ACLapp.use('/api', userRoutes) 
-ACLapp.use('/api', eventRoutes) 
-
+// ACLapp.use('/api', userRoutes) 
+// ACLapp.use('/api', eventRoutes) 
+ACLapp.use('/api', checkoutRoutes) 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
