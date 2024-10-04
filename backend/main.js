@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 // const eventRoutes = require('./src/components/events/eventRoutes')
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes') 
 
-const swaggerDocs = require('./src/swagger/swagger'); // Import swagger configuration
+const swaggerDocs = require('../backend/src/swagger/swagger'); // Import swagger configuration
 
 
 // Express app
