@@ -21,9 +21,9 @@ ACLapp.use((req, res, next) => {
 });
 
 // Routes
-ACLapp.use('/api', userRoutes);
-ACLapp.use('/api', eventRoutes);
-ACLapp.use('/api', checkoutRoutes);
+ACLapp.use(userRoutes);
+ACLapp.use(eventRoutes);
+ACLapp.use(checkoutRoutes);
 // Setup Swagger
 setupSwaggerDocs(ACLapp); // Add Swagger setup here
 
