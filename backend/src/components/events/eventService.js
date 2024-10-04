@@ -1,76 +1,6 @@
 const eventRepository = require("../events/eventRepository");
 const User = require("../../models/user");
 
-const getUserEvents = async (username, userType) => {
-  const user = await User.findOne({ username });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  let events;
-
-  switch (userType) {
-    case "tourismGovernor":
-      events = await eventRepository.getHistoricalPlacesByUsername(user._id);
-      break;
-    case "tourGuide":
-      events = await eventRepository.getItinerariesByUsername(user._id);
-      break;
-    case "advertiser":
-      events = await eventRepository.getActivitiesByUsername(user._id);
-      break;
-    default:
-      throw new Error("Invalid user type");
-  }
-
-  return events;
-};
-
-//CRUD ACTIVITY CATEGORY
-
-// Create a new activity category
-const createCategory = async (categoryData) => {
-  return await eventRepository.createCategory(categoryData);
-};
-
-// Get all activity categories
-const getAllCategories = async () => {
-  return await eventRepository.getAllCategories();
-};
-
-// Delete a category by ID
-const deleteCategoryById = async (id) => {
-  return await eventRepository.deleteCategoryById(id);
-};
-
-// Update a category by ID
-const updateCategoryById = async (id, updateData) => {
-  return await eventRepository.updateCategoryById(id, updateData);
-};
-
-//CRUD PREFTAGS
-
-// Create a new preference tag
-const createTag = async (tagData) => {
-  return await eventRepository.createTag(tagData);
-};
-
-// Get all preference tags
-const getAllTags = async () => {
-  return await eventRepository.getAllTags();
-};
-
-// Update a preference tag by _id
-const updateTagById = async (id, updatedData) => {
-  return await eventRepository.updateTagById(id, updatedData);
-};
-
-// Delete a preference tag by _id
-const deleteTagById = async (id) => {
-  return await eventRepository.deleteTagById(id);
-};
-
 //sarah
 
 const CategoryNameToId = async (categoryName) => {
@@ -91,14 +21,10 @@ const CategoryNameToId = async (categoryName) => {
   return null; // Return null if categoryName is not provided
 };
 
-const getFilteredUpcomingActivities = async (filters, page = 1, limit = 10) => {
+const getFilteredUpcomingActivities = async (filters) => {
   try {
     // Fetch filtered activities from the repository
-    const activities = await eventRepository.getFilteredActivities(
-      filters,
-      page,
-      limit
-    );
+    const activities = await eventRepository.getFilteredActivities(filters);
 
     // Format the activities data
     const formattedActivities = activities.map((activity) => ({
@@ -109,7 +35,7 @@ const getFilteredUpcomingActivities = async (filters, page = 1, limit = 10) => {
       time: activity.time,
       location: activity.location, // Include location details (latitude, longitude)
       budget: activity.price, // Handle budget or price depending on schema
-      category: activity.category, // Assuming category is populated and has a 'name' field
+      category: activity.category.categoryName, // Assuming category is populated and has a 'name' field
       tags: activity.tags, // Include tags if applicable
       specialDiscounts: activity.specialDiscounts,
       created_by: activity.created_by,
@@ -126,10 +52,6 @@ const getFilteredUpcomingActivities = async (filters, page = 1, limit = 10) => {
     console.error(`Service Error: ${error.message}`);
     throw new Error("Failed to retrieve filtered activities.");
   }
-};
-
-const getAllActivites = async () => {
-  return await eventRepository.getAllActivities();
 };
 
 const getAllUpcomingEvents = async () => {
@@ -218,11 +140,9 @@ const getFilteredHistoricalPlaces = async (tags) => {
       location: place.location,
       openingHours: place.openingHours,
       ticketPrice: place.ticketPrice,
-      type: place.type,
-      period: place.period,
       createdAt: place.createdAt,
       createdBy: place.created_by, // Reference to creator's ID
-      tags: place.tags, // Include tags
+      tags: place.tags, // Include el period we el type
     }));
     console.log(formattedHistoricalPlaces);
 
@@ -233,19 +153,37 @@ const getFilteredHistoricalPlaces = async (tags) => {
   }
 };
 
+const getFilteredItineraries = async (filters) => {
+  try {
+    // Pass the filters, page, and limit to the repository to fetch itineraries
+    const itineraries = await eventRepository.getFilteredItineraries(filters);
+
+    // Format the fetched itineraries before returning
+    return itineraries.map((itinerary) => ({
+      id: itinerary._id,
+      activities: itinerary.activities,
+      activitiesNames: itinerary.activities.name,
+      locations: itinerary.locations,
+      price: itinerary.price,
+      dateTimeAvailable: itinerary.dateTimeAvailable,
+      language: itinerary.language,
+      accessibility: itinerary.accessibility,
+      pickupLocation: itinerary.pickupLocation,
+      dropoffLocation: itinerary.dropoffLocation,
+      rating: itinerary.rating,
+      comments: itinerary.comments,
+      tags: itinerary.tags.map((tag) => tag.name), // Extract tag names if populated
+    }));
+  } catch (error) {
+    console.error(`Service Error: ${error.message}`);
+    throw error;
+  }
+};
+
 module.exports = {
-  getUserEvents,
-  createCategory,
-  getAllCategories,
-  updateCategoryById,
-  deleteCategoryById,
-  createTag,
-  getAllTags,
-  updateTagById,
-  deleteTagById,
   getFilteredUpcomingActivities,
-  getAllActivites,
   CategoryNameToId,
   getAllUpcomingEvents,
   getFilteredHistoricalPlaces,
+  getFilteredItineraries,
 };
