@@ -85,5 +85,24 @@ const getAvailableProductsSortedByRatings = async (req, res) => {
     }
 };
 
+const searchProductByName = async (req, res) => {
+    const { productName } = req.body;
 
-module.exports = {addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct, getAvailableProductsSortedByRatings};
+    try {
+        const products = await checkoutService.searchProductByName(productName);
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+module.exports = {
+    addProduct,
+    getAvailableProducts,
+    getProductsByPriceRange,
+    updateProduct,
+    getAvailableProductsSortedByRatings,
+    searchProductByName
+};
