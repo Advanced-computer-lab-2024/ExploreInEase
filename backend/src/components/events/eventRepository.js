@@ -3,6 +3,11 @@ const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const ActivityCategory = require('../../models/activityCategory'); 
 const PreferenceTags = require('../../models/preferenceTags'); 
+const Users = require('../../models/user');
+const Tourist = require('../../models/tourist');
+const mongoose = require('mongoose');
+const historicalTags = require('../../models/historicalTag');
+const historicalPlace = require('../../models/historicalPlace');
 
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
@@ -227,8 +232,129 @@ const getFilteredItineraries = async (filters) => {
 const createHistoricalTag = async (tagData) => {
   const tag = new HistoricalTag(tagData);
   return await tag.save();
-  };  
+};  
   
+
+const getActivityById = async (id) => {
+  return await Activity.findById(id);
+};
+
+const createActivity = async (activityData) => {
+  const activity = new Activity(activityData);
+  return await activity.save();
+};
+
+const findCategoryById = async (categoryId) => {
+  return await ActivityCategory.findById(categoryId);
+};
+
+const updateActivity = async (id, updateData) => {
+  // Use the mongoose method to update an activity
+  return await Activity.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+};
+
+const deleteActivity = async (_id) => {
+  // Use the mongoose method to delete an activity
+  const deletedActivity = await Activity.findByIdAndDelete(_id);
+  return deletedActivity; // Return the deleted activity for confirmation
+};
+
+const getAllActivities = async (userId) => {
+  return await Activity.find();
+};
+
+const getAllActivitiesAdvertiser = async (userId) => {
+  return await Activity.find({ created_by: userId });
+};
+
+const getAllItineraries = async (userId) => {
+  return await Itinerary.find({ created_by: userId });
+};
+
+const getItineraryById = async (id) => {
+  const itinerary = await Itinerary.findById(id)
+    .populate('activities')
+    .populate({
+      path: 'comments.user', // Populate user data in comments
+      select: 'name', // Assuming user schema has a name field
+    });
+
+  return itinerary;
+};
+
+
+const createItinerary = async (itineraryData) => {
+  // Create a new itinerary document in the database
+  const newItinerary = new Itinerary(itineraryData);
+  return await newItinerary.save();
+};
+
+const findItineraryById = async (_id) => {
+  return await Itinerary.findById(_id);
+};
+
+const updateItinerary = async (_id, itineraryData) => {
+  return await Itinerary.findByIdAndUpdate(_id, itineraryData, { new: true });
+};
+
+// Delete Itinerary from the database
+const deleteItinerary = async (_id) => {
+  try {
+      // Find itinerary by ID and delete it
+      const deletedItinerary = await Itinerary.findByIdAndDelete(_id);
+      return deletedItinerary;
+  } catch (error) {
+      throw new Error('Error deleting itinerary: ' + error.message);
+  }
+};
+
+const createHistoricalPlace = async (data) => {
+  const newPlace = new HistoricalPlace(data);
+  const savedPlace = await newPlace.save();
+  return { status: 200, response: { message: "Historical Place created successfully", savedPlace } };
+};
+
+const findTagByTypeAndPeriod = async (type, period) => {
+  return await historicalTags.findOne({ type, period });
+};
+
+const checkTourismGovernor = async (userId) => {
+  const user = await Users.findById(userId);
+  return user && user.type === 'tourismGovernor';
+};
+
+
+// Get all Historical Places
+const getAllHistoricalPlaces = async () => {
+  return await HistoricalPlace.find();
+};
+
+// Get a Historical Place by ID
+const getHistoricalPlaceById = async (id) => {
+  return await HistoricalPlace.findById(id);
+};
+
+// Update a Historical Place by ID
+const updateHistoricalPlace = async (id, data) => {
+  return await HistoricalPlace.findByIdAndUpdate(id, data, { new: true });
+};
+
+// Delete a Historical Place by ID
+const deleteHistoricalPlace = async (id) => {
+  return await HistoricalPlace.findByIdAndDelete(id);
+};
+
+const getType = async (id) => {
+  const user = await Users.findOne({ _id: id });
+  const tourist = await Tourist.findOne({ _id: id });
+  if (user) {
+    return user.type;
+  } else if (tourist) {
+    return tourist.type;
+  } else {
+    throw new Error('User not found');
+  }
+};
 
 
 module.exports = {
