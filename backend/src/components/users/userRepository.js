@@ -110,6 +110,87 @@ const getTouristEventDetails = async (username) => {
 };
 
 
+const updateUserData = async (id, updateData) => {
+    return await Users.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+};
+
+
+// Update a tourist by ID (excluding username and wallet)
+const updateTourist = async (id, updateData) => {
+    return await Tourist.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+};
+
+const deleteUser = async (username) => {
+    try {
+        const result = await Users.findOneAndDelete({ username });
+        return result ? true : false;
+    } catch (error) {
+        console.error(`Error deleting user: ${error.message}`);
+        return false;
+    }
+};
+
+
+
+const checkTouristExists = async (username) => {
+    try {
+        const result = await Tourist.findOne({ username });
+        return result ? true : false;
+    } catch (error) {
+        console.error(`Error checking if tourist exists: ${error.message}`);
+        return false;
+    }
+};
+
+const findUserByUsername = async (username) => {
+    return await Users.findOne({ username });
+};
+
+// Save a new user
+const saveUser = async (userData) => {
+    const newUser = new Users(userData);
+    const savedUser = await newUser.save();
+    return savedUser; // Return the entire user document
+};
+
+
+const saveTourist = async (tourist) => {
+    try {
+        const newTourist = new Tourist(tourist);
+        const savedTourist = await newTourist.save();
+        return { status: 201, tourist: savedTourist }; // Return the entire tourist document
+    } catch (error) {
+        throw new Error(`Error saving tourist: ${error.message}`);
+    }
+};
+
+
+const checkUserExists = async (username) => {
+    try {
+        const existsUser = await Users.findOne({ username });
+        const existsTourist = await Tourist.findOne({ username });
+        if (existsUser || existsTourist) {
+            return true;
+        }
+    } catch (error) {
+        console.error(`Error checking if user exists: ${error.message}`);
+        return false;
+    }
+};
+
+const checkUserExistsByEmail = async (email) => {
+    try {
+        const existsUser = await Users.findOne({ email });
+        const existsTourist = await Tourist.findOne({ email });
+        if (existsUser || existsTourist) {
+            return true;
+        }
+    } catch (error) {
+        console.error(`Error checking if user exists: ${error.message}`);
+        return false;
+    }
+};
+
 
 module.exports = {
   deleteTourist,
@@ -120,5 +201,14 @@ module.exports = {
   deleteUserById,
   findUserById,
   findTouristByUsername,
-  getTouristEventDetails
+  getTouristEventDetails,
+  updateUserData,
+  updateTourist,
+  deleteTourist,
+  checkTouristExists,
+  findUserByUsername,
+  saveUser,
+  saveTourist,
+  checkUserExists,
+  checkUserExistsByEmail
 };
