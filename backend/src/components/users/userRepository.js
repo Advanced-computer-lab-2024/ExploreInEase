@@ -204,4 +204,4 @@ const fetchAllTourists = async () => {
 
 
 
-module.exports = { checkUserExistsByEmail, checkUserExists ,deleteUser, deleteTourist,addGovernerOrAdmin, saveTourist, checkTouristExists , findUserByUsername, saveUser,fetchAllUsers ,fetchAllTourists,deleteTouristById,findUserById,updateTourist,updateUserData,getTourGuideById,getTouristById};
+module.exports = { checkUserExistsByEmail, checkUserExists ,deleteUser, deleteTourist,addGovernerOrAdmin, saveTourist, checkTouristExists , findUserByUsername, saveUser,fetchAllUsers ,fetchAllTourists,deleteTouristById,findUserById,updateTourist,updateUserData,getTouristById};
