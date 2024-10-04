@@ -34,6 +34,8 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
         // Start listening for requests
         ACLapp.listen(process.env.PORT, () => {
             console.log(`Connected to DB & listening on port ${process.env.PORT}`)
+            console.log(`Swagger docs available at http://localhost:${process.env.PORT}/api-docs`); // Log Swagger docs URL
+
         })
     })
     .catch((error) => {
