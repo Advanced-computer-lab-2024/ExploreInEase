@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const complaintSchema = new Schema({
   touristId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Tourist",
+    ref: "Tourist", // Reference to the Tourist model mesh el schema
     required: true,
   },
   problem: {
@@ -19,7 +19,7 @@ const complaintSchema = new Schema({
   status: {
     type: String,
     enum: ["pending", "resolved"], // Enum for status (resolved when there is a reply)
-    default: "pending", 
+    default: "pending", // Default status is pending
   },
   reply: {
     type: String,
@@ -28,6 +28,6 @@ const complaintSchema = new Schema({
 });
 
 // Create the Complaint model
-const Complaint = mongoose.model("Complaint", complaintSchema);
+const Complaint = mongoose.models.Complaint ||mongoose.model("Complaint", complaintSchema);
 
 module.exports = Complaint;
