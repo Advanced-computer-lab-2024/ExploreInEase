@@ -1,0 +1,107 @@
+/* src/Shared/Components/HomePage.css */
+
+.homepage {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+    background-color: #ffffff; /* White background for the homepage */
+    padding: 20px; /* Padding around the page */
+    min-height: 100vh; /* Ensure the homepage takes full height */
+    color: #333; /* Dark text color for contrast against white */
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Space between items */
+    align-items: center; /* Center items vertically */
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white navbar */
+    padding: 10px 30px; /* Padding in navbar */
+    border-radius: 8px; /* Rounded corners for navbar */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.logo-container {
+    display: flex;
+    align-items: center; /* Align logo and text */
+}
+
+/* src/Shared/Components/GuestHP.css */
+
+/* src/Shared/Components/GuestHP.css */
+
+.logo {
+    height: 100px; /* Increase the height of the logo */
+    width: auto; /* Maintain aspect ratio */
+    margin-right: 10px; /* Space between logo and website name */
+  }
+  
+  
+
+.logo:hover {
+    transform: scale(1.1); /* Scale logo on hover */
+}
+
+.website-name {
+    font-size: 1.8em; /* Larger font size for better visibility */
+    font-weight: bold; /* Bold font weight */
+    color: #007bff; /* Blue color for the website name */
+}
+
+.nav-links {
+    display: flex; /* Flex for nav links */
+    justify-content: center; /* Center the nav links */
+    flex: 1; /* Allow nav links to take available space */
+    gap: 25px; /* Space between links */
+}
+
+.nav-links a {
+    color: #007bff; /* Blue text color for links */
+    text-decoration: none; /* Remove underline from links */
+    font-weight: 500; /* Medium font weight */
+    transition: color 0.3s, text-shadow 0.3s; /* Smooth transition for hover effect */
+}
+
+.nav-links a:hover {
+    color: #5787ff; /* Change color on hover */
+    text-shadow: 0 0 5px #5787ff , 0 0 10px #5787ff; /* Glow effect on hover */
+}
+
+.currency-selector {
+    color: #333; /* Dark text color for currency */
+    display: flex; /* Flexbox for better layout */
+    align-items: center; /* Center items vertically */
+}
+
+.currency-symbol {
+    margin-right: 5px; /* Space between currency label and select */
+    font-weight: bold; /* Bold for better visibility */
+}
+
+.currency-selector select {
+    background-color: #f0f0f0; /* Light gray for select */
+    color: #333; /* Dark text for select */
+    border: 1px solid #ccc; /* Light border for select */
+    border-radius: 4px; /* Rounded corners for select */
+    padding: 8px 12px; /* Padding in select */
+    font-size: 1em; /* Font size for the select */
+    transition: background-color 0.3s; /* Transition for background color */
+}
+
+.currency-selector select:hover {
+    background-color: #e0e0e0; /* Change background color on hover */
+}
+
+.avatar-container {
+    margin-left: auto; /* Push avatar to the right */
+}
+
+.avatar {
+    height: 45px; /* Set avatar height */
+    width: 45px; /* Set avatar width */
+    border-radius: 50%; /* Circular avatar */
+    border: 2px solid #007bff; /* Blue border for avatar */
+    object-fit: cover; /* Ensure the avatar fits well */
+    transition: transform 0.3s; /* Smooth avatar hover effect */
+}
+
+.avatar:hover {
+    transform: scale(1.1); /* Scale avatar on hover */
+}

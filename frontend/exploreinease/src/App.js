@@ -6,12 +6,13 @@ import ActivityList from './Shared/Components/Activities/ActivityList'; // Impor
 import ItineraryList from './Shared/Components/ItineraryList';
 import './Shared/Components/ItineraryList.css'; // Ensure this path is correct
 import MuseumList from './Shared/Components/MuseumList'; // Ensure this path is correct
+import GuestHP from './Shared/Components/GuestHP';
 
 const App = () => {
   return (
     <div>
     
-      <MuseumList />
+      <GuestHP />
     </div>
   );
 };
