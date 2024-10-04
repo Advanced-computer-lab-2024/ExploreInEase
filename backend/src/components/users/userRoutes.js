@@ -82,4 +82,76 @@ router.post('/addGovernorOrAdmin', userController.addGovernorOrAdmin);
  */
 router.get('/fetchAllUsersAndTourists', userController.fetchAllUsersAndTourists);
 
+
+/**
+ * @swagger
+ * /upcomingEvents/{username}:
+ *   get:
+ *     summary: Get a tourist's upcoming events
+ *     description: Retrieve upcoming activities, itineraries, and historical places for a given tourist by username.
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The username of the tourist
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved upcoming events
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 upcomingActivities:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                       description:
+ *                         type: string
+ *                 upcomingItineraries:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                       description:
+ *                         type: string
+ *                 upcomingHistoricalPlaces:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                       description:
+ *                         type: string
+ *       400:
+ *         description: Username is required or invalid
+ *       500:
+ *         description: Server error
+ */
+router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents);
+
 module.exports = router;
