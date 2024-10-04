@@ -84,6 +84,19 @@ const fetchAllTourists = async () => {
 };
 
 
+const updateUserData = async (id, updateData) => {
+    return await Users.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+};
+
+const getTouristById = async (id) => {
+    return await Tourist.findById(id);
+};
+
+// Update a tourist by ID (excluding username and wallet)
+const updateTourist = async (id, updateData) => {
+    return await Tourist.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+};
+
 
 
 module.exports = {
@@ -93,5 +106,8 @@ module.exports = {
     fetchAllTourists,
     deleteTouristById,
     deleteUserById,
-    findUserById
+    findUserById,
+    updateUserData,
+    getTouristById,
+    updateTourist
 };
