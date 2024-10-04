@@ -568,6 +568,99 @@ router.get('/getTourist/:_id', userController.getTourist);
 router.put('/updateTourist/:_id', userController.updateTourist);
 
 
+
+// /register/:type
+/**
+ * @swagger
+ * /register/{type}:
+ *   post:
+ *     summary: Register a new user
+ *     description: Registers a new user based on the user type (tourist, tourGuide, advertiser, seller).
+ *     tags: [Users]
+ *     parameters:
+ *       - name: type
+ *         in: path
+ *         required: true
+ *         description: The type of user to register (tourist, tourGuide, advertiser, seller).
+ *         schema:
+ *           type: string
+ *           enum: [tourist, tourGuide, advertiser, seller]
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         description: User registration details.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *               format: email
+ *               description: The user's email address.
+ *             username:
+ *               type: string
+ *               description: The username for the user.
+ *             password:
+ *               type: string
+ *               description: The password for the user.
+ *             mobileNum:
+ *               type: string
+ *               description: The mobile number of the tourist (only for type `tourist`).
+ *             nation:
+ *               type: string
+ *               description: The nationality of the tourist (only for type `tourist`).
+ *             dob:
+ *               type: string
+ *               format: date
+ *               description: The date of birth of the tourist (only for type `tourist`).
+ *             profession:
+ *               type: string
+ *               description: The profession of the tourist (only for type `tourist`).
+ *     responses:
+ *       200:
+ *         description: User registered successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User registered successfully"
+ *                 User:
+ *                   type: object
+ *                   additionalProperties: true
+ *       400:
+ *         description: Bad request due to missing input.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing Input"
+ *       409:
+ *         description: Conflict due to existing username or email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Username already exists"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
+ */
+
 router.post('/register/:type', userController.registerUser);
 
 
