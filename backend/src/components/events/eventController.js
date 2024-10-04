@@ -226,6 +226,20 @@ const getFilteredItineraries = async (req, res) => {
   }
 };
 
+const createHistoricalTag = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const tag = await eventService.createHistoricalTag(req.body);
+        res.status(201).json(tag);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -241,6 +255,7 @@ module.exports = {
   GetupcommingActivitesFilter,
   getUpcomingEvents,
   filterHistoricalPlacesByTags,
-  getFilteredItineraries
+  getFilteredItineraries,
+  createHistoricalTag
   };
   
