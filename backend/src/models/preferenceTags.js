@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+// Define the schema for the activity category
 const preferenceTagsSchema = new Schema({
   tags: {
     type: String,
@@ -9,6 +10,7 @@ const preferenceTagsSchema = new Schema({
   }
 });
 
-const PreferenceTags = mongoose.model('PreferenceTags', preferenceTagsSchema);
+// Create and export the model
+const PreferenceTags = mongoose.models.PreferenceTags ||mongoose.model('PreferenceTags', preferenceTagsSchema);
 
 module.exports = PreferenceTags;
