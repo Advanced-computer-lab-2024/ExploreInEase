@@ -7,12 +7,13 @@ import ItineraryList from './Shared/Components/ItineraryList';
 import './Shared/Components/ItineraryList.css'; // Ensure this path is correct
 import MuseumList from './Shared/Components/MuseumList'; // Ensure this path is correct
 import GuestHP from './Shared/Components/GuestHP';
+import TourGuideHP from './Shared/Components/TourGuideHP';
 
 const App = () => {
   return (
     <div>
     
-      <GuestHP />
+      <TourGuideHP />
     </div>
   );
 };
