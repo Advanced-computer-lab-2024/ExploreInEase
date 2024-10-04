@@ -6,11 +6,17 @@ const mongoose = require('mongoose')
 // const eventRoutes = require('./src/components/events/eventRoutes')
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes') 
 
+const swaggerDocs = require('./src/swagger/swagger'); // Import swagger configuration
+
+
 // Express app
 const ACLapp = express()
 
 // Middleware to parse JSON
 ACLapp.use(express.json())
+
+swaggerDocs(app); // Initialize Swagger documentation
+
 
 // Logging middleware (optional, just for debugging)
 ACLapp.use((req, res, next) => {
