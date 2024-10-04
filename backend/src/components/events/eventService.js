@@ -202,7 +202,194 @@ const getAllUpcomingEvents = async () => {
 
 const createHistoricalTag = async (tag) => {
     return await eventRepository.createHistoricalTag(tag);
-    };
+};
+
+const getActivityById = async (id) => {
+  return await eventRepository.getActivityById(id);
+};
+
+const addActivity = async ({ name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by }) => {
+  // Check if the category exists
+  const categoryExists = await eventRepository.findCategoryById(category);
+  if (!categoryExists) {
+    throw new Error('Invalid category.');
+  }
+
+  const user = await User.findOne({ _id: created_by, type: 'advertiser' });
+  if (!user) {
+    throw new Error('Advertiser not found');
+  }
+
+  // Construct the new activity object
+  const newActivity = {
+    name,
+    date,
+    time,
+    location,
+    price,
+    category,
+    tags,
+    specialDiscounts,
+    isOpen,
+    created_by
+  };
+
+  // Call the repository to add the activity to the database
+  const createdActivity = await eventRepository.createActivity(newActivity);
+  
+  return createdActivity;
+};
+
+const updateActivity = async (id, updateData) => {
+  // You can add additional validation or processing here if needed
+  return await eventRepository.updateActivity(id, updateData);
+};
+
+const deleteActivity = async (_id) => {
+  return await eventRepository.deleteActivity(_id);
+};
+
+const getAllActivitiesAdvertiser = async (userId) => {
+  return await eventRepository.getAllActivitiesAdvertiser(userId);
+};
+
+const getAllActivities = async () => {
+  return await eventRepository.getAllActivities();
+};
+
+const getAllItineraries = async (userId) => {
+  const itineraries = await eventRepository.getAllItineraries(userId);
+  return itineraries;
+};
+
+
+const getItineraryById = async (id) => {
+  return await eventRepository.getItineraryById(id);
+};
+
+const createItinerary = async (itineraryData) => {
+  return await eventRepository.createItinerary(itineraryData);
+};
+
+const updateItinerary = async (_id, itineraryData) => {
+  try {
+      const currentItinerary = await eventRepository.findItineraryById(_id);
+      
+      if (!currentItinerary) {
+          return null; // Itinerary not found
+      }
+
+      // Check if there is a rating in the incoming data and ensure it's an array
+      if (itineraryData.rating) {
+          // Ensure itineraryData.rating is an array before spreading
+          const newRatings = Array.isArray(itineraryData.rating) ? itineraryData.rating : [itineraryData.rating];
+          currentItinerary.rating.push(...newRatings); // Add new ratings
+      }
+
+      // Update other fields
+      Object.keys(itineraryData).forEach(key => {
+          if (key !== 'rating') { // Exclude rating to prevent overwriting
+              currentItinerary[key] = itineraryData[key];
+          }
+      });
+
+      // Save the updated itinerary
+      await currentItinerary.save();
+      
+      return currentItinerary;
+  } catch (error) {
+      throw new Error('Error updating itinerary: ' + error.message);
+  }
+};
+
+// Service to delete an itinerary by ID
+const deleteItinerary = async (_id) => {
+  try {
+      const deletedItinerary = await eventRepository.deleteItinerary(_id);
+      return deletedItinerary;
+  } catch (error) {
+      throw new Error(error.message);
+  }
+};
+
+// Create a new Historical Place
+const createHistoricalPlace = async (data) => {
+  // Check if the user is authorized to create a historical place
+  const user = await eventRepository.checkTourismGovernor(data.created_by);
+  if (!user) {
+    return { status: 403, response: { message: 'You are not authorized to create a Historical Place' } };
+  }
+
+  // Create a new historical place
+  const newPlace = new HistoricalPlace(data);
+  const savedPlace = await newPlace.save();
+
+  return { status: 200, response: { message: "Historical Place created successfully", savedPlace } };
+};
+
+
+// Get all Historical Places
+const getAllHistoricalPlaces = async () => {
+  return await eventRepository.getAllHistoricalPlaces();
+};
+
+// Get a Historical Place by ID
+const getHistoricalPlaceById = async (id, userId) => {
+  const user = await eventRepository.checkTourismGovernor(userId);
+  if (!user) {
+    return {status: 400, response: {message: 'You are not authorized to view this Historical Place'}};
+  }
+  const historicalPlace = await eventRepository.getHistoricalPlaceById(id);
+  if (!historicalPlace) {
+    return {status: 404, response: {message: 'Historical Place not found'}};
+  }
+  else{
+    if(historicalPlace.created_by != userId) {
+      return {status: 400, response: {message: 'You are not authorized to view this Historical Place'}};
+    }
+    return {status: 200, response: {message: 'Historical Place found', historicalPlace: historicalPlace}};
+  }
+};
+
+// Update a Historical Place by ID
+const updateHistoricalPlace = async (id, userId, data) => {
+  const user = await eventRepository.checkTourismGovernor(userId);
+  if (!user) {
+    return {status: 400, response: {message: 'You are not authorized to update this Historical Place'}};
+  }
+  const historicalPlace = await eventRepository.getHistoricalPlaceById(id);
+  if (!historicalPlace) {
+    return {status: 404, response: {message: 'Historical Place not found'}};
+  }
+  if(historicalPlace.created_by != userId) {
+    return {status: 400, response: {message: 'You are not authorized to update this Historical Place'}};
+  }
+  const updatedHistoricalPlace = await eventRepository.updateHistoricalPlace(id, data);
+  if (!updatedHistoricalPlace) {
+    return {status: 500, response: {message: 'Failed to update Historical Place'}};
+  }
+  return {status: 200, response: {message: 'Historical Place updated', updatedHistoricalPlace: updatedHistoricalPlace}};
+};
+
+// Delete a Historical Place by ID
+const deleteHistoricalPlace = async (id, userId) => {
+  const user = await eventRepository.checkTourismGovernor(userId);
+  if (!user) {
+    return {status: 400, response: {message: 'You are not authorized to delete this Historical Place'}};
+  }
+  const historicalPlace = await eventRepository.getHistoricalPlaceById(id);
+  if (!historicalPlace) {
+    return {status: 404, response: {message: 'Historical Place not found'}};
+  }
+  if(historicalPlace.created_by != userId) {
+    return {status: 400, response: {message: 'You are not authorized to delete this Historical Place'}};
+  }
+  const deletedHistoricalPlace = await eventRepository.deleteHistoricalPlace(id);
+  if (!deletedHistoricalPlace) {
+    return {status: 500, response: {message: 'Failed to delete Historical Place'}};
+  }
+  return {status: 200, response: {message: 'Historical Place deleted'}};
+};
 
 
 module.exports = {
@@ -218,6 +405,22 @@ module.exports = {
   CategoryNameToId,
   getFilteredUpcomingActivities,
   getAllUpcomingEvents,
-  createHistoricalTag
+  createHistoricalTag,
+  getActivityById,
+  addActivity,
+  updateActivity,
+  deleteActivity,
+  getItineraryById,
+  createItinerary,
+  updateItinerary,
+  deleteItinerary,
+  createHistoricalPlace,
+  getAllHistoricalPlaces,
+  getHistoricalPlaceById,
+  updateHistoricalPlace,
+  deleteHistoricalPlace,
+  getAllItineraries,
+  getAllActivities,
+  getAllActivitiesAdvertiser
 };
 
