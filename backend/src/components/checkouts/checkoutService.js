@@ -25,4 +25,16 @@ const getAvailableProductsSortedByRatings = async () => {
     return await checkoutRepository.getAvailableProductsSortedByRatings();
 };
 
-module.exports = {addProduct, getAvailableProducts, getProductsByPriceRange, updateProduct, getAvailableProductsSortedByRatings};
+const searchProductByName = async (name) => {
+    return await checkoutRepository.searchByName(name);
+};
+
+
+module.exports = {
+    addProduct,
+    getAvailableProducts,
+    getProductsByPriceRange,
+    updateProduct,
+    getAvailableProductsSortedByRatings,
+    searchProductByName
+};
