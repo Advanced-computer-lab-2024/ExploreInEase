@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Select Your Location</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        /* Adjust map height */
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        #location-info {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Please Pin Your Organization/Clinic Location & Attach the selected location link in the Address Field below.</h2>
+    <div id="map"></div>
+    <div id="location-info">
+        <h3>Selected Location:</h3>
+        <p id="selected-location">Click on the map to select a location.</p>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize Leaflet map with no specific center (we'll use the geolocation)
+        var map = L.map('map', {
+            zoom: 13,
+            preferCanvas: true, // Improves map rendering performance
+        });
+
+        // Add OpenStreetMap tile layer for smooth map loading
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19, // Maximum zoom level for OpenStreetMap
+            attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        // Function to handle location success (user's current location)
+        function onLocationFound(e) {
+            var latlng = e.latlng;
+
+            // Set map view to user's location and add marker
+            map.setView(latlng, 13); // Set the map view to the user's current location
+            L.marker(latlng).addTo(map).bindPopup("You are here").openPopup();
+
+            // Log coordinates to the console
+            console.log("Latitude:", latlng.lat, "Longitude:", latlng.lng);
+
+            // Create a Google Maps search URL with lat/lng
+            var latitude = latlng.lat.toFixed(6); // Ensure consistent decimal precision
+            var longitude = latlng.lng.toFixed(6);
+
+            // Ensure the URL is correctly formatted
+            var googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+            // Update selected location with the correct link
+            var selectedLocation = document.getElementById('selected-location');
+            selectedLocation.innerHTML = `Selected Location: <a href="${googleMapsUrl}" target="_blank">View on Google Maps</a>`;
+        }
+
+        // Function to handle location error
+        function onLocationError(e) {
+            alert("Unable to retrieve your location. Please allow location access in your browser settings or manually select a location.");
+            console.log(e.message); // Log error message to the console
+        }
+
+        // Request user's location with high accuracy
+        map.locate({
+            setView: true,
+            maxZoom: 16,
+            watch: false, // Disable continuous tracking (set it to true if you want real-time location updates)
+            enableHighAccuracy: true, // Use GPS for higher accuracy if available
+        });
+
+        // Event listeners for location found or error
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+
+        // Function to handle map click event for custom location selection
+        function onMapClick(e) {
+            // Clear previous markers
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Add marker at clicked location
+            L.marker(e.latlng).addTo(map);
+
+            // Log the coordinates to ensure correct lat/lng values
+            console.log("Latitude:", e.latlng.lat, "Longitude:", e.latlng.lng);
+
+            // Create a Google Maps search URL with lat/lng
+            var latitude = e.latlng.lat.toFixed(6); // Ensure consistent decimal precision
+            var longitude = e.latlng.lng.toFixed(6);
+
+            // Ensure the URL is correctly formatted
+            var googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+            // Update selected location with the correct link
+            var selectedLocation = document.getElementById('selected-location');
+            selectedLocation.innerHTML = `Selected Location: <a href="${googleMapsUrl}" target="_blank">View on Google Maps</a>`;
+        }
+
+        // Add click event listener to the map for manual location selection
+        map.on('click', onMapClick);
+    </script>
+
+</body>
+</html>

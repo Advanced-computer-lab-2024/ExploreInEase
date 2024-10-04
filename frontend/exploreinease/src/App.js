@@ -1,131 +1,62 @@
+import React, { useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import './App.css';
-import AdminCard from './Shared/Components/AdminCard/adminsCard.js';
-import GenericDialog from './Shared/Components/GenericDialog/genericDialog.js';
-//import React from 'react';
-import React, { useState } from 'react'; // Fix for useState error
-import GenericCard from './Shared/Components/UserCard/Usergenericcard.js';
-import AddUser from "./Shared/Components/admin/AddUser.js";
-import ActivityList from "./Shared/Components/Activities/ActivityList.js";
-import "./Shared/Components/Activities/ActivityList.css"; // Importing the CSS
-import TouristSignUp from './Shared/Components/RegisterForms/TouristSignup.js';
-import GuideAdvertiserSignUp from './Shared/Components/RegisterForms/GuideAdvertiserSignUp.js';
-import './App.css'; // Optional CSS for styling
 
-// function App() {
-// //   return (
-   
-// //       <AdminCard  title="Lizard"
-// //       description="Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all continents except Antarctica."
-// //       imageUrl="/static/images/cards/contemplative-reptile.jpg"/>
- 
-// //   );
-// // }
-const App = () => {
-  const handleButtonClick = () => {
-    alert('Button clicked!');
-  };
+// Fix marker icon issues in Leaflet when used with React
+delete L.Icon.Default.prototype._getIconUrl;
 
-//   return (
-//     <div>
-//       <GenericCard
-//         title="Sample Title"
-//         title2="taso"
-//         subtitle="Sample Subtitle"
-//         image="https://via.placeholder.com/150"
-//         description="This is a sample description for the card."
-//         buttonLabel="Click Me"
-//         onButtonClick={handleButtonClick}
-//       />
-//     </div>
-//   );
-  // return (
-  //   <div className="App">
-  //     <AddUser />
-  //   </div>
-  // );
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+});
+
+function LocationMarker({ setLocation }) {
+  const [position, setPosition] = useState(null);
+
+  // This handles the map click event
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      setPosition(e.latlng);
+
+      // Update the Google Maps link with the selected lat/lng
+      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lng.toFixed(6)}`;
+      setLocation(googleMapsUrl);
+    },
+  });
+
+  // Render the marker at the selected position
+  return position ? <Marker position={position}></Marker> : null;
+}
+
+function App() {
+  const [locationUrl, setLocationUrl] = useState('');
+
   return (
-    <div className="App">
-      <ActivityList />
+    <div>
+      <h2>Please Pin Your Organization/Clinic Location & Attach the selected location link in the Address Field below.</h2>
+      <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: '400px', width: '100%' }}>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <LocationMarker setLocation={setLocationUrl} />
+      </MapContainer>
+      <div id="location-info">
+        <h3>Selected Location:</h3>
+        <p id="selected-location">
+          {locationUrl ? (
+            <a href={locationUrl} target="_blank" rel="noopener noreferrer">View on Google Maps</a>
+          ) : (
+            'Click on the map to select a location.'
+          )}
+        </p>
+      </div>
     </div>
   );
-  
-//   function App() {
-//     const [role, setRole] = useState(''); // No initial role selected
-  
-//     const handleRoleChange = (selectedRole) => {
-//       setRole(selectedRole);
-//     };
-  
+}
 
-
-//    return (
-//     <div className="App">
-//       <div className="form-container"> 
-//         <h1>Sign Up</h1>
-        
-//         {/* Buttons for role selection */}
-//         <div className="button-group">
-//           <button className={`role-button ${role === 'tourist' ? 'active' : ''}`} onClick={() => handleRoleChange('tourist')}>
-//             Register as Tourist
-//           </button>
-//           <button className={`role-button ${role === 'guideAdvertiser' ? 'active' : ''}`} onClick={() => handleRoleChange('guideAdvertiser')}>
-//             Register as Guide / Advertiser / Seller
-//           </button>
-//         </div>
-        
-//         {/* Conditionally render the form based on the selected role */}
-//         {role && (
-//           <div className="form-content">
-//             {role === 'tourist' ? <TouristSignUp /> : <GuideAdvertiserSignUp />}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default App;
-// import './App.css'; // Import your CSS for styling
-// import React, { useState } from 'react';
-// import TouristSignUp from './Shared/Components/RegisterForms/TouristSignup.js';
-// import GuideAdvertiserSignUp from './Shared/Components/RegisterForms/GuideAdvertiserSignUp.js';
-
-// function App() {
-//   const [role, setRole] = useState(''); // No initial role selected
-
-//   const handleRoleChange = (selectedRole) => {
-//     setRole(selectedRole);
-//   };
-
-//   return (
-//     <div className="App">
-//       <div className="form-container">
-//         <h1>Sign Up</h1>
-        
-//         {/* Buttons for role selection */}
-//         <div className="button-group">
-//           <button className={`role-button ${role === 'tourist' ? 'active' : ''}`} onClick={() => handleRoleChange('tourist')}>
-//             Register as Tourist
-//           </button>
-//           <button className={`role-button ${role === 'guideAdvertiser' ? 'active' : ''}`} onClick={() => handleRoleChange('guideAdvertiser')}>
-//             Register as Tour Guide / Advertiser / Seller
-//           </button>
-//         </div>
-        
-//         {/* Conditionally render the form based on the selected role */}
-//         {role && (
-//           <div className="form-content">
-//             {role === 'tourist' ? (
-//               <TouristSignUp />
-//             ) : (
-//               <GuideAdvertiserSignUp />
-//             )}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
- }
-//}
-
-export default App;
+export default App
