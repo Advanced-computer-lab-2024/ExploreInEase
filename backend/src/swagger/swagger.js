@@ -15,7 +15,7 @@ const options = {
       },
     ],
   },
-  apis: ['./components/checkouts/checkoutsRoutes.js'], // Path to the API docs
+  apis: ['./src/components/checkouts/checkoutsRoutes.js'], // Path to the API docs
 };
 
 const swaggerSpec = swaggerJsdoc(options);
