@@ -374,7 +374,28 @@ module.exports = {
   getAllUpcomingEvents,
   getFilteredHistoricalPlaces,
   getFilteredItineraries,
-  createHistoricalTag
+  createHistoricalTag,
+  getActivityById,
+  createActivity,
+  findCategoryById,
+  updateActivity,
+  deleteActivity,
+  getItineraryById,
+  createItinerary,
+  updateItinerary,
+  deleteItinerary,
+  createHistoricalPlace,
+  getAllHistoricalPlaces,
+  getHistoricalPlaceById,
+  updateHistoricalPlace,
+  deleteHistoricalPlace,
+  getType,
+  getAllItineraries,
+  getAllActivities,
+  getAllActivitiesAdvertiser,
+  findItineraryById,
+  findTagByTypeAndPeriod,
+  checkTourismGovernor
 };
 
 
