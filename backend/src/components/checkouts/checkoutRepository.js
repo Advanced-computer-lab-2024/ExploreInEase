@@ -95,5 +95,18 @@ const getAvailableProductsSortedByRatings = async () => {
     }
 };
 
+const searchByName = async (name) => {
+    return await Product.find({ name });
+};
 
-module.exports = {addProduct, getAllAvailableProducts, getProductsByPriceRange,updateProduct, getAvailableProductsSortedByRatings};
+
+
+module.exports = {
+    addProduct,
+    getAllAvailableProducts,
+    getProductsByPriceRange,
+    updateProduct,
+    getAvailableProductsSortedByRatings,
+    searchByName
+};
+
