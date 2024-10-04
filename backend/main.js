@@ -15,7 +15,7 @@ const ACLapp = express()
 // Middleware to parse JSON
 ACLapp.use(express.json())
 
-swaggerDocs(app); // Initialize Swagger documentation
+swaggerDocs(ACLapp); // Initialize Swagger documentation
 
 
 // Logging middleware (optional, just for debugging)
