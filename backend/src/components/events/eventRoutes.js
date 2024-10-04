@@ -399,4 +399,23 @@ router.post('/createHistoricalTag', eventController.createHistoricalTag);
 
 
 
+router.get('/activity/:_id/:userId', eventController.getActivityById);
+router.get('/activity/user/:userId/allActivities', eventController.getAllActivities);
+router.post('/activity', eventController.addActivity);
+router.put('/activity/:_id/:userId', eventController.updateActivity);
+router.delete('/activity/:_id/:userId', eventController.deleteActivity);
+
+router.get('/itinerary/:_id/:userId', eventController.getItineraryById);
+router.get('/itinerary/user/:userId/allItineraries', eventController.getAllItineraries);
+router.post('/itinerary', eventController.createItinerary);
+router.put('/itinerary/:_id/:userId', eventController.updateItinerary);
+router.delete('/itinerary/:_id/:userId', eventController.deleteItinerary);
+
+router.post('/historical-places', eventController.createHistoricalPlace);
+router.get('/historical-places/:userId/allHistoricalPlaces', eventController.getAllHistoricalPlaces);
+router.get('/historical-places/:_id/:userId', eventController.getHistoricalPlaceById);
+router.put('/historical-places/:_id/:userId', eventController.updateHistoricalPlace);
+router.delete('/historical-places/:_id/:userId', eventController.deleteHistoricalPlace);
+
+
 module.exports = router;
