@@ -50,7 +50,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
                 },
             ],
         },
-        apis: ["./src/swagger/swagger.js"], // Path to the API docs
+        apis: ['./src/components/users/userRoutes.js', './src/components/events/eventRoutes.js', './src/components/checkouts/checkoutsRoutes.js'], // Path to the API docs
     };
     const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
