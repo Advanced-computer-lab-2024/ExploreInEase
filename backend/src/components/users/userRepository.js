@@ -84,6 +84,41 @@ const fetchAllTourists = async () => {
 };
 
 
+// Find user by username from Tourist table
+const findTouristByUsername = async (username) => {
+  try {
+    const tourist = await Tourist.findOne({ username });
+    return tourist;
+  } catch (error) {
+    console.error(`Error finding tourist: ${error.message}`);
+    return null;
+  }
+};
+
+// Function to get tourist details by username
+const getTouristEventDetails = async (username) => {
+  try {
+    const tourist = await Tourist.findOne({ username })
+      .populate("activityId")
+      .populate("itinerary")
+      .populate("historicalplaceId");
+    return tourist;
+  } catch (error) {
+    console.error(`Error finding tourist: ${error.message}`);
+    return null;
+  }
+};
 
 
-module.exports = { deleteTourist,addGovernorOrAdmin,fetchAllUsers, fetchAllTourists,deleteTouristById,deleteUserById,findUserById};
+
+module.exports = {
+  deleteTourist,
+  addGovernorOrAdmin,
+  fetchAllUsers,
+  fetchAllTourists,
+  deleteTouristById,
+  deleteUserById,
+  findUserById,
+  findTouristByUsername,
+  getTouristEventDetails
+};
