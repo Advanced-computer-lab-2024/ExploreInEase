@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+// Define the schema for the activity
 const activitySchema = new Schema({
   name: {
     type: String,
@@ -28,7 +29,7 @@ const activitySchema = new Schema({
     required: true,
   },
   price: {
-    type: String, 
+    type: String, // Example: "$", "$$" for range or you can use Number if it's specific
     required: true,
   },
   category: {
@@ -47,13 +48,13 @@ const activitySchema = new Schema({
   },
   flag: {
     type: Number,
-    enum: [0, 1], 
+    enum: [0, 1], // 0: inappropriate, 1: appropriate
     default: 1,
   },
   isOpen: {
-    type: Number,
-    enum: [0, 1], 
-    default: 0,
+    type: Boolean,
+    enum: [false, true], // 0: closed, 1: opened
+    default: true,
   },
   rating: {
     type: Number,
@@ -71,5 +72,6 @@ const activitySchema = new Schema({
   }
 });
 
+// Create and export the model
 const Activity = mongoose.model('Activity', activitySchema);
 module.exports = Activity;
