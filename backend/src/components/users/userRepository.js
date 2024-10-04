@@ -36,17 +36,6 @@ const deleteTouristById = async (id) => {
 
 
 
-// Delete user from Tourist table
-const deleteTourist = async (username) => {
-    try {
-        const result = await Tourist.findOneAndDelete({ username });
-        return result ? true : false;
-    } catch (error) {
-        console.error(`Error deleting tourist: ${error.message}`);
-        return false;
-    }
-};
-
 // Add a new user wether admin or tourism governer
 const addGovernorOrAdmin = async (userData) => {
     try {
@@ -100,7 +89,6 @@ const updateTourist = async (id, updateData) => {
 
 
 module.exports = {
-    deleteTourist,
     addGovernorOrAdmin,
     fetchAllUsers,
     fetchAllTourists,
