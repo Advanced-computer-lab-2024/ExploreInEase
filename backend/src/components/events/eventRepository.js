@@ -238,7 +238,12 @@ module.exports = {
   deleteTagById,
   getHistoricalPlacesByUserId,
   getItinerariesByUserId,
-  getActivitiesByUserId
+  getActivitiesByUserId,
+  getCategoryByName,
+  getFilteredActivities,
+  getAllUpcomingEvents,
+  getFilteredHistoricalPlaces,
+  getFilteredItineraries
 };
 
 
