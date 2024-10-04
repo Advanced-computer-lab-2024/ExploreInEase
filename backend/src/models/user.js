@@ -15,14 +15,16 @@ const UsersSchema = new Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: 8,
-        select: false 
+        select: false // Password will not be included in query results by default
     },
     email: {
         type: String,
         required: function() {
+            // Required for specific types
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         },
         unique: function() {
+            // Required for specific types
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         }
         
@@ -66,7 +68,7 @@ const UsersSchema = new Schema({
     type: {
         type: String,
         required: [true, 'User type is required'],
-        enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] 
+        enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] // User types
     },
     selfPicture: {
         type: String,
@@ -90,7 +92,7 @@ const UsersSchema = new Schema({
         type: Number,
        
     },
-    specialization: {
+    specialist: {
         type: String,
         
     },
@@ -108,13 +110,13 @@ const UsersSchema = new Schema({
     },
     sellerType: {
         type: String,
-        enum: ['VTP', 'External'], 
-        default: 'External' 
+        enum: ['VTP', 'External'], // Seller types
+        default: 'External'
     }
 
 }, {
-    timestamps: true, 
-    versionKey: false 
+    timestamps: true, // Automatically add createdAt and updatedAt fields
+    versionKey: false // Disable the "__v" version key
 });
 
 // Create the Users Model
