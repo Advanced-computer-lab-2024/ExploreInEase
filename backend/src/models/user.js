@@ -92,7 +92,7 @@ const UsersSchema = new Schema({
         type: Number,
        
     },
-    specialist: {
+    specialization: {
         type: String,
         
     },
