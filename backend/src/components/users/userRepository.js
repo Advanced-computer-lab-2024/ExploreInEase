@@ -4,10 +4,10 @@ const Tourist = require('../../models/tourist');
 
 
 // Create a new tour guide
-const createTourGuide = async (tourGuideData) => {
-    const tourGuide = new Users({ ...tourGuideData, type: 'tourGuide' });
-    return await tourGuide.save();
-};
+// const createTourGuide = async (tourGuideData) => {
+//     const tourGuide = new Users({ ...tourGuideData, type: 'tourGuide' });
+//     return await tourGuide.save();
+// };
 
 // Find a tour guide by ID
 const getTourGuideById = async (id) => {
@@ -208,4 +208,4 @@ const fetchAllTourists = async () => {
 
 
 
-module.exports = { checkUserExistsByEmail, checkUserExists ,deleteUser, deleteTourist,addGovernerOrAdmin, saveTourist, checkTouristExists , findUserByUsername, saveUser,fetchAllUsers ,fetchAllTourists,deleteTouristById,findUserById};
+module.exports = { checkUserExistsByEmail, checkUserExists ,deleteUser, deleteTourist,addGovernerOrAdmin, saveTourist, checkTouristExists , findUserByUsername, saveUser,fetchAllUsers ,fetchAllTourists,deleteTouristById,findUserById,updateTourist,updateUserData,getTourGuideById,getTouristById};

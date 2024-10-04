@@ -49,6 +49,10 @@ const UsersSchema = new Schema({
         type: String,
        
     },
+    languages:{
+        type: Array,
+
+    },
     linkWebsite: {
         type: String,
         
@@ -89,10 +93,10 @@ const UsersSchema = new Schema({
         
     },
     founded: {
-        type: Number,
+        type: Date,
        
     },
-    specialist: {
+    specialization: {
         type: String,
         
     },

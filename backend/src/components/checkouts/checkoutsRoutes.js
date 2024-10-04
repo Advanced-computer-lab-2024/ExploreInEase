@@ -6,6 +6,6 @@ const router = express.Router()
 const checkoutController = require('./checkoutController');
 
 // Route to search for products by name
-router.get('/searchProductByName/:name', checkoutController.searchProductByName);
+router.get('/searchProductByName', checkoutController.searchProductByName);
 
 module.exports = router;

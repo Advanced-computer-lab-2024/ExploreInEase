@@ -2,5 +2,5 @@ const Product = require('../../models/product'); // Assuming you have a Product 
 
 // Repository to search for products by name
 exports.searchByName = async (name) => {
-    return await Product.find({ name: { $regex: name, $options: 'i' } });
+    return await Product.find({ name });
 };

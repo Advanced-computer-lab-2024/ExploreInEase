@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const userRoutes = require('./src/components/users/userRoutes');
 const eventRoutes = require('./src/components/events/eventRoutes');
+const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes')
 
 require('dotenv').config({ path: ".env" });
 
@@ -20,6 +21,7 @@ ACLapp.use((req, res, next) => {
 // Routes
 ACLapp.use('/', userRoutes);
 ACLapp.use('/', eventRoutes);
+ACLapp.use('/', checkoutRoutes);
 
 // Connect to MongoDB
 console.log(process.env.MONGO_URI)

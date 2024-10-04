@@ -21,7 +21,7 @@ exports.createTourGuide = async (req, res) => {
     }
 
     try {
-        const tourGuide = await userService.createTourGuide(req.body);
+        const tourGuide = await userService.createTourGuide(req.params._id,req.body);
         res.status(201).json(tourGuide);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -31,7 +31,7 @@ exports.createTourGuide = async (req, res) => {
 // Get a tour guide profile
 exports.getTourGuide = async (req, res) => {
     try {
-        const tourGuide = await userService.getTourGuide(req.params.id);
+        const tourGuide = await userService.getTourGuide(req.params._id);
         if (!tourGuide) {
             return res.status(404).json({ message: 'Tour guide not found' });
         }
@@ -49,7 +49,7 @@ exports.updateTourGuide = async (req, res) => {
     }
 
     try {
-        const updatedTourGuide = await userService.updateTourGuide(req.params.id, req.body);
+        const updatedTourGuide = await userService.updateTourGuide(req.params._id, req.body);
         if (!updatedTourGuide) {
             return res.status(404).json({ message: 'Tour guide not found' });
         }
@@ -62,13 +62,15 @@ exports.updateTourGuide = async (req, res) => {
 
 //Advertiser
 exports.createAdvertiser = async (req, res) => {
+    console.log("dakahal");
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
     try {
-        const advertiser = await userService.createAdvertiser(req.body);
+        console.log("conroller : ",req.params._id,req.body)
+        const advertiser = await userService.createAdvertiser(req.params._id,req.body);
         res.status(201).json(advertiser);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -78,7 +80,7 @@ exports.createAdvertiser = async (req, res) => {
 // Get an advertiser profile
 exports.getAdvertiser = async (req, res) => {
     try {
-        const advertiser = await userService.getAdvertiser(req.params.id);
+        const advertiser = await userService.getAdvertiser(req.params._id);
         if (!advertiser) {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
@@ -96,7 +98,7 @@ exports.updateAdvertiser = async (req, res) => {
     }
 
     try {
-        const updatedAdvertiser = await userService.updateAdvertiser(req.params.id, req.body);
+        const updatedAdvertiser = await userService.updateAdvertiser(req.params._id, req.body);
         if (!updatedAdvertiser) {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
@@ -118,7 +120,7 @@ exports.createSeller = async (req, res) => {
     }
 
     try {
-        const seller = await userService.createSeller(req.body);
+        const seller = await userService.createSeller(req.params._id,req.body);
         res.status(201).json(seller);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -128,7 +130,7 @@ exports.createSeller = async (req, res) => {
 // Get a seller profile
 exports.getSeller = async (req, res) => {
     try {
-        const seller = await userService.getSeller(req.params.id);
+        const seller = await userService.getSeller(req.params._id);
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
@@ -146,7 +148,7 @@ exports.updateSeller = async (req, res) => {
     }
 
     try {
-        const updatedSeller = await userService.updateSeller(req.params.id, req.body);
+        const updatedSeller = await userService.updateSeller(req.params._id, req.body);
         if (!updatedSeller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
@@ -163,7 +165,7 @@ exports.updateSeller = async (req, res) => {
 // Get a tourist profile
 exports.getTourist = async (req, res) => {
     try {
-        const tourist = await userService.getTourist(req.params.id);
+        const tourist = await userService.getTourist(req.params._id);
         if (!tourist) {
             return res.status(404).json({ message: 'Tourist not found' });
         }
@@ -182,10 +184,13 @@ exports.updateTourist = async (req, res) => {
 
     try {
         const updateData = { ...req.body };
-        delete updateData.username;
-        delete updateData.wallet;
+        if(updateData.username){
+            return res.status(400).json({ message: 'Cannot update username' });
+        }else if(updateData.wallet){
+            return res.status(400).json({ message: 'Cannot update wallet' });
+        }
 
-        const updatedTourist = await userService.updateTourist(req.params.id, updateData);
+        const updatedTourist = await userService.updateTourist(req.params._id, updateData);
         if (!updatedTourist) {
             return res.status(404).json({ message: 'Tourist not found' });
         }

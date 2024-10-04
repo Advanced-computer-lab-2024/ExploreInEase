@@ -2,8 +2,8 @@ const eventRepository = require('./eventRepository');
 
 
 // Service to create a new preference tag
-exports.createTag = async (tag) => {
-    return await eventRepository.createTag(tag);
+exports.createHistoricalTag = async (tag) => {
+    return await eventRepository.createHistoricalTag(tag);
 };
 
 // Service to search across multiple collections (activities, historical places, itineraries)

@@ -5,9 +5,8 @@ const Schema = mongoose.Schema;
 const historicalTagsSchema = new Schema({
   type: {
     type: String,
-    required: true,
-    unique: true // Ensures tag names are unique
-  },
+    required: true
+    },
   period: {
     type: String,
     required: true,

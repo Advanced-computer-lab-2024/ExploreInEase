@@ -3,48 +3,11 @@ const HistoricalPlace = require('../../models/historicalPlace');
 const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 // const ActivityCategory = require('../../models/activityCategory'); 
-const PreferenceTags = require('../../models/preferenceTags'); 
+const HistoricalTag = require('../../models/historicalTag'); 
 const User = require('../../models/user');
 const Tourist = require('../../models/tourist');
 
 
-const searchActivities = async(name, category, tag)=>{
-  let query = {};
-  if(name){
-    query.name = name;
-  }
-  if(category){
-    query.category = category;
-  }
-  if(tag){
-    query.tags = tag;
-  }
-  return await Activity.find(query);
-
-};
-
-
-const searchHistoricalPlaces = async(name, tag)=>{
-  let query = {};
-  if(name){
-    query.name = name;
-  }
-  if(tag){
-    query.tags = tag;
-  }
-  return await HistoricalPlace.find(query);
-}
-
-const searchItineraries = async(name, tag)=>{
-  let query = {};
-  if(name){
-    query.name = name;
-  }
-  if(tag){
-    query.tags = tag;
-  }
-  return await Itinerary.find(query)
-}
 
 
 // Function to get historical places created by a user
@@ -100,27 +63,10 @@ const updateCategoryById = async (id, updateData) => {
 
 
 
-//CRUD PREFTAGS
-
-// Create a new preference tag
-const createTag = async (tagData) => {
-  const tag = new PreferenceTags(tagData);
+//create historical tag
+const createHistoricalTag = async (tagData) => {
+  const tag = new HistoricalTag(tagData);
   return await tag.save();
-};
-
-// Get all preference tags
-const getAllTags = async () => {
-  return await PreferenceTags.find();
-};
-
-// Update a preference tag by its _id
-const updateTagById = async (id, updatedData) => {
-  return await PreferenceTags.findByIdAndUpdate(id, updatedData, { new: true });
-};
-
-// Delete a preference tag by its _id
-const deleteTagById = async (id) => {
-  return await PreferenceTags.findByIdAndDelete(id);
 };
 
 
@@ -138,7 +84,7 @@ const findCategoryById = async (categoryId) => {
 };
 
 const findTagsByNames = async (tags) => {
-  return await PreferenceTags.find({ tags: { $in: tags } });
+  return await HistoricalTag.find({ tags: { $in: tags } });
 };
 
 const updateActivity = async (id, updateData) => {
@@ -271,7 +217,7 @@ module.exports = {
   getAllCategories,
   updateCategoryById,
   deleteCategoryById,
-  createTag,
+  createHistoricalTag,
   getAllTags,
   updateTagById,
   deleteTagById,
