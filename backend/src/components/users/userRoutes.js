@@ -568,4 +568,7 @@ router.get('/getTourist/:_id', userController.getTourist);
 router.put('/updateTourist/:_id', userController.updateTourist);
 
 
+router.post('/register/:type', userController.registerUser);
+
+
 module.exports = router;

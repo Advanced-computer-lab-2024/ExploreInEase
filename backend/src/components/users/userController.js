@@ -276,6 +276,59 @@ const updateTourist = async (req, res) => {
 };
 
 
+const registerUser = async (req, res) => {
+    const { type } = req.params;
+    const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
+    
+
+    const usernameExists = await userRepository.checkUserExists(username);
+    if (usernameExists) {
+        return res.status(409).json({ message: "Username already exists" });
+    }
+
+    const emailExists = await userRepository.checkUserExistsByEmail(email);
+    if (emailExists) {
+        return res.status(409).json({ message: "Email already exists" });
+    }
+
+    if(type == 'tourist'){
+        if (!email||!username||!password||!mobileNum||!nation||!dob||!profession) {
+            return res.status(400).json({ message: "Missing Input" });
+        }
+        try {
+            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob,  profession);
+            res.status(result.status).json(result.response);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+    else{
+        if(type == 'tourGuide' || type == 'advertiser' || type == 'seller'){
+            if (!email||!username||!password) {
+                return res.status(400).json({ message: "Missing Input" });
+            }
+            try {
+                const result = await userService.registerUser(type, email, username, password);
+                res.status(result.status).json(result.response);
+            } catch (error) {
+                res.status(500).json({ message: error.message });
+            }
+        }
+        else{
+            res.status(400).json({ message: "Invalid usertype" });
+        }
+    }
+};
+
+const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const differenceInMilliseconds = Date.now() - birthDate.getTime();
+    const ageDate = new Date(differenceInMilliseconds);
+
+    return Math.abs(ageDate.getUTCFullYear() - 1970); // Calculate age
+};
+
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -291,5 +344,6 @@ module.exports = {
   getSeller,
   updateSeller,
   getTourist,
-  updateTourist
+  updateTourist,
+  registerUser
 };

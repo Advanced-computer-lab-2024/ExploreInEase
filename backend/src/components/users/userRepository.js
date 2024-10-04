@@ -86,6 +86,65 @@ const updateTourist = async (id, updateData) => {
     return await Tourist.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 };
 
+const checkTouristExists = async (username) => {
+    try {
+        const result = await Tourist.findOne({ username });
+        return result ? true : false;
+    } catch (error) {
+        console.error(`Error checking if tourist exists: ${error.message}`);
+        return false;
+    }
+};
+
+const findUserByUsername = async (username) => {
+    return await Users.findOne({ username });
+};
+
+// Save a new user
+const saveUser = async (userData) => {
+    const newUser = new Users(userData);
+    const savedUser = await newUser.save();
+    return savedUser; // Return the entire user document
+};
+
+
+const saveTourist = async (tourist) => {
+    try {
+        console.log(tourist);
+        const newTourist = new Tourist(tourist);
+        const savedTourist = await newTourist.save();
+        return { status: 201, tourist: savedTourist }; // Return the entire tourist document
+    } catch (error) {
+        throw new Error(`Error saving tourist: ${error.message}`);
+    }
+};
+
+
+const checkUserExists = async (username) => {
+    try {
+        const existsUser = await Users.findOne({ username });
+        const existsTourist = await Tourist.findOne({ username });
+        if (existsUser || existsTourist) {
+            return true;
+        }
+    } catch (error) {
+        console.error(`Error checking if user exists: ${error.message}`);
+        return false;
+    }
+};
+
+const checkUserExistsByEmail = async (email) => {
+    try {
+        const existsUser = await Users.findOne({ email });
+        const existsTourist = await Tourist.findOne({ email });
+        if (existsUser || existsTourist) {
+            return true;
+        }
+    } catch (error) {
+        console.error(`Error checking if user exists: ${error.message}`);
+        return false;
+    }
+};
 
 
 module.exports = {
@@ -97,5 +156,12 @@ module.exports = {
     findUserById,
     updateUserData,
     getTouristById,
-    updateTourist
+    updateTourist,
+    checkTouristExists,
+    findUserByUsername,
+    saveUser,
+    saveTourist,
+    checkUserExists,
+    checkUserExistsByEmail
+
 };

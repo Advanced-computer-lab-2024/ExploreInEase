@@ -164,6 +164,56 @@ const updateTourist = async (_id, updateData) => {
 };
 
 
+
+const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession) => {
+    const touristExists = await userRepository.checkTouristExists(username);
+    if (touristExists) {
+        return { status: 409, response: {message: "Tourist already exists"} };
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newTourist = {
+        email: email,
+        username: username,
+        password: hashedPassword,
+        mobileNum: mobileNum,
+        nation: nation,
+        dob: dob,
+        profession: profession
+    };
+    const tourist = await userRepository.saveTourist(newTourist);
+    return { status: tourist.status, response: {message: "Turist registered successfully", tourist: tourist.tourist, type: 'tourist'} };
+    
+}
+
+const registerUser = async (type, email, username, password) => {
+    try {
+        // Check if a user with the same email or username already exists
+        const existingUser = await userRepository.findUserByUsername(username);
+        if (existingUser) {
+            return { status: 400, response: { message: "User already exists" } };
+        }
+
+        // Hash the password before saving the user
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create user data object to be passed to the repository
+        const userData = {
+            email,
+            username,
+            password: hashedPassword,
+            type
+        };
+
+        // Save the user using the repository
+        const savedUser = await userRepository.saveUser(userData);
+        console.log(savedUser)
+        return { status: 200, response: { message: "User registered successfully", User: savedUser } };
+    } catch (error) {
+        return { status: 500, response: { message: error.message } };
+    }
+};
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -181,6 +231,8 @@ module.exports = {
   getSeller,
   updateSeller,
   getTourist,
-  updateTourist
+  updateTourist,
+  registerTourist,
+  registerUser
 };
 
