@@ -6,11 +6,11 @@ const ProductsSchema = new Schema({
     productId: {
         type: String,
         required: [true, 'Product ID is required'],
-        unique: true,              
+        unique: true,              // Ensures each product has a unique ID
         trim: true
     },
     picture: {
-        type: String,              
+        type: String,              // URL or path to the product image
         required: [true, 'Picture is required']
     },
     price: {
@@ -21,23 +21,23 @@ const ProductsSchema = new Schema({
     description: {
         type: String,
         required: [true, 'Description is required'],
-        minlength: 10               
+        minlength: 10               // Minimum length for description
     },
-    sellerId: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Users',               
-        required: [true, 'Seller ID is required']
-    },
+    // sellerId: {
+    //     type: mongoose.Schema.Types.ObjectId, // Foreign key to reference the seller
+    //     ref: 'Users',               // Assuming you have a Users schema
+    //     required: [true, 'Seller ID is required']
+    // },
     ratings: {
         type: Number,
         min: 0,
         max: 5,
-        default: 0                 
+        default: 0                 // Default rating
     },
     reviews: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Users',           
+            ref: 'Users',           // Assuming reviews are associated with Users
             required: true
         },
         comment: {
@@ -70,18 +70,18 @@ const ProductsSchema = new Schema({
         type: String,
         required: [true, 'Product name is required'],
         trim: true,
-        minlength: 1                
+        minlength: 1                // Minimum length for product name
     },
     isActive: {
         type: Boolean,
-        default: true               
+        default: true               // Indicates whether the product is active or inactive
     }
 }, {
-    timestamps: true,               
-    versionKey: false                
+    timestamps: true,               // Automatically add createdAt and updatedAt fields
+    versionKey: false                // Disable the "__v" version key
 });
 
 // Create the Products Model
-const Products = mongoose.model('Products', ProductsSchema);
+const Products = mongoose.models.Products || mongoose.model('Products', ProductsSchema);
 
 module.exports = Products;
