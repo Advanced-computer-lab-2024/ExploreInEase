@@ -20,15 +20,15 @@ const deleteUserByIdAndType = async (_id, userType) => {
 };
 
 
-const addGovernerOrAdmin = async (username, password, type,email) => {
+const addGovernorOrAdmin = async (username, password, type) => {
     const newUser = {
         username: username,
         password: password,
         type: type, // The type can be 'admin' or 'tourismGovernor'
-        email: email
+        
     };
 
-    return await userRepository.addGovernerOrAdmin(newUser);
+    return await userRepository.addGovernorOrAdmin(newUser);
 };
 
 
@@ -46,5 +46,5 @@ const fetchAllUsersAndTourists = async () => {
 
 
 
-module.exports = { deleteUserByIdAndType, addGovernerOrAdmin, fetchAllUsersAndTourists,getUserById, deleteUserByIdAndType };
+module.exports = { deleteUserByIdAndType, addGovernorOrAdmin, fetchAllUsersAndTourists,getUserById, deleteUserByIdAndType };
 

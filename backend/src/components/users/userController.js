@@ -41,8 +41,8 @@ const deleteUserByIdAndType = async (req, res) => {
 
 
 // Add a new tourismGovernor or a new Admin
-const addGovernerOrAdmin = async (req, res) => {
-    const { username, password, type,email } = req.body;
+const addGovernorOrAdmin = async (req, res) => {
+    const { username, password, type } = req.body;
 
     // Check if username and password are provided
     if (!username || !password || !type) {
@@ -52,7 +52,7 @@ const addGovernerOrAdmin = async (req, res) => {
 
     try {
         // Send data to the service layer to create a new tourismGovernor
-        const result = await userService.addGovernerOrAdmin(username, password, type,email);
+        const result = await userService.addGovernorOrAdmin(username, password, type);
         res.status(201).json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -72,4 +72,4 @@ const fetchAllUsersAndTourists = async (req, res) => {
 
 
 
-module.exports = { deleteUserByIdAndType ,addGovernerOrAdmin,fetchAllUsersAndTourists};
+module.exports = { deleteUserByIdAndType ,addGovernorOrAdmin,fetchAllUsersAndTourists};
