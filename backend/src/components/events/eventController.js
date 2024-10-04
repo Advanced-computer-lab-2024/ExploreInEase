@@ -241,7 +241,419 @@ const createHistoricalTag = async (req, res) => {
     }
 };
 
+const getActivityById = async (req, res) => {
+  const { _id, userId } = req.params;
+  if(!_id || !userId) {
+    res.status(400).json({ message: 'Missing inputs' });
+  }
+  const type = await eventRepository.getType(userId);
+  if (type !== 'advertiser') {
+    return res.status(400).json({ message: 'Invalid type' });
+  }
+  try {
+    const activity = await eventService.getActivityById(_id);
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' });
+    }
+    return res.status(200).json(activity);
+  } catch (error) {
+      return res.status(500).json({ message: error.message });
+  }
+};
 
+const getAllActivities = async (req, res) => {
+  const { userId } = req.params;
+  if (!userId) {
+    return res.status(400).json({ message: 'Missing userId' });
+  }
+
+  try {
+    const type = await eventRepository.getType(userId);
+    if (type !== 'advertiser') {
+      return res.status(400).json({ message: 'Invalid user type' });
+    }
+    const activities = await eventService.getAllActivitiesAdvertiser(userId); // Same here
+    console.log(activities);
+    return res.status(200).json(activities);
+  } catch (error) {
+    console.error('Error fetching activitiesss:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const addActivity = async (req, res) => {
+  const { name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
+
+  // Validate required fields
+  if (!name || !date || !time || !location || !price || !category || !tags || typeof isOpen === 'undefined' || !created_by) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  const type = await eventRepository.getType(created_by);
+  if (type !== 'advertiser') {
+    return res.status(400).json({ message: 'Invalid type' });
+  }
+
+  try {
+    // Call service layer to add the activity
+    const activity = await eventService.addActivity({
+      name,
+      date,
+      time,
+      location,
+      price,
+      category,
+      tags,
+      specialDiscounts,
+      isOpen,
+      created_by
+    });
+
+    return res.status(200).json({message: 'Activity created successfully', activity: activity });
+  } catch (error) {
+    console.error('Error creating activity:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const updateActivity = async (req, res) => {
+  const { _id, userId } = req.params;
+  const updateData = req.body; 
+
+  if(!_id || !userId) {
+    return res.status(400).json({ message: 'Missing inputs' });
+  }
+
+  const type = await eventRepository.getType(userId);
+  if (type !== 'advertiser') {
+    return res.status(400).json({ message: 'Invalid type' });
+  }
+
+  const allowedUpdates = ['date', 'time', 'location', 'price', 'category', 'tags', 'specialDiscounts', 'isOpen'];
+  const invalidUpdates = Object.keys(updateData).filter(key => !allowedUpdates.includes(key));
+
+  if (invalidUpdates.length) {
+    return res.status(400).json({ message: `Invalid fields: ${invalidUpdates.join(', ')}` });
+  }
+
+  try {
+    const updatedActivity = await eventService.updateActivity(_id, updateData);
+    if (!updatedActivity) {
+      return res.status(404).json({ message: 'Activity not found.' });
+    }
+    return res.status(200).json({message: 'Activity updated successfully', activity: updatedActivity});
+  } catch (error) {
+    console.error('Error updating activity:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteActivity = async (req, res) => {
+  const { _id, userId } = req.params; // Extract the activity ID from the request parameters
+
+  if(!_id || !userId) {
+    return res.status(400).json({ message: 'Missing inputs' });
+  }
+
+  const type = await eventRepository.getType(userId);
+  if (type !== 'advertiser') {
+    return res.status(400).json({ message: 'Invalid type' });
+  }
+  try {
+    const deletedActivity = await eventService.deleteActivity(_id);
+    
+    if (!deletedActivity) {
+      return res.status(404).json({ message: 'Activity not found.' });
+    }
+
+    return res.status(200).json({ message: 'Activity deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting activity:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const getAllItineraries = async (req, res) => {
+  const { userId } = req.params;
+  if (!userId) {
+    return res.status(400).json({ message: 'Missing userId' });
+  }
+
+  try {
+    const type = await eventRepository.getType(userId);
+    if (type !== 'tourGuide') {
+      return res.status(400).json({ message: 'Invalid type' });
+    }
+
+    const itineraries = await eventService.getAllItineraries(userId);
+    return res.status(200).json(itineraries);
+  } catch (error) {
+    console.error('Error fetching itineraries:', error.message);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+
+const getItineraryById = async (req, res) => {
+  const { _id, userId } = req.params;
+  
+  if(!_id){
+    return res.status(400).json({ message: 'Missing id' });
+  }
+
+  const type = await eventRepository.getType(userId);
+
+  if(type !== 'tourGuide'){
+    return res.status(400).json({ message: 'Invalid type' });
+  }
+
+  try {
+    const itinerary = await eventService.getItineraryById(_id);
+    
+    if (!itinerary) {
+      return res.status(404).json({ message: 'Itinerary not found.' });
+    }
+
+    return res.status(200).json(itinerary);
+  } catch (error) {
+    console.error('Error fetching itinerary:', error.message);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+
+const createItinerary = async (req, res) => {
+  try {
+    const {activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
+    
+    if(!activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    if(!isSpecial){
+      const isSpecial = false;
+    }
+    else{
+      const isSpecial = true;
+    }
+    const type = await eventRepository.getType(created_by);
+
+    if(type !== 'tourGuide'){
+      return res.status(400).json({ message: 'Invalid type' });
+    }
+    
+    const allActivities = await eventRepository.getAllActivities();
+
+    if(!allActivities) {
+      return res.status(404).json({ message: 'Activities not found.' });
+    }
+
+    const allActivitiesIds = allActivities.map(activity => activity._id.toString());
+    const areAllActivitiesValid = activities.every(activityId => allActivitiesIds.includes(activityId));
+
+    if (!areAllActivitiesValid) {
+      return res.status(400).json({ message: 'One or more provided activities are invalid.' });
+    }
+    
+    const itineraryData = { activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
+    
+    // Call the service to create the itinerary
+    const newItinerary = await eventService.createItinerary(itineraryData);
+    
+    return res.status(200).json({message: "Itinerary created successfully", Itinerary: newItinerary});
+  } catch (error) {
+    console.error('Error creating itinerary:', error.message);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+const updateItinerary = async (req, res) => {
+  const { _id, userId } = req.params;
+  const itineraryData = req.body;
+
+  if (!_id) {
+      return res.status(400).json({ message: 'Missing id' });
+  }
+
+  const type = await eventRepository.getType(userId);
+
+  if (type !== 'tourGuide') {
+      return res.status(400).json({ message: 'Invalid type' });
+  }
+
+  try {
+      const updatedItinerary = await eventService.updateItinerary(_id, itineraryData);
+      
+      if (!updatedItinerary) {
+          return res.status(404).json({ message: 'Itinerary not found' });
+      }
+      
+      return res.status(200).json(updatedItinerary);
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Error updating itinerary', error: error.message });
+  }
+};
+
+// Delete Itinerary by ID
+const deleteItinerary = async (req, res) => {
+  const { _id, userId } = req.params;
+
+  if (!_id) {
+      return res.status(400).json({ message: 'Missing id' });
+  }
+
+  const type = await eventRepository.getType(userId);
+
+  if (type !== 'tourGuide') {
+      return res.status(400).json({ message: 'Invalid type' });
+  }
+
+  try {
+      const deletedItinerary = await eventService.deleteItinerary(_id);
+      if (!deletedItinerary) {
+          return res.status(404).json({ message: 'Itinerary not found' });
+      }
+      res.status(200).json({ message: 'Itinerary deleted successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error deleting itinerary', error: error.message });
+  }
+};
+
+// Create a new Historical Place
+const createHistoricalPlace = async (req, res) => {
+  const {
+    description,
+    pictures,
+    location,
+    openingHours,
+    ticketPrice,
+    type, // this should refer to the tags
+    period, // this should refer to the tags
+    created_by,
+  } = req.body;
+
+  // Validate required fields
+  if (!description || !pictures || !location || !openingHours || !ticketPrice || !type || !period || !created_by) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  // Check if the user has the right type
+  const typeData = await eventRepository.getType(created_by);
+  if (typeData !== 'tourismGovernor') {
+    return res.status(403).json({ message: 'You are not authorized to create a Historical Place' });
+  }
+
+  try {
+    // Ensure the tag exists in the database
+    const tag = await eventRepository.findTagByTypeAndPeriod(type, period);
+    if (!tag) {
+      return res.status(400).json({ message: 'Invalid tag type or period' });
+    }
+
+    // Prepare the data for the historical place
+    const historicalPlaceData = {
+      description,
+      pictures,
+      location,
+      openingHours,
+      ticketPrice,
+      created_by,
+      tags: tag._id // Use the tag's ObjectId
+    };
+
+    // Call the service to create the historical place
+    const historicalPlace = await eventService.createHistoricalPlace(historicalPlaceData);
+    return res.status(historicalPlace.status).json(historicalPlace.response);
+  } catch (error) {
+    console.error('Error creating historical place:', error.message);
+    return res.status(500).json({ message: 'Error creating historical place', error: error.message });
+  }
+};
+
+
+// Get all Historical Places
+const getAllHistoricalPlaces = async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+      return res.status(400).json({ message: 'Missing userId' });
+  }
+  const type = await eventRepository.getType(userId);
+  if (type !== 'tourismGovernor') {
+      return res.status(400).json({ message: 'Invalid type' });
+  }
+  try {
+      const historicalPlaces = await eventService.getAllHistoricalPlaces();
+      res.status(200).json(historicalPlaces);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching historical places', error: error.message });
+  }
+};
+
+// Get Historical Place by ID
+const getHistoricalPlaceById = async (req, res) => {
+  try {
+      const { _id, userId } = req.params;
+      if (!_id || !userId) {
+          return res.status(400).json({ message: 'Missing inputs' });
+      }
+      const type = await eventRepository.getType(userId);
+      if (type !== 'tourismGovernor') {
+          return res.status(400).json({ message: 'Invalid type' });
+      }
+      const historicalPlace = await eventService.getHistoricalPlaceById(_id, userId);
+      res.status(historicalPlace.status).json(historicalPlace.response);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching historical place', error: error.message });
+  }
+};
+
+// Update a Historical Place by ID
+const updateHistoricalPlace = async (req, res) => {
+  try {
+      const { _id, userId } = req.params;
+      const { updateValues } = req.body;
+
+      if (!_id || !userId) {
+          return res.status(400).json({ message: 'Missing inputs' });
+      }
+
+      const type = await eventRepository.getType(userId);
+      if (type !== 'tourismGovernor') {
+          return res.status(400).json({ message: 'Invalid type' });
+      }
+      const updatedPlace = await eventService.updateHistoricalPlace(_id, userId, updateValues);
+      if (!updatedPlace) {
+          return res.status(404).json({ message: 'Historical place not found' });
+      }
+      res.status(updatedPlace.status).json(updatedPlace.response);
+  } catch (error) {
+      res.status(500).json({ message: 'Error updating historical place', error: error.message });
+  }
+};
+
+// Delete a Historical Place by ID
+const deleteHistoricalPlace = async (req, res) => {
+  try {
+      const { _id, userId } = req.params;
+      if(!_id || !userId) {
+          return res.status(400).json({ message: 'Missing inputs' });
+      }
+
+      const type = await eventRepository.getType(userId);
+      if (type !== 'tourismGovernor') {
+          return res.status(400).json({ message: 'Invalid type' });
+      }
+      const deletedPlace = await eventService.deleteHistoricalPlace(_id, userId);
+      if (!deletedPlace) {
+          return res.status(404).json({ message: 'Historical place not found' });
+      }
+      res.status(deletedPlace.status).json(deletedPlace.response);
+  } catch (error) {
+      res.status(500).json({ message: 'Error deleting historical place', error: error.message });
+  }
+};
 
 module.exports = {
   getUserEvents,
@@ -257,6 +669,21 @@ module.exports = {
   getUpcomingEvents,
   filterHistoricalPlacesByTags,
   getFilteredItineraries,
-  createHistoricalTag
+  createHistoricalTag,
+  getActivityById,
+  addActivity,
+  updateActivity,
+  deleteActivity,
+  getItineraryById,
+  createItinerary,
+  updateItinerary,
+  deleteItinerary,
+  createHistoricalPlace,
+  getAllHistoricalPlaces,
+  getHistoricalPlaceById,
+  updateHistoricalPlace,
+  deleteHistoricalPlace,
+  getAllItineraries,
+  getAllActivities
   };
   
