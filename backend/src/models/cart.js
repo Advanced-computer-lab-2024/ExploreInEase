@@ -5,30 +5,31 @@ const cartItemSchema = new Schema(
   {
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product", 
+      ref: "Product", // Establishes a reference to the Product model
       required: true,
     },
     quantity: {
       type: Number,
-      min: [1, "Quantity must be at least 1"], 
+      min: [1, "Quantity must be at least 1"], // Validates minimum quantity
       required: true, // Ensures every cart item has a quantity
     },
   },
   { _id: false }
 ); // Disables the automatic _id field for subdocuments 3ashan does not need an id
 
+// Define the Cart schema
 const cartSchema = new Schema(
   {
     touristId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Tourist", 
+      ref: "Tourist", // Establishes a reference to the Tourist model
       required: true, // Ensures every cart is associated with a tourist
       unique: true, // Guarantees one cart per tourist
     },
     products: [cartItemSchema], // Embeds an array of cart items
   },
   {
-    timestamps: true, y
+    timestamps: true, // Adds createdAt and updatedAt fields automatically
   }
 );
 
@@ -36,6 +37,8 @@ const cartSchema = new Schema(
 cartSchema.index({ touristId: 1 });
 cartItemSchema.index({ productId: 1 });
 
-const Cart = mongoose.model("Cart", cartSchema);
+// Compile the Cart model
+const Cart = mongoose.models.Cart ||mongoose.model("Cart", cartSchema);
 
+// Export the Cart model for use in other parts of the application
 module.exports = Cart;
