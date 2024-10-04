@@ -12,6 +12,8 @@ exports.getTourGuide = async (_id) => {
     return await userRepo.findUserById(_id);
 };
 
+
+
 // Update a tour guide
 exports.updateTourGuide = async (_id, updateData) => {
     return await userRepo.updateUserData(_id, updateData);

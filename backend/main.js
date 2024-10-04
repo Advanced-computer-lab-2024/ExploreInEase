@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const userRoutes = require('./src/components/users/userRoutes');
 const eventRoutes = require('./src/components/events/eventRoutes');
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes')
+const setupSwaggerDocs = require('../backend/src/swagger/swagger');
+
 
 require('dotenv').config({ path: ".env" });
 
@@ -18,11 +20,12 @@ ACLapp.use((req, res, next) => {
     next();
 });
 
+
 // Routes
 ACLapp.use('/', userRoutes);
 ACLapp.use('/', eventRoutes);
 ACLapp.use('/', checkoutRoutes);
-
+setupSwaggerDocs(ACLapp);
 // Connect to MongoDB
 console.log(process.env.MONGO_URI)
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
