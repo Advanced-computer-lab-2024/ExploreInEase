@@ -9,12 +9,17 @@ const Tourist = require('../../models/tourist');
 //     return await tourGuide.save();
 // };
 
-// Find a tour guide by ID
-const getTourGuideById = async (id) => {
-    return await Users.findById(id).where({ type: 'tourGuide' });
+const findUserById = async (id) => {
+    try {
+        const user = await Users.findById(id);
+        return user ? user : null;
+    } catch (error) {
+        console.error(`Error finding user: ${error.message}`);
+        return null;
+    }
 };
 
-// Update a tour guide by ID
+
 const updateUserData = async (id, updateData) => {
     return await Users.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 };
@@ -148,16 +153,7 @@ const checkUserExistsByEmail = async (email) => {
 // const Users = require('../../models/user');
 // const Tourist = require('../../models/tourist');
 
-// Find user by ID
-const findUserById = async (id) => {
-    try {
-        const user = await Users.findById(id);
-        return user ? user : null;
-    } catch (error) {
-        console.error(`Error finding user: ${error.message}`);
-        return null;
-    }
-};
+
 
 // Delete user from Users table by ID
 // const deleteUserById = async (id) => {
