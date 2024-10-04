@@ -1,4 +1,5 @@
 const eventService = require('../events/eventService');
+const { validationResult } = require('express-validator');
 
 // Get all user events by _id and userType
 const getUserEvents = async (req, res) => {
