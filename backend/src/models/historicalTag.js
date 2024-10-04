@@ -6,7 +6,6 @@ const historicalTagsSchema = new Schema({
   type: {
     type: String,
     required: true,
-    unique: true // Ensures tag names are unique
   },
   period: {
     type: String,
