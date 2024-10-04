@@ -21,7 +21,7 @@ const swaggerOptions = {
       ],
     },
   },
-  apis: ['./src/components/users/userRoutes.js', './src/components/events/eventRoutes.js'], // Specify paths to files where routes are defined
+  apis: ['./src/components/users/userRoutes.js', './src/components/events/eventRoutes.js', './src/components/checkouts/checkoutsRoutes.js'], // Specify paths to files where routes are defined
 };
 
 // Swagger documentation setup
