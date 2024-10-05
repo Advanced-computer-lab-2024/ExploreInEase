@@ -1,0 +1,4685 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "User Registration API",
+    "version": "1.0.0",
+    "description": "API for ACL Project"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3030"
+    }
+  ],
+  "paths": {
+    "/deleteUserByIdAndType": {
+      "delete": {
+        "summary": "Delete a user by _id and userType",
+        "description": "Deletes a user based on the provided userType and prevents self-deletion.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "userType": {
+                    "type": "string"
+                  },
+                  "selfId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "400": {
+            "description": "Invalid input or trying to delete oneself"
+          },
+          "403": {
+            "description": "Unauthorized action"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/addGovernorOrAdmin": {
+      "post": {
+        "summary": "Add a new governor or admin",
+        "description": "Creates a new tourism governor or admin.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Missing or invalid input"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/fetchAllUsersAndTourists": {
+      "get": {
+        "summary": "Fetch all users and tourists",
+        "description": "Retrieve data from the Users and Tourists tables.",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved data"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/upcomingEvents/{username}": {
+      "get": {
+        "summary": "Get a tourist's upcoming events",
+        "description": "Retrieve upcoming activities, itineraries, and historical places for a given tourist by username.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The username of the tourist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved upcoming events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "upcomingActivities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "upcomingItineraries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "upcomingHistoricalPlaces": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Username is required or invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/createTourGuide/{_id}": {
+      "post": {
+        "summary": "Create a new tour guide",
+        "description": "Adds a new tour guide to the system.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the tour guide to create.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "The username for the tour guide."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password for the tour guide."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the tour guide."
+                  },
+                  "mobileNum": {
+                    "type": "string",
+                    "description": "The mobile number of the tour guide."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tour guide created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tour guide created successfully"
+                    },
+                    "tourGuide": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing Input"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict due to existing username or email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Username already exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getTourGuide/{_id}": {
+      "get": {
+        "summary": "Get tour guide details",
+        "description": "Retrieve details of a specific tour guide by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the tour guide to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved tour guide details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tourGuide": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tour guide not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tour guide not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/updateTourGuide/{_id}": {
+      "put": {
+        "summary": "Update a tour guide",
+        "description": "Update the details of a specific tour guide by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the tour guide to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The updated email address of the tour guide."
+                  },
+                  "mobileNum": {
+                    "type": "string",
+                    "description": "The updated mobile number of the tour guide."
+                  },
+                  "otherDetails": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tour guide updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tour guide updated successfully"
+                    },
+                    "tourGuide": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tour guide not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tour guide not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/createAdvertiser/{_id}": {
+      "post": {
+        "summary": "Create a new advertiser",
+        "description": "Adds a new advertiser to the system.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the advertiser to create.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "The username for the advertiser."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password for the advertiser."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the advertiser."
+                  },
+                  "mobileNum": {
+                    "type": "string",
+                    "description": "The mobile number of the advertiser."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Advertiser created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Advertiser created successfully"
+                    },
+                    "advertiser": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing Input"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict due to existing username or email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Username already exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getAdvertiser/{_id}": {
+      "get": {
+        "summary": "Get advertiser details",
+        "description": "Retrieve details of a specific advertiser by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the advertiser to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved advertiser details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "advertiser": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Advertiser not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Advertiser not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/updateAdvertiser/{_id}": {
+      "put": {
+        "summary": "Update an advertiser",
+        "description": "Update the details of a specific advertiser by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the advertiser to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The updated email address of the advertiser."
+                  },
+                  "mobileNum": {
+                    "type": "string",
+                    "description": "The updated mobile number of the advertiser."
+                  },
+                  "otherDetails": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Advertiser updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Advertiser updated successfully"
+                    },
+                    "advertiser": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Advertiser not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Advertiser not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/createSeller/{_id}": {
+      "post": {
+        "summary": "Create a new seller",
+        "description": "Adds a new seller to the system.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the seller to create.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "The username for the seller."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password for the seller."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email address of the seller."
+                  },
+                  "mobileNum": {
+                    "type": "string",
+                    "description": "The mobile number of the seller."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Seller created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Seller created successfully"
+                    },
+                    "seller": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing Input"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict due to existing username or email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Username already exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getSeller/{_id}": {
+      "get": {
+        "summary": "Get seller details",
+        "description": "Retrieve details of a specific seller by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the seller to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved seller details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "seller": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Seller not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Seller not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/updateSeller/{_id}": {
+      "put": {
+        "summary": "Update a seller",
+        "description": "Update the details of a specific seller by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the seller to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The updated email address of the seller."
+                  },
+                  "mobileNum": {
+                    "type": "string",
+                    "description": "The updated mobile number of the seller."
+                  },
+                  "otherDetails": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Seller updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Seller updated successfully"
+                    },
+                    "seller": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Seller not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Seller not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getTourist/{_id}": {
+      "get": {
+        "summary": "Get tourist details",
+        "description": "Retrieve details of a specific tourist by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the tourist to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved tourist details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tourist": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tourist not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tourist not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/updateTourist/{_id}": {
+      "put": {
+        "summary": "Update a tourist",
+        "description": "Update the details of a specific tourist by ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the tourist to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The updated email address of the tourist."
+                  },
+                  "mobileNum": {
+                    "type": "string",
+                    "description": "The updated mobile number of the tourist."
+                  },
+                  "otherDetails": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tourist updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tourist updated successfully"
+                    },
+                    "tourist": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tourist not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tourist not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/register/{type}": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Registers a new user based on the user type (tourist, tourGuide, advertiser, seller).",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "description": "The type of user to register (tourist, tourGuide, advertiser, seller).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tourist",
+                "tourGuide",
+                "advertiser",
+                "seller"
+              ]
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "User registration details.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "The user's email address."
+                },
+                "username": {
+                  "type": "string",
+                  "description": "The username for the user."
+                },
+                "password": {
+                  "type": "string",
+                  "description": "The password for the user."
+                },
+                "mobileNum": {
+                  "type": "string",
+                  "description": "The mobile number of the tourist (only for type `tourist`)."
+                },
+                "nation": {
+                  "type": "string",
+                  "description": "The nationality of the tourist (only for type `tourist`)."
+                },
+                "dob": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "The date of birth of the tourist (only for type `tourist`)."
+                },
+                "profession": {
+                  "type": "string",
+                  "description": "The profession of the tourist (only for type `tourist`)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User registered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User registered successfully"
+                    },
+                    "User": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing Input"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict due to existing username or email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Username already exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetMyEvents": {
+      "get": {
+        "summary": "Retrieve user events by user ID and userType",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The user's ID"
+          },
+          {
+            "in": "body",
+            "name": "userType",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The user's type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of events for the user"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/createCategory": {
+      "post": {
+        "summary": "Create a new activity category",
+        "tags": [
+          "Activity Categories"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the category"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/getAllCategories": {
+      "get": {
+        "summary": "Retrieve all activity categories",
+        "tags": [
+          "Activity Categories"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/updateCategoryById/{id}": {
+      "put": {
+        "summary": "Update an activity category by ID",
+        "tags": [
+          "Activity Categories"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the category to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The new name of the category"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/deleteCategoryById/{id}": {
+      "delete": {
+        "summary": "Delete an activity category by ID",
+        "tags": [
+          "Activity Categories"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the category to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/createTag": {
+      "post": {
+        "summary": "Create a new preference tag",
+        "tags": [
+          "Preference Tags"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the tag"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tag created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/getAllTags": {
+      "get": {
+        "summary": "Retrieve all preference tags",
+        "tags": [
+          "Preference Tags"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/updateTagById/{id}": {
+      "put": {
+        "summary": "Update a preference tag by ID",
+        "tags": [
+          "Preference Tags"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the tag to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The new name of the tag"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag updated successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "Tag not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/deleteTagById/{id}": {
+      "delete": {
+        "summary": "Delete a preference tag by ID",
+        "tags": [
+          "Preference Tags"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the tag to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag deleted successfully"
+          },
+          "404": {
+            "description": "Tag not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/upcomingEvents": {
+      "get": {
+        "summary": "Retrieve all upcoming events",
+        "tags": [
+          "Events"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of upcoming events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/filterUpcommingActivites": {
+      "get": {
+        "summary": "Retrieve filtered upcoming activities",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filters",
+            "schema": {
+              "type": "object"
+            },
+            "required": false,
+            "description": "Filters for activities"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of filtered upcoming activities"
+          },
+          "400": {
+            "description": "Invalid filters"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/filteritineraries": {
+      "get": {
+        "summary": "Retrieve filtered itineraries",
+        "tags": [
+          "Itineraries"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filters",
+            "schema": {
+              "type": "object"
+            },
+            "required": false,
+            "description": "Filters for itineraries"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of filtered itineraries"
+          },
+          "400": {
+            "description": "Invalid filters"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/historicalPlacesByTags": {
+      "get": {
+        "summary": "Retrieve historical places by tags",
+        "tags": [
+          "Historical Places"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tags",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "required": true,
+            "description": "Tags to filter historical places"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of historical places matching the tags"
+          },
+          "400": {
+            "description": "Invalid tags"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/createHistoricalTag": {
+      "post": {
+        "summary": "Create a new historical tag",
+        "description": "Creates a new historical tag associated with cultural heritage.",
+        "tags": [
+          "Historical Tag"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The type of the historical tag (e.g., monuments, museums, etc.)."
+                  },
+                  "period": {
+                    "type": "string",
+                    "description": "The historical period associated with the tag."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Historical tag created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical tag created successfully"
+                    },
+                    "tag": {
+                      "type": "object",
+                      "description": "The created historical tag object.",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the created historical tag."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "The type of the historical tag."
+                        },
+                        "period": {
+                          "type": "string",
+                          "description": "The historical period associated with the tag."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request, validation errors or invalid tag type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Only tourism governors can create historical tags"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error creating historical tag"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activity/{_id}/{userId}": {
+      "get": {
+        "summary": "Retrieve activity by ID",
+        "description": "Get activity details based on the provided activity ID and user ID. Only 'advertiser' type users can access this endpoint.",
+        "tags": [
+          "Activities"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the activity to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the user requesting the activity.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved activity details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the activity."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the activity."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "A description of the activity."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing inputs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Activity not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Activity not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error message here"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an existing activity",
+        "description": "Updates the details of an existing activity.",
+        "tags": [
+          "Activities"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "The ID of the activity to update.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user making the update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The updated date of the activity."
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "The updated time of the activity."
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "The updated location of the activity."
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The updated price of the activity."
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "The updated ID of the category for the activity."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Updated tags associated with the activity."
+                  },
+                  "specialDiscounts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Updated special discounts for the activity."
+                  },
+                  "isOpen": {
+                    "type": "boolean",
+                    "description": "Indicates if the activity is open."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activity updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Activity updated successfully"
+                    },
+                    "activity": {
+                      "type": "object",
+                      "description": "The updated activity object.",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the updated activity."
+                        },
+                        "date": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "The updated date of the activity."
+                        },
+                        "time": {
+                          "type": "string",
+                          "description": "The updated time of the activity."
+                        },
+                        "location": {
+                          "type": "string",
+                          "description": "The updated location of the activity."
+                        },
+                        "price": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "The updated price of the activity."
+                        },
+                        "category": {
+                          "type": "string",
+                          "description": "The updated ID of the category for the activity."
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Updated tags associated with the activity."
+                        },
+                        "specialDiscounts": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Updated special discounts for the activity."
+                        },
+                        "isOpen": {
+                          "type": "boolean",
+                          "description": "Indicates if the activity is open."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing inputs, invalid type, or invalid fields in the update request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing inputs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Activity not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Activity not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error updating activity"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an existing activity",
+        "description": "Deletes an activity by its ID.",
+        "tags": [
+          "Activities"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "The ID of the activity to delete.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user making the delete request.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Activity deleted successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing inputs or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing inputs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Activity not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Activity not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error deleting activity"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activity/user/{userId}/allActivities": {
+      "get": {
+        "summary": "Retrieve all activities for an advertiser",
+        "description": "Get all activities created by a specific user, where the user is of type 'advertiser'.",
+        "tags": [
+          "Activities"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the user requesting the activities.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved activities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The ID of the activity."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the activity."
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "A description of the activity."
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The date when the activity was created."
+                      },
+                      "created_by": {
+                        "type": "string",
+                        "description": "The ID of the user who created the activity."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user type or missing userId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user type"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error fetching activities"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activity": {
+      "post": {
+        "summary": "Create a new activity",
+        "description": "Adds a new activity created by an advertiser.",
+        "tags": [
+          "Activities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the activity."
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "The date of the activity."
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "The time of the activity."
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "The location of the activity."
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The price of the activity."
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "The ID of the category for the activity."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Tags associated with the activity."
+                  },
+                  "specialDiscounts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Special discounts for the activity."
+                  },
+                  "isOpen": {
+                    "type": "boolean",
+                    "description": "Indicates if the activity is open."
+                  },
+                  "created_by": {
+                    "type": "string",
+                    "description": "The ID of the user who created the activity."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activity created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Activity created successfully"
+                    },
+                    "activity": {
+                      "type": "object",
+                      "description": "The created activity object.",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the created activity."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the activity."
+                        },
+                        "date": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "The date of the activity."
+                        },
+                        "time": {
+                          "type": "string",
+                          "description": "The time of the activity."
+                        },
+                        "location": {
+                          "type": "string",
+                          "description": "The location of the activity."
+                        },
+                        "price": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "The price of the activity."
+                        },
+                        "category": {
+                          "type": "string",
+                          "description": "The ID of the category for the activity."
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Tags associated with the activity."
+                        },
+                        "specialDiscounts": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Special discounts for the activity."
+                        },
+                        "isOpen": {
+                          "type": "boolean",
+                          "description": "Indicates if the activity is open."
+                        },
+                        "created_by": {
+                          "type": "string",
+                          "description": "The ID of the user who created the activity."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing required fields"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error creating activity"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/itinerary/{_id}/{userId}": {
+      "get": {
+        "summary": "Retrieve an itinerary by ID",
+        "description": "Fetches an itinerary based on its ID and the user type.",
+        "tags": [
+          "Itineraries"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "The ID of the itinerary to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user making the request.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved itinerary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "60c72b2f5f1b2c001f7e8e6f"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Summer Vacation"
+                    },
+                    "activities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "activityId": {
+                            "type": "string",
+                            "example": "60c72b2f5f1b2c001f7e8e6g"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Beach day with friends"
+                          }
+                        }
+                      }
+                    },
+                    "comments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "example": "John Doe"
+                              }
+                            }
+                          },
+                          "content": {
+                            "type": "string",
+                            "example": "Had a great time!"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing ID or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Itinerary not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Itinerary not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Server error."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an existing itinerary",
+        "description": "Updates the specified itinerary with new data. Only tour guides can update itineraries.",
+        "tags": [
+          "Itineraries"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the itinerary to update.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6f"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the user making the request.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6h"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "activities": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": [
+                        "60c72b2f5f1b2c001f7e8e6f",
+                        "60c72b2f5f1b2c001f7e8e70"
+                      ]
+                    }
+                  },
+                  "locations": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": [
+                        "Location A",
+                        "Location B"
+                      ]
+                    }
+                  },
+                  "timeline": {
+                    "type": "string",
+                    "example": "Day 1: Arrival; Day 2: Sightseeing"
+                  },
+                  "directions": {
+                    "type": "string",
+                    "example": "Take bus number 5 to reach the destination."
+                  },
+                  "language": {
+                    "type": "string",
+                    "example": "English"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 100
+                  },
+                  "dateTimeAvailable": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-10-01T10:00:00Z"
+                  },
+                  "accessibility": {
+                    "type": "string",
+                    "example": "Wheelchair accessible"
+                  },
+                  "pickupLocation": {
+                    "type": "string",
+                    "example": "Hotel Lobby"
+                  },
+                  "dropoffLocation": {
+                    "type": "string",
+                    "example": "Airport"
+                  },
+                  "isActivated": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "flag": {
+                    "type": "string",
+                    "example": "normal"
+                  },
+                  "isSpecial": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated itinerary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Itinerary updated successfully."
+                    },
+                    "itinerary": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "60c72b2f5f1b2c001f7e8e6f"
+                        },
+                        "activities": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "example": [
+                              "60c72b2f5f1b2c001f7e8e6f",
+                              "60c72b2f5f1b2c001f7e8e70"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request due to missing id or user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid type or missing id."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Itinerary not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Itinerary not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error updating itinerary."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an existing itinerary",
+        "description": "Deletes the specified itinerary. Only tour guides can delete itineraries.",
+        "tags": [
+          "Itineraries"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the itinerary to delete.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6f"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the user making the request.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6h"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted itinerary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Itinerary deleted successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request due to missing id or user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid type or missing id."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Itinerary not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Itinerary not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error deleting itinerary."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/itinerary/user/{userId}/allItineraries": {
+      "get": {
+        "summary": "Retrieve all itineraries for a user",
+        "description": "Fetches all itineraries created by a specific user based on their user ID.",
+        "tags": [
+          "Itineraries"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user whose itineraries are being requested.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved itineraries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "example": "60c72b2f5f1b2c001f7e8e6f"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Weekend Getaway"
+                      },
+                      "activities": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "activityId": {
+                              "type": "string",
+                              "example": "60c72b2f5f1b2c001f7e8e6g"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "Visit the local museum"
+                            }
+                          }
+                        }
+                      },
+                      "created_by": {
+                        "type": "string",
+                        "example": "60c72b2f5f1b2c001f7e8e6h"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user ID or user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing userId"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Server error."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/itinerary": {
+      "post": {
+        "summary": "Create a new itinerary",
+        "description": "Creates a new itinerary with the specified details.",
+        "tags": [
+          "Itineraries"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "activities": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": [
+                        "60c72b2f5f1b2c001f7e8e6f",
+                        "60c72b2f5f1b2c001f7e8e70"
+                      ]
+                    }
+                  },
+                  "locations": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": [
+                        "Location A",
+                        "Location B"
+                      ]
+                    }
+                  },
+                  "timeline": {
+                    "type": "string",
+                    "example": "Day 1: Arrival; Day 2: Sightseeing"
+                  },
+                  "directions": {
+                    "type": "string",
+                    "example": "Take bus number 5 to reach the destination."
+                  },
+                  "language": {
+                    "type": "string",
+                    "example": "English"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 100
+                  },
+                  "dateTimeAvailable": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-10-01T10:00:00Z"
+                  },
+                  "accessibility": {
+                    "type": "string",
+                    "example": "Wheelchair accessible"
+                  },
+                  "pickupLocation": {
+                    "type": "string",
+                    "example": "Hotel Lobby"
+                  },
+                  "dropoffLocation": {
+                    "type": "string",
+                    "example": "Airport"
+                  },
+                  "isActivated": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "created_by": {
+                    "type": "string",
+                    "example": "60c72b2f5f1b2c001f7e8e6h"
+                  },
+                  "flag": {
+                    "type": "string",
+                    "example": "normal"
+                  },
+                  "isSpecial": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created itinerary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Itinerary created successfully"
+                    },
+                    "Itinerary": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "60c72b2f5f1b2c001f7e8e6f"
+                        },
+                        "activities": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "example": [
+                              "60c72b2f5f1b2c001f7e8e6f",
+                              "60c72b2f5f1b2c001f7e8e70"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or invalid input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing required fields"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Server error."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/historical-places": {
+      "post": {
+        "summary": "Create a new historical place",
+        "description": "Creates a new historical place with the specified details. Only tourism governors are authorized to create historical places.",
+        "tags": [
+          "Historical Places"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "example": "A beautiful historical site with rich cultural heritage."
+                  },
+                  "pictures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": [
+                        "https://example.com/image1.jpg",
+                        "https://example.com/image2.jpg"
+                      ]
+                    }
+                  },
+                  "location": {
+                    "type": "string",
+                    "example": "123 Historical Ave, History Town"
+                  },
+                  "openingHours": {
+                    "type": "string",
+                    "example": "09:00 AM - 05:00 PM"
+                  },
+                  "ticketPrice": {
+                    "type": "number",
+                    "example": 15
+                  },
+                  "type": {
+                    "type": "string",
+                    "example": "cultural"
+                  },
+                  "period": {
+                    "type": "string",
+                    "example": "Medieval"
+                  },
+                  "created_by": {
+                    "type": "string",
+                    "example": "60c72b2f5f1b2c001f7e8e6h"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created historical place.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical Place created successfully."
+                    },
+                    "savedPlace": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "60c72b2f5f1b2c001f7e8e70"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "A beautiful historical site with rich cultural heritage."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or invalid input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing required fields."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "You are not authorized to create a Historical Place."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error creating historical place."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/historical-places/{userId}/allHistoricalPlaces": {
+      "get": {
+        "summary": "Retrieve all historical places",
+        "description": "Retrieves a list of all historical places. Only tourism governors are authorized to access this endpoint.",
+        "tags": [
+          "Historical Places"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user making the request.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6h"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of historical places.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "example": "60c72b2f5f1b2c001f7e8e70"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "A beautiful historical site with rich cultural heritage."
+                      },
+                      "pictures": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "example": "https://example.com/image1.jpg"
+                        }
+                      },
+                      "location": {
+                        "type": "string",
+                        "example": "123 Historical Ave, History Town"
+                      },
+                      "openingHours": {
+                        "type": "string",
+                        "example": "09:00 AM - 05:00 PM"
+                      },
+                      "ticketPrice": {
+                        "type": "number",
+                        "example": 15
+                      },
+                      "created_by": {
+                        "type": "string",
+                        "example": "60c72b2f5f1b2c001f7e8e6h"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing userId or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing userId"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error fetching historical places."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/historical-places/{_id}/{userId}": {
+      "get": {
+        "summary": "Retrieve a historical place by ID",
+        "description": "Fetch a specific historical place using its ID. Only tourism governors are authorized to access this endpoint.",
+        "tags": [
+          "Historical Places"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "The ID of the historical place to retrieve.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e70"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user making the request.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6h"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical place found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical Place found"
+                    },
+                    "historicalPlace": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "60c72b2f5f1b2c001f7e8e70"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "A beautiful historical site with rich cultural heritage."
+                        },
+                        "pictures": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "example": "https://example.com/image1.jpg"
+                          }
+                        },
+                        "location": {
+                          "type": "string",
+                          "example": "123 Historical Ave, History Town"
+                        },
+                        "openingHours": {
+                          "type": "string",
+                          "example": "09:00 AM - 05:00 PM"
+                        },
+                        "ticketPrice": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "created_by": {
+                          "type": "string",
+                          "example": "60c72b2f5f1b2c001f7e8e6h"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing inputs or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing inputs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Historical place not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical Place not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error fetching historical place."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a historical place by ID",
+        "description": "Update an existing historical place using its ID. Only tourism governors are authorized to make updates.",
+        "tags": [
+          "Historical Places"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "The ID of the historical place to update.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e70"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user making the request.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6h"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "updateValues": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "example": "An updated description for the historical site."
+                      },
+                      "pictures": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "example": "https://example.com/image2.jpg"
+                        }
+                      },
+                      "location": {
+                        "type": "string",
+                        "example": "456 Updated Historical Ave, History Town"
+                      },
+                      "openingHours": {
+                        "type": "string",
+                        "example": "10:00 AM - 06:00 PM"
+                      },
+                      "ticketPrice": {
+                        "type": "number",
+                        "example": 20
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Historical place updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical Place updated"
+                    },
+                    "updatedHistoricalPlace": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "60c72b2f5f1b2c001f7e8e70"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "An updated description for the historical site."
+                        },
+                        "pictures": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "example": "https://example.com/image2.jpg"
+                          }
+                        },
+                        "location": {
+                          "type": "string",
+                          "example": "456 Updated Historical Ave, History Town"
+                        },
+                        "openingHours": {
+                          "type": "string",
+                          "example": "10:00 AM - 06:00 PM"
+                        },
+                        "ticketPrice": {
+                          "type": "number",
+                          "example": 20
+                        },
+                        "created_by": {
+                          "type": "string",
+                          "example": "60c72b2f5f1b2c001f7e8e6h"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing inputs or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing inputs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Historical place not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical Place not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error updating historical place."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a historical place by ID",
+        "description": "Deletes an existing historical place using its ID. Only tourism governors are authorized to perform this action.",
+        "tags": [
+          "Historical Places"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_id",
+            "required": true,
+            "description": "The ID of the historical place to delete.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e70"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user making the request.",
+            "schema": {
+              "type": "string",
+              "example": "60c72b2f5f1b2c001f7e8e6h"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical place deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical Place deleted"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing inputs or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing inputs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Historical place not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Historical Place not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error deleting historical place."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/addProduct/{userId}": {
+      "post": {
+        "summary": "Add a new product",
+        "description": "Adds a new product by a user with the specified userId.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user adding the product.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the product"
+                  },
+                  "picture": {
+                    "type": "string",
+                    "description": "The URL of the product picture."
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The price of the product."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A description of the product."
+                  },
+                  "sellerType": {
+                    "type": "string",
+                    "description": "The type of the seller."
+                  },
+                  "originalQuantity": {
+                    "type": "integer",
+                    "description": "The original quantity of the product available."
+                  },
+                  "ratings": {
+                    "type": "number",
+                    "description": "The initial ratings of the product."
+                  },
+                  "reviews": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of reviews for the product."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Product added successfully"
+                    },
+                    "product": {
+                      "type": "object",
+                      "description": "The created product object.",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Name of the product"
+                        },
+                        "picture": {
+                          "type": "string",
+                          "description": "The URL of the product picture."
+                        },
+                        "price": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "The price of the product."
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "A description of the product."
+                        },
+                        "sellerType": {
+                          "type": "string",
+                          "description": "The type of the seller."
+                        },
+                        "originalQuantity": {
+                          "type": "integer",
+                          "description": "The original quantity of the product available."
+                        },
+                        "ratings": {
+                          "type": "number",
+                          "description": "The initial ratings of the product."
+                        },
+                        "reviews": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "List of reviews for the product."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Price, picture, original quantity, description, sellerType, name, ratings and reviews are required."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error adding product"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getAvailableProducts/{userId}": {
+      "get": {
+        "summary": "Get available products",
+        "description": "Retrieves all available products for a user with the specified userId.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user retrieving available products.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available products.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
+                      "picture": {
+                        "type": "string",
+                        "description": "The URL of the product picture."
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "The price of the product."
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "A description of the product."
+                      },
+                      "sellerType": {
+                        "type": "string",
+                        "description": "The type of the seller."
+                      },
+                      "ratings": {
+                        "type": "number",
+                        "description": "The product's ratings."
+                      },
+                      "reviews": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of reviews for the product."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid type"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error retrieving available products"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/filterProducts/{userId}": {
+      "get": {
+        "summary": "Filter products by price range",
+        "description": "Retrieves products within a specified price range for a user with the specified userId.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user filtering products.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minPrice",
+            "required": false,
+            "description": "The minimum price of products to retrieve.",
+            "schema": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxPrice",
+            "required": false,
+            "description": "The maximum price of products to retrieve.",
+            "schema": {
+              "type": "number",
+              "format": "float"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products filtered by price range.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
+                      "picture": {
+                        "type": "string",
+                        "description": "The URL of the product picture."
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "The price of the product."
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "A description of the product."
+                      },
+                      "sellerType": {
+                        "type": "string",
+                        "description": "The type of the seller."
+                      },
+                      "ratings": {
+                        "type": "number",
+                        "description": "The product's ratings."
+                      },
+                      "reviews": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of reviews for the product."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid type"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error querying products by price range"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/editProducts/{userId}/{productId}": {
+      "put": {
+        "summary": "Update a product",
+        "description": "Updates an existing product for the user with the specified userId.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user updating the product.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "productId",
+            "required": true,
+            "description": "The ID of the product to be updated.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the product"
+                  },
+                  "picture": {
+                    "type": "string",
+                    "description": "The URL of the product picture."
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The updated price of the product."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The updated description of the product."
+                  },
+                  "originalQuantity": {
+                    "type": "integer",
+                    "description": "The updated original quantity of the product."
+                  },
+                  "ratings": {
+                    "type": "number",
+                    "description": "The updated ratings of the product."
+                  },
+                  "reviews": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The updated list of reviews for the product."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Product updated successfully"
+                    },
+                    "product": {
+                      "type": "object",
+                      "description": "The updated product object.",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Name of the product"
+                        },
+                        "picture": {
+                          "type": "string",
+                          "description": "The URL of the product picture."
+                        },
+                        "price": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "The price of the product."
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "A description of the product."
+                        },
+                        "originalQuantity": {
+                          "type": "integer",
+                          "description": "The original quantity of the product available."
+                        },
+                        "ratings": {
+                          "type": "number",
+                          "description": "The updated ratings of the product."
+                        },
+                        "reviews": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Updated list of reviews for the product."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Price, picture, original quantity, description, name, ratings and reviews are required."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error updating product"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sortProducts/{userId}": {
+      "get": {
+        "summary": "Sort products by price or rating",
+        "description": "Retrieves products sorted by price or rating for a user with the specified userId.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user sorting products.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "required": false,
+            "description": "The criterion to sort by (price or rating).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products sorted by the specified criterion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
+                      "picture": {
+                        "type": "string",
+                        "description": "The URL of the product picture."
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "The price of the product."
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "A description of the product."
+                      },
+                      "sellerType": {
+                        "type": "string",
+                        "description": "The type of the seller."
+                      },
+                      "ratings": {
+                        "type": "number",
+                        "description": "The product's ratings."
+                      },
+                      "reviews": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of reviews for the product."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid type"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error sorting products"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/searchProductByName/{userId}": {
+      "get": {
+        "summary": "Search products by name",
+        "description": "Retrieves products by name for a user with the specified userId.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user searching for products.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "description": "The name of the product to search for.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products matching the search criteria.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
+                      "picture": {
+                        "type": "string",
+                        "description": "The URL of the product picture."
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "The price of the product."
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "A description of the product."
+                      },
+                      "sellerType": {
+                        "type": "string",
+                        "description": "The type of the seller."
+                      },
+                      "ratings": {
+                        "type": "number",
+                        "description": "The product's ratings."
+                      },
+                      "reviews": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of reviews for the product."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid type"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error searching products"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "tags": []
+}
