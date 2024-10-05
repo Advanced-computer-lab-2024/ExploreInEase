@@ -233,6 +233,11 @@ const createHistoricalTag = async (tagData) => {
   const tag = new HistoricalTag(tagData);
   return await tag.save();
 };  
+
+const getTypeForTag = async (id) => {
+  const user = await User.findOne({ _id: id });
+  return user.type
+};
   
 
 const getActivityById = async (id) => {
@@ -395,7 +400,8 @@ module.exports = {
   getAllActivitiesAdvertiser,
   findItineraryById,
   findTagByTypeAndPeriod,
-  checkTourismGovernor
+  checkTourismGovernor,
+  getTypeForTag
 };
 
 

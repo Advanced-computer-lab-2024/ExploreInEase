@@ -370,31 +370,71 @@ router.get("/historicalPlacesByTags", eventController.filterHistoricalPlacesByTa
 
 
 /**
- * @swagger
- * /createHistoricalTag:
- *   post:
- *     summary: Create a new historical tag
- *     tags: [Historical Tag]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/HistoricalTag'
- *     responses:
- *       201:
- *         description: Historical tag created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/HistoricalTag'
- *       400:
- *         description: Bad Request, validation errors
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
+ * @swagger
+ * /createHistoricalTag:
+ *   post:
+ *     summary: Create a new historical tag
+ *     description: Creates a new historical tag associated with cultural heritage.
+ *     tags: [Historical Tag]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 description: The type of the historical tag (e.g., monuments, museums, etc.).
+ *               period:
+ *                 type: string
+ *                 description: The historical period associated with the tag.
+ *     responses:
+ *       201:
+ *         description: Historical tag created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Historical tag created successfully"
+ *                 tag:
+ *                   type: object
+ *                   description: The created historical tag object.
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: The ID of the created historical tag.
+ *                     type:
+ *                       type: string
+ *                       description: The type of the historical tag.
+ *                     period:
+ *                       type: string
+ *                       description: The historical period associated with the tag.
+ *       400:
+ *         description: Bad Request, validation errors or invalid tag type.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Only tourism governors can create historical tags"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error creating historical tag"
+ */
+
 router.post('/createHistoricalTag', eventController.createHistoricalTag);
 
 // /activity/:_id/:userId

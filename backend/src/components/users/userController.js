@@ -91,15 +91,18 @@ const getTouristUpcommingEvents = async (req, res) => {
   }
 };
 
+//Tour Guide
 const createTourGuide = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
     try {
         const tourGuide = await userService.createTourGuide(req.params._id,req.body);
-        res.status(201).json(tourGuide);
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'Tour guide not found' });
+        }
+        response={
+            message: "Tour guide Profile created successfully",
+            tourGuide: tourGuide
+        }
+        res.status(201).json(response);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -130,7 +133,11 @@ const updateTourGuide = async (req, res) => {
         if (!updatedTourGuide) {
             return res.status(404).json({ message: 'Tour guide not found' });
         }
-        res.status(200).json(updatedTourGuide);
+        response={
+            message: "Tour guide updated successfully",
+            tourGuide: updatedTourGuide
+        }
+        res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -148,7 +155,14 @@ const createAdvertiser = async (req, res) => {
     try {
         console.log("conroller : ",req.params._id,req.body)
         const advertiser = await userService.createAdvertiser(req.params._id,req.body);
-        res.status(201).json(advertiser);
+        if(!advertiser){
+            return res.status(404).json({ message: 'Advertiser not found' });
+        }
+        response = {
+            message: "Advertiser Profile created successfully",
+            advertiser: advertiser
+        }
+        res.status(201).json(response);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -179,7 +193,11 @@ const updateAdvertiser = async (req, res) => {
         if (!updatedAdvertiser) {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
-        res.status(200).json(updatedAdvertiser);
+        response = {
+            message: "Advertiser updated successfully",
+            advertiser: updatedAdvertiser
+        }
+        res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -198,7 +216,14 @@ const createSeller = async (req, res) => {
 
     try {
         const seller = await userService.createSeller(req.params._id,req.body);
-        res.status(201).json(seller);
+        if (!seller) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+        reponse={
+            message: "Seller Profile created successfully",
+            seller: seller
+        }
+        res.status(201).json(reponse);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -229,7 +254,11 @@ const updateSeller = async (req, res) => {
         if (!updatedSeller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
-        res.status(200).json(updatedSeller);
+        reponse={
+            message: "Seller updated successfully",
+            seller: updatedSeller
+        }
+        res.status(200).json(reponse);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -271,11 +300,17 @@ const updateTourist = async (req, res) => {
         if (!updatedTourist) {
             return res.status(404).json({ message: 'Tourist not found' });
         }
-        res.status(200).json(updatedTourist);
+        reponse={
+            message: "Tourist updated successfully",
+            tourist: updatedTourist
+        }
+
+        res.status(200).json(reponse);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
+
 
 
 const registerUser = async (req, res) => {
