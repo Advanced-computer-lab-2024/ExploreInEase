@@ -3941,6 +3941,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the product"
+                  },
                   "picture": {
                     "type": "string",
                     "description": "The URL of the product picture."
@@ -3994,6 +3998,10 @@
                       "type": "object",
                       "description": "The created product object.",
                       "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Name of the product"
+                        },
                         "picture": {
                           "type": "string",
                           "description": "The URL of the product picture."
@@ -4096,6 +4104,10 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
                       "picture": {
                         "type": "string",
                         "description": "The URL of the product picture."
@@ -4213,6 +4225,10 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
                       "picture": {
                         "type": "string",
                         "description": "The URL of the product picture."
@@ -4316,6 +4332,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the product"
+                  },
+                  "picture": {
+                    "type": "string",
+                    "description": "The URL of the product picture."
+                  },
                   "price": {
                     "type": "number",
                     "format": "float",
@@ -4329,10 +4353,6 @@
                     "type": "integer",
                     "description": "The updated original quantity of the product."
                   },
-                  "name": {
-                    "type": "string",
-                    "description": "The updated name of the product."
-                  },
                   "ratings": {
                     "type": "number",
                     "description": "The updated ratings of the product."
@@ -4342,11 +4362,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "List of updated reviews for the product."
-                  },
-                  "sellerType": {
-                    "type": "string",
-                    "description": "The updated type of the seller."
+                    "description": "The updated list of reviews for the product."
                   }
                 }
               }
@@ -4369,6 +4385,10 @@
                       "type": "object",
                       "description": "The updated product object.",
                       "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Name of the product"
+                        },
                         "picture": {
                           "type": "string",
                           "description": "The URL of the product picture."
@@ -4376,23 +4396,15 @@
                         "price": {
                           "type": "number",
                           "format": "float",
-                          "description": "The updated price of the product."
+                          "description": "The price of the product."
                         },
                         "description": {
                           "type": "string",
-                          "description": "The updated description of the product."
-                        },
-                        "sellerType": {
-                          "type": "string",
-                          "description": "The type of the seller."
+                          "description": "A description of the product."
                         },
                         "originalQuantity": {
                           "type": "integer",
-                          "description": "The updated original quantity of the product."
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "The updated name of the product."
+                          "description": "The original quantity of the product available."
                         },
                         "ratings": {
                           "type": "number",
@@ -4403,7 +4415,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "description": "List of updated reviews for the product."
+                          "description": "Updated list of reviews for the product."
                         }
                       }
                     }
@@ -4413,7 +4425,7 @@
             }
           },
           "400": {
-            "description": "Invalid user type or missing required fields.",
+            "description": "Missing required fields or invalid user type.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4421,7 +4433,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Invalid type or missing fields"
+                      "example": "Price, picture, original quantity, description, name, ratings and reviews are required."
                     }
                   }
                 }
@@ -4447,10 +4459,10 @@
         }
       }
     },
-    "/searchProductByName/{userId}": {
+    "/sortProducts/{userId}": {
       "get": {
-        "summary": "Search products by name",
-        "description": "Searches for products by name for a user with the specified userId.",
+        "summary": "Sort products by price or rating",
+        "description": "Retrieves products sorted by price or rating for a user with the specified userId.",
         "tags": [
           "Products"
         ],
@@ -4459,16 +4471,16 @@
             "in": "path",
             "name": "userId",
             "required": true,
-            "description": "The ID of the user searching for products.",
+            "description": "The ID of the user sorting products.",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "name",
-            "required": true,
-            "description": "The name of the product to search for.",
+            "name": "sortBy",
+            "required": false,
+            "description": "The criterion to sort by (price or rating).",
             "schema": {
               "type": "string"
             }
@@ -4476,7 +4488,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of products matching the search criteria.",
+            "description": "List of products sorted by the specified criterion.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4484,6 +4496,10 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
                       "picture": {
                         "type": "string",
                         "description": "The URL of the product picture."
@@ -4519,7 +4535,7 @@
             }
           },
           "400": {
-            "description": "Invalid user type or missing product name.",
+            "description": "Invalid user type.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4527,7 +4543,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Invalid type or missing product name"
+                      "example": "Invalid type"
                     }
                   }
                 }
@@ -4543,7 +4559,117 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Error searching for products"
+                      "example": "Error sorting products"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/searchProductByName/{userId}": {
+      "get": {
+        "summary": "Search products by name",
+        "description": "Retrieves products by name for a user with the specified userId.",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "The ID of the user searching for products.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "description": "The name of the product to search for.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products matching the search criteria.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                      },
+                      "picture": {
+                        "type": "string",
+                        "description": "The URL of the product picture."
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "The price of the product."
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "A description of the product."
+                      },
+                      "sellerType": {
+                        "type": "string",
+                        "description": "The type of the seller."
+                      },
+                      "ratings": {
+                        "type": "number",
+                        "description": "The product's ratings."
+                      },
+                      "reviews": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of reviews for the product."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid type"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error searching products"
                     }
                   }
                 }
