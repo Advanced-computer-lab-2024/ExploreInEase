@@ -1,5 +1,5 @@
 const userRepository = require('../users/userRepository');
-
+const bcrypt = require('bcrypt');
 const getUserById = async (id) => {
     // Retrieve the user from the Users table based on id
     return await userRepository.findUserById(id);

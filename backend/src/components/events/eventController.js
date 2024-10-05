@@ -256,6 +256,10 @@ const getActivityById = async (req, res) => {
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' });
     }
+
+    if (activity.created_by !== userId) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
     return res.status(200).json(activity);
   } catch (error) {
       return res.status(500).json({ message: error.message });
@@ -338,6 +342,14 @@ const updateActivity = async (req, res) => {
   }
 
   try {
+    const getActivity = await eventService.getActivityById(_id);
+    if (!getActivity) {
+      return res.status(404).json({ message: 'Activity not found.' });
+    }
+
+    if (getActivity.created_by !== userId) {
+      return res.status(400).json({ message: 'You are not authorized to update this activity.' });
+    }
     const updatedActivity = await eventService.updateActivity(_id, updateData);
     if (!updatedActivity) {
       return res.status(404).json({ message: 'Activity not found.' });
@@ -361,6 +373,13 @@ const deleteActivity = async (req, res) => {
     return res.status(400).json({ message: 'Invalid type' });
   }
   try {
+    const getActivity = await eventService.getActivityById(_id);
+    if (!getActivity) {
+      return res.status(404).json({ message: 'Activity not found.' });
+    }
+    if(getActivity.created_by !== userId) {
+      return res.status(400).json({ message: 'Cannot Delete the Activity as it is not yours.' });
+    }
     const deletedActivity = await eventService.deleteActivity(_id);
     
     if (!deletedActivity) {
@@ -413,6 +432,10 @@ const getItineraryById = async (req, res) => {
     
     if (!itinerary) {
       return res.status(404).json({ message: 'Itinerary not found.' });
+    }
+
+    if(itinerary.created_by !== userId){
+      return res.status(400).json({ message: 'Cannot access the itinerary as it is not yours.' });
     }
 
     return res.status(200).json(itinerary);
@@ -482,6 +505,13 @@ const updateItinerary = async (req, res) => {
   }
 
   try {
+    const getItinerary = await eventService.getItineraryById(_id);
+    if (!getItinerary) {
+      return res.status(404).json({ message: 'Itinerary not found.' });
+    }
+    if(getItinerary.created_by !== userId) {
+      return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
+    }
       const updatedItinerary = await eventService.updateItinerary(_id, itineraryData);
       
       if (!updatedItinerary) {
@@ -510,6 +540,13 @@ const deleteItinerary = async (req, res) => {
   }
 
   try {
+    const getItinerary = await eventService.getItineraryById(_id);
+    if (!getItinerary) {
+      return res.status(404).json({ message: 'Itinerary not found.' });
+    }
+    if(getItinerary.created_by !== userId) {
+      return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
+    }
       const deletedItinerary = await eventService.deleteItinerary(_id);
       if (!deletedItinerary) {
           return res.status(404).json({ message: 'Itinerary not found' });
@@ -624,6 +661,13 @@ const updateHistoricalPlace = async (req, res) => {
       if (type !== 'tourismGovernor') {
           return res.status(400).json({ message: 'Invalid type' });
       }
+      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id);
+      if (!getHistoricalPlace) {
+        return res.status(404).json({ message: 'Historical Place not found.' });
+      }
+      if(getHistoricalPlace.created_by !== userId) {
+        return res.status(400).json({ message: 'Cannot Update the Historical Place as it is not yours.' });
+      }
       const updatedPlace = await eventService.updateHistoricalPlace(_id, userId, updateValues);
       if (!updatedPlace) {
           return res.status(404).json({ message: 'Historical place not found' });
@@ -645,6 +689,13 @@ const deleteHistoricalPlace = async (req, res) => {
       const type = await eventRepository.getType(userId);
       if (type !== 'tourismGovernor') {
           return res.status(400).json({ message: 'Invalid type' });
+      }
+      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id);
+      if (!getHistoricalPlace) {
+        return res.status(404).json({ message: 'Historical Place not found.' });
+      }
+      if(getHistoricalPlace.created_by !== userId) {
+        return res.status(400).json({ message: 'Cannot Delete the Historical Place as it is not yours.' });
       }
       const deletedPlace = await eventService.deleteHistoricalPlace(_id, userId);
       if (!deletedPlace) {

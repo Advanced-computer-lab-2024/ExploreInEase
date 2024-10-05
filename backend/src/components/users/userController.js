@@ -1,4 +1,6 @@
 const userService = require('../users/userService');
+const userRepository = require('../users/userRepository');
+const bcrypt = require('bcrypt');
 
 // Delete user by _id and userType, ensuring self-id check
 const deleteUserByIdAndType = async (req, res) => {
