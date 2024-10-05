@@ -323,7 +323,6 @@ function Activity() {
             </Button>
 
 
-            {/* <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}> */}
 
               <GoogleMap
                 mapContainerStyle={containerStyle}
@@ -336,7 +335,6 @@ function Activity() {
                   <Marker position={{ lat: activityForm.lat, lng: activityForm.lng }} />
                 )}
               </GoogleMap>
-            {/* </LoadScript> */}
 
             <TextField
               fullWidth
