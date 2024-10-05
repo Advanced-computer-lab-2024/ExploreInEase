@@ -418,6 +418,32 @@ const getFilteredItineraries = async (filters) => {
   }
 };
 
+const getFilteredHistoricalPlaces = async (tags) => {
+  try {
+    const historicalPlaces = await eventRepository.getFilteredHistoricalPlaces(
+      tags
+    );
+
+    // Format historical places
+    const formattedHistoricalPlaces = historicalPlaces.map((place) => ({
+      id: place._id,
+      description: place.description,
+      pictures: place.pictures,
+      location: place.location,
+      openingHours: place.openingHours,
+      ticketPrice: place.ticketPrice,
+      createdAt: place.createdAt,
+      createdBy: place.created_by, // Reference to creator's ID
+      tags: place.tags, // Include el period we el type
+    }));
+    console.log(formattedHistoricalPlaces);
+
+    return formattedHistoricalPlaces;
+  } catch (error) {
+    console.error(`Service Error: ${error.message}`);
+    throw error; // Propagate the error to the controller
+  }
+};
 
 module.exports = {
   getUserEvents,
@@ -449,6 +475,7 @@ module.exports = {
   getAllItineraries,
   getAllActivities,
   getAllActivitiesAdvertiser,
-  getFilteredItineraries
+  getFilteredItineraries,
+  getFilteredHistoricalPlaces
 };
 
