@@ -3956,7 +3956,33 @@
                       "example": "Product added successfully"
                     },
                     "product": {
-                      "$ref": "#/components/schemas/Product"
+                      "type": "object",
+                      "properties": {
+                        "picture": {
+                          "type": "string"
+                        },
+                        "price": {
+                          "type": "number"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "ratings": {
+                          "type": "integer"
+                        },
+                        "reviews": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sellerType": {
+                          "type": "string"
+                        },
+                        "originalQuantity": {
+                          "type": "number"
+                        }
+                      }
                     }
                   }
                 }
@@ -4023,30 +4049,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "picture": {
-                        "type": "string"
-                      },
-                      "price": {
-                        "type": "number"
-                      },
-                      "description": {
-                        "type": "string"
-                      },
-                      "ratings": {
-                        "type": "integer"
-                      },
-                      "reviews": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "sellerType": {
-                        "type": "string"
-                      }
-                    }
+                    "$ref": "#/components/schemas/Product"
                   }
                 }
               }
@@ -4060,7 +4063,74 @@
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "Server error."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/filterProducts/{userId}": {
+      "get": {
+        "summary": "Get products by price range",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          },
+          {
+            "in": "query",
+            "name": "minPrice",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Minimum price of the products"
+          },
+          {
+            "in": "query",
+            "name": "maxPrice",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Maximum price of the products"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products within the price range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Server error."
                     }
                   }
                 }
@@ -4161,7 +4231,7 @@
         }
       }
     },
-    "/sortProducts/{userId]}": {
+    "/sortProducts/{userId}": {
       "get": {
         "summary": "Get products sorted by ratings",
         "tags": [
@@ -4210,6 +4280,81 @@
           }
         }
       }
+    },
+    "/searchProductByName/{userId}": {
+      "get": {
+        "summary": "Search for a product by name",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          },
+          {
+            "in": "query",
+            "name": "productName",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The name of the product to search for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products matching the search criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No products found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "No products found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Server error."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4217,9 +4362,6 @@
       "Product": {
         "type": "object",
         "properties": {
-          "productId": {
-            "type": "string"
-          },
           "picture": {
             "type": "string"
           },
@@ -4229,14 +4371,20 @@
           "description": {
             "type": "string"
           },
-          "sellerId": {
+          "ratings": {
+            "type": "integer"
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sellerType": {
             "type": "string"
           },
           "originalQuantity": {
             "type": "number"
-          },
-          "name": {
-            "type": "string"
           }
         }
       }

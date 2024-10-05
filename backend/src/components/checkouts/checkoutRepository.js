@@ -23,9 +23,9 @@ const getAllAvailableProducts = async () => {
             picture: product.picture,
             price: product.price,
             description: product.description,
+            sellerType: product.sellerId.sellerType,
             ratings: product.ratings,
             reviews: product.reviews,
-            sellerType: product.sellerId.sellerType
         }));
 
         return transformedProducts;
@@ -43,7 +43,7 @@ const getProductsByPriceRange = async (minPrice, maxPrice) => {
                 $lte: maxPrice
             }
         })
-        .select('productId picture price description sellerId ratings reviews originalQuantity takenQuantity name')
+        .select('productId picture price description sellerId ratings reviews originalQuantity name')
         .populate('sellerId', 'name type');
 
         return products;

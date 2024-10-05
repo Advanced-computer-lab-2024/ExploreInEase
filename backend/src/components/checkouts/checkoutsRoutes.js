@@ -9,19 +9,19 @@ const checkoutController = require('../checkouts/checkoutController');
  *     Product:
  *       type: object
  *       properties:
- *         productId:
- *           type: string
  *         picture:
  *           type: string
  *         price:
  *           type: number
  *         description:
  *           type: string
- *         sellerId:
- *           type: string
- *         originalQuantity:
- *           type: number
- *         name:
+ *         ratings:
+ *           type: integer
+ *         reviews:
+ *           type: array
+ *           items:
+ *             type: string
+ *         sellerType:
  *           type: string
  */
 
@@ -101,22 +101,7 @@ router.post('/addProduct/:userId', checkoutController.addProduct);
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   picture:
- *                     type: string
- *                   price:
- *                     type: number
- *                   description:
- *                     type: string
- *                   ratings:
- *                     type: integer
- *                   reviews:
- *                     type: array
- *                     items:
- *                       type: string
- *                   sellerType:
- *                     type: string
+ *                 $ref: '#/components/schemas/Product'
  *       500:
  *         description: Internal server error
  *         content:
@@ -126,8 +111,8 @@ router.post('/addProduct/:userId', checkoutController.addProduct);
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: "Server error."
  */
-
 router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProducts);
 
 /**
@@ -143,7 +128,6 @@ router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProdu
  *         schema:
  *           type: string
  *         description: User ID
- *     parameters:
  *       - in: query
  *         name: minPrice
  *         schema:
@@ -237,10 +221,9 @@ router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange
  */
 router.put('/editProducts/:userId/:productId', checkoutController.updateProduct);
 
-
 /**
  * @swagger
- * /sortProducts/{userId]}:
+ * /sortProducts/{userId}:
  *   get:
  *     summary: Get products sorted by ratings
  *     tags: [Products]
@@ -286,7 +269,6 @@ router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSorte
  *         schema:
  *           type: string
  *         description: User ID
- *     parameters:
  *       - in: query
  *         name: productName
  *         schema:
