@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import TouristSignUp from './TouristSignUp'; // Ensure the path is correct
 import GuideAdvertiserSignUp from './AdvertiserSignUp'; // Ensure the path is correct
+import TouristSignUp from './TouristSignUp'; // Ensure this component exists
 
 const RoleSelection = () => {
   const [role, setRole] = useState(''); // No initial role selected
@@ -16,7 +16,7 @@ const RoleSelection = () => {
       <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
         <button
           style={{
-            margin: '0 10px',
+            margin: '10px',
             padding: '10px 20px',
             border: 'none',
             borderRadius: '5px',
@@ -32,7 +32,7 @@ const RoleSelection = () => {
         </button>
         <button
           style={{
-            margin: '0 10px',
+            margin: '10px',
             padding: '10px 20px',
             border: 'none',
             borderRadius: '5px',

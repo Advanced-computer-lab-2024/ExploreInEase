@@ -1,25 +1,39 @@
 // src/Shared/Components/GuestHP.js
 import React from 'react';
-import logo from './logo.png'; // Adjust the path as needed
 import './GuestHP.css'; // Import the CSS file
+import Avatar from '@mui/material/Avatar';
+import HomePageLogo from '../HomePageLogo.png';
+import RoleSelection from '../SignUp/RoleSelection';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
 const HomePage = () => {
+  const navigate = useNavigate(); // Hook for navigation
+  const initialUsername ="TAST";
+  const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+  function handleRegisterClick(title){
+    if (title == "Register"){
+    navigate('/register'); 
+  }
+  else if (title=="Activity Categories"){
+    navigate('/explore');
+  }
+  };
   return (
     <div className="homepage">
       <nav className="navbar">
         <div className="logo-container">
           <img
-            src={logo} // Use the imported logo
+            src={HomePageLogo} // Use the imported logo
             alt="ExploreInEase Logo"
             className="logo"
           />
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <a href="https://www.google.com/">Register</a>
-          <a href="https://www.google.com/">Upload Required Documents</a>
-          <a href="https://www.google.com/">View Step-by-Step Guide</a>
-          <a href="https://www.google.com/">Activity Categories</a>
+        <button onClick={() => handleRegisterClick("Register")}>Register</button>
+          <button>Upload Required Documents</button>
+          <button>View Step-by-Step Guide</button>
+          <button onClick={() => handleRegisterClick("Activity Categories")}>Activity Categories</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>
@@ -30,11 +44,18 @@ const HomePage = () => {
           </select>
         </div>
         <div className="avatar-container">
-          <img
-            src="path/to/your/avatar.png" // Replace with your avatar path
-            alt="User Avatar"
-            className="avatar"
-          />
+          <Avatar
+            sx={{
+              bgcolor: 'darkblue',
+              color: 'white',
+              width: 56,
+              height: 56,
+              fontSize: 24,
+              marginLeft: 2,
+            }}
+          >
+            {firstInitial}
+          </Avatar>
         </div>
       </nav>
       {/* Other homepage content goes here */}

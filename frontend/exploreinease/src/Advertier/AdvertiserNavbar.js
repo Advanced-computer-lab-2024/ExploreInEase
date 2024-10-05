@@ -1,27 +1,42 @@
 // src/Shared/Components/GuestHP.js
 import React from 'react';
-import logo from './logo.png'; // Adjust the path as needed
-import './Guest/GuestHP.css'; // Import the CSS file
-
+import Avatar from '@mui/material/Avatar';
+import '../Guest/GuestHP.css'; // Import the CSS file
+import HomePageLogo from '../HomePageLogo.png';
+import { useNavigate } from 'react-router-dom';
 const HomePage = () => {
+    const navigate=useNavigate();
+    const initialUsername ="TAST";
+    const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+    function handleRegisterClick(title) {
+        if (title == "My profile"){
+            navigate('/viewAdvertiserProfile');
+        }
+      else if (title=="View Created Activities"){
+          navigate('/viewAllCreatedActivities');
+      }
+      else {
+        navigate('/explore`');
+      }
+      };
   return (
     <div className="homepage">
       <nav className="navbar">
         <div className="logo-container">
           <img
-            src={logo} // Use the imported logo
+            src={HomePageLogo} // Use the imported logo
             alt="ExploreInEase Logo"
             className="logo"
           />
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <a href="https://www.google.com/">Create Activities</a>
-          <a href="https://www.google.com/">Delete Activities</a>
-          <a href="https://www.google.com/">Update Activities</a>
-          <a href="https://www.google.com/">View All Activities</a>
-          <a href="https://www.google.com/">View Created Activities</a>
-          <a href="https://www.google.com/">My profile</a>
+          <button  onClick={() => handleRegisterClick("Create Activities")}>Create Activities</button>
+          <button  onClick={() => handleRegisterClick("Delete Activities")}>Delete Activities</button>
+          <button  onClick={() => handleRegisterClick("Update Activities")}>Update Activities</button>
+          <button  onClick={() => handleRegisterClick("View All Activities")}>View All Activities</button>
+          <button  onClick={() => handleRegisterClick("View Created Activities")}>View Created Activities</button>
+          <button  onClick={() => handleRegisterClick("My profile")}>My profile</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>
@@ -32,11 +47,18 @@ const HomePage = () => {
           </select>
         </div>
         <div className="avatar-container">
-          <img
-            src="path/to/your/avatar.png" // Replace with your avatar path
-            alt="User Avatar"
-            className="avatar"
-          />
+        <Avatar
+            sx={{
+              bgcolor: 'darkblue',
+              color: 'white',
+              width: 56,
+              height: 56,
+              fontSize: 24,
+              marginLeft: 2,
+            }}
+          >
+            {firstInitial}
+          </Avatar>
         </div>
       </nav>
       {/* Other homepage content goes here */}

@@ -222,6 +222,9 @@ function Activity() {
   };
 
   return (
+    <div>
+                  <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
+
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div>
    
@@ -320,7 +323,6 @@ function Activity() {
             </Button>
 
 
-            <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'}>
 
               <GoogleMap
                 mapContainerStyle={containerStyle}
@@ -333,7 +335,6 @@ function Activity() {
                   <Marker position={{ lat: activityForm.lat, lng: activityForm.lng }} />
                 )}
               </GoogleMap>
-            </LoadScript>
 
             <TextField
               fullWidth
@@ -375,6 +376,8 @@ function Activity() {
         </Grid>
       </div>
     </LocalizationProvider>
+    </LoadScript>
+    </div>
   );
 }
 

@@ -1,7 +1,9 @@
 // src/components/TouristSignUp.js
-import React, { useState } from 'react';
-
+import React, { useState,useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 const TouristSignUp = () => {
+  const navigate= useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -11,6 +13,7 @@ const TouristSignUp = () => {
     dob: '',
     jobOrStudent: ''
   });
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -41,7 +44,10 @@ const TouristSignUp = () => {
     setSuccess('Registration successful!');
     // Submit form data to the server (API call)
     console.log('Form data:', formData);
+    navigate('/TouristHomePage');
+
   };
+
 
   return (
     <div className="signup-form">

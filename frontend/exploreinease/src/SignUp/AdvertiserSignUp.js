@@ -1,13 +1,15 @@
 // src/components/GuideAdvertiserSignUp.js
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import './Signup.css';
-
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 const GuideAdvertiserSignUp = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
     password: '',
-    role: 'tourGuide' // default selection
+    type: 'tourGuide' // default selection
   });
   const [success, setSuccess] = useState('');
 
@@ -59,8 +61,8 @@ const GuideAdvertiserSignUp = () => {
 
         <label>Select Role:</label>
         <select
-          name="role"
-          value={formData.role}
+          name="type"
+          value={formData.type}
           onChange={handleInputChange}
           required
         >
@@ -70,7 +72,7 @@ const GuideAdvertiserSignUp = () => {
         </select>
 
         <button type="submit" className="blue-button">
-          Register as {formData.role === 'tourGuide' ? 'Tour Guide' : formData.role === 'advertiser' ? 'Advertiser' : 'Seller'}
+          Register as {formData.type === 'tourGuide' ? 'Tour Guide' : formData.type === 'advertiser' ? 'Advertiser' : 'Seller'}
         </button>
       </form>
     </div>

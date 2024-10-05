@@ -1,4 +1,3 @@
-// Static Filter
 import React, { useState } from 'react';
 import {
   TextField,
@@ -122,6 +121,7 @@ const Filter = () => {
 
   const [filteredData, setFilteredData] = useState(itemList);
   const [role, setRole] = useState('Main'); // Default to Main to show all
+  const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
 
   // Handle Input Change
   const handleFilterChange = (e) => {
@@ -150,68 +150,69 @@ const Filter = () => {
 
     // Filter by role-specific type
     if (roleToFilter === 'Activities') {
-      data = data.filter((item) => item.type === 'Activity');
+        data = data.filter((item) => item.type === 'Activity');
     } else if (roleToFilter === 'Itineraries') {
-      data = data.filter((item) => item.type === 'Itinerary');
+        data = data.filter((item) => item.type === 'Itinerary');
     } else if (roleToFilter === 'HistoricalPlaces') {
-      data = data.filter((item) => item.type === 'HistoricalPlace');
+        data = data.filter((item) => item.type === 'HistoricalPlace');
     }
 
     // Apply other filters
     if (filters.budget) {
-      data = data.filter((item) => item.budget <= parseFloat(filters.budget));
+        data = data.filter((item) => item.budget <= parseFloat(filters.budget));
     }
 
     if (filters.price) {
-      data = data.filter((item) => item.price.toString() === filters.price);
+        data = data.filter((item) => item.price.toString() === filters.price);
     }
 
     if (filters.date) {
-      data = data.filter((item) => item.date === filters.date);
+        data = data.filter((item) => item.date === filters.date);
     }
 
     if (filters.rating) {
-      data = data.filter((item) => item.rating >= filters.rating);
+        data = data.filter((item) => item.rating >= filters.rating && item.rating <= 5);
     }
 
     if (filters.category) {
-      data = data.filter((item) => item.category === filters.category);
+        data = data.filter((item) => item.category === filters.category);
     }
 
     if (filters.language) {
-      data = data.filter((item) => item.language === filters.language);
+        data = data.filter((item) => item.language === filters.language);
     }
 
     if (filters.preferences) {
-      data = data.filter((item) => item.preferences === filters.preferences);
+        data = data.filter((item) => item.preferences === filters.preferences);
     }
 
     if (filters.Tag) {
-      data = data.filter((item) => item.Tag === filters.Tag);
+        data = data.filter((item) => item.Tag === filters.Tag);
     }
 
     // Search by name
     if (filters.search) {
-      data = data.filter((item) =>
-        item.name.toLowerCase().includes(filters.search.toLowerCase())
-      );
+        data = data.filter((item) =>
+            item.name.toLowerCase().includes(filters.search.toLowerCase())
+        );
     }
 
     // Sort logic
     if (filters.sortBy === 'price') {
-      data = data.sort((a, b) => a.price - b.price);
+        data.sort((a, b) => b.price - a.price);
     } else if (filters.sortBy === 'rating') {
-      data = data.sort((a, b) => b.rating - a.rating);
+        data.sort((a, b) => b.rating - a.rating);
     }
 
     setFilteredData(data);
-  };
+};
+
 
   // Reset Filters
   const resetFilters = () => {
     setFilters({ budget: '', price: '', date: '', rating: 0, category: '', language: '', preferences: '', Tag: '', search: '', sortBy: '' });
     setFilteredData(itemList);
-    setRole('Main'); // Reset to main view
+    // Keep the role the same when resetting
   };
 
   // Helper function to check if a field should be displayed for the current role
@@ -221,7 +222,7 @@ const Filter = () => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, justifyContent: 'center' }}>
         <Tabs value={role} onChange={handleRoleChange}>
           <Tab label="Main" value="Main" />
           <Tab label="Activities" value="Activities" />
@@ -242,7 +243,7 @@ const Filter = () => {
             fullWidth
             style={{ marginBottom: '20px' }}
           />
-
+          {role == 'Itineraries' && (
           <FormControl fullWidth style={{ marginBottom: '20px' }}>
             <InputLabel>Sort By</InputLabel>
             <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
@@ -250,6 +251,16 @@ const Filter = () => {
               <MenuItem value="rating">Rating</MenuItem>
             </Select>
           </FormControl>
+          )}
+          {role == 'Activities' && (
+          <FormControl fullWidth style={{ marginBottom: '20px' }}>
+            <InputLabel>Sort By</InputLabel>
+            <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+              <MenuItem value="price">Price</MenuItem>
+              <MenuItem value="rating">Rating</MenuItem>
+            </Select>
+          </FormControl>
+          )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {shouldDisplayField('budget') && (
@@ -293,19 +304,26 @@ const Filter = () => {
               />
             )}
 
+            {shouldDisplayField('category') && (
+              <TextField
+                label="Category"
+                variant="outlined"
+                name="category"
+                value={filters.category}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
             {shouldDisplayField('language') && (
-              <FormControl fullWidth variant="outlined">
-                <InputLabel>Language</InputLabel>
-                <Select
-                  label="Language"
-                  name="language"
-                  value={filters.language}
-                  onChange={handleFilterChange}
-                >
-                  <MenuItem value="English">English</MenuItem>
-                  <MenuItem value="Spanish">Spanish</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                label="Language"
+                variant="outlined"
+                name="language"
+                value={filters.language}
+                onChange={handleFilterChange}
+                fullWidth
+              />
             )}
 
             {shouldDisplayField('date') && (
@@ -317,30 +335,12 @@ const Filter = () => {
                 value={filters.date}
                 onChange={handleFilterChange}
                 fullWidth
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                InputLabelProps={{ shrink: true }}
               />
             )}
 
-            {shouldDisplayField('category') && (
-              <FormControl fullWidth variant="outlined">
-                <InputLabel>Category</InputLabel>
-                <Select
-                  label="Category"
-                  name="category"
-                  value={filters.category}
-                  onChange={handleFilterChange}
-                >
-                  <MenuItem value="Food">Food</MenuItem>
-                  <MenuItem value="Party">Party</MenuItem>
-                  <MenuItem value="Concert">Concert</MenuItem>
-                </Select>
-              </FormControl>
-            )}
-
             {shouldDisplayField('rating') && (
-              <FormControl fullWidth>
+              <div>
                 <Typography component="legend">Rating</Typography>
                 <Rating
                   name="rating"
@@ -348,56 +348,42 @@ const Filter = () => {
                   onChange={handleRatingChange}
                   precision={0.5}
                 />
-              </FormControl>
+              </div>
             )}
+
+            <Button variant="contained" color="primary" onClick={() => applyFilters()}>
+              Apply Filters
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={resetFilters}>
+              Reset Filters
+            </Button>
           </div>
-
-          <Button
-            onClick={() => applyFilters()}
-            variant="contained"
-            color="primary"
-            fullWidth
-            style={{ marginTop: '20px' }}
-          >
-            Apply Filters
-          </Button>
-
-          <Button
-            onClick={resetFilters}
-            variant="outlined"
-            color="secondary"
-            fullWidth
-            style={{ marginTop: '10px' }}
-          >
-            Reset Filters
-          </Button>
         </div>
 
-        <div style={{ flex: 1, padding: '20px' }}>
-          <Grid container spacing={3}>
-            {filteredData.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h5">{item.name}</Typography>
-                    <Typography>Budget: {item.budget}</Typography>
-                    <Typography>Price: {item.price}</Typography>
-                    <Typography>Date: {item.date}</Typography>
-                    <Typography>Rating: {item.rating}</Typography>
-                    <Typography>Category: {item.category}</Typography>
-                    <Typography>Language: {item.language}</Typography>
-                    <Typography>Preferences: {item.preferences}</Typography>
-                    <Typography>Tag: {item.Tag}</Typography>
-                    <Typography>Type: {item.type}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </div>
+        <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
+          {filteredData.map((item) => (
+            <Grid item xs={12} sm={6} md={4} key={item.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h5" component="div">
+                    {item.name}
+                  </Typography>
+                  <Typography color="text.secondary">Price: {item.price}</Typography>
+                  <Typography color="text.secondary">Budget: {item.budget}</Typography>
+                  <Typography color="text.secondary">Date: {item.date}</Typography>
+                  <Typography color="text.secondary">Rating: {item.rating}</Typography>
+                  <Typography color="text.secondary">Category: {item.category}</Typography>
+                  <Typography color="text.secondary">Language: {item.language}</Typography>
+                  <Typography color="text.secondary">Preferences: {item.preferences}</Typography>
+                  <Typography color="text.secondary">Tag: {item.Tag}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </div>
     </div>
   );
-}
+};
 
 export default Filter;

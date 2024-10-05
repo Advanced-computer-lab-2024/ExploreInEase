@@ -1,24 +1,40 @@
 // src/Shared/Components/TourGuideHP.js
 import React from 'react';
-import logo from './logo.png'; // Adjust the path as needed
-import '../Guest/GuestHP.css'; // You can use the same CSS for a consistent style
-
+import Avatar from '@mui/material/Avatar';
+import '../Guest/GuestHP.css'; 
+import HomePageLogo from '../HomePageLogo.png';
+import { useNavigate } from 'react-router-dom';
 const TourGuideHP = () => {
+    const navigate = useNavigate();
+    const initialUsername ="TAST";
+    const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+    function handleClick(title) {
+        if (title == "My Profile"){
+         navigate('/viewSellerProfile');
+       }
+       else if(title == 'View My Created Itineraries') {
+         navigate('/viewItineraryList');
+       }
+       else {
+        navigate('/viewMyItinerary');
+
+       }
+    };
   return (
     <div className="homepage">
       <nav className="navbar">
         <div className="logo-container">
           <img
-            src={logo} // Use the imported logo
+            src={HomePageLogo} // Use the imported logo
             alt="ExploreInEase Logo"
             className="logo"
           />
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <a href="">My Profile</a>
-          <a href="C:\Users\pc\OneDrive\Desktop\ExploreInEase\frontend\exploreinease\src\Shared\Components\ItineraryList.js">View My Created Itineraries</a>
-          <a href="/manage-itineraries">Create/Read/Update/Delete Itineraries</a>
+          <button  onClick={() => handleClick("My Profile")}>My Profile</button>
+          <button onClick={() => handleClick("View My Created Itineraries")}>View My Created Itineraries</button>
+          <button onClick={() => handleClick("Create/Read/Update/Delete Itineraries")}>Create/Read/Update/Delete Itineraries</button>
         </div>
         <div className="currency-selector">
           <select>
@@ -28,11 +44,18 @@ const TourGuideHP = () => {
           </select>
         </div>
         <div className="avatar-container">
-          <img
-            src="path/to/your/avatar.png" // Replace with your avatar path
-            alt="User Avatar"
-            className="avatar"
-          />
+        <Avatar
+            sx={{
+              bgcolor: 'darkblue',
+              color: 'white',
+              width: 56,
+              height: 56,
+              fontSize: 24,
+              marginLeft: 2,
+            }}
+          >
+            {firstInitial}
+          </Avatar>
         </div>
       </nav>
       {/* Other homepage content goes here */}
