@@ -4,49 +4,52 @@ const checkoutController = require('../checkouts/checkoutController');
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     Product:
- *       type: object
- *       properties:
- *         picture:
- *           type: string
- *         price:
- *           type: number
- *         description:
- *           type: string
- *         ratings:
- *           type: integer
- *         reviews:
- *           type: array
- *           items:
- *             type: string
- *         sellerType:
- *           type: string
- */
-
-/**
- * @swagger
  * /addProduct/{userId}:
  *   post:
  *     summary: Add a new product
+ *     description: Adds a new product by a user with the specified userId.
  *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
+ *         description: The ID of the user adding the product.
  *         schema:
  *           type: string
- *         description: User ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               picture:
+ *                 type: string
+ *                 description: The URL of the product picture.
+ *               price:
+ *                 type: number
+ *                 format: float
+ *                 description: The price of the product.
+ *               description:
+ *                 type: string
+ *                 description: A description of the product.
+ *               sellerType:
+ *                 type: string
+ *                 description: The type of the seller.
+ *               originalQuantity:
+ *                 type: integer
+ *                 description: The original quantity of the product available.
+ *               ratings:
+ *                 type: number
+ *                 description: The initial ratings of the product.
+ *               reviews:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of reviews for the product.
  *     responses:
  *       201:
- *         description: Product added successfully
+ *         description: Product added successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -56,9 +59,35 @@ const checkoutController = require('../checkouts/checkoutController');
  *                   type: string
  *                   example: "Product added successfully"
  *                 product:
- *                   $ref: '#/components/schemas/Product'
+ *                   type: object
+ *                   description: The created product object.
+ *                   properties:
+ *                     picture:
+ *                       type: string
+ *                       description: The URL of the product picture.
+ *                     price:
+ *                       type: number
+ *                       format: float
+ *                       description: The price of the product.
+ *                     description:
+ *                       type: string
+ *                       description: A description of the product.
+ *                     sellerType:
+ *                       type: string
+ *                       description: The type of the seller.
+ *                     originalQuantity:
+ *                       type: integer
+ *                       description: The original quantity of the product available.
+ *                     ratings:
+ *                       type: number
+ *                       description: The initial ratings of the product.
+ *                     reviews:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: List of reviews for the product.
  *       400:
- *         description: Invalid input
+ *         description: Missing required fields or invalid user type.
  *         content:
  *           application/json:
  *             schema:
@@ -66,9 +95,9 @@ const checkoutController = require('../checkouts/checkoutController');
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "ProductId, price, picture, original quantity, description, sellerId and name are required."
+ *                   example: "Price, picture, original quantity, description, sellerType, name, ratings and reviews are required."
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
  *         content:
  *           application/json:
  *             schema:
@@ -76,34 +105,56 @@ const checkoutController = require('../checkouts/checkoutController');
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Server error."
+ *                   example: "Error adding product"
  */
-router.post('/addProduct/:userId', checkoutController.addProduct);
 
 /**
  * @swagger
  * /getAvailableProducts/{userId}:
  *   get:
- *     summary: Get all available products
+ *     summary: Get available products
+ *     description: Retrieves all available products for a user with the specified userId.
  *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
+ *         description: The ID of the user retrieving available products.
  *         schema:
  *           type: string
- *         description: User ID
  *     responses:
  *       200:
- *         description: List of available products
+ *         description: List of available products.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Product'
- *       500:
- *         description: Internal server error
+ *                 type: object
+ *                 properties:
+ *                   picture:
+ *                     type: string
+ *                     description: The URL of the product picture.
+ *                   price:
+ *                     type: number
+ *                     format: float
+ *                     description: The price of the product.
+ *                   description:
+ *                     type: string
+ *                     description: A description of the product.
+ *                   sellerType:
+ *                     type: string
+ *                     description: The type of the seller.
+ *                   ratings:
+ *                     type: number
+ *                     description: The product's ratings.
+ *                   reviews:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     description: List of reviews for the product.
+ *       400:
+ *         description: Invalid user type.
  *         content:
  *           application/json:
  *             schema:
@@ -111,44 +162,80 @@ router.post('/addProduct/:userId', checkoutController.addProduct);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Server error."
+ *                   example: "Invalid type"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error retrieving available products"
  */
-router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProducts);
 
 /**
  * @swagger
  * /filterProducts/{userId}:
  *   get:
- *     summary: Get products by price range
+ *     summary: Filter products by price range
+ *     description: Retrieves products within a specified price range for a user with the specified userId.
  *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
+ *         description: The ID of the user filtering products.
  *         schema:
  *           type: string
- *         description: User ID
  *       - in: query
  *         name: minPrice
+ *         required: false
+ *         description: The minimum price of products to retrieve.
  *         schema:
  *           type: number
- *         description: Minimum price of the products
+ *           format: float
  *       - in: query
  *         name: maxPrice
+ *         required: false
+ *         description: The maximum price of products to retrieve.
  *         schema:
  *           type: number
- *         description: Maximum price of the products
+ *           format: float
  *     responses:
  *       200:
- *         description: Products within the price range
+ *         description: List of products filtered by price range.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Product'
- *       500:
- *         description: Internal server error
+ *                 type: object
+ *                 properties:
+ *                   picture:
+ *                     type: string
+ *                     description: The URL of the product picture.
+ *                   price:
+ *                     type: number
+ *                     format: float
+ *                     description: The price of the product.
+ *                   description:
+ *                     type: string
+ *                     description: A description of the product.
+ *                   sellerType:
+ *                     type: string
+ *                     description: The type of the seller.
+ *                   ratings:
+ *                     type: number
+ *                     description: The product's ratings.
+ *                   reviews:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     description: List of reviews for the product.
+ *       400:
+ *         description: Invalid user type.
  *         content:
  *           application/json:
  *             schema:
@@ -156,38 +243,73 @@ router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProdu
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Server error."
+ *                   example: "Invalid type"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error querying products by price range"
  */
-router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange);
 
 /**
  * @swagger
  * /editProducts/{userId}/{productId}:
  *   put:
- *     summary: Update product details
+ *     summary: Update a product
+ *     description: Updates an existing product for the user with the specified userId.
  *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
+ *         description: The ID of the user updating the product.
  *         schema:
  *           type: string
- *         description: User ID
  *       - in: path
  *         name: productId
  *         required: true
+ *         description: The ID of the product to be updated.
  *         schema:
  *           type: string
- *         description: Product ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               price:
+ *                 type: number
+ *                 format: float
+ *                 description: The updated price of the product.
+ *               description:
+ *                 type: string
+ *                 description: The updated description of the product.
+ *               originalQuantity:
+ *                 type: integer
+ *                 description: The updated original quantity of the product.
+ *               name:
+ *                 type: string
+ *                 description: The updated name of the product.
+ *               ratings:
+ *                 type: number
+ *                 description: The updated ratings of the product.
+ *               reviews:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of updated reviews for the product.
+ *               sellerType:
+ *                 type: string
+ *                 description: The updated type of the seller.
  *     responses:
  *       200:
- *         description: Product updated successfully
+ *         description: Product updated successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -197,9 +319,38 @@ router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange
  *                   type: string
  *                   example: "Product updated successfully"
  *                 product:
- *                   $ref: '#/components/schemas/Product'
- *       404:
- *         description: Product not found
+ *                   type: object
+ *                   description: The updated product object.
+ *                   properties:
+ *                     picture:
+ *                       type: string
+ *                       description: The URL of the product picture.
+ *                     price:
+ *                       type: number
+ *                       format: float
+ *                       description: The updated price of the product.
+ *                     description:
+ *                       type: string
+ *                       description: The updated description of the product.
+ *                     sellerType:
+ *                       type: string
+ *                       description: The type of the seller.
+ *                     originalQuantity:
+ *                       type: integer
+ *                       description: The updated original quantity of the product.
+ *                     name:
+ *                       type: string
+ *                       description: The updated name of the product.
+ *                     ratings:
+ *                       type: number
+ *                       description: The updated ratings of the product.
+ *                     reviews:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: List of updated reviews for the product.
+ *       400:
+ *         description: Invalid user type or missing required fields.
  *         content:
  *           application/json:
  *             schema:
@@ -207,9 +358,9 @@ router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Product not found"
+ *                   example: "Invalid type or missing fields"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
  *         content:
  *           application/json:
  *             schema:
@@ -217,75 +368,62 @@ router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Server error."
+ *                   example: "Error updating product"
  */
-router.put('/editProducts/:userId/:productId', checkoutController.updateProduct);
-
-/**
- * @swagger
- * /sortProducts/{userId}:
- *   get:
- *     summary: Get products sorted by ratings
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: User ID
- *     responses:
- *       200:
- *         description: Sorted list of products
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Server error."
- */
-router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSortedByRatings);
 
 /**
  * @swagger
  * /searchProductByName/{userId}:
  *   get:
- *     summary: Search for a product by name
+ *     summary: Search products by name
+ *     description: Searches for products by name for a user with the specified userId.
  *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
+ *         description: The ID of the user searching for products.
  *         schema:
  *           type: string
- *         description: User ID
  *       - in: query
- *         name: productName
+ *         name: name
+ *         required: true
+ *         description: The name of the product to search for.
  *         schema:
  *           type: string
- *         required: true
- *         description: The name of the product to search for
  *     responses:
  *       200:
- *         description: List of products matching the search criteria
+ *         description: List of products matching the search criteria.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Product'
- *       404:
- *         description: No products found
+ *                 type: object
+ *                 properties:
+ *                   picture:
+ *                     type: string
+ *                     description: The URL of the product picture.
+ *                   price:
+ *                     type: number
+ *                     format: float
+ *                     description: The price of the product.
+ *                   description:
+ *                     type: string
+ *                     description: A description of the product.
+ *                   sellerType:
+ *                     type: string
+ *                     description: The type of the seller.
+ *                   ratings:
+ *                     type: number
+ *                     description: The product's ratings.
+ *                   reviews:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     description: List of reviews for the product.
+ *       400:
+ *         description: Invalid user type or missing product name.
  *         content:
  *           application/json:
  *             schema:
@@ -293,9 +431,9 @@ router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSorte
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "No products found"
+ *                   example: "Invalid type or missing product name"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
  *         content:
  *           application/json:
  *             schema:
@@ -303,8 +441,15 @@ router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSorte
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Server error."
+ *                   example: "Error searching for products"
  */
+
+router.post('/addProduct/:userId', checkoutController.addProduct);
+router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProducts);
+router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange);
+router.put('/editProducts/:userId/:productId', checkoutController.updateProduct);
+router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSortedByRatings);
 router.get('/searchProductByName/:userId', checkoutController.searchProductByName);
+
 
 module.exports = router;
