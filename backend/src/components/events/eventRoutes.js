@@ -34,7 +34,7 @@ const eventController = require('./eventController');
  *               $ref: '#/components/schemas/Error'
  */
 
-router.post('/createHistoricalTag', eventController.createHistoricalTag);
+router.post('/createHistoricalTag/:_id', eventController.createHistoricalTag);
 
 
 

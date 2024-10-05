@@ -14,4 +14,9 @@ const createHistoricalTag = async (tagData) => {
 };
 
 
-module.exports = {createHistoricalTag};
+const getTypeForTag = async (id) => {
+  const user = await User.findOne({ _id: id });
+  return user.type
+};
+
+module.exports = {createHistoricalTag,getTypeForTag};
