@@ -8,12 +8,13 @@ import './Shared/Components/ItineraryList.css'; // Ensure this path is correct
 import MuseumList from './Shared/Components/MuseumList'; // Ensure this path is correct
 import GuestHP from './Shared/Components/GuestHP';
 import TourGuideHP from './Shared/Components/TourGuideHP';
+import GenericCard from './Shared/Components/UserCard/Usergenericcard'
 
 const App = () => {
   return (
     <div>
     
-      <TourGuideHP />
+      <GenericCard />
     </div>
   );
 };

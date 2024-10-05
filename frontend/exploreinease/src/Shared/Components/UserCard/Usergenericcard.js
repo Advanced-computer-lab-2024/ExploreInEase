@@ -1,9 +1,9 @@
 import React from 'react';
-import { Card, CardContent, CardMedia, Typography, CardActions, Button } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, CardActions, Button, Grid } from '@mui/material';
 import PropTypes from 'prop-types';
 
 // GenericCard Component
-const GenericCard = ({ title, subtitle, image, description, buttonLabel, onButtonClick }) => {
+const GenericCard = ({ image, labelValuePairs, buttonLabel, onButtonClick }) => {
   return (
     <Card
       sx={{
@@ -23,7 +23,7 @@ const GenericCard = ({ title, subtitle, image, description, buttonLabel, onButto
           component="img"
           height="180"
           image={image}
-          alt={title}
+          alt="Card image"
           sx={{
             borderTopLeftRadius: '16px',
             borderTopRightRadius: '16px',
@@ -31,24 +31,23 @@ const GenericCard = ({ title, subtitle, image, description, buttonLabel, onButto
         />
       )}
       <CardContent>
-        {/* Title */}
-        <Typography gutterBottom variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#333' }}>
-          {title}
-        </Typography>
-        
-        {/* Subtitle */}
-        {subtitle && (
-          <Typography variant="subtitle1" color="text.secondary" sx={{ marginBottom: '12px' }}>
-            {subtitle}
-          </Typography>
-        )}
-
-        {/* Description */}
-        <Typography variant="body2" color="text.secondary">
-          {description}
-        </Typography>
+        {/* Rendering label-value pairs */}
+        {labelValuePairs.map((pair, index) => (
+          <Grid container key={index} spacing={2} sx={{ marginBottom: '10px' }}>
+            <Grid item xs={6}>
+              <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold' }}>
+                {pair.label}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="body1" color="text.secondary">
+                {pair.value}
+              </Typography>
+            </Grid>
+          </Grid>
+        ))}
       </CardContent>
-      
+
       {/* Button actions */}
       <CardActions sx={{ justifyContent: 'center' }}>
         {buttonLabel && (
@@ -84,13 +83,18 @@ const ExampleCard = () => {
     alert('Button clicked!');
   };
 
+  const labelValuePairs = [
+    { label: 'Location', value: 'Paris, France' },
+    { label: 'Duration', value: '5 Days' },
+    { label: 'Price', value: '$1200' },
+    { label: 'Category', value: 'Adventure' },
+  ];
+
   return (
     <GenericCard
-      title="Amazing Adventure"
-      subtitle="Explore the beauty of nature"
       image="https://via.placeholder.com/345x180" // Replace with an actual image URL
-      description="Join us for an unforgettable journey through the world's most beautiful landscapes."
-      buttonLabel="Learn More"
+      labelValuePairs={labelValuePairs}
+      buttonLabel="Book Now"
       onButtonClick={handleButtonClick}
     />
   );
@@ -98,17 +102,19 @@ const ExampleCard = () => {
 
 // Define prop types
 GenericCard.propTypes = {
-  title: PropTypes.node.isRequired,
-  subtitle: PropTypes.node,
-  description: PropTypes.node.isRequired,
   image: PropTypes.string,
+  labelValuePairs: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   buttonLabel: PropTypes.string,
   onButtonClick: PropTypes.func,
 };
 
 // Define default prop values (optional)
 GenericCard.defaultProps = {
-  subtitle: 'Default Subtitle',
   image: 'https://via.placeholder.com/345x180', // Default placeholder image
 };
 
