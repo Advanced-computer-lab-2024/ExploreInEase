@@ -158,108 +158,199 @@ router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents
  * @swagger
  * /createTourGuide/{_id}:
  *   post:
- *     summary: Create a new tour guide profile
- *     tags: [Tour Guide]
+ *     summary: Create a new tour guide
+ *     description: Adds a new tour guide to the system.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the tour guide to create.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the user to convert to tour guide
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/TourGuide'
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The username for the tour guide.
+ *               password:
+ *                 type: string
+ *                 description: The password for the tour guide.
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the tour guide.
+ *               mobileNum:
+ *                 type: string
+ *                 description: The mobile number of the tour guide.
  *     responses:
  *       201:
- *         description: Tour guide created successfully
+ *         description: Tour guide created successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TourGuide'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tour guide created successfully"
+ *                 tourGuide:
+ *                   type: object
+ *                   additionalProperties: true
  *       400:
- *         description: Bad Request, validation errors
+ *         description: Bad request due to missing input.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing Input"
+ *       409:
+ *         description: Conflict due to existing username or email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Username already exists"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
+
 
 /**
  * @swagger
  * /getTourGuide/{_id}:
  *   get:
- *     summary: Retrieve a tour guide profile
- *     tags: [Tour Guide]
+ *     summary: Get tour guide details
+ *     description: Retrieve details of a specific tour guide by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the tour guide to retrieve.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the tour guide to retrieve
  *     responses:
  *       200:
- *         description: Tour guide profile found
+ *         description: Successfully retrieved tour guide details.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TourGuide'
+ *               type: object
+ *               properties:
+ *                 tourGuide:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Tour guide not found
+ *         description: Tour guide not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tour guide not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
+
 
 /**
  * @swagger
  * /updateTourGuide/{_id}:
  *   put:
- *     summary: Update a tour guide profile
- *     tags: [Tour Guide]
+ *     summary: Update a tour guide
+ *     description: Update the details of a specific tour guide by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the tour guide to update.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the tour guide to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/TourGuide'
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The updated email address of the tour guide.
+ *               mobileNum:
+ *                 type: string
+ *                 description: The updated mobile number of the tour guide.
+ *               otherDetails:
+ *                 type: object
+ *                 additionalProperties: true
  *     responses:
  *       200:
- *         description: Tour guide updated successfully
+ *         description: Tour guide updated successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TourGuide'
- *       400:
- *         description: Bad Request, validation errors
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tour guide updated successfully"
+ *                 tourGuide:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Tour guide not found
+ *         description: Tour guide not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tour guide not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
-
-
-
-
-
 
 
 
@@ -278,103 +369,198 @@ router.put('/updateTourGuide/:_id', userController.updateTourGuide);
  * @swagger
  * /createAdvertiser/{_id}:
  *   post:
- *     summary: Create a new advertiser profile
- *     tags: [Advertiser]
+ *     summary: Create a new advertiser
+ *     description: Adds a new advertiser to the system.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the advertiser to create.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the user to convert to advertiser
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Advertiser'
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The username for the advertiser.
+ *               password:
+ *                 type: string
+ *                 description: The password for the advertiser.
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the advertiser.
+ *               mobileNum:
+ *                 type: string
+ *                 description: The mobile number of the advertiser.
  *     responses:
  *       201:
- *         description: Advertiser profile created successfully
+ *         description: Advertiser created successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Advertiser'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Advertiser created successfully"
+ *                 advertiser:
+ *                   type: object
+ *                   additionalProperties: true
  *       400:
- *         description: Bad Request, validation errors
+ *         description: Bad request due to missing input.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing Input"
+ *       409:
+ *         description: Conflict due to existing username or email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Username already exists"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
 
 /**
  * @swagger
  * /getAdvertiser/{_id}:
  *   get:
- *     summary: Retrieve an advertiser profile
- *     tags: [Advertiser]
+ *     summary: Get advertiser details
+ *     description: Retrieve details of a specific advertiser by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the advertiser to retrieve.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the advertiser to retrieve
  *     responses:
  *       200:
- *         description: Advertiser profile found
+ *         description: Successfully retrieved advertiser details.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Advertiser'
+ *               type: object
+ *               properties:
+ *                 advertiser:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Advertiser not found
+ *         description: Advertiser not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Advertiser not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
 
 /**
  * @swagger
  * /updateAdvertiser/{_id}:
  *   put:
- *     summary: Update an advertiser profile
- *     tags: [Advertiser]
+ *     summary: Update an advertiser
+ *     description: Update the details of a specific advertiser by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the advertiser to update.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the advertiser to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Advertiser'
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The updated email address of the advertiser.
+ *               mobileNum:
+ *                 type: string
+ *                 description: The updated mobile number of the advertiser.
+ *               otherDetails:
+ *                 type: object
+ *                 additionalProperties: true
  *     responses:
  *       200:
- *         description: Advertiser profile updated successfully
+ *         description: Advertiser updated successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Advertiser'
- *       400:
- *         description: Bad Request, validation errors
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Advertiser updated successfully"
+ *                 advertiser:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Advertiser not found
+ *         description: Advertiser not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Advertiser not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
 
 
 
@@ -391,103 +577,197 @@ router.put('/updateAdvertiser/:_id', userController.updateAdvertiser);
  * @swagger
  * /createSeller/{_id}:
  *   post:
- *     summary: Create a new seller profile
- *     tags: [Seller]
+ *     summary: Create a new seller
+ *     description: Adds a new seller to the system.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the seller to create.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the user to convert to seller
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Seller'
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The username for the seller.
+ *               password:
+ *                 type: string
+ *                 description: The password for the seller.
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the seller.
+ *               mobileNum:
+ *                 type: string
+ *                 description: The mobile number of the seller.
  *     responses:
  *       201:
- *         description: Seller profile created successfully
+ *         description: Seller created successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Seller'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Seller created successfully"
+ *                 seller:
+ *                   type: object
+ *                   additionalProperties: true
  *       400:
- *         description: Bad Request, validation errors
+ *         description: Bad request due to missing input.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing Input"
+ *       409:
+ *         description: Conflict due to existing username or email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Username already exists"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
 
 /**
  * @swagger
  * /getSeller/{_id}:
  *   get:
- *     summary: Retrieve a seller profile
- *     tags: [Seller]
+ *     summary: Get seller details
+ *     description: Retrieve details of a specific seller by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the seller to retrieve.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the seller to retrieve
  *     responses:
  *       200:
- *         description: Seller profile found
+ *         description: Successfully retrieved seller details.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Seller'
+ *               type: object
+ *               properties:
+ *                 seller:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Seller not found
+ *         description: Seller not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Seller not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
 
 /**
  * @swagger
  * /updateSeller/{_id}:
  *   put:
- *     summary: Update a seller profile
- *     tags: [Seller]
+ *     summary: Update a seller
+ *     description: Update the details of a specific seller by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the seller to update.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the seller to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Seller'
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The updated email address of the seller.
+ *               mobileNum:
+ *                 type: string
+ *                 description: The updated mobile number of the seller.
+ *               otherDetails:
+ *                 type: object
+ *                 additionalProperties: true
  *     responses:
  *       200:
- *         description: Seller profile updated successfully
+ *         description: Seller updated successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Seller'
- *       400:
- *         description: Bad Request, validation errors
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Seller updated successfully"
+ *                 seller:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Seller not found
+ *         description: Seller not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Seller not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
 
 
 
@@ -499,69 +779,117 @@ router.put('/updateSeller/:_id', userController.updateSeller);
  * @swagger
  * /getTourist/{_id}:
  *   get:
- *     summary: Retrieve a tourist profile
- *     tags: [Tourist]
+ *     summary: Get tourist details
+ *     description: Retrieve details of a specific tourist by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the tourist to retrieve.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the tourist to retrieve
  *     responses:
  *       200:
- *         description: Tourist profile found
+ *         description: Successfully retrieved tourist details.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Tourist'
+ *               type: object
+ *               properties:
+ *                 tourist:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Tourist not found
+ *         description: Tourist not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tourist not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
 
 /**
  * @swagger
  * /updateTourist/{_id}:
  *   put:
- *     summary: Update a tourist profile (excluding username and wallet)
- *     tags: [Tourist]
+ *     summary: Update a tourist
+ *     description: Update the details of a specific tourist by ID.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: _id
+ *       - name: _id
+ *         in: path
+ *         required: true
+ *         description: The ID of the tourist to update.
  *         schema:
  *           type: string
- *         required: true
- *         description: ID of the tourist to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Tourist'
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The updated email address of the tourist.
+ *               mobileNum:
+ *                 type: string
+ *                 description: The updated mobile number of the tourist.
+ *               otherDetails:
+ *                 type: object
+ *                 additionalProperties: true
  *     responses:
  *       200:
- *         description: Tourist profile updated successfully
+ *         description: Tourist updated successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Tourist'
- *       400:
- *         description: Bad Request, cannot update username or wallet
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tourist updated successfully"
+ *                 tourist:
+ *                   type: object
+ *                   additionalProperties: true
  *       404:
- *         description: Tourist not found
+ *         description: Tourist not found.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tourist not found"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message here"
  */
+
 
 
 router.get('/getTourist/:_id', userController.getTourist);
