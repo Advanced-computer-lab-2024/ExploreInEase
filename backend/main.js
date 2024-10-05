@@ -46,7 +46,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
             },
             servers: [
                 {
-                    url: "http://localhost:3030", // Update to your server URL
+                    url: `http://localhost:${process.env.PORT}`, // Update to your server URL
                 },
             ],
         },
@@ -57,10 +57,10 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     // Serve swagger documentation
     ACLapp.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    // fs.writeFileSync('./swagger.json', JSON.stringify(swaggerDocs, null, 2), (err) => {
-    //     if (err) {
-    //         console.error('Error writing swagger.json:', err);
-    //     } else {
-    //         console.log('swagger.json has been saved!');
-    //     }
-    // });
+    fs.writeFileSync('./swagger.json', JSON.stringify(swaggerDocs, null, 2), (err) => {
+        if (err) {
+            console.error('Error writing swagger.json:', err);
+        } else {
+            console.log('swagger.json has been saved!');
+        }
+    });

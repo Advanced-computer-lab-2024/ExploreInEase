@@ -23,11 +23,11 @@ const ProductsSchema = new Schema({
         required: [true, 'Description is required'],
         minlength: 10               // Minimum length for description
     },
-    // sellerId: {
-    //     type: mongoose.Schema.Types.ObjectId, // Foreign key to reference the seller
-    //     ref: 'Users',               // Assuming you have a Users schema
-    //     required: [true, 'Seller ID is required']
-    // },
+    sellerId: {
+        type: mongoose.Schema.Types.ObjectId, // Foreign key to reference the seller
+        ref: 'Users',               // Assuming you have a Users schema
+        required: [true, 'Seller ID is required']
+    },
     ratings: {
         type: Number,
         min: 0,
