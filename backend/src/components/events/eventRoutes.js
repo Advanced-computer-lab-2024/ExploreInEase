@@ -5,71 +5,188 @@ const eventController = require('../events/eventController');
 
 /**
  * @swagger
- * /GetMyEvents:
+ * /GetMyEvents/{_id}/{userType}:
  *   get:
- *     summary: Retrieve user events by user ID and userType
- *     tags: [Events]
+ *     summary: Get events based on user type
+ *     description: Retrieve events related to a specific user based on their role (tourismGovernor, tourGuide, advertiser).
+ *     tags:
+ *       - Events
  *     parameters:
- *       - in: body
+ *       - in: path
  *         name: _id
+ *         required: true
+ *         description: The ID of the user
  *         schema:
  *           type: string
- *         required: true
- *         description: The user's ID
- *       - in: body
+ *         example: "64a8b0f1234567890abc1234"
+ *       - in: path
  *         name: userType
+ *         required: true
+ *         description: The type of the user (tourismGovernor, tourGuide, advertiser)
  *         schema:
  *           type: string
- *         required: true
- *         description: The user's type
+ *           enum: [tourismGovernor, tourGuide, advertiser]
+ *         example: "tourGuide"
  *     responses:
  *       200:
- *         description: A list of events for the user
+ *         description: Successfully retrieved user events
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 events:
+ *                   type: array
+ *                   description: List of events related to the user
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: The ID of the event
+ *                       name:
+ *                         type: string
+ *                         description: The name of the event
+ *                       description:
+ *                         type: string
+ *                         description: A brief description of the event
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                         description: The date of the event
+ *                       location:
+ *                         type: string
+ *                         description: The location of the event
  *       400:
- *         description: Invalid input
+ *         description: Bad request due to missing or invalid parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User ID and userType are required."
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid userId or userType format"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User not found"
  *       500:
- *         description: Server error
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Error details message"
  */
-router.get('/GetMyEvents', eventController.getUserEvents);
+router.get('/GetMyEvents/:_id/:userType', eventController.getUserEvents);
 
 /**
  * @swagger
- * /createCategory:
+ * /createCategory/{_id}:
  *   post:
- *     summary: Create a new activity category
- *     tags: [Activity Categories]
+ *     summary: Create a new category (admin only)
+ *     description: This endpoint allows the creation of a new category. Only users with the userType 'admin' can create categories. The userType is validated using the provided user ID.
+ *     tags:
+ *       - Categories
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user making the request (userType must be 'admin' to create categories)
+ *         example: "64d5a4e674b17cba3f4e2f96"
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
  *             properties:
  *               name:
  *                 type: string
- *                 description: The name of the category
+ *                 description: The name of the new category
+ *                 example: "Historical"
  *     responses:
  *       201:
- *         description: Category created successfully
+ *         description: Successfully created category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Category created successfully"
+ *                 category:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: The ID of the newly created category
+ *                     name:
+ *                       type: string
+ *                       description: The name of the newly created category
  *       400:
- *         description: Invalid input
+ *         description: Invalid inputs or userType is not 'admin'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid inputs" or "Invalid type"
  *       500:
- *         description: Server error
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while creating the category"
  */
-
-// Create activity category
-router.post('/createCategory', eventController.createCategory);
-
+router.post('/createCategory/:_id', eventController.createCategory);
 
 /**
  * @swagger
- * /getAllCategories:
+ * /getAllCategories/{userType}:
  *   get:
- *     summary: Retrieve all activity categories
- *     tags: [Activity Categories]
+ *     summary: Retrieve all categories based on user type
+ *     description: This endpoint retrieves all categories. The userType is validated before fetching the categories. Only valid user types can access this endpoint.
+ *     tags:
+ *       - Categories
+ *     parameters:
+ *       - in: path
+ *         name: userType
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The type of user making the request (e.g., advertiser, admin, tourGuide, tourist, guest)
+ *         example: "advertiser"
  *     responses:
  *       200:
- *         description: A list of categories
+ *         description: Successfully retrieved all categories
  *         content:
  *           application/json:
  *             schema:
@@ -77,30 +194,51 @@ router.post('/createCategory', eventController.createCategory);
  *               items:
  *                 type: object
  *                 properties:
+ *                   id:
+ *                     type: string
+ *                     description: The ID of the category
  *                   name:
  *                     type: string
+ *                     description: The name of the category
+ *       400:
+ *         description: Invalid userType provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid type"
  *       500:
- *         description: Server error
+ *         description: Internal server error while fetching categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while fetching categories"
  */
-
-// Read all activity categories
-router.get('/getAllCategories', eventController.getAllCategories); 
-
-
+router.get('/getAllCategories/:userType', eventController.getAllCategories);
 
 /**
  * @swagger
- * /updateCategoryById/{id}:
+ * /updateCategoryById/{_id}:
  *   put:
- *     summary: Update an activity category by ID
- *     tags: [Activity Categories]
+ *     summary: Update a category by its ID
+ *     description: This endpoint updates a category based on its ID. Only admin users can update a category.
+ *     tags:
+ *       - Categories
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: _id
  *         required: true
  *         schema:
  *           type: string
  *         description: The ID of the category to update
+ *         example: "123456"
  *     requestBody:
  *       required: true
  *       content:
@@ -111,53 +249,140 @@ router.get('/getAllCategories', eventController.getAllCategories);
  *               name:
  *                 type: string
  *                 description: The new name of the category
+ *                 example: "Updated Category Name"
+ *               description:
+ *                 type: string
+ *                 description: Optional description for the category
+ *                 example: "Updated description"
  *     responses:
  *       200:
- *         description: Category updated successfully
+ *         description: Successfully updated the category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the updated category
+ *                 name:
+ *                   type: string
+ *                   description: The updated name of the category
+ *                 description:
+ *                   type: string
+ *                   description: Optional updated description
  *       400:
- *         description: Invalid input
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing required fields" or "Invalid type"
  *       404:
  *         description: Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Category not found"
  *       500:
- *         description: Server error
+ *         description: Internal server error while updating the category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while updating the category"
  */
-
-
-// Update by name activity category
-router.put('/updateCategoryById/:id', eventController.updateCategoryById);
-
+router.put('/updateCategoryById/:_id', eventController.updateCategoryById);
 
 /**
  * @swagger
- * /deleteCategoryById/{id}:
+ * /deleteCategoryById/{_id}:
  *   delete:
- *     summary: Delete an activity category by ID
- *     tags: [Activity Categories]
+ *     summary: Delete a category by its ID
+ *     description: This endpoint deletes a category by its ID. Only admin users can delete a category.
+ *     tags:
+ *       - Categories
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: _id
  *         required: true
  *         schema:
  *           type: string
  *         description: The ID of the category to delete
+ *         example: "123456"
  *     responses:
  *       200:
- *         description: Category deleted successfully
+ *         description: Successfully deleted the category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Category deleted successfully"
+ *       400:
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing required fields" or "Invalid type"
  *       404:
  *         description: Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Category not found"
  *       500:
- *         description: Server error
+ *         description: Internal server error while deleting the category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ *                 error:
+ *                   type: string
+ *                   description: Details about the server error
  */
-
-// Delete by name activity category
-router.delete('/deleteCategoryById/:id', eventController.deleteCategoryById); 
+router.delete('/deleteCategoryById/:_id', eventController.deleteCategoryById);
 
 /**
  * @swagger
- * /createTag:
+ * /createPreferenceTag/{_id}:
  *   post:
- *     summary: Create a new preference tag
- *     tags: [Preference Tags]
+ *     summary: Create new tags
+ *     description: This endpoint allows users with the role of `admin` to create new tags.
+ *     tags:
+ *       - Tags
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user creating the tags
+ *         example: "123456"
  *     requestBody:
  *       required: true
  *       content:
@@ -165,59 +390,113 @@ router.delete('/deleteCategoryById/:id', eventController.deleteCategoryById);
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *                 description: The name of the tag
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of tags to create
+ *                 example: ["historical", "nature", "adventure"]
  *     responses:
  *       201:
- *         description: Tag created successfully
+ *         description: Successfully created the tag(s)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tags:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["historical", "nature", "adventure"]
  *       400:
- *         description: Invalid input
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing required fields" or "Invalid type"
  *       500:
- *         description: Server error
+ *         description: Internal server error while creating the tag(s)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error creating tag"
  */
-// Create a new preference tag
-router.post('/createTag', eventController.createTag);
-
+router.post('/createPreferenceTag/:_id', eventController.createTag);
 
 /**
  * @swagger
- * /getAllTags:
+ * /getAllPreferenceTags/{_id}:
  *   get:
  *     summary: Retrieve all preference tags
- *     tags: [Preference Tags]
+ *     description: This endpoint allows users with the role of `admin` to fetch all preference tags.
+ *     tags:
+ *       - Tags
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user fetching the tags
+ *         example: "123456"
  *     responses:
  *       200:
- *         description: A list of tags
+ *         description: Successfully retrieved the list of preference tags
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   name:
- *                     type: string
+ *                 type: string
+ *               example: ["historical", "nature", "adventure"]
+ *       400:
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Missing required fields" or "Invalid type"
  *       500:
- *         description: Server error
+ *         description: Internal server error while fetching the tags
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error fetching tags"
  */
-// Get all preference tags
-router.get('/getAllTags', eventController.getAllTags);
-
+router.get('/getAllPreferenceTags/:_id', eventController.getAllTags);
 
 /**
  * @swagger
- * /updateTagById/{id}:
+ * /updatePreferenceTagById/{_id}:
  *   put:
  *     summary: Update a preference tag by ID
- *     tags: [Preference Tags]
+ *     description: This endpoint allows updating a specific preference tag using its ID. The request is only allowed if the user is an admin.
+ *     tags:
+ *       - Tags
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: _id
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the tag to update
+ *         description: The ID of the preference tag to be updated
+ *         example: "607d1e3eab1e3f001fddf72a"
  *     requestBody:
  *       required: true
  *       content:
@@ -225,75 +504,324 @@ router.get('/getAllTags', eventController.getAllTags);
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *                 description: The new name of the tag
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *             example:
+ *               tags: ["cultural", "historical"]
  *     responses:
  *       200:
- *         description: Tag updated successfully
+ *         description: Successfully updated the preference tag
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tag updated successfully"
+ *                 updatedTag:
+ *                   type: object
+ *                   additionalProperties: true
  *       400:
- *         description: Invalid input
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid type"
  *       404:
  *         description: Tag not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tag not found"
  *       500:
- *         description: Server error
+ *         description: Internal server error while updating the tag
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error updating tag"
  */
-
-// Update a preference tag by name
-router.put('/updateTagById/:id', eventController.updateTagById);
-
+router.put('/updatePreferenceTagById/:_id', eventController.updateTagById);
 
 /**
  * @swagger
- * /deleteTagById/{id}:
+ * /deletePreferenceTagById/{_id}:
  *   delete:
  *     summary: Delete a preference tag by ID
- *     tags: [Preference Tags]
+ *     description: This endpoint allows deleting a specific preference tag using its ID. The request is only allowed if the user is an admin.
+ *     tags:
+ *       - Tags
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: _id
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the tag to delete
+ *         description: The ID of the preference tag to be deleted
+ *         example: "607d1e3eab1e3f001fddf72a"
  *     responses:
  *       200:
- *         description: Tag deleted successfully
+ *         description: Successfully deleted the preference tag
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tag deleted successfully"
+ *       400:
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid type"
  *       404:
  *         description: Tag not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tag not found"
  *       500:
- *         description: Server error
+ *         description: Internal server error while deleting the tag
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error deleting tag"
  */
-
-// Delete a preference tag by name
-router.delete('/deleteTagById/:id', eventController.deleteTagById);
-
-
+router.delete('/deletePreferenceTagById/:_id', eventController.deleteTagById);
 
 /**
  * @swagger
  * /upcomingEvents:
  *   get:
- *     summary: Retrieve all upcoming events
- *     tags: [Events]
+ *     summary: Retrieve upcoming events
+ *     description: This endpoint returns a list of upcoming events, including activities, itineraries, and historical places.
+ *     tags:
+ *       - Events
  *     responses:
  *       200:
  *         description: A list of upcoming events
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   name:
- *                     type: string
- *                   date:
- *                     type: string
- *                   location:
+ *               type: object
+ *               properties:
+ *                 activities:
+ *                   type: array
+ *                   items:
  *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "607d1e3eab1e3f001fddf72a"
+ *                       name:
+ *                         type: string
+ *                         example: "City Tour"
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                         example: "2024-10-15"
+ *                       time:
+ *                         type: string
+ *                         example: "10:00 AM"
+ *                       location:
+ *                         type: object
+ *                         properties:
+ *                           latitude:
+ *                             type: number
+ *                             example: 37.7749
+ *                           longitude:
+ *                             type: number
+ *                             example: -122.4194
+ *                       budget:
+ *                         type: number
+ *                         example: 50.00
+ *                       category:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                             example: "Cultural"
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: "sightseeing"
+ *                       specialDiscounts:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       created_by:
+ *                         type: string
+ *                         example: "admin"
+ *                       flag:
+ *                         type: boolean
+ *                         example: true
+ *                       isOpen:
+ *                         type: boolean
+ *                         example: true
+ *                       rating:
+ *                         type: number
+ *                         format: float
+ *                         example: 4.5
+ *                       comments:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-10T12:00:00Z"
+ *                       description:
+ *                         type: string
+ *                         example: "Explore the city's history and culture."
+ *                 itineraries:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "607d1e3eab1e3f001fddf72b"
+ *                       activities:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       locations:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       timeline:
+ *                         type: string
+ *                         example: "09:00 AM - 05:00 PM"
+ *                       directions:
+ *                         type: string
+ *                         example: "Start at the main square."
+ *                       language:
+ *                         type: string
+ *                         example: "English"
+ *                       price:
+ *                         type: number
+ *                         example: 150.00
+ *                       dateAvailable:
+ *                         type: string
+ *                         format: date
+ *                         example: "2024-10-15"
+ *                       accessibility:
+ *                         type: string
+ *                         example: "Wheelchair accessible"
+ *                       pickupLocation:
+ *                         type: string
+ *                         example: "Hotel Lobby"
+ *                       dropoffLocation:
+ *                         type: string
+ *                         example: "Main Square"
+ *                       isActivated:
+ *                         type: boolean
+ *                         example: true
+ *                       created_by:
+ *                         type: string
+ *                         example: "admin"
+ *                       flag:
+ *                         type: boolean
+ *                         example: false
+ *                       rating:
+ *                         type: number
+ *                         format: float
+ *                         example: 4.0
+ *                       comments:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                 historicalPlaces:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "607d1e3eab1e3f001fddf72c"
+ *                       description:
+ *                         type: string
+ *                         example: "A beautiful historical site."
+ *                       pictures:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: "http://example.com/image.jpg"
+ *                       location:
+ *                         type: object
+ *                         properties:
+ *                           latitude:
+ *                             type: number
+ *                             example: 37.7749
+ *                           longitude:
+ *                             type: number
+ *                             example: -122.4194
+ *                       openingHours:
+ *                         type: string
+ *                         example: "9 AM - 6 PM"
+ *                       ticketPrice:
+ *                         type: object
+ *                         properties:
+ *                           student:
+ *                             type: number
+ *                             example: 10.00
+ *                           native:
+ *                             type: number
+ *                             example: 20.00
+ *                           foreign:
+ *                             type: number
+ *                             example: 30.00
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-08-10T12:00:00Z"
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: "history"
  *       500:
- *         description: Server error
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Error message details"
  */
 router.get("/upcomingEvents", eventController.getUpcomingEvents);
 
@@ -301,22 +829,78 @@ router.get("/upcomingEvents", eventController.getUpcomingEvents);
  * @swagger
  * /filterUpcommingActivites:
  *   get:
- *     summary: Retrieve filtered upcoming activities
- *     tags: [Events]
+ *     summary: Filter upcoming activities
+ *     description: Retrieve a filtered list of upcoming activities based on budget, date, categoryId, and rating.
+ *     tags:
+ *       - Activities
  *     parameters:
  *       - in: query
- *         name: filters
+ *         name: budget
  *         schema:
- *           type: object
- *         required: false
- *         description: Filters for activities
+ *           type: number
+ *         description: The maximum budget for the activities
+ *         example: 100.50
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: The date of the activity (filter)
+ *         example: 2024-10-10T00:00:00Z
+ *       - in: query
+ *         name: categoryId
+ *         schema:
+ *           type: string
+ *         description: The ID of the category to filter activities by
+ *         example: "categoryId123"
+ *       - in: query
+ *         name: rating
+ *         schema:
+ *           type: integer
+ *         description: Minimum rating of the activities (1-5)
+ *         example: 4
  *     responses:
  *       200:
- *         description: A list of filtered upcoming activities
- *       400:
- *         description: Invalid filters
+ *         description: Successfully retrieved the filtered list of activities
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     description: The ID of the activity
+ *                   name:
+ *                     type: string
+ *                     description: The name of the activity
+ *                   budget:
+ *                     type: number
+ *                     description: The budget for the activity
+ *                   date:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The date of the activity
+ *                   categoryId:
+ *                     type: string
+ *                     description: The category ID of the activity
+ *                   rating:
+ *                     type: integer
+ *                     description: The rating of the activity (1-5)
  *       500:
- *         description: Server error
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Error details message"
  */
 router.get("/filterUpcommingActivites", eventController.GetupcommingActivitesFilter);
 
@@ -324,58 +908,194 @@ router.get("/filterUpcommingActivites", eventController.GetupcommingActivitesFil
  * @swagger
  * /filteritineraries:
  *   get:
- *     summary: Retrieve filtered itineraries
- *     tags: [Itineraries]
+ *     summary: Get filtered itineraries
+ *     description: Fetch itineraries based on budget, date, preferences, and language.
  *     parameters:
  *       - in: query
- *         name: filters
- *         schema:
- *           type: object
+ *         name: budget
  *         required: false
- *         description: Filters for itineraries
+ *         description: Budget filter for itineraries
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: date
+ *         required: false
+ *         description: Date filter for itineraries in YYYY-MM-DD format
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: preferences
+ *         required: false
+ *         description: User preferences for filtering itineraries
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *       - in: query
+ *         name: language
+ *         required: false
+ *         description: Preferred language for itineraries
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A list of filtered itineraries
- *       400:
- *         description: Invalid filters
+ *         description: Successfully retrieved filtered itineraries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 total:
+ *                   type: integer
+ *                   example: 2
+ *                 itineraries:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       activities:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       locations:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       price:
+ *                         type: number
+ *                       dateTimeAvailable:
+ *                         type: string
+ *                       language:
+ *                         type: string
+ *                       accessibility:
+ *                         type: string
+ *                       pickupLocation:
+ *                         type: string
+ *                       dropoffLocation:
+ *                         type: string
+ *                       rating:
+ *                         type: number
+ *                       comments:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: string
  *       500:
- *         description: Server error
+ *         description: An error occurred while fetching itineraries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while fetching itineraries"
+ *                 details:
+ *                   type: string
+ *                   example: "Error details message"
  */
 router.get("/filteritineraries", eventController.getFilteredItineraries);
 
 /**
  * @swagger
- * /historicalPlacesByTags:
+ * /historicalPlacesByTags/{_id}:
  *   get:
- *     summary: Retrieve historical places by tags
- *     tags: [Historical Places]
+ *     summary: Filter historical places by tags
+ *     description: Fetch historical places based on specified tags for a given user ID.
  *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         description: User ID to filter the historical places
+ *         schema:
+ *           type: string
  *       - in: query
  *         name: tags
+ *         required: true
+ *         description: Array of tags to filter historical places
  *         schema:
  *           type: array
  *           items:
  *             type: string
- *         required: true
- *         description: Tags to filter historical places
  *     responses:
  *       200:
- *         description: A list of historical places matching the tags
+ *         description: Successfully retrieved filtered historical places
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   pictures:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   location:
+ *                     type: string
+ *                   openingHours:
+ *                     type: string
+ *                   ticketPrice:
+ *                     type: number
+ *                   createdAt:
+ *                     type: string
+ *                   createdBy:
+ *                     type: string
+ *                   tags:
+ *                     type: array
+ *                     items:
+ *                       type: string
  *       400:
- *         description: Invalid tags
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       500:
- *         description: Server error
+ *         description: An error occurred while fetching historical places
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 details:
+ *                   type: string
  */
-router.get("/historicalPlacesByTags", eventController.filterHistoricalPlacesByTags);
-
+router.get("/historicalPlacesByTags/:_id", eventController.filterHistoricalPlacesByTags);
 
 /**
  * @swagger
- * /createHistoricalTag:
+ * /createHistoricalTag/{_id}:
  *   post:
- *     summary: Create a new historical tag
- *     description: Creates a new historical tag associated with cultural heritage.
- *     tags: [Historical Tag]
+ *     summary: Create a historical tag
+ *     description: Creates a new historical tag if the user is authorized (tourismGovernor).
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         description: User ID for authorization
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -383,38 +1103,28 @@ router.get("/historicalPlacesByTags", eventController.filterHistoricalPlacesByTa
  *           schema:
  *             type: object
  *             properties:
- *               type:
+ *               name:
  *                 type: string
- *                 description: The type of the historical tag (e.g., monuments, museums, etc.).
- *               period:
+ *                 description: Name of the historical tag
+ *               description:
  *                 type: string
- *                 description: The historical period associated with the tag.
+ *                 description: Description of the historical tag
  *     responses:
  *       201:
- *         description: Historical tag created successfully.
+ *         description: Successfully created a historical tag
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 id:
  *                   type: string
- *                   example: "Historical tag created successfully"
- *                 tag:
- *                   type: object
- *                   description: The created historical tag object.
- *                   properties:
- *                     id:
- *                       type: string
- *                       description: The ID of the created historical tag.
- *                     type:
- *                       type: string
- *                       description: The type of the historical tag.
- *                     period:
- *                       type: string
- *                       description: The historical period associated with the tag.
+ *                 name:
+ *                   type: string
+ *                 description:
+ *                   type: string
  *       400:
- *         description: Bad Request, validation errors or invalid tag type.
+ *         description: Missing required fields or invalid user type
  *         content:
  *           application/json:
  *             schema:
@@ -422,20 +1132,19 @@ router.get("/historicalPlacesByTags", eventController.filterHistoricalPlacesByTa
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Only tourism governors can create historical tags"
  *       500:
- *         description: Internal server error.
+ *         description: An error occurred while creating the tag
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 error:
  *                   type: string
- *                   example: "Error creating historical tag"
+ *                 details:
+ *                   type: string
  */
-
-router.post('/createHistoricalTag', eventController.createHistoricalTag);
+router.post('/createHistoricalTag/:_id', eventController.createHistoricalTag);
 
 // /activity/:_id/:userId
 /**

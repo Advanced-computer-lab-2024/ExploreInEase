@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 const router = express.Router()
 const userController = require('../users/userController');
 
-
 /**
  * @swagger
  * /deleteUserByIdAndType:
@@ -40,9 +39,8 @@ router.delete('/deleteUserByIdAndType', userController.deleteUserByIdAndType);
  * @swagger
  * /addGovernorOrAdmin:
  *   post:
- *     summary: Add a new governor or admin
- *     description: Creates a new tourism governor or admin.
- *     tags: [Users]
+ *     summary: Add a new tourismGovernor or Admin
+ *     description: Adds a new user with role 'tourismGovernor' or 'admin'.
  *     requestBody:
  *       required: true
  *       content:
@@ -52,54 +50,146 @@ router.delete('/deleteUserByIdAndType', userController.deleteUserByIdAndType);
  *             properties:
  *               username:
  *                 type: string
+ *                 description: The username for the new user.
  *               password:
  *                 type: string
+ *                 description: The password for the new user.
  *               type:
  *                 type: string
- *               
+ *                 enum: [admin, tourismGovernor]
+ *                 description: The role of the new user (either 'admin' or 'tourismGovernor').
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: User added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: object
+ *                   properties:
+ *                     username:
+ *                       type: string
+ *                     type:
+ *                       type: string
  *       400:
- *         description: Missing or invalid input
+ *         description: Missing required fields or username already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       500:
- *         description: Server error
+ *         description: An error occurred while adding the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  */
 router.post('/addGovernorOrAdmin', userController.addGovernorOrAdmin);
 
 /**
  * @swagger
- * /fetchAllUsersAndTourists:
+ * /fetchAllUsersAndTourists/{_id}:
  *   get:
  *     summary: Fetch all users and tourists
- *     description: Retrieve data from the Users and Tourists tables.
- *     tags: [Users]
+ *     description: Retrieves all registered users and tourists. Only accessible by admins.
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         description: The ID of the admin requesting the information.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Successfully retrieved data
+ *         description: A list of users and tourists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       username:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                 tourists:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       username:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *       400:
+ *         description: Missing _id parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       403:
+ *         description: Unauthorized access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  */
-router.get('/fetchAllUsersAndTourists', userController.fetchAllUsersAndTourists);
-
+router.get('/fetchAllUsersAndTourists/:_id', userController.fetchAllUsersAndTourists);
 
 /**
  * @swagger
  * /upcomingEvents/{username}:
  *   get:
- *     summary: Get a tourist's upcoming events
- *     description: Retrieve upcoming activities, itineraries, and historical places for a given tourist by username.
- *     tags: [Users]
+ *     summary: Get upcoming events for a tourist
+ *     description: Retrieves a list of upcoming activities, itineraries, and historical places for the specified tourist username.
  *     parameters:
  *       - in: path
  *         name: username
  *         required: true
+ *         description: The username of the tourist whose upcoming events are to be retrieved.
  *         schema:
  *           type: string
- *         description: The username of the tourist
  *     responses:
  *       200:
- *         description: Successfully retrieved upcoming events
+ *         description: A list of upcoming events
  *         content:
  *           application/json:
  *             schema:
@@ -116,7 +206,7 @@ router.get('/fetchAllUsersAndTourists', userController.fetchAllUsersAndTourists)
  *                         type: string
  *                       date:
  *                         type: string
- *                         format: date
+ *                         format: date-time
  *                       description:
  *                         type: string
  *                 upcomingItineraries:
@@ -130,7 +220,7 @@ router.get('/fetchAllUsersAndTourists', userController.fetchAllUsersAndTourists)
  *                         type: string
  *                       date:
  *                         type: string
- *                         format: date
+ *                         format: date-time
  *                       description:
  *                         type: string
  *                 upcomingHistoricalPlaces:
@@ -144,13 +234,38 @@ router.get('/fetchAllUsersAndTourists', userController.fetchAllUsersAndTourists)
  *                         type: string
  *                       date:
  *                         type: string
- *                         format: date
+ *                         format: date-time
  *                       description:
  *                         type: string
  *       400:
- *         description: Username is required or invalid
+ *         description: Bad request due to invalid username
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       404:
+ *         description: Tourist not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       500:
- *         description: Server error
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 details:
+ *                   type: string
  */
 router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents);
 
@@ -233,9 +348,6 @@ router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents
  *                   type: string
  *                   example: "Error message here"
  */
-
-
-
 /**
  * @swagger
  * /getTourGuide/{_id}:
@@ -282,9 +394,6 @@ router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents
  *                   type: string
  *                   example: "Error message here"
  */
-
-
-
 /**
  * @swagger
  * /updateTourGuide/{_id}:
@@ -352,18 +461,9 @@ router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents
  *                   example: "Error message here"
  */
 
-
-
 router.post('/createTourGuide/:_id', userController.createTourGuide);
 router.get('/getTourGuide/:_id', userController.getTourGuide);
 router.put('/updateTourGuide/:_id', userController.updateTourGuide);
-
-
-
-
-
-
-
 
 /**
  * @swagger
@@ -444,8 +544,6 @@ router.put('/updateTourGuide/:_id', userController.updateTourGuide);
  *                   type: string
  *                   example: "Error message here"
  */
-
-
 /**
  * @swagger
  * /getAdvertiser/{_id}:
@@ -492,8 +590,6 @@ router.put('/updateTourGuide/:_id', userController.updateTourGuide);
  *                   type: string
  *                   example: "Error message here"
  */
-
-
 /**
  * @swagger
  * /updateAdvertiser/{_id}:
@@ -561,17 +657,9 @@ router.put('/updateTourGuide/:_id', userController.updateTourGuide);
  *                   example: "Error message here"
  */
 
-
-
-
-
 router.post('/createAdvertiser/:_id', userController.createAdvertiser);
 router.get('/getAdvertiser/:_id', userController.getAdvertiser);
 router.put('/updateAdvertiser/:_id', userController.updateAdvertiser);
-
-
-
-
 
 /**
  * @swagger
@@ -652,8 +740,6 @@ router.put('/updateAdvertiser/:_id', userController.updateAdvertiser);
  *                   type: string
  *                   example: "Error message here"
  */
-
-
 /**
  * @swagger
  * /getSeller/{_id}:
@@ -700,7 +786,6 @@ router.put('/updateAdvertiser/:_id', userController.updateAdvertiser);
  *                   type: string
  *                   example: "Error message here"
  */
-
 /**
  * @swagger
  * /updateSeller/{_id}:
@@ -768,9 +853,6 @@ router.put('/updateAdvertiser/:_id', userController.updateAdvertiser);
  *                   example: "Error message here"
  */
 
-
-
-
 router.post('/createSeller/:_id', userController.createSeller);
 router.get('/getSeller/:_id', userController.getSeller);
 router.put('/updateSeller/:_id', userController.updateSeller);
@@ -821,8 +903,6 @@ router.put('/updateSeller/:_id', userController.updateSeller);
  *                   type: string
  *                   example: "Error message here"
  */
-
-
 /**
  * @swagger
  * /updateTourist/{_id}:
@@ -890,14 +970,9 @@ router.put('/updateSeller/:_id', userController.updateSeller);
  *                   example: "Error message here"
  */
 
-
-
 router.get('/getTourist/:_id', userController.getTourist);
 router.put('/updateTourist/:_id', userController.updateTourist);
 
-
-
-// /register/:type
 /**
  * @swagger
  * /register/{type}:
