@@ -9,12 +9,13 @@ import MuseumList from './Shared/Components/MuseumList'; // Ensure this path is 
 import GuestHP from './Shared/Components/GuestHP';
 import TourGuideHP from './Shared/Components/TourGuideHP';
 import GenericCard from './Shared/Components/UserCard/Usergenericcard'
+import RoleSelection from './Shared/Components/RoleSelection/RoleSelection';
 
 const App = () => {
   return (
     <div>
     
-      <GenericCard />
+      <RoleSelection />
     </div>
   );
 };

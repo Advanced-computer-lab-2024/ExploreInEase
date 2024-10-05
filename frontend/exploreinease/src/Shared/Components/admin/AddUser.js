@@ -4,7 +4,7 @@ import './AddUser.css'; // Import the CSS file for styling
 
 const AddUser = () => {
   const [user, setUser] = useState({
-    role: "Admin", // Default role as Admin
+    type: "Admin", // Default role as Admin
     username: "",
     password: "",
   });
@@ -25,7 +25,7 @@ const AddUser = () => {
     console.log("User added:", user);
     setShowSuccess(true); // Show the success message
     setTimeout(() => setShowSuccess(false), 3000); // Hide after 3 seconds
-    setUser({ role: "Admin", username: "", password: "" }); // Reset form
+    setUser({ type: "Admin", username: "", password: "" }); // Reset form
   };
 
   return (
@@ -36,7 +36,7 @@ const AddUser = () => {
 
         <label>
           Role:
-          <select name="role" value={user.role} onChange={handleInputChange}>
+          <select name="type" value={user.type} onChange={handleInputChange}>
             <option value="Admin">Admin</option>
             <option value="Tourism Governor">Tourism Governor</option>
           </select>

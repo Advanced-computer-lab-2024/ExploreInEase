@@ -25,10 +25,12 @@ const redMarkerIcon = new L.Icon({
   popupAnchor: [1, -34], // Popup anchor point
 });
 
+// Mock data with _id as string and added type field
 const museumsData = [
   {
-    id: 1,
+    _id: "1",
     name: "National Museum of History",
+    type: "museum", // Added type field
     description: "Explore artifacts from the past.",
     image: "https://via.placeholder.com/300",
     location: {
@@ -45,10 +47,12 @@ const museumsData = [
     },
     additionalDetails: "This museum houses a vast collection of historical artifacts from around the world.",
     coordinates: { lat: 51.505, lng: -0.09 },
+    createdBy: "user123", // Created by user with ID 'user123'
   },
   {
-    id: 2,
+    _id: "2",
     name: "Art Gallery of Modern Art",
+    type: "historical_place", // Added type field
     description: "Discover contemporary artworks.",
     image: "https://via.placeholder.com/300",
     location: {
@@ -65,11 +69,12 @@ const museumsData = [
     },
     additionalDetails: "The gallery features rotating exhibitions of modern art and photography.",
     coordinates: { lat: 51.507, lng: -0.08 },
+    createdBy: "user456", // Created by another user
   },
   // Add more museum data as needed
 ];
 
-const MuseumList = () => {
+const MuseumList = ({ userId }) => { // Accept userId as a prop
   const [open, setOpen] = useState(false);
   const [selectedMuseum, setSelectedMuseum] = useState(null);
 
@@ -83,48 +88,57 @@ const MuseumList = () => {
     setSelectedMuseum(null);
   };
 
+  // Filter museums created by the logged-in user
+  const userMuseums = museumsData.filter((museum) => museum.createdBy === userId);
+
   return (
     <div className="museum-list-container">
-      <h2>Explore Museums and Historical Places</h2>
+      <h2>Your Created Museums and Historical Places</h2>
       <Grid container spacing={3}>
-        {museumsData.map((museum) => (
-          <Grid item xs={12} sm={6} md={4} key={museum.id}>
-            <Card className="museum-card">
-              <CardMedia
-                component="img"
-                alt={museum.name}
-                height="200"
-                image={museum.image}
-                sx={{ borderRadius: "16px 16px 0 0" }} // Rounded corners for the image
-              />
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div" sx={{ fontWeight: "bold", color: "#333" }}>
-                  {museum.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {museum.description}
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  <strong>Location:</strong> {museum.location.address}, {museum.location.city}, {museum.location.county}, {museum.location.country}
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  <strong>Opening Hours:</strong> {museum.openingHours}
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  <strong>Ticket Prices:</strong>
-                  <ul>
-                    <li>Foreigner: {museum.ticketPrices.foreigner}</li>
-                    <li>Native: {museum.ticketPrices.native}</li>
-                    <li>Student: {museum.ticketPrices.student}</li>
-                  </ul>
-                </Typography>
-                <Button variant="contained" color="primary" onClick={() => handleClickOpen(museum)} sx={{ marginTop: 2 }}>
-                  Learn More
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+        {userMuseums.length > 0 ? (
+          userMuseums.map((museum) => (
+            <Grid item xs={12} sm={6} md={4} key={museum._id}>
+              <Card className="museum-card">
+                <CardMedia
+                  component="img"
+                  alt={museum.name}
+                  height="200"
+                  image={museum.image}
+                  sx={{ borderRadius: "16px 16px 0 0" }} // Rounded corners for the image
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div" sx={{ fontWeight: "bold", color: "#333" }}>
+                    {museum.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {museum.description}
+                  </Typography>
+                  <Typography variant="body2" color="text.primary">
+                    <strong>Location:</strong> {museum.location.address}, {museum.location.city}, {museum.location.county}, {museum.location.country}
+                  </Typography>
+                  <Typography variant="body2" color="text.primary">
+                    <strong>Opening Hours:</strong> {museum.openingHours}
+                  </Typography>
+                  <Typography variant="body2" color="text.primary">
+                    <strong>Ticket Prices:</strong>
+                    <ul>
+                      <li>Foreigner: {museum.ticketPrices.foreigner}</li>
+                      <li>Native: {museum.ticketPrices.native}</li>
+                      <li>Student: {museum.ticketPrices.student}</li>
+                    </ul>
+                  </Typography>
+                  <Button variant="contained" color="primary" onClick={() => handleClickOpen(museum)} sx={{ marginTop: 2 }}>
+                    Learn More
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Typography variant="body2" color="text.primary" sx={{ marginTop: 3 }}>
+            No museums or historical places created by you.
+          </Typography>
+        )}
       </Grid>
 
       {/* Modal for showing additional details */}

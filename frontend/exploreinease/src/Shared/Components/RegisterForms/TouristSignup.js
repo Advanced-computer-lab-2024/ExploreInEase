@@ -6,10 +6,11 @@ const TouristSignUp = () => {
     email: '',
     username: '',
     password: '',
-    mobileNumber: '',
-    nationality: '',
+    mobileNum: '',
+    nation: '',
     dob: '',
-    jobOrStudent: ''
+    profession: '',
+    type:''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -49,6 +50,17 @@ const TouristSignUp = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {success && <p style={{ color: 'green' }}>{success}</p>}
       <form onSubmit={handleSubmit}>
+
+      <label>Select Role:</label>
+        <select
+          name="type"
+          value={formData.type}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="tourist">Tourist</option>
+        
+        </select>
         <label>Email:</label>
         <input
           type="email"
@@ -79,8 +91,8 @@ const TouristSignUp = () => {
         <label>Mobile Number:</label>
         <input
           type="tel"
-          name="mobileNumber"
-          value={formData.mobileNumber}
+          name="mobileNum"
+          value={formData.mobileNum}
           onChange={handleInputChange}
           required
         />
@@ -88,8 +100,8 @@ const TouristSignUp = () => {
         <label>Nationality:</label>
         <input
           type="text"
-          name="nationality"
-          value={formData.nationality}
+          name="nation"
+          value={formData.nation}
           onChange={handleInputChange}
           required
         />
@@ -106,8 +118,8 @@ const TouristSignUp = () => {
         <label>Job/Student:</label>
         <input
           type="text"
-          name="jobOrStudent"
-          value={formData.jobOrStudent}
+          name="profession"
+          value={formData.profession}
           onChange={handleInputChange}
           required
         />

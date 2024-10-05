@@ -7,7 +7,7 @@ const GuideAdvertiserSignUp = () => {
     email: '',
     username: '',
     password: '',
-    role: 'tourGuide' // default selection
+    type: 'tourGuide' // default selection
   });
   const [success, setSuccess] = useState('');
 
@@ -59,8 +59,8 @@ const GuideAdvertiserSignUp = () => {
 
         <label>Select Role:</label>
         <select
-          name="role"
-          value={formData.role}
+          name="type"
+          value={formData.type}
           onChange={handleInputChange}
           required
         >
@@ -70,7 +70,7 @@ const GuideAdvertiserSignUp = () => {
         </select>
 
         <button type="submit" className="blue-button">
-          Register as {formData.role === 'tourGuide' ? 'Tour Guide' : formData.role === 'advertiser' ? 'Advertiser' : 'Seller'}
+          Register as {formData.type === 'tourGuide' ? 'Tour Guide' : formData.role === 'advertiser' ? 'Advertiser' : 'Seller'}
         </button>
       </form>
     </div>

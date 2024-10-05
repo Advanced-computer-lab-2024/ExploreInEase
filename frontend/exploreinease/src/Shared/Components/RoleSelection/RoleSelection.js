@@ -3,7 +3,7 @@ import TouristSignUp from '../RegisterForms/TouristSignUp'; // Ensure the path i
 import GuideAdvertiserSignUp from '../RegisterForms/GuideAdvertiserSignUp'; // Ensure the path is correct
 
 const RoleSelection = () => {
-  const [role, setRole] = useState(''); // No initial role selected
+  const [type, setRole] = useState(''); // No initial role selected
 
   const handleRoleChange = (selectedRole) => {
     setRole(selectedRole);
@@ -25,7 +25,7 @@ const RoleSelection = () => {
             color: 'white',
             transition: 'background-color 0.3s',
           }}
-          className={role === 'tourist' ? 'active' : ''}
+          className={type === 'tourist' ? 'active' : ''}
           onClick={() => handleRoleChange('tourist')}
         >
           Register as Tourist
@@ -41,7 +41,7 @@ const RoleSelection = () => {
             color: 'white',
             transition: 'background-color 0.3s',
           }}
-          className={role === 'guideAdvertiser' ? 'active' : ''}
+          className={type === 'guideAdvertiser' ? 'active' : ''}
           onClick={() => handleRoleChange('guideAdvertiser')}
         >
           Register as Guide / Advertiser / Seller
@@ -49,9 +49,9 @@ const RoleSelection = () => {
       </div>
 
       {/* Conditionally render the form based on the selected role */}
-      {role && (
+      {type && (
         <div className="form-content">
-          {role === 'tourist' ? <TouristSignUp /> : <GuideAdvertiserSignUp />}
+          {type === 'tourist' ? <TouristSignUp /> : <GuideAdvertiserSignUp />}
         </div>
       )}
     </div>

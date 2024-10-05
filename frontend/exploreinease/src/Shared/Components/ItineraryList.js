@@ -6,8 +6,6 @@ import L from "leaflet"; // Import Leaflet
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
 import "./ItineraryList.css"; // Import the CSS for styling
 
-
-
 // Custom red marker icon
 const redMarkerIcon = new L.Icon({
   iconUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Map_marker_icon_red.svg/1024px-Map_marker_icon_red.svg.png",
@@ -16,66 +14,74 @@ const redMarkerIcon = new L.Icon({
   popupAnchor: [1, -34], // Popup anchor point
 });
 
-const ItineraryList = () => {
-  const [itinerariesData] = useState([
+const ItineraryList = ({ userId }) => { // Pass userId as a prop
+  const [itinerariesData, setItinerariesData] = useState([
     {
-      id: 1,
-      title: "Historical London Tour",
+      _id: 1,
+      userId: 1,
+      name: "Historical London Tour",
       activities: [
         {
+          activityId:"",
           name: "Visit the Tower of London",
-          location: { lat: 51.5081, lng: -0.0759 },
+          location: "Tower of London", // Changed to string
           duration: "2 hours",
           language: "English",
         },
         {
+          activityId:"",
           name: "Walk through Westminster",
-          location: { lat: 51.4995, lng: -0.1248 },
+          location: "Westminster, London", // Changed to string
           duration: "1 hour",
           language: "English",
         },
       ],
       timeline: "10:00 AM - 1:00 PM",
-      price: "£100",
+      price: 100, // Changed to int
       availableDates: ["2024-10-01", "2024-10-02"],
       accessibility: "Wheelchair accessible",
       pickupLocation: "Central London",
       dropOffLocation: "Central London",
+      createdBy: "John Doe", // New attribute added
     },
     {
-      id: 2,
-      title: "Paris Adventure Tour",
+      _id: 2,
+      userId: 2,
+      name: "Paris Adventure Tour",
       activities: [
         {
+          activityId:"",
           name: "Explore the Eiffel Tower",
-          location: { lat: 48.8584, lng: 2.2941 },
+          location: "Eiffel Tower, Paris", // Changed to string
           duration: "1.5 hours",
           language: "French",
         },
         {
+          activityId:"",
           name: "Seine River Cruise",
-          location: { lat: 48.8566, lng: 2.3522 },
+          location: "Seine River, Paris", // Changed to string
           duration: "1 hour",
           language: "French",
         },
       ],
       timeline: "2:00 PM - 5:00 PM",
-      price: "€120",
+      price: 120, // Changed to int
       availableDates: ["2024-10-05", "2024-10-06"],
       accessibility: "Not wheelchair accessible",
       pickupLocation: "Eiffel Tower",
       dropOffLocation: "Louvre Museum",
+      createdBy: "Jane Smith", // New attribute added
     },
   ]);
 
   const [locationNames, setLocationNames] = useState({}); // State to store location names
 
-  // Function to get place names from coordinates
-  const getLocationName = async (lat, lng, id) => {
+  // Function to get place names from the location string
+  const getLocationName = async (location, _id) => {
     const provider = new OpenStreetMapProvider();
-    const result = await provider.search({ query: `${lat}, ${lng}` });
+    const result = await provider.search({ query: location });
     if (result && result.length > 0) {
-      setLocationNames((prev) => ({ ...prev, [id]: result[0].label })); // Save the location name
+      setLocationNames((prev) => ({ ...prev, [_id]: result[0].label })); // Save the location name
     }
   };
 
@@ -83,58 +89,67 @@ const ItineraryList = () => {
   useEffect(() => {
     itinerariesData.forEach((itinerary) => {
       itinerary.activities.forEach((activity) => {
-        getLocationName(activity.location.lat, activity.location.lng, activity.name);
+        getLocationName(activity.location, activity.name);
       });
     });
   }, [itinerariesData]);
+
+  // Filter itineraries by userId
+  const userItineraries = itinerariesData.filter(itinerary => itinerary.userId === userId);
 
   return (
     <div className="itinerary-list-container">
       <h2>Your Created Itineraries</h2>
       <div className="itinerary-cards">
-        {itinerariesData.map((itinerary) => (
-          <div key={itinerary.id} className="itinerary-card">
-            <h3>{itinerary.title}</h3>
-            <p><strong>Timeline:</strong> {itinerary.timeline}</p>
-            <p><strong>Price:</strong> {itinerary.price}</p>
-            <p><strong>Available Dates:</strong> {itinerary.availableDates.join(", ")}</p>
-            <p><strong>Accessibility:</strong> {itinerary.accessibility}</p>
-            <p><strong>Pickup Location:</strong> {itinerary.pickupLocation}</p>
-            <p><strong>Drop Off Location:</strong> {itinerary.dropOffLocation}</p>
+        {userItineraries.length > 0 ? (
+          userItineraries.map((itinerary) => (
+            <div key={itinerary._id} className="itinerary-card">
+              <h3>{itinerary.name}</h3>
+              <p><strong>Timeline:</strong> {itinerary.timeline}</p>
+              <p><strong>Price:</strong> £{itinerary.price}</p>
+              <p><strong>Available Dates:</strong> {itinerary.availableDates.join(", ")}</p>
+              <p><strong>Accessibility:</strong> {itinerary.accessibility}</p>
+              <p><strong>Pickup Location:</strong> {itinerary.pickupLocation}</p>
+              <p><strong>Drop Off Location:</strong> {itinerary.dropOffLocation}</p>
+              <p><strong>Created By:</strong> {itinerary.createdBy}</p> {/* New field */}
 
-            <h4>Activities:</h4>
-            {itinerary.activities.map((activity, index) => (
-              <div key={index} className="activity-detail">
-                <p><strong>Activity:</strong> {activity.name}</p>
-                <p><strong>Duration:</strong> {activity.duration}</p>
-                <p><strong>Language:</strong> {activity.language}</p>
-                
-                {/* Leaflet Map for each activity */}
-                <MapContainer center={activity.location} zoom={12} style={{ height: "200px", width: "100%" }}>
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <Marker position={activity.location} icon={redMarkerIcon}>
-                    <Popup>{locationNames[activity.name] || "Loading..."}</Popup>
-                  </Marker>
-                </MapContainer>
+              <h4>Activities:</h4>
+              {itinerary.activities.map((activity, index) => (
+                <div key={index} className="activity-detail">
+                  <p><strong>Activity:</strong> {activity.name}</p>
+                  <p><strong>Duration:</strong> {activity.duration}</p>
+                  <p><strong>Language:</strong> {activity.language}</p>
+                  <p><strong>Location:</strong> {activity.location}</p> {/* Display location as string */}
 
-                {/* GPS Link */}
-                <p>
-                  <strong>GPS Link:</strong>{" "}
-                  <a
-                    href={`https://www.openstreetmap.org/?mlat=${activity.location.lat}&mlon=${activity.location.lng}#map=12/${activity.location.lat}/${activity.location.lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open in OpenStreetMap
-                  </a>
-                </p>
-              </div>
-            ))}
-          </div>
-        ))}
+                  {/* Leaflet Map for each activity */}
+                  <MapContainer center={{ lat: 51.5074, lng: -0.1278 }} zoom={12} style={{ height: "200px", width: "100%" }}>
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={{ lat: 51.5074, lng: -0.1278 }} icon={redMarkerIcon}>
+                      <Popup>{activity.location}</Popup>
+                    </Marker>
+                  </MapContainer>
+
+                  {/* GPS Link */}
+                  <p>
+                    <strong>GPS Link:</strong>{" "}
+                    <a
+                      href={`https://www.openstreetmap.org/search?query=${activity.location}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open in OpenStreetMap
+                    </a>
+                  </p>
+                </div>
+              ))}
+            </div>
+          ))
+        ) : (
+          <p>No itineraries found for this tour guide.</p>
+        )}
       </div>
     </div>
   );
