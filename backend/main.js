@@ -36,31 +36,31 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
         console.log('Error connecting to MongoDB:', error);
     });
 
-    // const swaggerOptions = {
-    //     swaggerDefinition: {
-    //         openapi: "3.0.0", // OpenAPI version
-    //         info: {
-    //             title: "User Registration API",
-    //             version: "1.0.0",
-    //             description: "API for ACL Project",
-    //         },
-    //         servers: [
-    //             {
-    //                 url: "http://localhost:3030", // Update to your server URL
-    //             },
-    //         ],
-    //     },
-    //     apis: ['./src/components/users/userRoutes.js', './src/components/events/eventRoutes.js', './src/components/checkouts/checkoutsRoutes.js'], // Path to the API docs
-    // };
-    // const swaggerDocs = swaggerJsDoc(swaggerOptions);
+    const swaggerOptions = {
+        swaggerDefinition: {
+            openapi: "3.0.0", // OpenAPI version
+            info: {
+                title: "User Registration API",
+                version: "1.0.0",
+                description: "API for ACL Project",
+            },
+            servers: [
+                {
+                    url: "http://localhost:3030", // Update to your server URL
+                },
+            ],
+        },
+        apis: ['./src/components/users/userRoutes.js', './src/components/events/eventRoutes.js', './src/components/checkouts/checkoutsRoutes.js'], // Path to the API docs
+    };
+    const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-    // // Serve swagger documentation
-    // ACLapp.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+    // Serve swagger documentation
+    ACLapp.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    // fs.writeFileSync('./swagger.json', JSON.stringify(swaggerDocs, null, 2), (err) => {
-    //     if (err) {
-    //         console.error('Error writing swagger.json:', err);
-    //     } else {
-    //         console.log('swagger.json has been saved!');
-    //     }
-    // });
+    fs.writeFileSync('./swagger.json', JSON.stringify(swaggerDocs, null, 2), (err) => {
+        if (err) {
+            console.error('Error writing swagger.json:', err);
+        } else {
+            console.log('swagger.json has been saved!');
+        }
+    });
