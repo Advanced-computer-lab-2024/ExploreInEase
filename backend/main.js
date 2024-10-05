@@ -1,9 +1,10 @@
-require("dotenv").config();
+require("dotenv").config({ path: "src/.env" });
 
 const express = require("express");
 const mongoose = require("mongoose");
 const userRoutes = require("./src/components/users/userRoutes");
 const eventRoutes = require("./src/components/events/eventRoutes");
+
 // Express app
 const ACLapp = express();
 

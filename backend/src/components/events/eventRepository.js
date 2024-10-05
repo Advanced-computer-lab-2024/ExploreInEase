@@ -110,14 +110,19 @@ const getFilteredItineraries = async (filters) => {
 
     const currentDate = new Date();
 
-    if (filters.Date) {
-      query.dateTimeAvailable = { $gte: new Date(filters.Date) };
+    // Check for date filtering
+    if (filters.date) {
+      // Ensure that we are comparing dates correctly
+      query.dateTimeAvailable = {
+        $elemMatch: { $gte: new Date(filters.date) },
+      };
     } else {
-      query.dateTimeAvailable = { $gte: currentDate };
+      query.dateTimeAvailable = { $elemMatch: { $gte: currentDate } };
     }
 
+    // Budget filter
     if (filters.budget) {
-      query.price = { $lte: parseFloat(filters.budget) };
+      query.price = { $lte: parseFloat(filters.budget) }; // Filter by budget
     }
 
     // Preferences filter (tags)
@@ -125,7 +130,7 @@ const getFilteredItineraries = async (filters) => {
       const tagsArray = Array.isArray(filters.preferences)
         ? filters.preferences
         : [filters.preferences];
-      query.tags = { $in: tagsArray }; // Filter by tags
+      query.preftag = { $in: tagsArray }; // Filter by tags
     }
 
     // Language filter

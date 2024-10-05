@@ -110,7 +110,7 @@ const getAllUpcomingEvents = async () => {
       location: place.location, // Location details (latitude, longitude, address)
       openingHours: place.openingHours, // Opening hours
       ticketPrice: place.ticketPrice, // Detailed ticket price (student/native/foreign)
-      createdAt: place.createdAt,
+      createdAt: place.createdAt.username,
       tags: place.tags, // Associated tags if needed
     }));
 
@@ -155,25 +155,48 @@ const getFilteredHistoricalPlaces = async (tags) => {
 
 const getFilteredItineraries = async (filters) => {
   try {
-    // Pass the filters, page, and limit to the repository to fetch itineraries
     const itineraries = await eventRepository.getFilteredItineraries(filters);
 
-    // Format the fetched itineraries before returning
-    return itineraries.map((itinerary) => ({
-      id: itinerary._id,
-      activities: itinerary.activities,
-      activitiesNames: itinerary.activities.name,
-      locations: itinerary.locations,
-      price: itinerary.price,
-      dateTimeAvailable: itinerary.dateTimeAvailable,
-      language: itinerary.language,
-      accessibility: itinerary.accessibility,
-      pickupLocation: itinerary.pickupLocation,
-      dropoffLocation: itinerary.dropoffLocation,
-      rating: itinerary.rating,
-      comments: itinerary.comments,
-      tags: itinerary.tags.map((tag) => tag.name), // Extract tag names if populated
-    }));
+    // Debugging: Log the fetched itineraries
+    console.log("Fetched Itineraries:", itineraries);
+
+    // Proceed only if itineraries is an array
+    if (!Array.isArray(itineraries)) {
+      throw new Error("Fetched itineraries is not an array");
+    }
+
+    // Continue with mapping
+    return itineraries.map((itinerary) => {
+      // Additional debugging inside the map
+      console.log("Processing Itinerary:", itinerary);
+
+      // Ensure 'tags' is an array
+      const tags = Array.isArray(itinerary.tags)
+        ? itinerary.tags.map((tag) => tag)
+        : [];
+
+      // Ensure 'activities' has a 'name' property
+      const activitiesNames =
+        itinerary.activities && itinerary.activities.name
+          ? itinerary.activities.name
+          : null;
+
+      return {
+        id: itinerary._id,
+        activities: itinerary.activities,
+        activitiesNames: activitiesNames,
+        locations: itinerary.locations,
+        price: itinerary.price,
+        dateTimeAvailable: itinerary.dateTimeAvailable,
+        language: itinerary.language,
+        accessibility: itinerary.accessibility,
+        pickupLocation: itinerary.pickupLocation,
+        dropoffLocation: itinerary.dropoffLocation,
+        rating: itinerary.rating,
+        comments: itinerary.comments,
+        tags: tags, // Safe mapping of tags
+      };
+    });
   } catch (error) {
     console.error(`Service Error: ${error.message}`);
     throw error;
