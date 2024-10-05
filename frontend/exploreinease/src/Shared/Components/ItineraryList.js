@@ -148,7 +148,7 @@ const ItineraryList = ({ userId }) => { // Pass userId as a prop
             </div>
           ))
         ) : (
-          <p>No itineraries found for this tour guide.</p>
+          <p>No itineraries created by you.</p>
         )}
       </div>
     </div>

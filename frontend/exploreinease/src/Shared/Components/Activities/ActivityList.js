@@ -110,7 +110,7 @@ const ActivityList = ({ userId }) => { // Pass userId as a prop
             </div>
           ))
         ) : (
-          <p>No activities found for this advertiser.</p>
+          <p>No activities created by you.</p>
         )}
       </div>
     </div>
