@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import AdminsCard from '../Shared/Components/AdminCard/adminsCard';
 
 const AdminUserProfiles = ({ users = [], onDelete }) => {
@@ -16,7 +16,7 @@ const AdminUserProfiles = ({ users = [], onDelete }) => {
   return (
     <Grid container spacing={2} sx={{ padding: 2 }}>
       {userList.map((user) => (
-        <Grid item xs={12} sm={6} md={4} key={user.email}> {/* Adjust size based on your design */}
+        <Grid item xs={12} sm={6} md={4} key={user.email}> 
           <AdminsCard
             name={user.name}
             email={user.email}
@@ -26,7 +26,7 @@ const AdminUserProfiles = ({ users = [], onDelete }) => {
             nationality={user.nationality}
             dateOfBirth={user.dateOfBirth}
             typeOfLifeLiving={user.typeOfLifeLiving}
-            onDelete={() => handleDelete(user.name)} // Pass the user's name for deletion
+            onDelete={() => handleDelete(user.name)} 
           />
         </Grid>
       ))}

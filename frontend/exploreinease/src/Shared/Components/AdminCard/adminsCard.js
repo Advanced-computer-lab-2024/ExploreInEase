@@ -2,7 +2,8 @@ import * as React from 'react';
 import Card from '@mui/material/Card';
 import Avatar from '@mui/material/Avatar';
 import SettingsApplicationsSharpIcon from '@mui/icons-material/SettingsApplicationsSharp';
-import { Box, CardContent, Typography, CardActions, IconButton, Popover, Button, Grid } from '@mui/material';
+import { Box, CardContent, Typography, CardActions, IconButton, Popover, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 const AdminsCard = ({ name, email, role, initialStatus, mobileNumber, nationality, dateOfBirth, typeOfLifeLiving, onDelete }) => {
   // State for controlling the popover

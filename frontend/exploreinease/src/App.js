@@ -5,13 +5,21 @@ import AdvertiserProfile from './Shared/Components/advertiserProfile/advertiserP
 import SellerProfile from './Shared/Components/SellerProfile/sellerProfile.js';
 import TouristProfile from './Shared/Components/TouristProfile/touristProfile.js';
 import AdminUserProfiles from './Admin/adminUserProfiles.js'
-
-
+import Tags from './Advertier/tags.js'
+import Preferencetags from './Admin/preferenceTags.js';
+import ActivityCategory from './Admin/activityCategories.js';
+import HistoricalPlaces from './TouristGovernor/historicPlaces.js';
+import Activity from './Advertier/activities.js';
+import Filter from './Shared/Components/Filter/Filter.js';
+import ProductCard from './Shared/Components/Product/Product.js';
+import RoleSelection from './SignUp/RoleSelection.js';
+import AddUser from './Admin/AddUser.js';
+import ItineraryForm from './Shared/TourGuide/Itinerary.js';
   const App = () => {
     const users = [
         {
             name: 'Shahd Fawzy',
-            email: 'john@example.com',
+            email: 'john1@example.com',
             role: 'Tour Guide',
             status: 'Active',
             mobileNumber: '123-456-7890',
@@ -21,7 +29,7 @@ import AdminUserProfiles from './Admin/adminUserProfiles.js'
         },
         {
             name: 'Sarrah El-Gazzar',
-            email: 'jane@example.com',
+            email: 'jane2@example.com',
             role: 'Seller',
             status: 'Pending',
             mobileNumber: '987-654-3210',
@@ -31,7 +39,7 @@ import AdminUserProfiles from './Admin/adminUserProfiles.js'
         },
         {
           name: 'Tasneem',
-          email: 'jane@example.com',
+          email: 'jane3@example.com',
           role: 'Admin',
           status: 'Pending',
           mobileNumber: '987-654-3210',
@@ -41,7 +49,7 @@ import AdminUserProfiles from './Admin/adminUserProfiles.js'
       },
       {
         name: 'Ali Hani',
-        email: 'jane@example.com',
+        email: 'jane4@example.com',
         role: 'Tourist',
         status: 'Pending',
         mobileNumber: '987-654-3210',
@@ -57,7 +65,16 @@ import AdminUserProfiles from './Admin/adminUserProfiles.js'
       description="Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging across all continents except Antarctica."
       imageUrl="/static/images/cards/contemplative-reptile.jpg"/> */}
       {/* <TourGuideProfile username='Shahd Mohamed' email='shahd@gmail.com' password="Ss123456!" mobileNumber="01027556612" yearExp="5" prevWork="previous work is a lot" /> */}
-      <SellerProfile/>
+      {/* //     <GenericCard
+      title="Amazing Adventure"
+      subtitle="Explore the beauty of nature"
+      image="https://via.placeholder.com/345x180" // Replace with an actual image URL
+      description="Join us for an unforgettable journey through the world's most beautiful landscapes."
+      buttonLabel="Learn More"
+      onButtonClick={handleButtonClick}
+    /> */}
+       <ItineraryForm/>
+
  </div>
   );
 }
