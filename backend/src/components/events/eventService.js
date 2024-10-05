@@ -391,6 +391,33 @@ const deleteHistoricalPlace = async (id, userId) => {
   return {status: 200, response: {message: 'Historical Place deleted'}};
 };
 
+const getFilteredItineraries = async (filters) => {
+  try {
+    // Pass the filters, page, and limit to the repository to fetch itineraries
+    const itineraries = await eventRepository.getFilteredItineraries(filters);
+
+    // Format the fetched itineraries before returning
+    return itineraries.map((itinerary) => ({
+      id: itinerary._id,
+      activities: itinerary.activities,
+      activitiesNames: itinerary.activities.name,
+      locations: itinerary.locations,
+      price: itinerary.price,
+      dateTimeAvailable: itinerary.dateTimeAvailable,
+      language: itinerary.language,
+      accessibility: itinerary.accessibility,
+      pickupLocation: itinerary.pickupLocation,
+      dropoffLocation: itinerary.dropoffLocation,
+      rating: itinerary.rating,
+      comments: itinerary.comments,
+      tags: itinerary.tags.map((tag) => tag.name), // Extract tag names if populated
+    }));
+  } catch (error) {
+    console.error(`Service Error: ${error.message}`);
+    throw error;
+  }
+};
+
 
 module.exports = {
   getUserEvents,
@@ -421,6 +448,7 @@ module.exports = {
   deleteHistoricalPlace,
   getAllItineraries,
   getAllActivities,
-  getAllActivitiesAdvertiser
+  getAllActivitiesAdvertiser,
+  getFilteredItineraries
 };
 
