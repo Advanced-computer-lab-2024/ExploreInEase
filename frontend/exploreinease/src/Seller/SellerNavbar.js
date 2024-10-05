@@ -1,7 +1,7 @@
 // src/Shared/Components/GuestHP.js
 import React from 'react';
 import logo from './logo.png'; // Adjust the path as needed
-import './GuestHP.css'; // Import the CSS file
+import './Guest/GuestHP.css'; // Import the CSS file
 
 const HomePage = () => {
   return (
@@ -16,10 +16,10 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <a href="https://www.google.com/">Register</a>
-          <a href="https://www.google.com/">Upload Required Documents</a>
-          <a href="https://www.google.com/">View Step-by-Step Guide</a>
-          <a href="https://www.google.com/">Activity Categories</a>
+          <a href="https://www.google.com/">View List of Available Products</a>
+          <a href="https://www.google.com/">Add Product</a>
+          <a href="https://www.google.com/">Edit Product</a>
+          <a href="https://www.google.com/">My Profile</a>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

@@ -1,0 +1,26 @@
+/* src/Shared/Components/MuseumList.css */
+.museum-list-container {
+    padding: 20px;
+    background-color: #f8f9fa; /* Light background for contrast */
+    border-radius: 8px;
+  }
+  
+  .museum-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    border-radius: 16px; /* Rounded corners for cards */
+  }
+  
+  .museum-card:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+  }
+  
+  /* Responsive typography */
+  h2 {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  

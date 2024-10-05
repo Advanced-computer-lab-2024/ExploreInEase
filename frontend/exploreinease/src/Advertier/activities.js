@@ -85,7 +85,16 @@ function Activity() {
 
   const onLoad = (mapInstance) => {
     setMap(mapInstance);
-    
+    if(window.google){
+      console.log(1)
+
+    } if(window.google.maps){
+      console.log(2)
+
+    }if(!window.google.maps.places){
+      console.log(3)
+
+    }
     // Check if window.google is defined
     if (window.google && window.google.maps && window.google.maps.places) {
       const service = new window.google.maps.places.PlacesService(mapInstance);

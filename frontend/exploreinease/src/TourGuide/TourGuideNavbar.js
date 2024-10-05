@@ -1,9 +1,9 @@
-// src/Shared/Components/GuestHP.js
+// src/Shared/Components/TourGuideHP.js
 import React from 'react';
 import logo from './logo.png'; // Adjust the path as needed
-import './GuestHP.css'; // Import the CSS file
+import '../Guest/GuestHP.css'; // You can use the same CSS for a consistent style
 
-const HomePage = () => {
+const TourGuideHP = () => {
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -16,13 +16,11 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <a href="https://www.google.com/">Register</a>
-          <a href="https://www.google.com/">Upload Required Documents</a>
-          <a href="https://www.google.com/">View Step-by-Step Guide</a>
-          <a href="https://www.google.com/">Activity Categories</a>
+          <a href="">My Profile</a>
+          <a href="C:\Users\pc\OneDrive\Desktop\ExploreInEase\frontend\exploreinease\src\Shared\Components\ItineraryList.js">View My Created Itineraries</a>
+          <a href="/manage-itineraries">Create/Read/Update/Delete Itineraries</a>
         </div>
         <div className="currency-selector">
-          <span className="currency-symbol"></span>
           <select>
             <option value="usd">USD ($)</option>
             <option value="eur">EUR (€)</option>
@@ -42,4 +40,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default TourGuideHP;

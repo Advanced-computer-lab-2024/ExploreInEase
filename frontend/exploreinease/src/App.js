@@ -14,7 +14,7 @@ import Filter from './Shared/Components/Filter/Filter.js';
 import ProductCard from './Shared/Components/Product/Product.js';
 import RoleSelection from './SignUp/RoleSelection.js';
 import AddUser from './Admin/AddUser.js';
-import ItineraryForm from './Shared/TourGuide/Itinerary.js';
+import ItineraryForm from './TourGuide/Itinerary.js';
   const App = () => {
     const users = [
         {
@@ -73,7 +73,7 @@ import ItineraryForm from './Shared/TourGuide/Itinerary.js';
       buttonLabel="Learn More"
       onButtonClick={handleButtonClick}
     /> */}
-       <ItineraryForm/>
+       <Activity/>
 
  </div>
   );
