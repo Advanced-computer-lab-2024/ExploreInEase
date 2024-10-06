@@ -16,12 +16,21 @@ const getAllAvailableProducts = async () => {
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
         })
-        .select('picture price description ratings reviews sellerId name')
-        .populate('sellerId', 'username sellerType');
+        .select('picture price description ratings reviews name originalQuantity')
+        .populate({
+            path: 'sellerId',
+            select: 'sellerType' // Only select sellerType
+        });
 
-        return availableProducts;
+        const productsWithSellerType = availableProducts.map(product => ({
+            ...product.toObject(),
+            sellerType: product.sellerId.sellerType, // Add sellerType directly
+            sellerId: undefined // Optionally, remove sellerId from the response
+        }));
+
+        return productsWithSellerType;
     } catch (error) {
-        throw new Error(`Error retrieving available products: ${error.message}`);
+        throw new Error(`Error retrieving available products:${error.message}`);
     }
 };
 

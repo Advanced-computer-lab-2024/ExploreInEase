@@ -26,7 +26,8 @@ import {
 
 const ProductCard = () => {
   const location = useLocation();
-  const { Product } = location.state || {};
+  const { Product,Type } = location.state || {};
+ 
   
   const [initialProductList, setInitialProductList] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -43,7 +44,7 @@ const ProductCard = () => {
     price: '',
     description: '',
     sellerType: '',
-    rating: '',
+    ratings: '',
     originalQuantity: '',
     reviews: [],
     picture: '',
@@ -112,7 +113,7 @@ const ProductCard = () => {
       price: '',
       description: '',
       sellerType: '',
-      rating: '',
+      ratings: '',
       originalQuantity: '',
       picture:'',
       reviews: [],
@@ -125,7 +126,7 @@ const ProductCard = () => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
-
+console.log(Product.ratings)
   const validateForm = () => {
     let formErrors = {};
 
@@ -143,8 +144,8 @@ const ProductCard = () => {
     if (!productData.sellerType) {
       formErrors.sellerType = 'Seller is required';
     }
-    if (!productData.rating || productData.rating < 0 || productData.rating > 5) {
-      formErrors.rating = 'Rating must be between 0 and 5';
+    if (!productData.ratings || productData.ratings < 0 || productData.ratings > 5) {
+      formErrors.ratings = 'ratings must be between 0 and 5';
     }
     if (!productData.originalQuantity) {
       formErrors.originalQuantity = 'Quantity is required';
@@ -159,7 +160,7 @@ const ProductCard = () => {
         productId: nextId,
         name: productData.name,
         price: parseFloat(productData.price),
-        rating: parseFloat(productData.rating),
+        ratings: parseFloat(productData.ratings),
       };
       setProducts((prev) => [...prev, newProduct]);
       setNextId((prev) => prev + 1);
@@ -172,7 +173,7 @@ const ProductCard = () => {
       setProducts((prev) =>
         prev.map((product) =>
           product.id === productData.id
-            ? { ...product, name: productData.name, price: parseFloat(productData.price), rating: parseFloat(productData.rating) }
+            ? { ...product, name: productData.name, price: parseFloat(productData.price), ratings: parseFloat(productData.ratings) }
             : product
         )
       );
@@ -185,10 +186,13 @@ const ProductCard = () => {
     const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
     return nameMatch && priceMatch;
   }).sort((a, b) => {
-    if (sortOption === 'ratingAsc') return a.rating - b.rating;
-    if (sortOption === 'ratingDesc') return b.rating - a.rating;
+    if (sortOption === 'ratingsAsc') return a.ratings - b.ratings;
+    if (sortOption === 'ratingsDesc') return b.ratings - a.ratings;
     return 0;
   });
+
+// const 
+
   return (
     <Box display="flex" flexDirection="row" py={3} px={2} justifyContent="center">
       <Box width="30%" px={2}>
@@ -221,10 +225,10 @@ const ProductCard = () => {
           </Typography>
 
           <FormControl fullWidth style={{ marginBottom: '20px', marginTop: '20px' }}>
-            <InputLabel>Sort by Rating</InputLabel>
+            <InputLabel>Sort by ratings</InputLabel>
             <Select value={sortOption} onChange={handleSortChange}>
-              <MenuItem value="ratingAsc">Rating: Low to High</MenuItem>
-              <MenuItem value="ratingDesc">Rating: High to Low</MenuItem>
+              <MenuItem value="ratingsAsc">ratings: Low to High</MenuItem>
+              <MenuItem value="ratingsDesc">ratings: High to Low</MenuItem>
             </Select>
           </FormControl>
 
@@ -235,48 +239,45 @@ const ProductCard = () => {
             <Button variant="outlined" color="secondary" onClick={handleReset}>
               Reset
             </Button>
-            <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
-              Create
-            </Button>
+            {!Type && (
+              <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
+                Create
+              </Button>)}
           </Box>
         </Paper>
       </Box>
 
       <Box width="70%" px={2}>
         <Grid container spacing={3}>
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <Grid item xs={12} sm={6} md={4} key={product.productId}>
-                <Card elevation={3}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {product.name || 'No name'}
-                    </Typography>
-                    <Typography>Price: ${product.price || 'N/A'}</Typography>
-                    <Typography>Rating: {product.rating || 'N/A'}</Typography>
-                    <Typography>Description: {product.description || 'No description'}</Typography>
-                    <Typography>Quantity: {product.originalQuantity || 'N/A'}</Typography>
-                    <Typography>Seller: {product.sellerType || 'Unknown'}</Typography>
+          {filteredProducts.map((product) => (
+            <Grid item xs={12} sm={6} md={4} key={product.productId}>
+              <Card elevation={3}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    {product.name}
+                  </Typography>
+                  <Typography>Price: ${product.price}</Typography>
+                  <Typography>Ratings: {product.ratings}</Typography>
+                  <Typography>Description: {product.description}</Typography>
+                  <Typography>Quantity: {product.originalQuantity}</Typography>
+                  <Typography>Seller: {product.sellerType}</Typography>
+                  {!Type && (
                     <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
                     </Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleClickOpenReviews(product.reviews)}
-                      style={{ marginTop: '10px' }}
-                    >
-                      View Reviews
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
-          ) : (
-            <Typography variant="h6" style={{ margin: '20px' }}>
-              No products found.
-            </Typography>
-          )}
+                  )}
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleClickOpenReviews(product.reviews)} // Open reviews dialog
+                    style={{ marginTop: '10px' }}
+                  >
+                    View Reviews
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
       </Box>
 
@@ -330,14 +331,14 @@ const ProductCard = () => {
           />
           <TextField
             margin="dense"
-            label="Rating"
-            name="rating"
+            label="ratings"
+            name="ratings"
             type="number"
-            value={productData.rating || ''}
+            value={productData.ratings || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.rating}
-            helperText={errors.rating}
+            error={!!errors.ratings}
+            helperText={errors.ratings}
           />
           <TextField
             margin="dense"
@@ -411,14 +412,14 @@ const ProductCard = () => {
           />
           <TextField
             margin="dense"
-            label="Rating"
-            name="rating"
+            label="Ratings"
+            name="ratings"
             type="number"
-            value={productData.rating || ''}
+            value={productData.ratings || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.rating}
-            helperText={errors.rating}
+            error={!!errors.ratings}
+            helperText={errors.ratings}
           />
           <TextField
             margin="dense"
@@ -451,7 +452,7 @@ const ProductCard = () => {
                 <ListItem key={index}>
                   <ListItemText
                     primary={`Review ${index + 1}: ${review.comment}`}
-                    secondary={`Rating: ${review.rating}`}
+                    secondary={`ratings: ${review.ratings}`}
                   />
                   <Divider />
                 </ListItem>
