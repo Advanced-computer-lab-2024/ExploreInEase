@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import {
   TextField,
   Card,
@@ -18,38 +18,62 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 
-const initialProductList = [
-  { id: 1, name: 'Product A', price: 100, rating: 4.5 },
-  { id: 2, name: 'Product B', price: 150, rating: 4.0 },
-  { id: 3, name: 'Product C', price: 700, rating: 5.0 },
-  { id: 4, name: 'Product D', price: 120, rating: 3.5 },
-  { id: 5, name: 'Product E', price: 90, rating: 4.2 },
-];
 
-const maxPrice = Math.max(...initialProductList.map(item => item.price));
+
+
+
+
+
 
 const ProductCard = () => {
+  const location = useLocation();
+  const { Product } = location.state || {};
+  
+  const [initialProductList, setInitialProductList] = useState([]);
+  const [maxPrice, setMaxPrice] = useState(0);
+
+  useEffect(() => {
+    if (Product) {
+      setInitialProductList([...Product]);
+      setMaxPrice(Math.max(...Product.map(item => item.price)));
+    }
+  }, [Product]);
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState([0, maxPrice]);
   const [sortOption, setSortOption] = useState('');
-  const [products, setProducts] = useState(initialProductList);
+  const [products, setProducts] = useState([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
+  const [openReviews, setOpenReviews] = useState(false); // State for opening reviews dialog
   const [productData, setProductData] = useState({
-    id: null,
+    productId: null,
     name: '',
     price: '',
     description: '',
-    seller: '',
+    sellerType: '',
     rating: '',
-    review: '',
-    quantity: '',
+    originalQuantity: '',
+    reviews: [],
+    picture:'',
+
   });
-  
+
   const [errors, setErrors] = useState({});
   const [nextId, setNextId] = useState(initialProductList.length + 1);
+  const [selectedReviews, setSelectedReviews] = useState([]); // State for reviews of selected product
+  
+  useEffect(() => {
+    setProducts(initialProductList);
+    setNextId(initialProductList.length + 1);
+  }, [initialProductList]);
+
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -78,22 +102,30 @@ const ProductCard = () => {
     setOpenUpdate(true);
   };
 
+  const handleClickOpenReviews = (reviews) => {
+    setSelectedReviews(reviews); // Set the reviews of the selected product
+    setOpenReviews(true);
+  };
+
   const handleClose = () => {
     setOpenCreate(false);
     setOpenUpdate(false);
+    setOpenReviews(false); // Close the reviews dialog
+
     setProductData({
-      id: null,
+      productId: null,
       name: '',
       price: '',
       description: '',
-      seller: '',
+      sellerType: '',
       rating: '',
-      review: '',
-      quantity: '',
+      originalQuantity: '',
+      picture:'',
+      reviews: [],
     });
     setErrors({});
   };
-  
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -102,7 +134,7 @@ const ProductCard = () => {
 
   const validateForm = () => {
     let formErrors = {};
-    
+
     if (!productData.name) {
       formErrors.name = 'Name is required';
     }
@@ -114,17 +146,14 @@ const ProductCard = () => {
     if (!productData.description) {
       formErrors.description = 'Description is required';
     }
-    if (!productData.seller) {
-      formErrors.seller = 'Seller is required';
+    if (!productData.sellerType) {
+      formErrors.sellerType = 'Seller is required';
     }
     if (!productData.rating || productData.rating < 0 || productData.rating > 5) {
       formErrors.rating = 'Rating must be between 0 and 5';
     }
-    if (!productData.review) {
-      formErrors.review = 'Review is required';
-    }
-    if (!productData.quantity) {
-      formErrors.quantity = 'Quantity is required';
+    if (!productData.originalQuantity) {
+      formErrors.originalQuantity = 'Quantity is required';
     }
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
@@ -133,7 +162,7 @@ const ProductCard = () => {
   const handleSubmitCreate = () => {
     if (validateForm()) {
       const newProduct = {
-        id: nextId,
+        productId: nextId,
         name: productData.name,
         price: parseFloat(productData.price),
         rating: parseFloat(productData.rating),
@@ -234,8 +263,19 @@ const ProductCard = () => {
                   </Typography>
                   <Typography>Price: ${product.price}</Typography>
                   <Typography>Rating: {product.rating}</Typography>
+                  <Typography>Description: {product.description}</Typography>
+                  <Typography>Quantity: {product.originalQuantity}</Typography>
+                  <Typography>Seller: {product.sellerType}</Typography>
                   <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                     Update
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleClickOpenReviews(product.reviews)} // Open reviews dialog
+                    style={{ marginTop: '10px' }}
+                  >
+                    View Reviews
                   </Button>
                 </CardContent>
               </Card>
@@ -286,11 +326,11 @@ const ProductCard = () => {
             margin="dense"
             label="Seller"
             name="seller"
-            value={productData.seller || ''}
+            value={productData.sellerType || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.seller}
-            helperText={errors.seller}
+            error={!!errors.sellerType}
+            helperText={errors.sellerType}
           />
           <TextField
             margin="dense"
@@ -305,24 +345,14 @@ const ProductCard = () => {
           />
           <TextField
             margin="dense"
-            label="Review"
-            name="review"
-            value={productData.review || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.review}
-            helperText={errors.review}
-          />
-          <TextField
-            margin="dense"
             label="Quantity"
             name="quantity"
             type="number"
-            value={productData.quantity || ''}
+            value={productData.originalQuantity || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.quantity}
-            helperText={errors.quantity}
+            error={!!errors.originalQuantity}
+            helperText={errors.originalQuantity}
           />
         </DialogContent>
         <DialogActions>
@@ -377,11 +407,11 @@ const ProductCard = () => {
             margin="dense"
             label="Seller"
             name="seller"
-            value={productData.seller || ''}
+            value={productData.sellerType || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.seller}
-            helperText={errors.seller}
+            error={!!errors.sellerType}
+            helperText={errors.sellerType}
           />
           <TextField
             margin="dense"
@@ -396,24 +426,14 @@ const ProductCard = () => {
           />
           <TextField
             margin="dense"
-            label="Review"
-            name="review"
-            value={productData.review || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.review}
-            helperText={errors.review}
-          />
-          <TextField
-            margin="dense"
             label="Quantity"
             name="quantity"
             type="number"
-            value={productData.quantity || ''}
+            value={productData.originalQuantity || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.quantity}
-            helperText={errors.quantity}
+            error={!!errors.originalQuantity}
+            helperText={errors.originalQuantity}
           />
         </DialogContent>
         <DialogActions>
@@ -425,6 +445,30 @@ const ProductCard = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Reviews Dialog */}
+      <Dialog open={openReviews} onClose={handleClose}>
+        <DialogTitle>Product Reviews</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Here are the reviews for the selected product:</DialogContentText>
+          <List>
+            {selectedReviews.map((review, index) => (
+              <React.Fragment key={index}>
+                <ListItem>
+                  <ListItemText primary={`${index + 1}. ${review}`} /> {/* Add numbering to the review */}
+                </ListItem>
+                {index < selectedReviews.length - 1 && <Divider />} {/* Add Divider between items except the last one */}
+              </React.Fragment>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
     </Box>
   );
 };
