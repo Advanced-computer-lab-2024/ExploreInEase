@@ -355,7 +355,7 @@ const getType = async (id) => {
   if (user) {
     return user.type;
   } else if (tourist) {
-    return tourist.type;
+    return "tourist";
   } else {
     throw new Error('User not found');
   }

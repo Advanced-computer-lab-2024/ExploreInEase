@@ -1,24 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import '../Guest/GuestHP.css'; 
 import HomePageLogo from '../HomePageLogo.png';
+import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 const TouristNavbar = () => {
     const navigate = useNavigate();
-    const initialUsername ="TAST";
-    const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-    function handleRegisterClick(title) {
+    const location = useLocation();
+    const { tourist } = location.state || {};
+    const [success,setSuccess]=useState();
+    const [error,setError]=useState();
+
+    const initialUsername = tourist?.username;
+     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+     const userId=tourist._id;
+    async function handleRegisterClick(title) {
         if (title == "View Products"){
-            navigate('/viewProduct');
+            try {
+                const options = {
+                  apiPath: `/getAvailableProducts/${userId}`,
+                };
+                
+                const response = await NetworkService.get(options);
+                setSuccess(response.message); // Set success message
+                console.log(response);
+                const Product=response.Products;
+                navigate(`/viewProduct`,{state:{Product}});          
+              } catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                  setError(err.response.data.message); // Set error message from server response if exists
+                } else {
+                  setError('An unexpected error occurred.'); // Generic error message
+                }
+              }
         }
       else if (title=="My Profile"){
-        navigate('/viewTouristProfile');
+        try {
+            const options = {
+              apiPath: `/getTourist/${userId}`,
+            };
+            
+            const response = await NetworkService.get(options);
+            setSuccess(response.message); // Set success message
+            console.log(response);
+            const tourist=response.tourist;
+            navigate(`/viewTouristProfile`,{state:{tourist}});          
+          } catch (err) {
+            if (err.response) {
+                console.log(err.message);
+              setError(err.response.data.message); // Set error message from server response if exists
+            } else {
+              setError('An unexpected error occurred.'); // Generic error message
+            }
+          }
       }
       else {
-        navigate('/explore');
-
+        try {
+            const options = {
+              apiPath: `/upcomingEvents`,
+            };
+            
+            const response = await NetworkService.get(options);
+            setSuccess(response.message); // Set success message
+            console.log(response);
+            const events=response.events;
+            navigate(`/explore`,{state:{events}});          
+          } catch (err) {
+            if (err.response) {
+                console.log(err.message);
+              setError(err.response.data.message); // Set error message from server response if exists
+            } else {
+              setError('An unexpected error occurred.'); // Generic error message
+            }
+          }
+        // navigate('/explore');
       }
-      };
+      }
   return (
     <div className="homepage">
       <nav className="navbar">

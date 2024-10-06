@@ -55,11 +55,14 @@ const TouristSignUp = () => {
       };
       
       const response = await NetworkService.post(options);
+      const tourist=response.tourist;
       setSuccess(response.message); // Set success message
-      setError(''); // Clear previous error messages
-      navigate('/TouristHomePage'); // Redirect to the tourist home page
+      console.log(response);
+      navigate(`/TouristHomePage`,{state:{tourist:tourist}});
+
     } catch (err) {
       if (err.response) {
+          console.log(err.message);
         setError(err.response.data.message); // Set error message from server response if exists
       } else {
         setError('An unexpected error occurred.'); // Generic error message

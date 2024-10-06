@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   TextField,
   MenuItem,
@@ -15,7 +16,6 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-
 // Sample data with 'type' field added
 const itemList = [
   {
@@ -96,12 +96,14 @@ const itemList = [
 
 // Role-based fields
 const roleFields = {
-  HistoricalPlaces: ['Tag'],
-  Activities: ['budget', 'date', 'category', 'rating'],
-  Itineraries: ['budget', 'date', 'preferences', 'language'],
+  HistoricalPlaces: [],
+  Activities: [],
+  Itineraries: [],
 };
 
 const Filter = () => {
+    const location=useLocation();
+  const { events } = location.state || {};
   const [filters, setFilters] = useState({
     budget: '',
     price: '',

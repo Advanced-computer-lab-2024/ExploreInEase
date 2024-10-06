@@ -3,6 +3,8 @@ import React, { useState,useEffect } from 'react';
 import './Signup.css';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
+
+import { useLocation } from 'react-router-dom';
 const GuideAdvertiserSignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -12,6 +14,7 @@ const GuideAdvertiserSignUp = () => {
     type: 'tourGuide' // default selection
   });
   const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     setFormData({
@@ -22,11 +25,7 @@ const GuideAdvertiserSignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess('Registration successful!');
-    // Submit form data to the server (API call)
-    console.log('Form data:', formData);
     if(formData.type== "tourGuide"){
-     
         try {
           const options = {
             apiPath: '/register/tourGuide',
@@ -36,15 +35,16 @@ const GuideAdvertiserSignUp = () => {
               password: formData.password,
             }
           };
-          
           const response =await NetworkService.post(options);
           setSuccess(response.message); // Set success message
-           navigate("/TourGuideHomePage");
+          const user=response.User;
+           navigate(`/TourGuideHomePage`,{state:{user}});
+           console.log(response);
            } catch (err) {
           if (err.response) {
-            // setError(err.response.data.message); // Set error message from server response if exists
+             setError(err.response.data.message);
           } else {
-            // setError('An unexpected error occurred.'); // Generic error message
+            setError('An unexpected error occurred.');
           }
         }
     }
@@ -60,13 +60,15 @@ const GuideAdvertiserSignUp = () => {
         };
         
         const response =await NetworkService.post(options);
+        const username=response.User.username;
         setSuccess(response.message); // Set success message
-      navigate ("/SellerHomePage");
+        navigate(`/SellerHomePage`,{state:{username:username}});
+
         } catch (err) {
         if (err.response) {
-          // setError(err.response.data.message); // Set error message from server response if exists
+           setError(err.response.data.message); // Set error message from server response if exists
         } else {
-          // setError('An unexpected error occurred.'); // Generic error message
+           setError('An unexpected error occurred.'); // Generic error message
         }
       }
     }
@@ -82,13 +84,15 @@ const GuideAdvertiserSignUp = () => {
         };
         
         const response =await NetworkService.post(options);
+        const username=response.User.username;
         setSuccess(response.message); // Set success message
-        navigate ("/AdvertiserHomePage");
+        navigate(`/AdvertiserHomePage`,{state:{username:username}});
+
       } catch (err) {
         if (err.response) {
-          // setError(err.response.data.message); // Set error message from server response if exists
+           setError(err.response.data.message); // Set error message from server response if exists
         } else {
-          // setError('An unexpected error occurred.'); // Generic error message
+          setError('An unexpected error occurred.'); // Generic error message
         }
       }
     }

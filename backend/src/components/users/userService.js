@@ -102,52 +102,52 @@ const getTouristUpcommingEvents = async (username) => {
 
 // Tour Guide
 const createTourGuide = async (_id,tourGuideData) => {
-    return await userRepo.updateUserData(_id,tourGuideData);
+    return await userRepository.updateUserData(_id,tourGuideData);
 };
 
 // Get a tour guide
 const getTourGuide = async (_id) => {
-    return await userRepo.findUserById(_id);
+    return await userRepository.findUserById(_id);
 };
 
 
 
 // Update a tour guide
 const updateTourGuide = async (_id, updateData) => {
-    return await userRepo.updateUserData(_id, updateData);
+    return await userRepository.updateUserData(_id, updateData);
 };
 
 
 //Advertiser
 const createAdvertiser = async (_id,advertiserData) => {
     console.log(_id,advertiserData);
-    return await userRepo.updateUserData(_id,advertiserData);
+    return await userRepository.updateUserData(_id,advertiserData);
 };
 
 // Get an advertiser
 const getAdvertiser = async (_id) => {
-    return await userRepo.findUserById(_id);
+    return await userRepository.findUserById(_id);
 };
 
 // Update an advertiser
 const updateAdvertiser = async (_id, updateData) => {
-    return await userRepo.updateUserData(_id, updateData);
+    return await userRepository.updateUserData(_id, updateData);
 };
 
 
 //Seller
 const createSeller = async (_id,sellerData) => {
-    return await userRepo.updateUserData(_id,sellerData);
+    return await userRepository.updateUserData(_id,sellerData);
 };
 
 // Get a seller
 const getSeller = async (_id) => {
-    return await userRepo.findUserById(_id);
+    return await userRepository.findUserById(_id);
 };
 
 // Update a seller
 const updateSeller = async (_id, updateData) => {
-    return await userRepo.updateUserData(_id, updateData);
+    return await userRepository.updateUserData(_id, updateData);
 };
 
 
@@ -155,12 +155,12 @@ const updateSeller = async (_id, updateData) => {
 
 // Get a tourist
 const getTourist = async (_id) => {
-    return await userRepo.getTouristById(_id);
+    return await userRepository.getTouristById(_id);
 };
 
 // Update a tourist (excluding username and wallet)
 const updateTourist = async (_id, updateData) => {
-    return await userRepo.updateTourist(_id, updateData);
+    return await userRepository.updateTourist(_id, updateData);
 };
 
 

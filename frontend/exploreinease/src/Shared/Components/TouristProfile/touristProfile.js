@@ -16,6 +16,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button'; // Import Button
+import { useLocation } from 'react-router-dom';
 
 const useForm = (initialValues) => {
   const [formValues, setFormValues] = useState(initialValues);
@@ -108,6 +109,8 @@ const TouristProfile = (props) => {
     wallet: false,
     });
   };
+  const location=useLocation();
+const { tourist } = location.state || {};
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Card sx={{ padding: 3, width: '80%', margin: 'auto' }}>

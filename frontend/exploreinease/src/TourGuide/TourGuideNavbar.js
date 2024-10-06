@@ -4,9 +4,13 @@ import Avatar from '@mui/material/Avatar';
 import '../Guest/GuestHP.css'; 
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
 const TourGuideHP = () => {
     const navigate = useNavigate();
-    const initialUsername ="TAST";
+    const location = useLocation();
+    const { tourist } = location.state || {};
+    const initialUsername = tourist.username;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     function handleClick(title) {
         if (title == "My Profile"){

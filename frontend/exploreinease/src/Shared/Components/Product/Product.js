@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   TextField,
   Card,
@@ -20,25 +21,26 @@ import {
   DialogTitle,
   List,
   ListItem,
-  ListItemText,
-  Divider,
+  ListItemText,Divider,
 } from '@mui/material';
 
-const initialProductList = [
-  { productId: 1, name: 'Product A', price: 100,sellerType: 'VTP', rating: 4.5, description: 'Best', originalQuantity: 20, reviews: ['Excellent product!', 'Value for money.'] },
-  { productId: 2, name: 'Product B', price: 150 ,sellerType: 'VTP', rating: 4.0, description: 'Worst', originalQuantity: 12, reviews: ['Not worth it.', 'Low quality.'] },
-  { productId: 3, name: 'Product C', price: 700 ,sellerType: 'External Seller', rating: 5.0, description: 'Okay', originalQuantity: 47, reviews: ['Amazing!', 'Loved it.'] },
-  { productId: 4, name: 'Product D', price: 120 ,sellerType: 'VTP', rating: 3.5, description: 'Fine', originalQuantity: 13, reviews: ['Mediocre performance.'] },
-  { productId: 5, name: 'Product E', price: 90 ,sellerType: 'External Seller', rating: 4.2, description: 'Excellent', originalQuantity: 25, reviews: ['Highly recommended!', 'Great service.'] },
-];
-
-const maxPrice = Math.max(...initialProductList.map(item => item.price));
-
 const ProductCard = () => {
+  const location = useLocation();
+  const { Product } = location.state || {};
+  
+  const [initialProductList, setInitialProductList] = useState([]);
+  const [maxPrice, setMaxPrice] = useState(0);
+
+  useEffect(() => {
+    if (Product) {
+      setInitialProductList([...Product]);
+      setMaxPrice(Math.max(...Product.map(item => item.price)));
+    }
+  }, [Product]);
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState([0, maxPrice]);
   const [sortOption, setSortOption] = useState('');
-  const [products, setProducts] = useState(initialProductList);
+  const [products, setProducts] = useState([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openReviews, setOpenReviews] = useState(false); // State for opening reviews dialog
@@ -51,12 +53,18 @@ const ProductCard = () => {
     rating: '',
     originalQuantity: '',
     reviews: [],
+    picture:'',
 
   });
 
   const [errors, setErrors] = useState({});
   const [nextId, setNextId] = useState(initialProductList.length + 1);
   const [selectedReviews, setSelectedReviews] = useState([]); // State for reviews of selected product
+  
+  useEffect(() => {
+    setProducts(initialProductList);
+    setNextId(initialProductList.length + 1);
+  }, [initialProductList]);
 
 
   const handleSearchChange = (event) => {
@@ -104,6 +112,7 @@ const ProductCard = () => {
       sellerType: '',
       rating: '',
       originalQuantity: '',
+      picture:'',
       reviews: [],
     });
     setErrors({});
@@ -172,7 +181,7 @@ const ProductCard = () => {
   const filteredProducts = products
     .filter(
       (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) &&
         product.price >= priceRange[0] &&
         product.price <= priceRange[1]
     )
@@ -237,25 +246,25 @@ const ProductCard = () => {
 
       <Box width="70%" px={2}>
         <Grid container spacing={3}>
-          {filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} md={4} key={product.id}>
+          {filteredProducts.map((productData) => (
+            <Grid item xs={12} sm={6} md={4} key={productData.id}>
               <Card elevation={3}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    {product.name}
+                    {productData.name}
                   </Typography>
-                  <Typography>Price: ${product.price}</Typography>
-                  <Typography>Rating: {product.rating}</Typography>
-                  <Typography>Description: {product.description}</Typography>
-                  <Typography>Quantity: {product.originalQuantity}</Typography>
-                  <Typography>Seller: {product.sellerType}</Typography>
-                  <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
+                  <Typography>Price: ${productData.price}</Typography>
+                  <Typography>Rating: {productData.rating}</Typography>
+                  <Typography>Description: {productData.description}</Typography>
+                  <Typography>Quantity: {productData.originalQuantity}</Typography>
+                  <Typography>Seller: {productData.sellerType}</Typography>
+                  <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(productData)}>
                     Update
                   </Button>
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => handleClickOpenReviews(product.reviews)} // Open reviews dialog
+                    onClick={() => handleClickOpenReviews(productData.reviews)} // Open reviews dialog
                     style={{ marginTop: '10px' }}
                   >
                     View Reviews
@@ -432,16 +441,20 @@ const ProductCard = () => {
       <Dialog open={openReviews} onClose={handleClose}>
         <DialogTitle>Product Reviews</DialogTitle>
         <DialogContent>
-          <DialogContentText>Here are the reviews for the selected product:</DialogContentText>
           <List>
-            {selectedReviews.map((review, index) => (
-              <React.Fragment key={index}>
-                <ListItem>
-                  <ListItemText primary={`${index + 1}. ${review}`} /> {/* Add numbering to the review */}
+            {selectedReviews.length > 0 ? (
+              selectedReviews.map((review, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={`Review ${index + 1}: ${review.comment}`}
+                    secondary={`Rating: ${review.rating}`}
+                  />
+                  <Divider />
                 </ListItem>
-                {index < selectedReviews.length - 1 && <Divider />} {/* Add Divider between items except the last one */}
-              </React.Fragment>
-            ))}
+              ))
+            ) : (
+              <Typography>No reviews available for this product.</Typography>
+            )}
           </List>
         </DialogContent>
         <DialogActions>

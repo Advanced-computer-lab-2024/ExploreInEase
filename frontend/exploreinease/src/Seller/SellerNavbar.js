@@ -1,12 +1,15 @@
-// src/Shared/Components/GuestHP.js
 import React from 'react';
 import HomePageLogo from '../HomePageLogo.png';
-import '../Guest/GuestHP.css'; // Import the CSS file
+import '../Guest/GuestHP.css';
 import Avatar from '@mui/material/Avatar';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
 const HomePage = () => {
+   const location=useLocation();
     const navigate = useNavigate();
-    const initialUsername ="TAST";
+    const { tourist } = location.state || {};
+    const initialUsername = tourist?.username;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     function handleClick(title) {
        if (title=="My Profile"){

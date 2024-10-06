@@ -61,21 +61,21 @@ const ProductsSchema = new Schema({
         required: [true, 'Original quantity is required'],
         min: 0                     // Original quantity cannot be negative
     },
-    // takenQuantity: {
-    //     type: Number,
-    //     default: 0,                // Initially zero
-    //     min: 0                     // Taken quantity cannot be negative
-    // },
+    takenQuantity: {
+        type: Number,
+        default: 0,                // Initially zero
+        min: 0                     // Taken quantity cannot be negative
+    },
     name: {
         type: String,
         required: [true, 'Product name is required'],
         trim: true,
         minlength: 1                // Minimum length for product name
     },
-    // isActive: {
-    //     type: Boolean,
-    //     default: true               // Indicates whether the product is active or inactive
-    // }
+    isActive: {
+        type: Boolean,
+        default: true               // Indicates whether the product is active or inactive
+    }
 }, {
     timestamps: true,               // Automatically add createdAt and updatedAt fields
     versionKey: false                // Disable the "__v" version key

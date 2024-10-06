@@ -40,8 +40,7 @@ const TouristSchema = new Schema({
     
     profession: {
         type: String,
-        required: [true, 'profession is required'],
-        enum: ['Job', 'Student'], // Restrict to either 'Job' or 'Student'
+        required: [true,'Profession is required'],
         required: true
     },
     itineraryId: {

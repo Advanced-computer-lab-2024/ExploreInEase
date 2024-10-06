@@ -85,7 +85,7 @@ const getTouristUpcommingEvents = async (req, res) => {
   }
   try {
     const events = await userService.getTouristUpcommingEvents(username);
-    return res.status(200).json(events);
+    return res.status(200).json({message: "Fetched Upcomming Events successfully", events: events});
   } catch (error) {
     return res.status(500).json({ error: "An error occurred", details: error.message });
   }
@@ -312,11 +312,15 @@ const updateTourist = async (req, res) => {
 };
 
 
-
+// const checkUsername = (username) => {
+//     return /^[a-zA-Z0-9]+$/.test(username);
+// }
 const registerUser = async (req, res) => {
     const { type } = req.params;
     const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
-    
+    // if (!type) {
+    //     return res.status(400).json({ message: "User type is required" });
+    // }
 
     const usernameExists = await userRepository.checkUserExists(username);
     if (usernameExists) {
