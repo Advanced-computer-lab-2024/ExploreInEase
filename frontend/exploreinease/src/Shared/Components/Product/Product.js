@@ -210,10 +210,10 @@ const ProductCard = () => {
           </FormControl>
 
           <Box mt={3} display="flex" justifyContent="space-between">
-            <Button variant="contained" color="primary" onClick={() => { /* handleFilter */ }}>
+            <Button variant="contained" color="primary" style={{marginRight:10}} onClick={() => { /* handleFilter */ }}>
               Confirm
             </Button>
-            <Button variant="outlined" color="secondary" onClick={handleReset}>
+            <Button variant="outlined" color="secondary" style={{marginRight:10}} onClick={handleReset}>
               Reset
             </Button>
             <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
@@ -417,7 +417,7 @@ const ProductCard = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleClose} color="primary" >
             Cancel
           </Button>
           <Button onClick={handleSubmitUpdate} color="primary">

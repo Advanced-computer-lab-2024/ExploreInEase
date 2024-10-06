@@ -25,6 +25,16 @@ const GuideAdvertiserSignUp = () => {
     setSuccess('Registration successful!');
     // Submit form data to the server (API call)
     console.log('Form data:', formData);
+    if(formData.type== "tourGuide"){
+        navigate("/TourGuideHomePage");
+    }
+    else if (formData.type== "seller"){
+      navigate ("/SellerHomePage");
+    }
+    else {
+      navigate ("/AdvertiserHomePage")
+    }
+
   };
 
   return (

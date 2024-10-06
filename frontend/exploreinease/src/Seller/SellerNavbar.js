@@ -28,18 +28,25 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <button onClick={() => handleClick("View List of Available Products")}>View List of Available Products</button>
-          <button onClick={() => handleClick("Add Product")}>Add Product</button>
-          <button onClick={() => handleClick("Edit Product")}>Edit Product</button>
-          <button onClick={() => handleClick("My Profile")}>My Profile</button>
-        </div>
-        <div className="currency-selector">
+          <button onClick={() => handleClick("View List of Available Products")}
+              className="small-button">View List of Available Products</button>
+          <button onClick={() => handleClick("Add Product")}
+              className="small-button">Add Product</button>
+          <button onClick={() => handleClick("Edit Product")}  
+           className="small-button"
+            >Edit Product</button>
+          <button 
+          onClick={() => handleClick("My Profile")}
+          className="small-button">My Profile</button>
+       
+        <div style={{marginRight:5,marginTop:30,marginLeft:30}}>
           <span className="currency-symbol"></span>
           <select>
             <option value="usd">USD ($)</option>
             <option value="eur">EUR (€)</option>
             <option value="egp">EGP (ج.م)</option>
           </select>
+        </div>
         </div>
         <div className="avatar-container">
         <Avatar

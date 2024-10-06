@@ -13,7 +13,7 @@ const TourGuideHP = () => {
          navigate('/viewSellerProfile');
        }
        else if(title == 'View My Created Itineraries') {
-         navigate('/viewItineraryList');
+         navigate('/viewCreatedItineraryList');
        }
        else {
         navigate('/viewMyItinerary');
@@ -32,16 +32,21 @@ const TourGuideHP = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <button  onClick={() => handleClick("My Profile")}>My Profile</button>
-          <button onClick={() => handleClick("View My Created Itineraries")}>View My Created Itineraries</button>
-          <button onClick={() => handleClick("Create/Read/Update/Delete Itineraries")}>Create/Read/Update/Delete Itineraries</button>
-        </div>
-        <div className="currency-selector">
+          <button  
+          onClick={() => handleClick("My Profile")}
+          className="small-button">My Profile</button>
+          <button onClick={() => handleClick("View My Created Itineraries")}
+              className="small-button">View My Created Itineraries</button>
+          <button onClick={() => handleClick("Create/Read/Update/Delete Itineraries")}
+              style={{width:220}}>Create/Read/Update/Delete Itineraries</button>
+     
+        <div style={{marginRight:5,marginTop:30,marginLeft:60}}>
           <select>
             <option value="usd">USD ($)</option>
             <option value="eur">EUR (€)</option>
             <option value="egp">EGP (ج.م)</option>
           </select>
+        </div>
         </div>
         <div className="avatar-container">
         <Avatar
@@ -58,7 +63,6 @@ const TourGuideHP = () => {
           </Avatar>
         </div>
       </nav>
-      {/* Other homepage content goes here */}
     </div>
   );
 };

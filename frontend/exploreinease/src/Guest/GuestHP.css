@@ -105,3 +105,9 @@
 .avatar:hover {
     transform: scale(1.1); /* Scale avatar on hover */
 }
+.small-button {
+    padding: 5px 10px;
+    margin-left: 4px;
+    font-size: 14px;
+    width: 160px; /* Adjust as needed */
+  }

@@ -3,7 +3,6 @@ import React from 'react';
 import './GuestHP.css'; // Import the CSS file
 import Avatar from '@mui/material/Avatar';
 import HomePageLogo from '../HomePageLogo.png';
-import RoleSelection from '../SignUp/RoleSelection';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
 const HomePage = () => {
@@ -30,10 +29,14 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-        <button onClick={() => handleRegisterClick("Register")}>Register</button>
-          <button>Upload Required Documents</button>
-          <button>View Step-by-Step Guide</button>
-          <button onClick={() => handleRegisterClick("Activity Categories")}>Activity Categories</button>
+        <button 
+         onClick={() => handleRegisterClick("Register")}
+          className="small-button"
+         >Register</button>
+          <button 
+           className="small-button">Upload Required Documents</button>
+          <button  className="small-button">View Step-by-Step Guide</button>
+          <button onClick={() => handleRegisterClick("Activity Categories")}  className="small-button">Activity Categories</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

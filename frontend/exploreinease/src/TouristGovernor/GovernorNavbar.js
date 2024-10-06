@@ -3,8 +3,9 @@ import React from 'react';
 import Avatar from '@mui/material/Avatar';
 import '../Guest/GuestHP.css'; 
 import HomePageLogo from '../HomePageLogo.png';
-
-const HomePage = () => {
+import { useNavigate } from 'react-router-dom';
+const GovernorNavbar = () => {
+    const navigate = useNavigate();
     const initialUsername ="TAST";
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     function handleRegisterClick(title) {
@@ -30,9 +31,12 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <button onClick={() => handleRegisterClick("CRUD Historical Places and Museums")} >CRUD Historical Places and Museums</button>
-          <button onClick={() => handleRegisterClick("Create Historical Locations Tags")} >Create Historical Locations Tags</button>
-          <button onClick={() => handleRegisterClick("View Created Historical Places and Museums")} >View Created Historical Places and Museums</button>
+          <button onClick={() => handleRegisterClick("CRUD Historical Places and Museums")} 
+              className="small-button">CRUD Historical Places and Museums</button>
+          <button onClick={() => handleRegisterClick("Create Historical Locations Tags")} 
+              className="small-button">Create Historical Locations Tags</button>
+          <button onClick={() => handleRegisterClick("View Created Historical Places and Museums")}
+            className="small-button" >View Created Historical Places and Museums</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>
@@ -61,4 +65,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default GovernorNavbar;

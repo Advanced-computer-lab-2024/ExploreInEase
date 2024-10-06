@@ -31,9 +31,13 @@ const TouristNavbar = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <button onClick={() => handleRegisterClick("Explore Activities and Itineraries and Historical Places")}>Explore Activities and Itineraries and Historical Places</button>
-          <button onClick={() => handleRegisterClick("View Products")}>View Products</button>
-          <button onClick={() => handleRegisterClick("My Profile")}>My Profile</button>
+          <button onClick={() => handleRegisterClick("Explore Activities and Itineraries and Historical Places")}
+              className="small-button">Explore Activities and Itineraries and Historical Places</button>
+          <button onClick={() => handleRegisterClick("View Products")}
+              className="small-button">View Products</button>
+          <button 
+          onClick={() => handleRegisterClick("My Profile")}
+          className="small-button">My Profile</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

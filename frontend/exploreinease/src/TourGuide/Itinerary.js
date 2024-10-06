@@ -14,12 +14,14 @@ import {
   DialogTitle,
   TextField,
   IconButton,
+  Checkbox,
+  FormControl, FormControlLabel 
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import dayjs from 'dayjs';
 
-export default function VerticalLinearStepper() {
+export default function ItineraryForm() {
   const [activeTourIndex, setActiveTourIndex] = React.useState(0);
   const [activeDayIndex, setActiveDayIndex] = React.useState(0);
   const [tours, setTours] = React.useState([]);
@@ -30,6 +32,7 @@ export default function VerticalLinearStepper() {
     endDate: '',
     numberOfDays: 0,
     activities: [],
+    isSpecial: false, 
   });
 
   const handleChange = (e) => {
@@ -100,6 +103,7 @@ export default function VerticalLinearStepper() {
         startDate: tourData.startDate,
         endDate: tourData.endDate,
         activities: tourData.activities,
+        isSpecial: tourData.isSpecial,
       },
     ]);
     handleClose();
@@ -107,11 +111,15 @@ export default function VerticalLinearStepper() {
 
   const handleEditTour = (index) => {
     const tourToEdit = tours[index];
-    setTourData(tourToEdit);
+    setTourData(
+      {...tourToEdit, 
+         isSpecial: tourToEdit.isSpecial || false,
+    });
     setOpen(true);
   };
 
   const handleDeleteTour = (index) => {
+    
     setTours((prevTours) => prevTours.filter((_, idx) => idx !== index));
   };
 
@@ -148,6 +156,19 @@ export default function VerticalLinearStepper() {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{tourData.name ? 'Edit Tour' : 'Add Tour'}</DialogTitle>
         <DialogContent>
+        <FormControl component="fieldset">
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={tourData.isSpecial || false}
+              onChange={(e) => setTourData({ ...tourData, isSpecial: e.target.checked })} // Handle the change
+            />
+          }
+          label="Is for Special Tourist?"
+          />
+              </FormControl>
+
           <TextField
             margin="dense"
             name="name"
@@ -245,7 +266,7 @@ export default function VerticalLinearStepper() {
             <StepLabel>{tour.name}</StepLabel>
             <StepContent>
               <Typography>{`Tour from ${dayjs(tour.startDate).format('YYYY-MM-DD')} to ${dayjs(tour.endDate).format('YYYY-MM-DD')}`}</Typography>
-              
+              {tour.isSpecial && <Typography color="secondary">Special Tour</Typography>} 
               {/* Inner Stepper for Tour Activities */}
               <Stepper activeStep={activeDayIndex} orientation="vertical">
                 {tour.activities.map((activity, idx) => (

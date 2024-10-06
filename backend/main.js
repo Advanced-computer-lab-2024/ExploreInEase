@@ -22,7 +22,7 @@ ACLapp.use((req, res, next) => {
 // Routes
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
-ACLapp.use(checkoutRoutes)
+ACLapp.use(checkoutRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

@@ -15,8 +15,11 @@ const HomePage = () => {
       else if (title=="View Created Activities"){
           navigate('/viewAllCreatedActivities');
       }
+      else if ( title =="View All Activities"){
+            navigate('/explore')
+      }
       else {
-        navigate('/explore`');
+        navigate('/Activities');
       }
       };
   return (
@@ -31,20 +34,23 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
-          <button  onClick={() => handleRegisterClick("Create Activities")}>Create Activities</button>
-          <button  onClick={() => handleRegisterClick("Delete Activities")}>Delete Activities</button>
-          <button  onClick={() => handleRegisterClick("Update Activities")}>Update Activities</button>
-          <button  onClick={() => handleRegisterClick("View All Activities")}>View All Activities</button>
-          <button  onClick={() => handleRegisterClick("View Created Activities")}>View Created Activities</button>
-          <button  onClick={() => handleRegisterClick("My profile")}>My profile</button>
-        </div>
-        <div className="currency-selector">
+          <button  onClick={() => handleRegisterClick("Activities")}
+              style={{width:160}}>Create Activities</button>
+          <button  onClick={() => handleRegisterClick("View All Activities")}
+               style={{width:160}}>View All Activities</button>
+          <button  onClick={() => handleRegisterClick("View Created Activities")}
+               style={{width:190}}>View Created Activities</button>
+          <button  onClick={() => handleRegisterClick("My profile")}
+               style={{width:160}}>My profile</button>
+ 
+        <div style={{marginRight:5,marginTop:30,marginLeft:30}}>
           <span className="currency-symbol"></span>
           <select>
             <option value="usd">USD ($)</option>
             <option value="eur">EUR (€)</option>
             <option value="egp">EGP (ج.م)</option>
           </select>
+        </div>
         </div>
         <div className="avatar-container">
         <Avatar
