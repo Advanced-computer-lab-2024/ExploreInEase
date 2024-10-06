@@ -16,19 +16,10 @@ const getAllAvailableProducts = async () => {
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
         })
-        .select('picture price description ratings reviews sellerId')
+        .select('picture price description ratings reviews sellerId name')
         .populate('sellerId', 'username sellerType');
 
-        const transformedProducts = availableProducts.map(product => ({
-            picture: product.picture,
-            price: product.price,
-            description: product.description,
-            sellerType: product.sellerId.sellerType,
-            ratings: product.ratings,
-            reviews: product.reviews,
-        }));
-
-        return transformedProducts;
+        return availableProducts;
     } catch (error) {
         throw new Error(`Error retrieving available products: ${error.message}`);
     }

@@ -30,20 +30,13 @@ const ProductCard = () => {
   
   const [initialProductList, setInitialProductList] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
-
-  useEffect(() => {
-    if (Product) {
-      setInitialProductList([...Product]);
-      setMaxPrice(Math.max(...Product.map(item => item.price)));
-    }
-  }, [Product]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [priceRange, setPriceRange] = useState([0, maxPrice]);
-  const [sortOption, setSortOption] = useState('');
   const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priceRange, setPriceRange] = useState([0, 0]);
+  const [sortOption, setSortOption] = useState('');
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
-  const [openReviews, setOpenReviews] = useState(false); // State for opening reviews dialog
+  const [openReviews, setOpenReviews] = useState(false);
   const [productData, setProductData] = useState({
     productId: null,
     name: '',
@@ -53,20 +46,29 @@ const ProductCard = () => {
     rating: '',
     originalQuantity: '',
     reviews: [],
-    picture:'',
-
+    picture: '',
   });
-
   const [errors, setErrors] = useState({});
-  const [nextId, setNextId] = useState(initialProductList.length + 1);
-  const [selectedReviews, setSelectedReviews] = useState([]); // State for reviews of selected product
-  
+  const [nextId, setNextId] = useState(0);
+  const [selectedReviews, setSelectedReviews] = useState([]);
+
   useEffect(() => {
-    setProducts(initialProductList);
-    setNextId(initialProductList.length + 1);
-  }, [initialProductList]);
+    if (Product && Array.isArray(Product)) {
+      console.log("Received Product data:", Product);
+      setInitialProductList(Product);
+      setProducts(Product);
+      const maxProductPrice = Math.max(...Product.map(item => Number(item.price) || 0));
+      setMaxPrice(maxProductPrice);
+      setPriceRange([0, maxProductPrice]);
+      setNextId(Product.length + 1);
+    } else {
+      console.log("No Product data received or it's not an array");
+    }
+  }, [Product]);
 
-
+  useEffect(() => {
+    console.log("Current products state:", products);
+  }, [products]);
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -178,19 +180,15 @@ const ProductCard = () => {
     }
   };
 
-  const filteredProducts = products
-    .filter(
-      (product) =>
-        (product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) &&
-        product.price >= priceRange[0] &&
-        product.price <= priceRange[1]
-    )
-    .sort((a, b) => {
-      if (sortOption === 'ratingAsc') return a.rating - b.rating;
-      if (sortOption === 'ratingDesc') return b.rating - a.rating;
-      return 0;
-    });
-
+  const filteredProducts = products.filter((product) => {
+    const nameMatch = product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
+    return nameMatch && priceMatch;
+  }).sort((a, b) => {
+    if (sortOption === 'ratingAsc') return a.rating - b.rating;
+    if (sortOption === 'ratingDesc') return b.rating - a.rating;
+    return 0;
+  });
   return (
     <Box display="flex" flexDirection="row" py={3} px={2} justifyContent="center">
       <Box width="30%" px={2}>
@@ -246,33 +244,39 @@ const ProductCard = () => {
 
       <Box width="70%" px={2}>
         <Grid container spacing={3}>
-          {filteredProducts.map((productData) => (
-            <Grid item xs={12} sm={6} md={4} key={productData.id}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {productData.name}
-                  </Typography>
-                  <Typography>Price: ${productData.price}</Typography>
-                  <Typography>Rating: {productData.rating}</Typography>
-                  <Typography>Description: {productData.description}</Typography>
-                  <Typography>Quantity: {productData.originalQuantity}</Typography>
-                  <Typography>Seller: {productData.sellerType}</Typography>
-                  <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(productData)}>
-                    Update
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleClickOpenReviews(productData.reviews)} // Open reviews dialog
-                    style={{ marginTop: '10px' }}
-                  >
-                    View Reviews
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <Grid item xs={12} sm={6} md={4} key={product.productId}>
+                <Card elevation={3}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      {product.name || 'No name'}
+                    </Typography>
+                    <Typography>Price: ${product.price || 'N/A'}</Typography>
+                    <Typography>Rating: {product.rating || 'N/A'}</Typography>
+                    <Typography>Description: {product.description || 'No description'}</Typography>
+                    <Typography>Quantity: {product.originalQuantity || 'N/A'}</Typography>
+                    <Typography>Seller: {product.sellerType || 'Unknown'}</Typography>
+                    <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
+                      Update
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleClickOpenReviews(product.reviews)}
+                      style={{ marginTop: '10px' }}
+                    >
+                      View Reviews
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Typography variant="h6" style={{ margin: '20px' }}>
+              No products found.
+            </Typography>
+          )}
         </Grid>
       </Box>
 

@@ -62,8 +62,9 @@ const TouristProfile = (props) => {
     educationState: false,
     wallet: false,
   });
-  
-  const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+  const location=useLocation();
+  const { tourist } = location.state || {};  
+  const firstInitial = tourist?.username ? tourist?.username.charAt(0).toUpperCase() : '?';
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleEditMode = (field) => {
@@ -109,8 +110,8 @@ const TouristProfile = (props) => {
     wallet: false,
     });
   };
-  const location=useLocation();
-const { tourist } = location.state || {};
+
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Card sx={{ padding: 3, width: '80%', margin: 'auto' }}>
