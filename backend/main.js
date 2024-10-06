@@ -7,9 +7,13 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const fs = require('fs'); // Import filesystem module
 require('dotenv').config({ path: "src/.env" });
+const cors = require('cors');
+
 
 // Express app
 const ACLapp = express();
+ACLapp.use(cors());
+
 
 // Middleware to parse JSON
 ACLapp.use(express.json());
@@ -57,10 +61,10 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     // Serve swagger documentation
     ACLapp.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    fs.writeFileSync('./swagger.json', JSON.stringify(swaggerDocs, null, 2), (err) => {
-        if (err) {
-            console.error('Error writing swagger.json:', err);
-        } else {
-            console.log('swagger.json has been saved!');
-        }
-    });
+    // fs.writeFileSync('./swagger.json', JSON.stringify(swaggerDocs, null, 2), (err) => {
+    //     if (err) {
+    //         console.error('Error writing swagger.json:', err);
+    //     } else {
+    //         console.log('swagger.json has been saved!');
+    //     }
+    // });

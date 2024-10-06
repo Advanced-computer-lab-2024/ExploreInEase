@@ -33,9 +33,12 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:backend": "cd ../backend && npm start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "concurrently \"npm run start\" \"npm run start:backend\""
+
   },
   "eslintConfig": {
     "extends": [
@@ -56,6 +59,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "concurrently": "^9.0.1"
   }
 }

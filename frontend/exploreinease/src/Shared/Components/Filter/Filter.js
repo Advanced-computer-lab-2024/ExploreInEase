@@ -22,78 +22,74 @@ const itemList = [
     id: 1,
     name: 'Activity 1',
     budget: 1000,
-    price: 800,
     date: '2023-09-01',
-    rating: 3.5,
+    location: 'Loc',
     category: 'Food',
-    language: 'English',
-    preferences: 'Historic Areas',
-    Tag: 'Monuments',
+    tags: 'Monuments',
+    specialDiscount: '20',
     type: 'Activity',
   },
   {
     id: 2,
     name: 'Activity 2',
-    budget: 2000,
-    price: 1200,
-    date: '2024-11-01',
-    rating: 2.5,
-    category: 'Party',
-    language: 'English',
-    preferences: 'Historic Areas',
-    Tag: 'Monuments',
+    budget: 1500,
+    date: '2024-03-08',
+    location: 'Loc2',
+    category: 'Concert',
+    tags: 'sightseeing',
+    specialDiscount: '15',
     type: 'Activity',
   },
   {
     id: 3,
     name: 'Itinerary 1',
-    budget: 500,
-    price: 400,
-    date: '2024-01-15',
-    rating: 4.0,
-    category: 'Concert',
+    activities: ['Activity 1', 'Activity 2'],
+    locations: ['Cairo', 'Paris'],
+    dateAvailable: '2024-01-15',
+    price: 150,
+    directions: 'Start at main gate',
     language: 'Spanish',
-    preferences: 'Shopping',
-    Tag: 'Palaces',
+    accessibility: 'WheelChair Accessible',
+    pickupLocation: 'Lobby',
+    dropoffLocation: 'Main Square',
+    rating: 4.0,
     type: 'Itinerary',
   },
   {
     id: 4,
     name: 'Itinerary 2',
-    budget: 1500,
-    price: 1400,
-    date: '2021-02-27',
-    rating: 3.2,
-    category: 'Food',
+    activities: ['Activity 1', 'Activity 2'],
+    locations: ['Prague', 'Madrid'],
+    dateAvailable: '2023-06-25',
+    price: 270,
+    directions: 'Main at square',
     language: 'English',
-    preferences: 'Beaches',
-    Tag: 'Palaces',
+    accessibility: 'WheelChair Accessible',
+    pickupLocation: 'Lobby',
+    dropoffLocation: 'Main Square',
+    rating: 2.5,
     type: 'Itinerary',
   },
   {
     id: 5,
     name: 'Historical Place 1',
-    budget: 2000,
-    price: 1500,
-    date: '2024-03-10',
-    rating: 4.7,
-    category: 'Party',
-    language: 'English',
-    preferences: 'Beaches',
-    Tag: 'Museums',
+    description: 'Perfect place to relax',
+    pictures: ['implement picture'],
+    location: 'to be revised',
+    openingHours: '6 to 9',
+    ticketPrice: 'to be revised',
+    tags: ['Museums'],
     type: 'HistoricalPlace',
   },
   {
     id: 6,
     name: 'Historical Place 2',
-    budget: 300,
-    price: 750,
-    date: '2022-06-13',
-    rating: 3.1,
-    category: 'Party',
-    language: 'English',
-    preferences: 'Beaches',
-    Tag: 'Museums',
+    description: 'test for museum',
+    pictures: ['implement picture'],
+    location: 'to be revised',
+    openingHours: '3 to 7',
+    ticketPrice: 'to be revised',
+    tags: ['history'],
     type: 'HistoricalPlace',
   },
 ];
@@ -150,62 +146,62 @@ const Filter = () => {
 
     // Filter by role-specific type
     if (roleToFilter === 'Activities') {
-        data = data.filter((item) => item.type === 'Activity');
+      data = data.filter((item) => item.type === 'Activity');
     } else if (roleToFilter === 'Itineraries') {
-        data = data.filter((item) => item.type === 'Itinerary');
+      data = data.filter((item) => item.type === 'Itinerary');
     } else if (roleToFilter === 'HistoricalPlaces') {
-        data = data.filter((item) => item.type === 'HistoricalPlace');
+      data = data.filter((item) => item.type === 'HistoricalPlace');
     }
 
     // Apply other filters
     if (filters.budget) {
-        data = data.filter((item) => item.budget <= parseFloat(filters.budget));
+      data = data.filter((item) => item.budget <= parseFloat(filters.budget));
     }
 
     if (filters.price) {
-        data = data.filter((item) => item.price.toString() === filters.price);
+      data = data.filter((item) => item.price.toString() === filters.price);
     }
 
     if (filters.date) {
-        data = data.filter((item) => item.date === filters.date);
+      data = data.filter((item) => item.date === filters.date);
     }
 
     if (filters.rating) {
-        data = data.filter((item) => item.rating >= filters.rating && item.rating <= 5);
+      data = data.filter((item) => item.rating >= filters.rating && item.rating <= 5);
     }
 
     if (filters.category) {
-        data = data.filter((item) => item.category === filters.category);
+      data = data.filter((item) => item.category === filters.category);
     }
 
     if (filters.language) {
-        data = data.filter((item) => item.language === filters.language);
+      data = data.filter((item) => item.language === filters.language);
     }
 
     if (filters.preferences) {
-        data = data.filter((item) => item.preferences === filters.preferences);
+      data = data.filter((item) => item.preferences === filters.preferences);
     }
 
     if (filters.Tag) {
-        data = data.filter((item) => item.Tag === filters.Tag);
+      data = data.filter((item) => item.Tag === filters.Tag);
     }
 
     // Search by name
     if (filters.search) {
-        data = data.filter((item) =>
-            item.name.toLowerCase().includes(filters.search.toLowerCase())
-        );
+      data = data.filter((item) =>
+        item.name.toLowerCase().includes(filters.search.toLowerCase())
+      );
     }
 
     // Sort logic
     if (filters.sortBy === 'price') {
-        data.sort((a, b) => b.price - a.price);
+      data.sort((a, b) => b.price - a.price);
     } else if (filters.sortBy === 'rating') {
-        data.sort((a, b) => b.rating - a.rating);
+      data.sort((a, b) => b.rating - a.rating);
     }
 
     setFilteredData(data);
-};
+  };
 
 
   // Reset Filters
@@ -222,7 +218,7 @@ const Filter = () => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, justifyContent: 'center' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
         <Tabs value={role} onChange={handleRoleChange}>
           <Tab label="Main" value="Main" />
           <Tab label="Activities" value="Activities" />
@@ -244,22 +240,22 @@ const Filter = () => {
             style={{ marginBottom: '20px' }}
           />
           {role == 'Itineraries' && (
-          <FormControl fullWidth style={{ marginBottom: '20px' }}>
-            <InputLabel>Sort By</InputLabel>
-            <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
-              <MenuItem value="price">Price</MenuItem>
-              <MenuItem value="rating">Rating</MenuItem>
-            </Select>
-          </FormControl>
+            <FormControl fullWidth style={{ marginBottom: '20px' }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="rating">Rating</MenuItem>
+              </Select>
+            </FormControl>
           )}
           {role == 'Activities' && (
-          <FormControl fullWidth style={{ marginBottom: '20px' }}>
-            <InputLabel>Sort By</InputLabel>
-            <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
-              <MenuItem value="price">Price</MenuItem>
-              <MenuItem value="rating">Rating</MenuItem>
-            </Select>
-          </FormControl>
+            <FormControl fullWidth style={{ marginBottom: '20px' }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="rating">Rating</MenuItem>
+              </Select>
+            </FormControl>
           )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -368,22 +364,59 @@ const Filter = () => {
                   <Typography variant="h5" component="div">
                     {item.name}
                   </Typography>
-                  <Typography color="text.secondary">Price: {item.price}</Typography>
-                  <Typography color="text.secondary">Budget: {item.budget}</Typography>
-                  <Typography color="text.secondary">Date: {item.date}</Typography>
-                  <Typography color="text.secondary">Rating: {item.rating}</Typography>
-                  <Typography color="text.secondary">Category: {item.category}</Typography>
-                  <Typography color="text.secondary">Language: {item.language}</Typography>
-                  <Typography color="text.secondary">Preferences: {item.preferences}</Typography>
-                  <Typography color="text.secondary">Tag: {item.Tag}</Typography>
+
+                  {item.type === 'Activity' && (
+                    <>
+                      <Typography color="text.secondary">Budget: {item.budget}</Typography>
+                      <Typography color="text.secondary">Date: {item.date}</Typography>
+                      <Typography color="text.secondary">Category: {item.category}</Typography>
+                      <Typography color="text.secondary">Location: {item.location}</Typography>
+                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
+                      {item.specialDiscount && (
+                        <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
+                      )}
+                    </>
+                  )}
+
+                  {item.type === 'Itinerary' && (
+                    <>
+                      <Typography color="text.secondary">Activities: {item.activities.join(', ')}</Typography>
+                      <Typography color="text.secondary">Locations: {item.locations.join(', ')}</Typography>
+                      <Typography color="text.secondary">Date Available: {item.dateAvailable}</Typography>
+                      <Typography color="text.secondary">Price: {item.price}</Typography>
+                      <Typography color="text.secondary">Rating: {item.rating}</Typography>
+                      <Typography color="text.secondary">Language: {item.language}</Typography>
+                      <Typography color="text.secondary">Accessibility: {item.accessibility}</Typography>
+                      <Typography color="text.secondary">Dropoff location: {item.dropoffLocation}</Typography>
+                      <Typography color="text.secondary">Pickup location: {item.pickupLocation}</Typography>
+                      <Typography color="text.secondary">Directions: {item.directions}</Typography>
+
+                    </>
+                  )}
+
+                  {item.type === 'HistoricalPlace' && (
+                    <>
+                      <Typography color="text.secondary">Description: {item.description}</Typography>
+                      <Typography color="text.secondary">Location: {item.location}</Typography>
+                      <Typography color="text.secondary">Opening Hours: {item.openingHours}</Typography>
+                      <Typography color="text.secondary">Ticket Price: {item.ticketPrice}</Typography>
+                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
+
       </div>
     </div>
   );
 };
 
 export default Filter;
+
+
+// For picture in Historical Locations
+
+// <img src={item.pictures[0]} alt={item.name} style={{ width: '100%', marginTop: '10px' }} />

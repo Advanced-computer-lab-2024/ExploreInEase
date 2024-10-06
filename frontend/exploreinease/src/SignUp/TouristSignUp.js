@@ -1,9 +1,9 @@
-// src/components/TouristSignUp.js
-import React, { useState,useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NetworkService from '../NetworkService';
+
 const TouristSignUp = () => {
-  const navigate= useNavigate();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -31,23 +31,41 @@ const TouristSignUp = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent form submission
     const age = calculateAge(formData.dob);
     
     if (age < 18) {
       setError('You must be at least 18 years old to register as a tourist.');
-      return;
+      return; // Stop execution if age is less than 18
     }
 
-    setError('');
-    setSuccess('Registration successful!');
-    // Submit form data to the server (API call)
-    console.log('Form data:', formData);
-    navigate('/TouristHomePage');
-
+    try {
+      const options = {
+        apiPath: '/register/tourist',
+        body: {
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          mobileNum: formData.mobileNumber, // API field mapping
+          nation: formData.nationality, // API field mapping
+          dob: formData.dob,
+          profession: formData.jobOrStudent // API field mapping
+        }
+      };
+      
+      const response = await NetworkService.post(options);
+      setSuccess(response.message); // Set success message
+      setError(''); // Clear previous error messages
+      navigate('/TouristHomePage'); // Redirect to the tourist home page
+    } catch (err) {
+      if (err.response) {
+        setError(err.response.data.message); // Set error message from server response if exists
+      } else {
+        setError('An unexpected error occurred.'); // Generic error message
+      }
+    }
   };
-
 
   return (
     <div className="signup-form">
