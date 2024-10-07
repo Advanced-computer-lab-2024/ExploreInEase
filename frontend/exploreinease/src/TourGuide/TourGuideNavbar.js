@@ -1,7 +1,8 @@
 // src/Shared/Components/TourGuideHP.js
-import React from 'react';
+import React,{ useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import '../Guest/GuestHP.css'; 
+import NetworkService from '../NetworkService';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
@@ -9,14 +10,36 @@ import { useLocation } from 'react-router-dom';
 const TourGuideHP = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { tourist } = location.state || {};
-    const initialUsername = tourist.username;
+    const { user } = location.state || {};
+    const [success,setSuccess]=useState();
+    const [error,setError]=useState();
+    const initialUsername = user.username;
+    const userId=user._id;
+    console.log(user);
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-    function handleClick(title) {
+    async function handleClick(title) {
         if (title == "My Profile"){
+          try {
+            const options = {
+              apiPath: `/getTourGuide/${userId}`,
+            };
+            
+            const response = await NetworkService.get(options);
+            setSuccess(response.message); // Set success message
+            const TourGuide=response;
+            navigate(`/viewTourGuideProfile`,{state:{TourGuide:TourGuide.tourGuide}});          
+          } catch (err) {
+            if (err.response) {
+                console.log(err.message);
+              setError(err.response.data.message); // Set error message from server response if exists
+            } else {
+              setError('An unexpected error occurred.'); // Generic error message
+            }
+          }
          navigate('/viewSellerProfile');
        }
        else if(title == 'View My Created Itineraries') {
+
          navigate('/viewCreatedItineraryList');
        }
        else {

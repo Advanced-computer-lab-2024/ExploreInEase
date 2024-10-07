@@ -115,8 +115,7 @@ const getTourGuide = async (req, res) => {
         if (!tourGuide) {
             return res.status(404).json({ message: 'Tour guide not found' });
         }
-        res.status(200).json(tourGuide);
-    } catch (error) {
+        res.status(200).json({message: "Tour Guide Profile fetched successfully", tourGuide: tourGuide});    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
@@ -175,7 +174,7 @@ const getAdvertiser = async (req, res) => {
         if (!advertiser) {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
-        res.status(200).json(advertiser);
+        res.status(200).json({message: "Advertiser profile fetched successfully", advertiser: advertiser});
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -236,8 +235,7 @@ const getSeller = async (req, res) => {
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
-        res.status(200).json(seller);
-    } catch (error) {
+        res.status(200).json({message: "Seller profile retrieved successfully", seller: seller});    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
@@ -369,7 +367,25 @@ const calculateAge = (dob) => {
     return Math.abs(ageDate.getUTCFullYear() - 1970); // Calculate age
 };
 
+const login = async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
 
+    if (typeof username !== 'string' || typeof password !== 'string') {
+        return res.status(400).json({ error: 'Invalid parameter types' });
+    }
+    try{
+        const user = await userService.login(username, password);
+        if (!user) {
+            return res.status(404).json({ error: 'Invalid username or password' });
+        }
+        return res.status(200).json({message: "Logged in Successfully", user: user});
+    }catch(error){
+        return res.status(500).json({ error: 'An error occurred while logging in the user' });
+    }
+}
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,

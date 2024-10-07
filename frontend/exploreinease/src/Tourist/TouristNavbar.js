@@ -11,9 +11,7 @@ const TouristNavbar = () => {
     const { tourist } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
-
     const initialUsername = tourist?.username;
-
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=tourist._id;
     async function handleRegisterClick(title) {
@@ -47,8 +45,7 @@ const TouristNavbar = () => {
             const response = await NetworkService.get(options);
             setSuccess(response.message); // Set success message
             console.log(response);
-            const tourist=response.tourist;
-            navigate(`/viewTouristProfile`,{state:{tourist}});          
+            navigate(`/viewTouristProfile`,{state:{Tourist:response}});
           } catch (err) {
             if (err.response) {
                 console.log(err.message);

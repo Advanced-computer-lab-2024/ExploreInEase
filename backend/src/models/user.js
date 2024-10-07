@@ -15,7 +15,6 @@ const UsersSchema = new Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: 8,
-        select: false // Password will not be included in query results by default
     },
     email: {
         type: String,

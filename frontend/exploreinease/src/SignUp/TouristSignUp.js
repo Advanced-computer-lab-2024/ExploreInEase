@@ -57,7 +57,7 @@ const TouristSignUp = () => {
       const response = await NetworkService.post(options);
       const tourist=response.tourist;
       setSuccess(response.message); // Set success message
-      console.log(response);
+      // console.log(response);
       navigate(`/TouristHomePage`,{state:{tourist:tourist}});
 
     } catch (err) {

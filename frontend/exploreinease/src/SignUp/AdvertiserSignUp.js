@@ -1,10 +1,8 @@
 // src/components/GuideAdvertiserSignUp.js
 import React, { useState,useEffect } from 'react';
 import './Signup.css';
-import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
-
-import { useLocation } from 'react-router-dom';
+import NetworkService from '../NetworkService';
 const GuideAdvertiserSignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -39,7 +37,7 @@ const GuideAdvertiserSignUp = () => {
           setSuccess(response.message); // Set success message
           const user=response.User;
            navigate(`/TourGuideHomePage`,{state:{user}});
-           console.log(response);
+           console.log(response.User);
            } catch (err) {
           if (err.response) {
              setError(err.response.data.message);
@@ -60,9 +58,9 @@ const GuideAdvertiserSignUp = () => {
         };
         
         const response =await NetworkService.post(options);
-        const username=response.User.username;
+        const user=response.User;
         setSuccess(response.message); // Set success message
-        navigate(`/SellerHomePage`,{state:{username:username}});
+        navigate(`/SellerHomePage`,{state:{user}});
 
         } catch (err) {
         if (err.response) {
@@ -84,9 +82,9 @@ const GuideAdvertiserSignUp = () => {
         };
         
         const response =await NetworkService.post(options);
-        const username=response.User.username;
+        const User=response.User;
         setSuccess(response.message); // Set success message
-        navigate(`/AdvertiserHomePage`,{state:{username:username}});
+        navigate(`/AdvertiserHomePage`,{state:{User:User}});
 
       } catch (err) {
         if (err.response) {

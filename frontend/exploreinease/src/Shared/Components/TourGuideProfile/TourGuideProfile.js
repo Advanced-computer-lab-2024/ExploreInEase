@@ -13,7 +13,11 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button'; // Import Button
+import NetworkService from '../../../NetworkService';
+import { useLocation } from 'react-router-dom';
 
+
+const tourGuide={};
 const useForm = (initialValues) => {
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -25,15 +29,21 @@ const useForm = (initialValues) => {
   return [formValues, handleChange];
 };
 
-const GenericDialog = ({
-   username: initialUsername,
+const GenericDialog  = (props) => {
+  const location=useLocation();
+  const { TourGuide } = location.state || {};  
+  const initialUsername = TourGuide?.username || '';
+
+  console.log(TourGuide);
+  const{ 
    email: initialEmail, 
    password: initialPassword,
    mobileNumber: initialMobile,
    yearExp: initialYearExp,
    prevWork: initialPrevWork,
-   languages: initialLanguages }) => {
-      
+   languages: initialLanguages } =props;
+    
+
   const [formValues, handleFormChange] = useForm({
     email: initialEmail || '',
     password: initialPassword || '',

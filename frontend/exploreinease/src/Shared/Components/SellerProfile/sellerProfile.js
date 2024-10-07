@@ -13,7 +13,8 @@ import Input from '@mui/material/Input';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button'; // Import Button
-
+import NetworkService from '../../../NetworkService';
+import { useLocation } from 'react-router-dom';
 
 const useForm = (initialValues) => {
   const [formValues, setFormValues] = useState(initialValues);
@@ -25,12 +26,18 @@ const useForm = (initialValues) => {
   return [formValues, handleChange];
 };
 
-const SellerProfile = ({
-  username: initialUsername,
-  email: initialEmail,
-  password: initialPassword,
+const SellerProfile = (props) => {
+  const location=useLocation();
+  const { tourist } = location.state || {};  
+  console.log(tourist);
+  
+  const initialUsername = tourist?.username || '';
+  const initialEmail = tourist?.email || '';
+  const initialPassword = tourist?.password || '';
+
+  const {
   specialties: initialSpecialties,
-}) => {
+  }= props;
   const [formValues, handleFormChange] = useForm({
     email: initialEmail || '',
     password: initialPassword || '',

@@ -17,6 +17,7 @@ import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button'; // Import Button
 import { useLocation } from 'react-router-dom';
+import NetworkService from '../../../NetworkService';
 
 const useForm = (initialValues) => {
   const [formValues, setFormValues] = useState(initialValues);
@@ -30,8 +31,13 @@ const useForm = (initialValues) => {
 };
 
 const TouristProfile = (props) => {
+  const location=useLocation();
+  const { Tourist } = location.state || {};  
+  console.log(Tourist);
+  
+  const initialUsername = Tourist?.username || '';
+
   const {
-    username: initialUsername,
     email: initialEmail,
     password: initialPassword,
     mobileNumber: initialMobile,
@@ -43,14 +49,14 @@ const TouristProfile = (props) => {
   } = props;
 
   const [formValues, handleChange] = useForm({
-    email: initialEmail || '',
-    password: initialPassword || '',
-    mobileNumber: initialMobile || '',
-    nationality: initialNat || '',
-    dateOfBirth: initialDateOfBirth || null,
-    educationState: initialEducationState || '',
-    wallet: initialWallet || '0',
-    currency: initialCurrency || '',
+    email: Tourist?.email || '',
+    password: Tourist?.password || '',
+    mobileNumber: Tourist?.mobileNum || '',
+    nationality: Tourist?.nation || '',
+    dateOfBirth: initialDateOfBirth  || null,
+    educationState: Tourist?.profession || '',
+    wallet: Tourist?.wallet || '0',
+    currency: Tourist?.wallet || '',
   });
 
   const [isEditable, setIsEditable] = useState({
@@ -62,9 +68,9 @@ const TouristProfile = (props) => {
     educationState: false,
     wallet: false,
   });
-  const location=useLocation();
-  const { tourist } = location.state || {};  
-  const firstInitial = tourist?.username ? tourist?.username.charAt(0).toUpperCase() : '?';
+
+  const initalLetter=Tourist.username;  
+  const firstInitial = initalLetter ? initalLetter.charAt(0).toUpperCase() : '?';
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleEditMode = (field) => {
@@ -99,17 +105,34 @@ const TouristProfile = (props) => {
       handleSave(); // Save values if switching to non-editable mode
     }
   };
-  const handleSave = () => {
-    setIsEditable({
-      email: false,
-    password: false,
-    mobileNumber: false,
-    nationality: false,
-    dateOfBirth: false,
-    educationState: false,
-    wallet: false,
-    });
-  };
+  const handleSave = async () => {
+    try {
+      const updatedTourist = {
+        email:formValues.email,
+        mobileNum:formValues.mobileNumber,
+        otherDetails:{
+          dateOfBirth: formValues.dateOfBirth?.toISOString(),
+          
+        }
+        
+         }; // Convert date to ISO format
+      const response = await NetworkService.put(`/updateTourist/${Tourist._id}`, updatedTourist);
+      console.log('Tourist updated successfully:', response.data);
+
+      // Set all fields to non-editable
+      setIsEditable({
+        email: false,
+        password: false,
+        mobileNumber: false,
+        nationality: false,
+        dateOfBirth: false,
+        educationState: false,
+        wallet: false,
+      });
+    } catch (error) {
+      console.error('Error updating tourist:', error);
+    }
+  }
 
 
   return (
@@ -313,16 +336,11 @@ const TouristProfile = (props) => {
               <Typography>{formValues.wallet}</Typography>
             )}
           </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('wallet')} aria-label={isEditable.wallet ? 'save' : 'edit'}>
-              {isEditable.wallet ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
         </Box>
         <Divider />
         <Divider sx={{ mb: 2 }} />
         <Button variant="contained" color="primary" onClick={toggleAllEditMode}>
-          {Object.values(isEditable).some(editable => editable) ? 'Save All' : 'Edit All'}
+          {Object.values(isEditable).some(editable => editable) ? 'Save All' : 'Save All'}
         </Button>
       </Card>
     </LocalizationProvider>

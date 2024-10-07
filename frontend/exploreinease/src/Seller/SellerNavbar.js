@@ -1,22 +1,61 @@
-import React from 'react';
+import React,{ useState } from 'react';
 import HomePageLogo from '../HomePageLogo.png';
 import '../Guest/GuestHP.css';
 import Avatar from '@mui/material/Avatar';
+import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 
 const HomePage = () => {
    const location=useLocation();
     const navigate = useNavigate();
-    const { tourist } = location.state || {};
-    const initialUsername = tourist?.username;
+    const [success,setSuccess]=useState();
+    const [error,setError]=useState();
+    const { user } = location.state || {};
+    const initialUsername = user?.username;
+    const userId=user._id;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-    function handleClick(title) {
+    async function handleClick(title) {
        if (title=="My Profile"){
-        navigate('/viewSellerProfile');
+        try {
+          const options = {
+            apiPath: `/getSeller/${userId}`,
+          };
+          
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          const tourist=response.seller;
+          console.log(response.seller);
+          navigate(`/viewSellerProfile`,{state:{tourist:response.seller}});     
+
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
       }
       else {
-        navigate('/viewProduct');
+        try {
+          const options = {
+            apiPath: `/getAvailableProducts/${userId}`,
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const Product=response.Products;
+          const Type='Seller';
+          navigate(`/viewProduct`,{state:{Product:Product,Type:Type}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
       }
       };
   return (

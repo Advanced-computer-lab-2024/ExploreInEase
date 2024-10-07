@@ -145,7 +145,35 @@ const checkUserExistsByEmail = async (email) => {
         return false;
     }
 };
-
+const login = async (username, password) => {
+    try {
+        const user = await Users.findOne({ username });
+        const tourist = await Tourist.findOne({ username });
+        if (user !== null) {
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                throw new Error('Incorrect username or password');
+            }
+            return user;
+        }
+        else{
+            if(tourist !== null){
+                const isMatch = await bcrypt.compare(password, tourist.password);
+                if (!isMatch) {
+                    throw new Error('Incorrect username or password');
+                }
+                return tourist;
+            }
+            else{
+                throw new Error('Incorrect username or password');
+            }
+        }
+        
+    } catch (error) {
+        console.error(`Error logging in: ${error.message}`);
+        return null;
+    }
+}
 
 module.exports = {
     addGovernorOrAdmin,

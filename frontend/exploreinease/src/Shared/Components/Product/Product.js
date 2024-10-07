@@ -265,6 +265,10 @@ console.log(Product.ratings)
                     <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
                     </Button>
+
+
+
+
                   )}
                   <Button
                     variant="contained"

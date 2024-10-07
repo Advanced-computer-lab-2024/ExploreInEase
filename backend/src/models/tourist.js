@@ -15,7 +15,6 @@ const TouristSchema = new Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: 8,
-        select: false // Password will not be included in queries unless explicitly selected
     },
     mobileNum: {
         type: String,

@@ -99,7 +99,10 @@ const getTouristUpcommingEvents = async (username) => {
   };
 };
 
-
+const login = async (username, password) => {
+    const user = await userRepository.login(username, password);
+    return user;
+}
 // Tour Guide
 const createTourGuide = async (_id,tourGuideData) => {
     return await userRepository.updateUserData(_id,tourGuideData);
@@ -170,13 +173,12 @@ const registerTourist = async (email, username, password, mobileNum, nation, dob
     if (touristExists) {
         return { status: 409, response: {message: "Tourist already exists"} };
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newTourist = {
         email: email,
         username: username,
-        password: hashedPassword,
-        mobileNum: mobileNum,
+        password: password,
+        mobileNum: password,
         nation: nation,
         dob: dob,
         profession: profession
@@ -194,14 +196,11 @@ const registerUser = async (type, email, username, password) => {
             return { status: 400, response: { message: "User already exists" } };
         }
 
-        // Hash the password before saving the user
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         // Create user data object to be passed to the repository
         const userData = {
             email,
             username,
-            password: hashedPassword,
+            password: password,
             type
         };
 
