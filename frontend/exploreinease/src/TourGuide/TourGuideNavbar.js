@@ -6,7 +6,6 @@ import NetworkService from '../NetworkService';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-
 const TourGuideHP = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -15,7 +14,7 @@ const TourGuideHP = () => {
     const [error,setError]=useState();
     const initialUsername = user.username;
     const userId=user._id;
-    console.log(user);
+    // console.log(user);
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     async function handleClick(title) {
         if (title == "My Profile"){
@@ -30,20 +29,53 @@ const TourGuideHP = () => {
             navigate(`/viewTourGuideProfile`,{state:{TourGuide:TourGuide.tourGuide}});          
           } catch (err) {
             if (err.response) {
-                console.log(err.message);
+                // console.log(err.message);
               setError(err.response.data.message); // Set error message from server response if exists
             } else {
               setError('An unexpected error occurred.'); // Generic error message
             }
           }
-         navigate('/viewSellerProfile');
        }
        else if(title == 'View My Created Itineraries') {
-
-         navigate('/viewCreatedItineraryList');
+        try {
+          const options = {
+            apiPath: `/itinerary/user/670328ceacfd9e94933ea931/allItineraries`,
+          };
+          
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          const TourGuideItinerary=response;
+          console.log(TourGuideItinerary);
+          navigate(`/viewCreatedItineraryList`,{state:{TourGuideItinerary}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
+        //  navigate('/viewCreatedItineraryList');
        }
        else {
-        navigate('/viewMyItinerary');
+        try {
+          const options = {
+            apiPath: `/itinerary/user/${userId}/allItineraries`,
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          const TourGuideItinerary=response;
+          console.log(TourGuideItinerary);
+          navigate(`/viewMyItinerary`,{state:{TourGuideItinerary}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
+        // navigate('/viewMyItinerary');
 
        }
     };

@@ -1,31 +1,46 @@
-// src/components/AddUser.js
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import './AddUser.css'; // Import the CSS file for styling
-
+import NetworkService from "../NetworkService";
 const AddUser = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState({
-    role: "Admin", // Default role as Admin
+    type: "admin", // Default role as admin (lowercase to match API enum)
     username: "",
     password: "",
   });
 
   const [showSuccess, setShowSuccess] = useState(false); // To handle success popup
+  const [showError, setShowError] = useState(null); // To handle error messages
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUser((prevUser) => ({
       ...prevUser,
-      [name]: value,
+      [name]: value,  // Update user state for each field
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you'd send this data to a server
-    console.log("User added:", user);
-    setShowSuccess(true); // Show the success message
-    setTimeout(() => setShowSuccess(false), 3000); // Hide after 3 seconds
-    setUser({ role: "Admin", username: "", password: "" }); // Reset form
+
+    const options = {
+      apiPath: '/addGovernorOrAdmin', 
+      body: { username: user.username, password: user.password, type: user.type }, // Request body
+
+    };
+
+    try {
+      const data = await NetworkService.post(options); // Call the POST method
+      console.log("User added:", data);
+      setShowSuccess(true); // Show success message
+      setTimeout(() => setShowSuccess(false), 3000); // Hide after 3 seconds
+      setUser({ type: "admin", username: "", password: "" }); // Reset form
+      navigate('/viewAddedUsers');
+
+    } catch (error) {
+      setShowError(error.response?.data?.message || 'An error occurred while adding the user.');
+    }
   };
 
   return (
@@ -36,9 +51,9 @@ const AddUser = () => {
 
         <label>
           Role:
-          <select name="role" value={user.role} onChange={handleInputChange}>
-            <option value="Admin">Admin</option>
-            <option value="Tourism Governor">Tourism Governor</option>
+          <select name="type" value={user.type} onChange={handleInputChange}>
+            <option value="admin">Admin</option>
+            <option value="tourismGovernor">Tourism Governor</option>
           </select>
         </label>
         <br />
@@ -71,9 +86,12 @@ const AddUser = () => {
 
         {/* Popup Success Message */}
         {showSuccess && (
-          <div className="success-popup">
-            User created successfully!
-          </div>
+          <div className="success-popup">User created successfully!</div>
+        )}
+
+        {/* Popup Error Message */}
+        {showError && (
+          <div className="error-popup">{showError}</div>
         )}
       </form>
     </div>

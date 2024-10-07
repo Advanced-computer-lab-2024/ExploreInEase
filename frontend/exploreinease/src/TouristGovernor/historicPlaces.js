@@ -6,13 +6,17 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid2';
+import NetworkService from '../NetworkService';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-
+import { useLocation } from 'react-router-dom';
 function HistoricalPlaces() {
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const location=useLocation();
+  const { places,userId } = location.state || {};
+  const governorId=userId;
+  const [images, setImages] = useState([]);  // Store multiple images
+  const [imagePreviews, setImagePreviews] = useState([]);  // Store image previews
   const [historicPlaces, setHistoricPlaces] = useState([]);
   const [open, setOpen] = useState(false);
   const [newHistoricPlace, setNewHistoricPlace] = useState({
@@ -21,6 +25,7 @@ function HistoricalPlaces() {
     location: '',
     openingHours: null,
     ticketPrice: '',
+    images: [], // Add images field for each place
   });
   const [editingHistoricPlaceIndex, setEditingHistoricPlaceIndex] = useState(null);
 
@@ -30,58 +35,103 @@ function HistoricalPlaces() {
 
   const handleClose = () => {
     setOpen(false);
-    setNewHistoricPlace({ name: '', description: '', location: '', openingHours: null, ticketPrice: '' });
-    setImage(null);
-    setImagePreview('');
+    setNewHistoricPlace({ name: '', description: '', location: '', openingHours: null, ticketPrice: '', images: [] });
+    setImages([]);
+    setImagePreviews([]);
     setEditingHistoricPlaceIndex(null);
   };
 
   const handleSaveHistoricPlaces = () => {
     if (newHistoricPlace.name.trim()) {
-      const newPlace = { ...newHistoricPlace, image };
-      if (editingHistoricPlaceIndex !== null) {
-        setHistoricPlaces((prevPlaces) => {
-          const updatedPlaces = [...prevPlaces];
-          updatedPlaces[editingHistoricPlaceIndex] = newPlace;
-          return updatedPlaces;
+      // Prepare the payload for the POST request
+      const payload = {
+        description: newHistoricPlace.description,
+        pictures: images.map((file) => URL.createObjectURL(file)), // Convert files to URLs or handle actual uploads
+        location: newHistoricPlace.location,
+        openingHours: newHistoricPlace.openingHours ? newHistoricPlace.openingHours.format('hh:mm A') : null,
+        ticketPrice: newHistoricPlace.ticketPrice,
+        type: '',  // Send empty string for type
+        period: '',  // Send empty string for period
+        created_by: places._id // Example user ID, you can replace with actual data
+      };
+        NetworkService.post('/historical-places', payload)
+        .then((response) => {
+          // Handle success
+          console.log(response.data.message);
+          const newPlace = { ...newHistoricPlace, images }; // Keep the images
+          setHistoricPlaces((prevPlaces) => [...prevPlaces, newPlace]);
+          handleClose();  // Close the dialog
+        })
+        .catch((error) => {
+          // Handle errors
+          console.error('Error creating historical place:', error);
         });
-      } else {
-        setHistoricPlaces((prevPlaces) => [...prevPlaces, newPlace]);
-      }
     }
-    handleClose();
   };
+  
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setNewHistoricPlace((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle multiple images upload
   const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(file);
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    const files = Array.from(event.target.files);
+    const previews = files.map((file) => URL.createObjectURL(file));
+
+    setImages(files);
+    setImagePreviews(previews);
   };
 
   // Function to handle updating a historic place
-  const handleUpdatePlace = (index) => {
-    setEditingHistoricPlaceIndex(index);
-    setNewHistoricPlace(historicPlaces[index]);
-    setImage(historicPlaces[index].image);
-    setImagePreview(URL.createObjectURL(historicPlaces[index].image));
-    handleClickOpen();
+  const handleUpdatePlace = async (index) => {
+    try {
+      const placeId = historicPlaces[index]._id;
+  
+      // Construct the API path using your NetworkService logic
+      const endpoint = `/historical-places/${placeId}/${governorId}`;
+      
+      const response = await NetworkService.get({ endpoint });
+        if (response) {
+        setEditingHistoricPlaceIndex(index);
+        setNewHistoricPlace(response.historicalPlace);
+        setImages(response.historicalPlace.pictures);
+        
+        const previews = response.historicalPlace.pictures.map((image) => image);
+        setImagePreviews(previews);
+        handleClickOpen(); 
+      } else {
+        console.error('Failed to fetch the historical place');
+      }
+    } catch (error) {
+      console.error('Error fetching historical place:', error);
+    }
   };
+  
+  
 
   // Function to handle deleting a historic place
-  const handleDeletePlace = (index) => {
-    setHistoricPlaces((prevPlaces) => prevPlaces.filter((_, i) => i !== index));
+  const handleDeletePlace = async (index) => {
+    try {
+      const placeId = historicPlaces[index]._id;  
+      // Use NetworkService to delete the historical place
+      const response = await NetworkService.delete({
+        path: `/historical-places/${placeId}/${governorId}`,
+      });
+  
+      if (response) {
+        // Update the state to remove the deleted place from the list
+        setHistoricPlaces((prevPlaces) => prevPlaces.filter((_, i) => i !== index));
+        console.log('Historical Place deleted successfully');
+      } else {
+        console.error('Failed to delete the historical place');
+      }
+    } catch (error) {
+      console.error('Error deleting historical place:', error);
+    }
   };
+  
 
   return (
     <div>
@@ -157,21 +207,25 @@ function HistoricalPlaces() {
             style={{ display: 'none' }}
             id="raised-button-file"
             type="file"
+            multiple  // Allow multiple image uploads
             onChange={handleImageChange}
           />
           <label htmlFor="raised-button-file">
             <Button variant="contained" component="span">
-              Upload Image
+              Upload Images
             </Button>
           </label>
-          {imagePreview && (
+          {/* Display multiple image previews */}
+          {imagePreviews.map((preview, index) => (
             <CardMedia
+              key={index}
               component="img"
               height="140"
-              image={imagePreview}
-              alt="Uploaded Image"
+              image={preview}
+              alt={`Uploaded Image ${index + 1}`}
+              sx={{ objectFit: 'cover', marginTop: 1 }}
             />
-          )}
+          ))}
         </DialogContent>
         <DialogActions>
           <Button sx={{ gap: 2 }} type="submit" variant="outlined" onClick={handleSaveHistoricPlaces}>
@@ -185,15 +239,17 @@ function HistoricalPlaces() {
         {historicPlaces.map((place, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <Card sx={{ width: 300, height: 350, display: 'flex', flexDirection: 'column', marginLeft: 2 }}>
-              {place.image && (
+              {/* Display all uploaded images for each historical place */}
+              {place.images.map((image, idx) => (
                 <CardMedia
+                  key={idx}
                   component="img"
                   height="140"
-                  image={URL.createObjectURL(place.image)}
-                  alt="Uploaded Image"
+                  image={URL.createObjectURL(image)}
+                  alt={`Uploaded Image ${idx + 1}`}
                   sx={{ objectFit: 'cover' }}
                 />
-              )}
+              ))}
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h5" component="div">
                   {place.name}

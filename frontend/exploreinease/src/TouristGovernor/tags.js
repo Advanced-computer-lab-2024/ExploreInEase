@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useLocation } from "react-router-dom";
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -14,6 +15,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import ListSubheader from '@mui/material/ListSubheader';
 
 function Tags() {
+  const location = useLocation();
   const [tags, setTags] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [newTag, setNewTag] = React.useState('');

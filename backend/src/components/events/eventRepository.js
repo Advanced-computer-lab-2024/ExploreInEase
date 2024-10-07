@@ -319,8 +319,8 @@ const createHistoricalPlace = async (data) => {
   return { status: 200, response: { message: "Historical Place created successfully", savedPlace } };
 };
 
-const findTagByTypeAndPeriod = async (type, period) => {
-  return await historicalTags.findOne({ type, period });
+const findTagByTypeAndPeriod = async (type) => {
+  return await historicalTags.findOne({type:type});
 };
 
 const checkTourismGovernor = async (userId) => {
@@ -361,7 +361,9 @@ const getType = async (id) => {
   }
 };
 
-
+const getAllHistoricalTags = async () => {
+  return await historicalTags.find();
+}
 module.exports = {
   createCategory,
   getAllCategories,
@@ -401,7 +403,8 @@ module.exports = {
   findItineraryById,
   findTagByTypeAndPeriod,
   checkTourismGovernor,
-  getTypeForTag
+  getTypeForTag,
+  getAllHistoricalTags
 };
 
 

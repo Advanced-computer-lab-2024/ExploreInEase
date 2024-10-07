@@ -34,10 +34,8 @@ const SellerProfile = (props) => {
   const initialUsername = tourist?.username || '';
   const initialEmail = tourist?.email || '';
   const initialPassword = tourist?.password || '';
+  const initialSpecialties = tourist?.specialist || '';
 
-  const {
-  specialties: initialSpecialties,
-  }= props;
   const [formValues, handleFormChange] = useForm({
     email: initialEmail || '',
     password: initialPassword || '',
@@ -80,12 +78,35 @@ const SellerProfile = (props) => {
       handleSave(); // Save values if switching to non-editable mode
     }
   };
-  const handleSave = () => {
+  const handleSave = async () => {
+
+    const updatedSeller = {
+      email: formValues.email,
+      password: formValues.password,
+      specialist: formValues.specialties,
+    };
+    console.log("Updated values: ", updatedSeller);
+    const options = {
+      apiPath: `/updateSeller/${tourist._id}`,
+      urlParam: tourist._id,
+      body: updatedSeller,
+    };
+    const response = await NetworkService.put(options);
+    console.log("Response: ", response);
+    // Update frontend form with the updated values
+    handleFormChange({
+      ...formValues,
+      email: response.seller.email,
+      password: response.seller.password,
+      specialties: response.seller.specialist,
+    });
     setIsEditable({
       email: false,
       password: false,
-      specialties: false,
-
+      mobileNumber: false,
+      yearExp: false,
+      prevWork: false,
+      languages: false,
     });
   };
 

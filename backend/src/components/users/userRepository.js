@@ -54,6 +54,7 @@ const addGovernorOrAdmin = async (userData) => {
 
 
 
+
 // Fetch all users
 const fetchAllUsers = async () => {
     try {
@@ -150,7 +151,7 @@ const login = async (username, password) => {
         const user = await Users.findOne({ username });
         const tourist = await Tourist.findOne({ username });
         if (user !== null) {
-            const isMatch = await bcrypt.compare(password, user.password);
+            const isMatch = await password === user.password;
             if (!isMatch) {
                 throw new Error('Incorrect username or password');
             }
@@ -158,7 +159,7 @@ const login = async (username, password) => {
         }
         else{
             if(tourist !== null){
-                const isMatch = await bcrypt.compare(password, tourist.password);
+                const isMatch = await password === tourist.password;
                 if (!isMatch) {
                     throw new Error('Incorrect username or password');
                 }
@@ -175,6 +176,7 @@ const login = async (username, password) => {
     }
 }
 
+
 module.exports = {
     addGovernorOrAdmin,
     fetchAllUsers,
@@ -190,6 +192,6 @@ module.exports = {
     saveUser,
     saveTourist,
     checkUserExists,
-    checkUserExistsByEmail
-
+    checkUserExistsByEmail,
+    login
 };

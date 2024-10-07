@@ -32,17 +32,14 @@ const useForm = (initialValues) => {
 const GenericDialog  = (props) => {
   const location=useLocation();
   const { TourGuide } = location.state || {};  
-  const initialUsername = TourGuide?.username || '';
-
-  console.log(TourGuide);
-  const{ 
-   email: initialEmail, 
-   password: initialPassword,
-   mobileNumber: initialMobile,
-   yearExp: initialYearExp,
-   prevWork: initialPrevWork,
-   languages: initialLanguages } =props;
-    
+  console.log(TourGuide.tourGuide);
+  const initialUsername = TourGuide.tourGuide?.username || '';
+  const initialEmail = TourGuide.tourGuide?.email || '';
+  const initialPassword = TourGuide.tourGuide?.password || '';
+  const initialMobile = TourGuide.tourGuide?.mobileNum || '';
+  const initialYearExp = TourGuide.tourGuide?.yearExp || '';
+  const initialPrevWork = TourGuide.tourGuide?.prevWork || '';
+  const initialLanguages = TourGuide.tourGuide?.languages || '';  
 
   const [formValues, handleFormChange] = useForm({
     email: initialEmail || '',
@@ -88,7 +85,29 @@ const GenericDialog  = (props) => {
       handleSave(); // Save values if switching to non-editable mode
     }
   };
-  const handleSave = () => {
+  const handleSave = async () => {
+    const updatedTourGuide = {
+      email: formValues.email,
+      mobileNum: formValues.mobileNumber,
+      password: formValues.password,
+      yearExp: formValues.yearExp,
+      prevWork: formValues.prevWork,
+      languages: formValues.languages,
+    };
+    const options = {
+      apiPath: `/updateTourGuide/${TourGuide.tourGuide._id}`,
+      urlParam: TourGuide.tourGuide._id,
+      body: updatedTourGuide,
+    };
+    const response = await NetworkService.put(options);
+    console.log("Response: ", response);
+    // Update frontend form with the updated values
+    handleFormChange({
+      ...formValues,
+      email: response.tourGuide.email,
+      mobileNumber: response.tourGuide.mobileNum,
+      dateOfBirth: response.tourGuide.dateOfBirth, // Convert back to Day.js format if needed
+    });
     setIsEditable({
       email: false,
       password: false,

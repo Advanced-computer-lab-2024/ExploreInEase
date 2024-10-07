@@ -372,7 +372,7 @@ router.delete('/deleteCategoryById/:_id', eventController.deleteCategoryById);
  * /createPreferenceTag/{_id}:
  *   post:
  *     summary: Create new tags
- *     description: This endpoint allows users with the role of `admin` to create new tags.
+ *     description: This endpoint allows users with the role of admin to create new tags.
  *     tags:
  *       - Tags
  *     parameters:
@@ -418,7 +418,7 @@ router.delete('/deleteCategoryById/:_id', eventController.deleteCategoryById);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Missing required fields" or "Invalid type"
+ *                   example: "Missing required fields"
  *       500:
  *         description: Internal server error while creating the tag(s)
  *         content:
@@ -432,12 +432,13 @@ router.delete('/deleteCategoryById/:_id', eventController.deleteCategoryById);
  */
 router.post('/createPreferenceTag/:_id', eventController.createTag);
 
+
 /**
  * @swagger
  * /getAllPreferenceTags/{_id}:
  *   get:
  *     summary: Retrieve all preference tags
- *     description: This endpoint allows users with the role of `admin` to fetch all preference tags.
+ *     description: This endpoint allows users with the role of admin to fetch all preference tags.
  *     tags:
  *       - Tags
  *     parameters:
@@ -467,7 +468,7 @@ router.post('/createPreferenceTag/:_id', eventController.createTag);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Missing required fields" or "Invalid type"
+ *                   example: "Missing required fields"
  *       500:
  *         description: Internal server error while fetching the tags
  *         content:
@@ -480,6 +481,8 @@ router.post('/createPreferenceTag/:_id', eventController.createTag);
  *                   example: "Error fetching tags"
  */
 router.get('/getAllPreferenceTags/:_id', eventController.getAllTags);
+
+
 
 /**
  * @swagger
@@ -2516,6 +2519,70 @@ router.get('/historical-places/:userId/allHistoricalPlaces', eventController.get
 router.get('/historical-places/:_id/:userId', eventController.getHistoricalPlaceById);
 router.put('/historical-places/:_id/:userId', eventController.updateHistoricalPlace);
 router.delete('/historical-places/:_id/:userId', eventController.deleteHistoricalPlace);
+
+/**
+ * @swagger
+ * /getAllHistoricalTags/{userId}:
+ *   get:
+ *     summary: Get all historical tags for a user
+ *     description: This endpoint fetches all historical tags for a user by userId.
+ *     tags: 
+ *       - Historical Tags
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user.
+ *     responses:
+ *       200:
+ *         description: Successfully fetched tags
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Tags fetched successfully
+ *                 tags:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "123"
+ *                       tagName:
+ *                         type: string
+ *                         example: "Ancient Monument"
+ *       400:
+ *         description: Missing or invalid inputs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Missing inputs or Invalid type
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Detailed error message"
+ */
+router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags);
+
 
 
 module.exports = router;

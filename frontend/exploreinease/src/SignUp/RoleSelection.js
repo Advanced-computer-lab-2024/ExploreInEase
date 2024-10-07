@@ -44,7 +44,7 @@ const RoleSelection = () => {
           className={role === 'guideAdvertiser' ? 'active' : ''}
           onClick={() => handleRoleChange('guideAdvertiser')}
         >
-          Register as Guide / Advertiser / Seller
+          Register as Tour Guide / Advertiser / Seller
         </button>
       </div>
 

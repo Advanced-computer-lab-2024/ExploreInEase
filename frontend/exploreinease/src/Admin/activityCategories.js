@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useLocation } from "react-router-dom";
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -15,12 +16,18 @@ import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import NetworkService from '../NetworkService';
+
 
 function ActivityCategory() {
-  const [category, setCategory] = React.useState([]);
+ 
+  const location = useLocation();
+  const { allcategories,adminId } = location.state || {};
+  const [category, setCategory] = React.useState(allcategories.map(categoryObj => categoryObj.categoryName));
   const [open, setOpen] = React.useState(false);
   const [newCategory, setNewCategory] = React.useState('');
   const [editingCategoryIndex, setEditingCategoryIndex] = React.useState(null);
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -32,7 +39,7 @@ function ActivityCategory() {
     setEditingCategoryIndex(null);  // Reset editing index
   };
 
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     if (newCategory.trim()) {
       if (editingCategoryIndex !== null) {
         // Edit existing tag
@@ -42,7 +49,19 @@ function ActivityCategory() {
           return updatedCategory;
         });
       } else {
-        // Add new tag
+         try {
+          const options = {
+            apiPath: `/createCategory/${adminId}`,
+            body: {
+              categoryName: newCategory
+            }
+          }
+         const response = await NetworkService.post(options);
+
+        console.log(response);  // Success message from backend
+        } catch (error) {
+        console.error('Error:', error);
+        }
         setCategory((prevCategory) => [...prevCategory, newCategory]);
       }
     }

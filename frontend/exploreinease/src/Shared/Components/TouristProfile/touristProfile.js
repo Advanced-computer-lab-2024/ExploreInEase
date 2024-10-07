@@ -15,15 +15,16 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button'; // Import Button
+import Button from '@mui/material/Button';
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../../../NetworkService';
+import dayjs from 'dayjs';
 
 const useForm = (initialValues) => {
   const [formValues, setFormValues] = useState(initialValues);
 
   const handleChange = (name) => (valueOrEvent) => {
-    const newValue = name === 'dateOfBirth' ? valueOrEvent : valueOrEvent.target.value;
+    const newValue = name === 'dob' ? valueOrEvent : valueOrEvent.target.value;
     setFormValues({ ...formValues, [name]: newValue });
   };
 
@@ -31,46 +32,34 @@ const useForm = (initialValues) => {
 };
 
 const TouristProfile = (props) => {
-  const location=useLocation();
+  const location = useLocation();
   const { Tourist } = location.state || {};  
-  console.log(Tourist);
+  console.log("tourist", Tourist);
   
   const initialUsername = Tourist?.username || '';
-
-  const {
-    email: initialEmail,
-    password: initialPassword,
-    mobileNumber: initialMobile,
-    nationality: initialNat,
-    dateOfBirth: initialDateOfBirth,
-    educationState: initialEducationState,
-    wallet: initialWallet,
-    currency: initialCurrency,
-  } = props;
-
+  const initialWallet = Tourist?.wallet || 0;
   const [formValues, handleChange] = useForm({
     email: Tourist?.email || '',
     password: Tourist?.password || '',
     mobileNumber: Tourist?.mobileNum || '',
     nationality: Tourist?.nation || '',
-    dateOfBirth: initialDateOfBirth  || null,
+    dob: Tourist?.dob ? dayjs(Tourist.dob) : null, // Ensure this is a dayjs object
     educationState: Tourist?.profession || '',
     wallet: Tourist?.wallet || '0',
-    currency: Tourist?.wallet || '',
   });
-
+  console.log(Tourist.dob ,typeof Tourist.dob);
   const [isEditable, setIsEditable] = useState({
     email: false,
     password: false,
     mobileNumber: false,
     nationality: false,
-    dateOfBirth: false,
+    dob: false,
     educationState: false,
     wallet: false,
   });
 
-  const initalLetter=Tourist.username;  
-  const firstInitial = initalLetter ? initalLetter.charAt(0).toUpperCase() : '?';
+  const initialLetter = Tourist.username;  
+  const firstInitial = initialLetter ? initialLetter.charAt(0).toUpperCase() : '?';
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleEditMode = (field) => {
@@ -87,17 +76,17 @@ const TouristProfile = (props) => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
   const toggleAllEditMode = () => {
     const allEditable = Object.values(isEditable).some(editable => editable);
     const newEditableState = {
-      email: true,
-      password: true,
-      mobileNumber: true,
-      nationality: true,
-      dateOfBirth: true,
-      educationState: true,
-      wallet: true,
-     
+      email: !allEditable,
+      password: !allEditable,
+      mobileNumber: !allEditable,
+      nationality: !allEditable,
+      dob: !allEditable,
+      educationState: !allEditable,
+      wallet: !allEditable,
     };
     setIsEditable(newEditableState);
 
@@ -105,21 +94,32 @@ const TouristProfile = (props) => {
       handleSave(); // Save values if switching to non-editable mode
     }
   };
+
   const handleSave = async () => {
     try {
       const updatedTourist = {
-        email:formValues.email,
-        mobileNum:formValues.mobileNumber,
-        otherDetails:{
-          dateOfBirth: formValues.dateOfBirth?.toISOString(),
-          
-        }
-        
-         }; // Convert date to ISO format
-      const response = await NetworkService.put(`/updateTourist/${Tourist._id}`, updatedTourist);
-      console.log('Tourist updated successfully:', response.data);
+        email: formValues.email,
+        mobileNum: formValues.mobileNumber,
+        password: formValues.password,
+        profession: formValues.educationState,
+        nation: formValues.nationality,
+        username: formValues.username,
+        dateOfBirth: formValues.dateOfBirth?.toISOString(),
+      };
+      const options = {
+        apiPath:  ` /updateTourist/${Tourist._id}`,
+        urlParam: Tourist._id,
+        body: updatedTourist,
+      };
+      const response = await NetworkService.put(options);
+      // Update frontend form with the updated values
+      handleChange({
+        ...formValues,
+        email: response.tourist.email,
+        mobileNumber: response.tourist.mobileNum,
+        dateOfBirth: response.tourist.dateOfBirth, // Convert back to Day.js format if needed
+      });
 
-      // Set all fields to non-editable
       setIsEditable({
         email: false,
         password: false,
@@ -132,8 +132,7 @@ const TouristProfile = (props) => {
     } catch (error) {
       console.error('Error updating tourist:', error);
     }
-  }
-
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -161,7 +160,7 @@ const TouristProfile = (props) => {
         {/* Username */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box>
-            <Typography sx={{ marginRight: 9, fontWeight:"bold" }}>Username:</Typography>
+            <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Username:</Typography>
             <Typography>{initialUsername}</Typography>
           </Box>
         </Box>
@@ -170,7 +169,7 @@ const TouristProfile = (props) => {
         {/* Email Field */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight:"bold" }}>Email:</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>Email:</Typography>
             {isEditable.email ? (
               <TextField
                 sx={{ width: '70%' }}
@@ -195,7 +194,7 @@ const TouristProfile = (props) => {
         {/* Password Field */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight:"bold" }}>Password:</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>Password:</Typography>
             {isEditable.password ? (
               <Input
                 sx={{ width: '70%' }}
@@ -229,7 +228,7 @@ const TouristProfile = (props) => {
         {/* Mobile Number Field */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight:"bold" }}>Mobile Number:</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>Mobile Number:</Typography>
             {isEditable.mobileNumber ? (
               <TextField
                 sx={{ width: '70%' }}
@@ -253,7 +252,7 @@ const TouristProfile = (props) => {
         {/* Nationality Field */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight:"bold" }}>Nationality:</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>Nationality:</Typography>
             {isEditable.nationality ? (
               <TextField
                 sx={{ width: '70%' }}
@@ -277,29 +276,29 @@ const TouristProfile = (props) => {
         {/* Date of Birth Field */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight:"bold" }}>Date of Birth:</Typography>
-            {isEditable.dateOfBirth ? (
+            <Typography sx={{ fontWeight: "bold" }}>Date of Birth:</Typography>
+            {isEditable.dob ? (
               <DatePicker
-                value={formValues.dateOfBirth}
-                onChange={(newValue) => handleChange('dateOfBirth')(newValue)}
-                renderInput={(params) => <TextField {...params} sx={{ width: '70%' }} variant="standard" />}
+                label="Select Date"
+                value={formValues.dob}
+                onChange={handleChange('dob')}
+                renderInput={(params) => <TextField {...params} />}
               />
             ) : (
-              <Typography>{formValues.dateOfBirth?.format('DD/MM/YYYY')}</Typography>
+              <Typography>{formValues.dob ? formValues.dob.format('MM/DD/YYYY') : 'N/A'}</Typography>
             )}
           </Box>
           <div>
-            <IconButton onClick={() => toggleEditMode('dateOfBirth')} aria-label={isEditable.dateOfBirth ? 'save' : 'edit'}>
-              {isEditable.dateOfBirth ? <SaveIcon /> : <EditIcon />}
+            <IconButton onClick={() => toggleEditMode('dob')} aria-label={isEditable.dob ? 'save' : 'edit'}>
+              {isEditable.dob ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
         </Box>
         <Divider />
-
         {/* Education State Field */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight:"bold" }}>Education State:</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>Education State:</Typography>
             {isEditable.educationState ? (
               <TextField
                 sx={{ width: '70%' }}
@@ -321,26 +320,19 @@ const TouristProfile = (props) => {
         <Divider />
 
         {/* Wallet Field */}
+        <Divider sx={{ mb: 2 }} />
+
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography>Wallet:</Typography>
-            {isEditable.wallet ? (
-              <TextField
-                sx={{ width: '70%' }}
-                variant="standard"
-                type="text"
-                value={formValues.wallet}
-                onChange={handleChange('wallet')}
-              />
-            ) : (
-              <Typography>{formValues.wallet}</Typography>
-            )}
+          <Box>
+            <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Wallet:</Typography>
+            <Typography>{initialWallet}</Typography>
           </Box>
         </Box>
         <Divider />
-        <Divider sx={{ mb: 2 }} />
-        <Button variant="contained" color="primary" onClick={toggleAllEditMode}>
-          {Object.values(isEditable).some(editable => editable) ? 'Save All' : 'Save All'}
+
+        {/* Save All Changes Button */}
+        <Button variant="contained" onClick={toggleAllEditMode}>
+          {Object.values(isEditable).some(editable => editable) ? 'Save All Changes' : 'Edit All'}
         </Button>
       </Card>
     </LocalizationProvider>

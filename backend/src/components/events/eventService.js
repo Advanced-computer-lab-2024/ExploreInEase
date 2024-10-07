@@ -1,6 +1,6 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
-
+const HistoricalPlace = require('../../models/historicalPlace');
 
 
 const getUserEvents = async (_id, userType) => {
@@ -105,7 +105,6 @@ const getFilteredUpcomingActivities = async (filters) => {
       id: activity._id,
       name: activity.name,
       date: activity.date,
-
       time: activity.time,
       location: activity.location, // Include location details (latitude, longitude)
       budget: activity.price, // Handle budget or price depending on schema
@@ -139,7 +138,6 @@ const getAllUpcomingEvents = async () => {
       id: activity._id,
       name: activity.name,
       date: activity.date,
-
       time: activity.time,
       location: activity.location, // Include location details (latitude, longitude)
       budget: activity.price, // Handle budget or price depending on schema
@@ -158,6 +156,7 @@ const getAllUpcomingEvents = async () => {
     // Format itineraries
     const formattedItineraries = itineraries.map((itinerary) => ({
       id: itinerary._id,
+      name:itinerary.name,
       activities: itinerary.activities.map((activity) => activity.name), // Get activity names within the itinerary
       locations: itinerary.locations, // Assuming locations is an array of strings
       timeline: itinerary.timeline,
@@ -178,9 +177,9 @@ const getAllUpcomingEvents = async () => {
     // Format historical places
     const formattedHistoricalPlaces = historicalPlaces.map((place) => ({
       id: place._id,
+      name:place.name,
       description: place.description,
       pictures: place.pictures, // Array of pictures
-
       location: place.location, // Location details (latitude, longitude, address)
       openingHours: place.openingHours, // Opening hours
       ticketPrice: place.ticketPrice, // Detailed ticket price (student/native/foreign)
@@ -189,11 +188,7 @@ const getAllUpcomingEvents = async () => {
     }));
 
     // Return formatted data
-    return {
-      activities: formattedActivities,
-      itineraries: formattedItineraries,
-      historicalPlaces: formattedHistoricalPlaces,
-    };
+    return [formattedActivities, formattedItineraries, formattedHistoricalPlaces];
   } catch (error) {
     console.error(`Service Error: ${error.message}`);
     throw error; // Propagate the error to the controller for further handling
@@ -444,6 +439,10 @@ const getFilteredHistoricalPlaces = async (tags) => {
     throw error; // Propagate the error to the controller
   }
 };
+const getAllHistoricalTags = async () => {
+  return await eventRepository.getAllHistoricalTags();
+}
+
 
 module.exports = {
   getUserEvents,
@@ -476,6 +475,7 @@ module.exports = {
   getAllActivities,
   getAllActivitiesAdvertiser,
   getFilteredItineraries,
-  getFilteredHistoricalPlaces
+  getFilteredHistoricalPlaces,
+  getAllHistoricalTags
 };
 

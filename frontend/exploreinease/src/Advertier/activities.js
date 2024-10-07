@@ -1,16 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  TextField,
-  DialogTitle,
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
-} from '@mui/material';
+import {Button,Dialog,DialogActions,DialogContent,TextField,DialogTitle,Card,CardContent,Typography,CardActions,} from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import InputLabel from '@mui/material/InputLabel';
@@ -21,6 +10,8 @@ import MenuItem from '@mui/material/MenuItem';
 import { LoadScript, GoogleMap, Marker,PlacesService } from '@react-google-maps/api';
 import Slider from '@mui/material/Slider';
 import dayjs from 'dayjs';
+import NetworkService from '../NetworkService';
+import { useLocation } from "react-router-dom";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -31,34 +22,37 @@ const containerStyle = {
 };
 
 const center = {
-  lat: 30.033333, // Default to Egypt's latitude
-  lng: 31.233334, // Default to Egypt's longitude
+  lat: 30.033333, 
+  lng: 31.233334, 
 };
 
 function Activity() {
+  const location=useLocation();
+  const TourGuideItinerary=location.useState||'';
+  // console.log(TourGuideItinerary);
   const [activities, setActivities] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
   const [map, setMap] = useState(null);
   const [placesService, setPlacesService] = useState(null);
   const [activityForm, setActivityForm] = useState({
+    name:'',
     date: null,
     time: null,
     location: '',
     price: [0, 100],
     category: '',
-    tags: '',
+    tags: [''],
     specialDiscounts: '',
-    booking: true,
-    lat: null,
-    lng: null,
+    isOpen: true,
+    latitude: null,
+    longitude: null,
   });
 
   const categoryList = ['Category 1', 'Category 2', 'Category 3'];
   const tagsList = ['Tag 1', 'Tag 2', 'Tag 3'];
   const [searchInput, setSearchInput] = useState('');
   const [isApiLoaded, setIsApiLoaded] = useState(false);
-
   const handleClickOpen = () => {
     setActivityForm({
       date: null,
@@ -69,8 +63,8 @@ function Activity() {
       tags: '',
       specialDiscounts: '',
       booking: false,
-      lat: null,
-      lng: null,
+      latitude: null,
+      longitude: null,
     });
     setCurrentActivity(null);
     setIsApiLoaded(false); // Reset API loaded state
@@ -104,35 +98,52 @@ function Activity() {
     }
   };
 
-  const handleSaveActivity = () => {
+  const handleSaveActivity = async () => {
     const updatedPrice =
-      activityForm.price[0] === activityForm.price[1]
-        ? [activityForm.price[0]]
-        : activityForm.price;
+        activityForm.price[0] === activityForm.price[1]
+            ? [activityForm.price[0]]
+            : activityForm.price;
 
     let updatedDiscount = activityForm.specialDiscounts;
     if (updatedDiscount && !updatedDiscount.includes('%')) {
-      updatedDiscount = `${updatedDiscount}%`;
+        updatedDiscount = `${updatedDiscount}%`;
     }
 
     const updatedActivity = {
-      ...activityForm,
-      price: updatedPrice,
-      specialDiscounts: updatedDiscount,
+        ...activityForm,
+
+        location:[activityForm.longitude,activityForm.latitude],
+        price: updatedPrice,
+        specialDiscounts: updatedDiscount,
     };
 
+    // If currentActivity is not null, update the existing activity
     if (currentActivity !== null) {
-      setActivities((prevActivities) =>
-        prevActivities.map((activity, index) =>
-          index === currentActivity ? updatedActivity : activity
-        )
-      );
+        setActivities((prevActivities) =>
+            prevActivities.map((activity, index) =>
+                index === currentActivity ? updatedActivity : activity
+            )
+        );
     } else {
-      setActivities((prevActivities) => [...prevActivities, updatedActivity]);
+        // Create a new activity by calling the NetworkService
+        try {
+            const response = await NetworkService.post({
+                apiPath: '/activity',
+                body: updatedActivity,
+            });
+            if (response && response.activity) {
+                // Add the created activity to the state
+                setActivities((prevActivities) => [...prevActivities, response.activity]);
+            }
+        } catch (error) {
+            console.error('Error creating activity:', error.message);
+            // Handle error appropriately, maybe show a message to the user
+        }
     }
 
     handleClose();
-  };
+};
+
 
   const handleEditActivity = (index) => {
     setCurrentActivity(index);
@@ -172,8 +183,8 @@ function Activity() {
 
         setActivityForm((prev) => ({
           ...prev,
-          lat: lat,
-          lng: lng,
+          latitude: lat,
+          longitude: lng,
           location: place.name, // Use the place name
         }));
       } else {
@@ -194,8 +205,8 @@ function Activity() {
 
           setActivityForm((prev) => ({
             ...prev,
-            lat: lat,
-            lng: lng,
+            longitude: lat,
+            longitude: lng,
             location: address, // Use the human-readable address
           }));
         } else {
@@ -223,11 +234,9 @@ function Activity() {
 
   return (
     <div>
-                  <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
-
+     <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div>
-   
         <Button variant="contained" onClick={handleClickOpen} sx={{ maxWidth: 150, marginTop: 2, marginLeft: 2 }}>
           Add Activity
         </Button>

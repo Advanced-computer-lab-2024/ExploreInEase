@@ -3,6 +3,9 @@ const Schema = mongoose.Schema;
 
 // Define the HistoricalPlaces schema
 const historicalPlaceSchema = new Schema({
+  name:{
+    type: String,
+  },
   description: {
     type: String,
     required: true,
@@ -58,7 +61,6 @@ const historicalPlaceSchema = new Schema({
   tags: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'historicalTags', // Assuming 'User' is the creator of the itinerary
-    required: true,
   }
   
 });

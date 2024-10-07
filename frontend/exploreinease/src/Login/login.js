@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';  // Import Axios
 import NetworkService from '../NetworkService';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './login.css';
 
 const Login = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'admin'  // Default role set to 'tourist'
+    role: 'admin'  // Default role set to 'admin'
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -32,18 +34,24 @@ const Login = () => {
       return;
     }
 
-    try {
-      // Send the POST request to the /login endpoint
-      const response = await NetworkService.post('/login', {
+    const options = {
+      apiPath: '/login',
+      body: {
         username: formData.email,  // Assuming email as username
         password: formData.password,
       }
-    );
-
+    };
+    
+    try {
+      // Send the POST request to the /login endpoint
+      const response = await NetworkService.post(options);
+      console.log("Response:", response);
       // Handle successful login
-      if (response.status === 200) {
-        setSuccess(`Sign-in successful! Welcome, ${response.data.user.username}`);
-        navigator('/AdminHomePage');
+      if (response.message === "Logged in Successfully") {
+        setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
+        console.log(response.user)
+        console.log(response.user._id);
+        navigate('/AdminHomePage', { state: { tourist: response.user } }); // Use navigate to change the route
         setError('');
       }
     } catch (error) {

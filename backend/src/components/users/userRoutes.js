@@ -1066,5 +1066,83 @@ router.put('/updateTourist/:_id', userController.updateTourist);
 
 router.post('/register/:type', userController.registerUser);
 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: User login
+ *     description: Log in with a username and password to get user details.
+ *     tags:
+ *       - [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "john_doe"
+ *                 description: The username of the user
+ *               password:
+ *                 type: string
+ *                 example: "password123"
+ *                 description: The password of the user
+ *     responses:
+ *       200:
+ *         description: Successful login
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Logged in Successfully"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "613b1f1fcf1a4b2f3856b3a1"
+ *                     username:
+ *                       type: string
+ *                       example: "john_doe"
+ *                     email:
+ *                       type: string
+ *                       example: "john@example.com"
+ *       400:
+ *         description: Bad Request - Missing or invalid parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Missing parameters"
+ *       404:
+ *         description: Not Found - Invalid username or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid username or password"
+ *       500:
+ *         description: Internal Server Error - An error occurred during login
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while logging in the user"
+ */
+router.post('/login', userController.login);
 
 module.exports = router;

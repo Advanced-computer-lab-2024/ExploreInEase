@@ -178,7 +178,7 @@ const registerTourist = async (email, username, password, mobileNum, nation, dob
         email: email,
         username: username,
         password: password,
-        mobileNum: password,
+        mobileNum: mobileNum,
         nation: nation,
         dob: dob,
         profession: profession
@@ -232,6 +232,7 @@ module.exports = {
   getTourist,
   updateTourist,
   registerTourist,
-  registerUser
+  registerUser,
+  login
 };
 

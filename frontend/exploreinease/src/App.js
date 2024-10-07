@@ -1,7 +1,7 @@
 import './App.css'; 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import React, { Suspense } from 'react';
-
+  
 // Lazy load components
 const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
 const TourGuideProfile = React.lazy(() => import('./Shared/Components/TourGuideProfile/TourGuideProfile'));
@@ -44,7 +44,7 @@ const App = () => {
           <Route path="/explore" element={<Filter />} />
           <Route path="/viewProduct" element={<Product />} />
           <Route path="/viewTouristProfile" element={<TouristProfile />} />
-          <Route path="/viewHistoricalPlaces" element={<HistoricalPlaces />} />
+          <Route path="/" element={<HistoricalPlaces />} />
           <Route path="/viewAllGovernorCreatedMuseum" element={<MuseumList />} />
           <Route path="/viewHistoricalTags" element={<Tags />} />
           <Route path="/viewSellerProfile" element={<SellerProfile />} />
@@ -67,7 +67,6 @@ const App = () => {
           <Route path="/Login" element={<SignIn />} />
           <Route path="/AdminHomePage" element={<AdminHomePage />} />
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
-
         </Routes>
       </Suspense>
     </Router>

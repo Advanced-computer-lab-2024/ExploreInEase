@@ -19,9 +19,10 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import NetworkService from '../NetworkService';
 import dayjs from 'dayjs';
 
-export default function ItineraryForm() {
+function ItineraryForm() {
   const [activeTourIndex, setActiveTourIndex] = React.useState(0);
   const [activeDayIndex, setActiveDayIndex] = React.useState(0);
   const [tours, setTours] = React.useState([]);
@@ -91,23 +92,51 @@ export default function ItineraryForm() {
     return start.isValid() && end.isValid() && start.isBefore(end);
   };
 
-  const handleAddTour = () => {
+  const handleAddTour = async () => {
     if (!validateDates()) {
       alert("Please enter valid start and end dates.");
       return;
     }
-    setTours((prevTours) => [
-      ...prevTours,
-      {
-        name: tourData.name,
-        startDate: tourData.startDate,
-        endDate: tourData.endDate,
-        activities: tourData.activities,
-        isSpecial: tourData.isSpecial,
-      },
-    ]);
+  
+    // Prepare the tour data
+    const newTour = {
+      name: tourData.name,
+      startDate: tourData.startDate,
+      endDate: tourData.endDate,
+      activities: tourData.activities,
+      isSpecial: tourData.isSpecial,
+    };
+  
+    // Add the tour to local state (optional, depending on whether you need to manage it locally)
+    setTours((prevTours) => [...prevTours, newTour]);
+  
+    // Prepare the itinerary data for the API
+    const itineraryData = {
+      name: tourData.name,
+      startDate: tourData.startDate,
+      endDate: tourData.endDate,
+      activities: tourData.activities,
+      isSpecial: tourData.isSpecial,
+    };
+  
+    // Define the options for the API call
+    const options = {
+      apiPath: '/itinerary',
+      body: itineraryData, // Data to be sent in the body of the POST request
+    };
+  
+    try {
+      // Make the API POST request using NetworkService
+      const newItinerary = await NetworkService.post(options);
+      console.log('Itinerary Created:', newItinerary);
+    } catch (error) {
+      console.error('Error creating itinerary:', error);
+    }
+  
+    // Close the dialog or form after adding the tour
     handleClose();
   };
+  
 
   const handleEditTour = (index) => {
     const tourToEdit = tours[index];
@@ -308,4 +337,4 @@ export default function ItineraryForm() {
     </Box>
   );
 }
-    
+export default ItineraryForm;

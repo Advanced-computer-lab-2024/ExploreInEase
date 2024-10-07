@@ -15,12 +15,22 @@ import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import NetworkService from '../NetworkService';
+import { useLocation } from 'react-router-dom';
 
 function Preferencetags() {
   const [tags, setTags] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [newTag, setNewTag] = React.useState('');
   const [editingTagIndex, setEditingTagIndex] = React.useState(null);
+  const location = useLocation();
+  const { PreferenceTag } = location.state || {}; // Use destructuring to access PreferenceTag
+  React.useEffect(() => {
+    // Set the initial tags if PreferenceTag exists
+    if (PreferenceTag.tags) {
+      setTags(PreferenceTag.tags);
+    }
+  }, [PreferenceTag.tags]); // Run the effect when PreferenceTag changes
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -32,9 +42,21 @@ function Preferencetags() {
     setEditingTagIndex(null);  // Reset editing index
   };
 
-  const handleSaveTag = () => {
+  const handleSaveTag = async () => {
     if (newTag.trim()) {
+      console.log(newTag);
       if (editingTagIndex !== null) {
+        const updatedTagId = PreferenceTag.ids[editingTagIndex];
+        console.log(updatedTagId);
+        const options = {
+          apiPath: `/updatePreferenceTagById/${updatedTagId}`,
+          body: {
+            tags: newTag
+          }
+        }
+        const response = await NetworkService.put(options);
+        console.log(response);  // Success message from backend
+
         // Edit existing tag
         setTags((prevTags) => {
           const updatedTags = [...prevTags];
@@ -42,6 +64,13 @@ function Preferencetags() {
           return updatedTags;
         });
       } else {
+        const options = {
+          apiPath: '/createPreferenceTag/0',
+          body: {
+            tags: newTag
+          }
+        }
+        const response = await NetworkService.post(options);
         // Add new tag
         setTags((prevTags) => [...prevTags, newTag]);
       }
@@ -53,7 +82,15 @@ function Preferencetags() {
     setNewTag(event.target.value); // Update the input value
   };
 
-  const handleDeleteTag = (index) => {
+  const handleDeleteTag = async (index) => {
+    const deletedId = PreferenceTag.ids[index];
+    console.log(deletedId)
+    const options = {
+      apiPath: `/deletePreferenceTagById/${deletedId}`,
+      urlParam: deletedId
+    }
+    const response = await NetworkService.delete(options);
+    console.log(response);
     setTags((prevTags) => prevTags.filter((_, i) => i !== index));  // Remove the tag
   };
 
@@ -66,18 +103,17 @@ function Preferencetags() {
   return (
     <div>
       {/* Button outside of the box */}
-      <Button variant="contained" onClick={handleClickOpen} sx={{ marginLeft: 2, marginTop: 2, height: 50,width:300 }}>
+      <Button variant="contained" onClick={handleClickOpen} sx={{ marginLeft: 2, marginTop: 2, height: 50, width: 300 }}>
         Create Preference Tag
       </Button>
       
       <Box
         sx={{
-          minWidth:100,
+          minWidth: 100,
           bgcolor: 'white',
           border: '1px solid #ccc', // Add border
-          marginRight:8,
-          marginLeft:8,
-
+          marginRight: 8,
+          marginLeft: 8,
           marginTop: 4, // Add top margin
           borderRadius: 1, // Slight border radius for aesthetics
           padding: 2 // Add padding inside the box
@@ -95,14 +131,13 @@ function Preferencetags() {
               name="name"
               label="Name"
               type="text"
-              
               variant="outlined"
               value={newTag} // Bind the input value to state
               onChange={handleInputChange} // Handle input change
             />
           </DialogContent>
           <DialogActions>
-            <Button sx={{gap:2}} type="submit" variant='standard' onClick={handleSaveTag}>
+            <Button sx={{ gap: 2 }} type="submit" variant='standard' onClick={handleSaveTag}>
               {editingTagIndex !== null ? 'Update' : 'Add'}
             </Button>
             

@@ -2,11 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"; // Import React Leaflet components
 import { OpenStreetMapProvider } from 'leaflet-geosearch'; // Import geocoding provider
+import { useLocation } from "react-router-dom";
 import L from "leaflet"; // Import Leaflet
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
 import "./ItineraryList.css"; // Import the CSS for styling
-
-
 
 // Custom red marker icon
 const redMarkerIcon = new L.Icon({
@@ -17,56 +16,62 @@ const redMarkerIcon = new L.Icon({
 });
 
 const ItineraryList = () => {
-  const [itinerariesData] = useState([
-    {
-      id: 1,
-      title: "Historical London Tour",
-      activities: [
-        {
-          name: "Visit the Tower of London",
-          location: { lat: 51.5081, lng: -0.0759 },
-          duration: "2 hours",
-          language: "English",
-        },
-        {
-          name: "Walk through Westminster",
-          location: { lat: 51.4995, lng: -0.1248 },
-          duration: "1 hour",
-          language: "English",
-        },
-      ],
-      timeline: "10:00 AM - 1:00 PM",
-      price: "£100",
-      availableDates: ["2024-10-01", "2024-10-02"],
-      accessibility: "Wheelchair accessible",
-      pickupLocation: "Central London",
-      dropOffLocation: "Central London",
-    },
-    {
-      id: 2,
-      title: "Paris Adventure Tour",
-      activities: [
-        {
-          name: "Explore the Eiffel Tower",
-          location: { lat: 48.8584, lng: 2.2941 },
-          duration: "1.5 hours",
-          language: "French",
-        },
-        {
-          name: "Seine River Cruise",
-          location: { lat: 48.8566, lng: 2.3522 },
-          duration: "1 hour",
-          language: "French",
-        },
-      ],
-      timeline: "2:00 PM - 5:00 PM",
-      price: "€120",
-      availableDates: ["2024-10-05", "2024-10-06"],
-      accessibility: "Not wheelchair accessible",
-      pickupLocation: "Eiffel Tower",
-      dropOffLocation: "Louvre Museum",
-    },
-  ]);
+  const location=useLocation();
+  // const TourGuideItinerary=location.useState()||'';
+  // console.log(TourGuideItinerary);
+  
+  const [itinerariesData]=useState([]);
+
+  // const [itinerariesData] = useState([
+  //   {
+  //     id: 1,
+  //     title: "Historical London Tour",
+  //     activities: [
+  //       {
+  //         name: "Visit the Tower of London",
+  //         location: { lat: 51.5081, lng: -0.0759 },
+  //         duration: "2 hours",
+  //         language: "English",
+  //       },
+  //       {
+  //         name: "Walk through Westminster",
+  //         location: { lat: 51.4995, lng: -0.1248 },
+  //         duration: "1 hour",
+  //         language: "English",
+  //       },
+  //     ],
+  //     timeline: "10:00 AM - 1:00 PM",
+  //     price: "£100",
+  //     availableDates: ["2024-10-01", "2024-10-02"],
+  //     accessibility: "Wheelchair accessible",
+  //     pickupLocation: "Central London",
+  //     dropOffLocation: "Central London",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Paris Adventure Tour",
+  //     activities: [
+  //       {
+  //         name: "Explore the Eiffel Tower",
+  //         location: { lat: 48.8584, lng: 2.2941 },
+  //         duration: "1.5 hours",
+  //         language: "French",
+  //       },
+  //       {
+  //         name: "Seine River Cruise",
+  //         location: { lat: 48.8566, lng: 2.3522 },
+  //         duration: "1 hour",
+  //         language: "French",
+  //       },
+  //     ],
+  //     timeline: "2:00 PM - 5:00 PM",
+  //     price: "€120",
+  //     availableDates: ["2024-10-05", "2024-10-06"],
+  //     accessibility: "Not wheelchair accessible",
+  //     pickupLocation: "Eiffel Tower",
+  //     dropOffLocation: "Louvre Museum",
+  //   },
+  // ]);
 
   const [locationNames, setLocationNames] = useState({}); // State to store location names
 

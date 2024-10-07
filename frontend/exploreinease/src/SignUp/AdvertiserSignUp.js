@@ -82,8 +82,10 @@ const GuideAdvertiserSignUp = () => {
         };
         
         const response =await NetworkService.post(options);
-        const User=response.User;
+        const User=response;
         setSuccess(response.message); // Set success message
+        console.log(User);
+        
         navigate(`/AdvertiserHomePage`,{state:{User:User}});
 
       } catch (err) {

@@ -17,8 +17,9 @@ const HomePage = () => {
      const initialUsername = User.User?.username;
      console.log(User.User);
      
-     const userId=User.User._id;
- 
+    const userId=User.User._id;
+    console.log(User.User._id);
+
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     async function handleRegisterClick(title) {
         if (title == "My profile"){
@@ -59,14 +60,13 @@ const HomePage = () => {
             setError('An unexpected error occurred.'); // Generic error message
           }
         }
-            // navigate('/explore')
       }
       else {
         try {
           const options = {
             apiPath: `/activity/user/${userId}/allActivities`,
           };
-          
+
           const response = await NetworkService.get(options);
           setSuccess(response.message); // Set success message
           console.log(response);
@@ -97,8 +97,6 @@ const HomePage = () => {
               style={{width:160}}>Create Activities</button>
           <button  onClick={() => handleRegisterClick("View All Activities")}
                style={{width:160}}>View All Activities</button>
-          <button  onClick={() => handleRegisterClick("View Created Activities")}
-               style={{width:190}}>View Created Activities</button>
           <button  onClick={() => handleRegisterClick("My profile")}
                style={{width:160}}>My profile</button>
  

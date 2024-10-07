@@ -37,7 +37,6 @@ const activitySchema = new Schema({
     ref: 'ActivityCategory', 
     required: true,
   },
-  
   specialDiscounts: {
     type: Number, 
   },

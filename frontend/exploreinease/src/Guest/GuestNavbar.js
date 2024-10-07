@@ -9,6 +9,9 @@ const HomePage = () => {
   const navigate = useNavigate(); // Hook for navigation
   const initialUsername ="TAST";
   const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+  function handleLoginClick(){
+    navigate('/Login');
+  }
   function handleRegisterClick(title){
     if (title == "Register"){
     navigate('/register'); 
@@ -28,6 +31,12 @@ const HomePage = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
+        <button
+     onClick={() => handleLoginClick()}
+  className="small-button"
+        >
+          Login
+        </button>
         <div className="nav-links">
         <button 
          onClick={() => handleRegisterClick("Register")}
@@ -46,7 +55,7 @@ const HomePage = () => {
             <option value="egp">EGP (ج.م)</option>
           </select>
         </div>
-        <div className="avatar-container">
+        {/* <div className="avatar-container">
           <Avatar
             sx={{
               bgcolor: 'darkblue',
@@ -59,7 +68,7 @@ const HomePage = () => {
           >
             {firstInitial}
           </Avatar>
-        </div>
+        </div> */}
       </nav>
       {/* Other homepage content goes here */}
     </div>

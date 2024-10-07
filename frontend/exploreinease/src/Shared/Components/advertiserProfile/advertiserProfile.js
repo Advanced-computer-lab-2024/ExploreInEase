@@ -30,39 +30,38 @@ const useForm = (initialValues) => {
 const AdvertiserProfile = (props) => {
   const location=useLocation();
   const { advertiser } = location.state || {};  
-  console.log(advertiser.advertiser);
-  
+
   const initialUsername = advertiser?.advertiser.username || '';
   const initialEmail = advertiser?.advertiser.email || '';
   const initialPassword = advertiser?.advertiser.password || '';
+  const initiallinkWebsite = advertiser?.advertiser.linkWebsite || '';
+  const initialHotline = advertiser?.advertiser.hotline || '';
+  const initiallinkedInLink = advertiser?.advertiser.linkedInLink || '';
+  const initialIndustry = advertiser?.advertiser.industry || '';
+  const initialnoEmployees = advertiser?.advertiser.noEmployees || '';
+  const initialfounded = advertiser?.advertiser.founded || '';
 
-const  {
-   webLink:initialWebLink,
-   hotline:initialHotline,
-   companyLinkedinProfile:initialCompanyLinkedinProfile,
-   industry:initialIndustry,
-   companySize:initialCompanySize,
-   yearOfRelease:initialYearOfRelease
- } = props;
-    const [formValues, handleFormChange] = useForm({
-      email: initialEmail ||'',
-      password: initialPassword ||'',
-      webLink:initialWebLink  ||'',
-      hotline:initialHotline  ||'',
-      companyLinkedinProfile:initialCompanyLinkedinProfile  ||'',
-      industry:initialIndustry  ||'',
-      companySize:initialCompanySize ||'',
-      yearOfRelease:initialYearOfRelease ||''
-    } );
+  const [formValues, handleFormChange] = useForm({
+    username: initialUsername || '',
+    email: initialEmail || '',
+    password: initialPassword || '',
+    linkWebsite: initiallinkWebsite || '',
+    hotline: initialHotline || '',
+    linkedInLink: initiallinkedInLink || '',
+    industry: initialIndustry || '',
+    noEmployees: initialnoEmployees || '',
+    founded: initialfounded || '',
+  });
+
     const [isEditable, setIsEditable] = useState({
       email: false,
       password: false,
-      webLink: false,
+      linkWebsite: false,
       hotline: false,
-      companyLinkedinProfile: false,
+      linkedInLink: false,
       industry: false,
-      companySize: false,
-      yearOfRelease: false
+      noEmployees: false,
+      founded: false
     });
     const [showPassword, setShowPassword] = useState(false);
 
@@ -86,12 +85,12 @@ const  {
       const newEditableState = {
         email: true,
         password: true,
-        webLink: true,
+        linkWebsite: true,
         hotline: true,
-        companyLinkedinProfile: true,
+        linkedInLink: true,
         industry: true,
-        companySize: true,
-        yearOfRelease: true
+        noEmployees: true,
+        founded: true
   
       };
       setIsEditable(newEditableState);
@@ -100,16 +99,47 @@ const  {
         handleSave(); // Save values if switching to non-editable mode
       }
     };
-    const handleSave = () => {
+    const handleSave = async () => {
+      const updatedAdvertiser = {
+        username: formValues.username,
+        email: formValues.email,
+        password: formValues.password,
+        linkWebsite: formValues.linkWebsite,
+        hotline: formValues.hotline,
+        linkedInLink: formValues.linkedInLink,
+        industry: formValues.industry,
+        noEmployees: formValues.noEmployees,
+        founded: formValues.founded
+      };
+      const options = {
+        apiPath: `/updateAdvertiser/${advertiser.advertiser._id}`,
+        urlParam: advertiser.advertiser._id,
+        body: updatedAdvertiser,
+      };
+      const response = await NetworkService.put(options);
+      console.log('Response: ', response);
+
+      handleFormChange({
+        ...formValues,
+        email: response.advertiser.email,
+        password: response.advertiser.password,
+        linkWebsite: response.advertiser.linkWebsite,
+        hotline: response.advertiser.hotline,
+        linkedInLink: response.advertiser.linkedInLink,
+        industry: response.advertiser.industry,
+        noEmployees: response.advertiser.noEmployees,
+        founded: response.advertiser.founded
+      });
+
       setIsEditable({
         email: false,
         password: false,
-        webLink: false,
+        linkWebsite: false,
         hotline: false,
-        companyLinkedinProfile: false,
+        linkedInLink: false,
         industry: false,
-        companySize: false,
-        yearOfRelease: false
+        noEmployees: false,
+        founded: false
   
       });
     };
@@ -222,22 +252,22 @@ const  {
 
             <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
               <Typography sx={{ marginRight: 10,fontWeight:"bold" }}>Website Link:</Typography>
-              {isEditable.webLink ? (
+              {isEditable.linkWebsite ? (
                 <TextField
                 fullWidth
-                  id="webLink-edit"
+                  id="linkWebsite-edit"
                   variant="standard"
                   type="url"
-                  value={formValues.webLink}
-                  onChange={handleFormChange('webLink')} // Using the generic change handler
+                  value={formValues.linkWebsite}
+                  onChange={handleFormChange('linkWebsite')} // Using the generic change handler
                 />
               ) : (
-                <Typography>{formValues.webLink}</Typography>
+                <Typography>{formValues.linkWebsite}</Typography>
               )}
                <div>
 
-              <IconButton onClick={() => toggleEditMode('webLink')} aria-label={isEditable.webLink ? "save" : "edit"}>
-                {isEditable.webLink ? <SaveIcon /> : <EditIcon />}
+              <IconButton onClick={() => toggleEditMode('linkWebsite')} aria-label={isEditable.linkWebsite ? "save" : "edit"}>
+                {isEditable.linkWebsite ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
             </Box>
@@ -246,21 +276,21 @@ const  {
 
             <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
               <Typography sx={{ marginRight: 8 ,fontWeight:"bold"}}>Linkedin Profile:</Typography>
-              {isEditable.companyLinkedinProfile ? (
+              {isEditable.linkedInLink ? (
                 <TextField
                 fullWidth
                   id="Linkedin-edit"
                   variant="standard"
                   type="url"
-                  value={formValues.companyLinkedinProfile}
-                  onChange={handleFormChange('companyLinkedinProfile')} // Using the generic change handler
+                  value={formValues.linkedInLink}
+                  onChange={handleFormChange('linkedInLink')} // Using the generic change handler
                 />
               ) : (
-                <Typography>{formValues.companyLinkedinProfile}</Typography>
+                <Typography>{formValues.linkedInLink}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('companyLinkedinProfile')} aria-label={isEditable.companyLinkedinProfile ? "save" : "edit"}>
-                {isEditable.companyLinkedinProfile ? <SaveIcon /> : <EditIcon />}
+              <IconButton onClick={() => toggleEditMode('linkedInLink')} aria-label={isEditable.linkedInLink ? "save" : "edit"}>
+                {isEditable.linkedInLink ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
             </Box>
@@ -293,21 +323,21 @@ const  {
 
             <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
               <Typography sx={{ marginRight: 2,fontWeight:"bold" }}>Number of Employees:</Typography>
-              {isEditable.companySize ? (
+              {isEditable.noEmployees ? (
                 <TextField
                 fullWidth
                   id="hotline-edit"
                   variant="standard"
                   type="text"
-                  value={formValues.companySize}
-                  onChange={handleFormChange('companySize')} // Using the generic change handler
+                  value={formValues.noEmployees}
+                  onChange={handleFormChange('noEmployees')} // Using the generic change handler
                 />
               ) : (
-                <Typography>{formValues.companySize}</Typography>
+                <Typography>{formValues.noEmployees}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('companySize')} aria-label={isEditable.companySize ? "save" : "edit"}>
-                {isEditable.companySize ? <SaveIcon /> : <EditIcon />}
+              <IconButton onClick={() => toggleEditMode('noEmployees')} aria-label={isEditable.noEmployees ? "save" : "edit"}>
+                {isEditable.noEmployees ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
             </Box>
@@ -316,21 +346,21 @@ const  {
 
             <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
               <Typography sx={{ marginRight: 8 ,fontWeight:"bold"}}>Year of Release:</Typography>
-              {isEditable.yearOfRelease ? (
+              {isEditable.founded ? (
                 <TextField
                 fullWidth
-                  id="YearOfRelease-edit"
+                  id="founded-edit"
                   variant="standard"
                   type="link"
-                  value={formValues.yearOfRelease}
-                  onChange={handleFormChange('yearOfRelease')} 
+                  value={formValues.founded}
+                  onChange={handleFormChange('founded')} 
                 />
               ) : (
-                <Typography>{formValues.yearOfRelease}</Typography>
+                <Typography>{formValues.founded}</Typography>
               )}
               <div>
-              <IconButton onClick={() =>toggleEditMode('yearOfRelease')} aria-label={isEditable.yearOfRelease ? "save" : "edit"}>
-                {isEditable.yearOfRelease ? <SaveIcon /> : <EditIcon />}
+              <IconButton onClick={() =>toggleEditMode('founded')} aria-label={isEditable.founded ? "save" : "edit"}>
+                {isEditable.founded ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
             </Box>

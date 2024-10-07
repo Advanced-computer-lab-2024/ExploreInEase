@@ -49,11 +49,11 @@ const getAllCategories = async (req, res) => {
 
 // Update an activity category by ID
 const updateCategoryById = async (req, res) => {
-  const { id } = req.params; 
+  const { _id } = req.params; 
   const updateData = req.body; // Get the update data from the request body
 
   try {
-    const updatedCategory = await eventService.updateCategoryById(id, updateData);
+    const updatedCategory = await eventService.updateCategoryById(_id, updateData);
     if (!updatedCategory) {
       return res.status(404).json({ message: 'Category not found' });
     }
@@ -99,7 +99,8 @@ const createTag = async (req, res) => {
 const getAllTags = async (req, res) => {
   try {
     const tags = await eventService.getAllTags();
-    return res.status(200).json(tags);
+    const tagsArray = tags.map(tag => tag.tags);
+    return res.status(200).json({message: 'Fetched all tags', tags: tagsArray});
   } catch (error) {
     console.error('Error fetching tags:', error.message);
     return res.status(500).json({ message: error.message });
@@ -108,11 +109,11 @@ const getAllTags = async (req, res) => {
 
 // Update a preference tag by its _id
 const updateTagById = async (req, res) => {
-  const { id } = req.params; // Get the id from the URL
+  const { _id } = req.params; // Get the id from the URL
   const updatedData = req.body; // Get the updated data from the request body
 
   try {
-    const updatedTag = await eventService.updateTagById(id, updatedData);
+    const updatedTag = await eventService.updateTagById(_id, updatedData);
     if (!updatedTag) {
       return res.status(404).json({ message: 'Tag not found' });
     }
@@ -125,10 +126,10 @@ const updateTagById = async (req, res) => {
 
 // Delete a preference tag by its _id
 const deleteTagById = async (req, res) => {
-  const { id } = req.params; // Get the id from the URL
+  const { _id } = req.params; // Get the id from the URL
 
   try {
-    const deletedTag = await eventService.deleteTagById(id);
+    const deletedTag = await eventService.deleteTagById(_id);
     if (!deletedTag) {
       return res.status(404).json({ message: 'Tag not found' });
     }
@@ -439,8 +440,7 @@ const getAllItineraries = async (req, res) => {
     }
 
     const itineraries = await eventService.getAllItineraries(userId);
-    return res.status(200).json(itineraries);
-  } catch (error) {
+    return res.status(200).json({message: "Itineraries fetched successfully" ,Itineraries: itineraries});  } catch (error) {
     console.error('Error fetching itineraries:', error.message);
     return res.status(500).json({ message: 'Server error.' });
   }
@@ -594,18 +594,17 @@ const deleteItinerary = async (req, res) => {
 // Create a new Historical Place
 const createHistoricalPlace = async (req, res) => {
   const {
+    name,
     description,
     pictures,
     location,
     openingHours,
     ticketPrice,
-    type, // this should refer to the tags
-    period, // this should refer to the tags
     created_by,
   } = req.body;
 
   // Validate required fields
-  if (!description || !pictures || !location || !openingHours || !ticketPrice || !type || !period || !created_by) {
+  if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -616,21 +615,18 @@ const createHistoricalPlace = async (req, res) => {
   }
 
   try {
-    // Ensure the tag exists in the database
-    const tag = await eventRepository.findTagByTypeAndPeriod(type, period);
-    if (!tag) {
-      return res.status(400).json({ message: 'Invalid tag type or period' });
-    }
-
-    // Prepare the data for the historical place
+    // const tag = await eventRepository.findTagByTypeAndPeriod(type);
+    // if (!tag) {
+    //   return res.status(400).json({ message: 'Invalid tag type' });
+    // }
     const historicalPlaceData = {
+      name,
       description,
       pictures,
       location,
       openingHours,
       ticketPrice,
       created_by,
-      tags: tag._id // Use the tag's ObjectId
     };
 
     // Call the service to create the historical place
@@ -739,7 +735,25 @@ const deleteHistoricalPlace = async (req, res) => {
       res.status(500).json({ message: 'Error deleting historical place', error: error.message });
   }
 };
-
+const getAllHistoricalTags = async (req, res) => {
+  const { userId } = req.params;
+  if(!userId) {
+    res.status(400).json({ message: 'Missing inputs' });
+  }
+  const type = await eventRepository.getType(userId);
+  if (type !== 'tourGuide' || type !== 'tourist' || type != 'guest') {
+    return res.status(400).json({ message: 'Invalid type' });
+  }
+  try {
+    const tags = await eventService.getAllHistoricalTags();
+    return res.status(200).json({message: "Tags fetched successfully", tags: tags});
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred", details: error.message });
+  }
+}
 module.exports = {
   getUserEvents,
   createCategory,
@@ -769,6 +783,7 @@ module.exports = {
   updateHistoricalPlace,
   deleteHistoricalPlace,
   getAllItineraries,
-  getAllActivities
+  getAllActivities,
+  getAllHistoricalTags
   };
   

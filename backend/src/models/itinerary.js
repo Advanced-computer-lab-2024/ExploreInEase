@@ -3,6 +3,9 @@ const Schema = mongoose.Schema;
 
 // Define the Itinerary schema
 const itinerarySchema = new Schema({
+  name:{
+    type: String,
+  },
   activities: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Activity', // Referencing the Activity schema

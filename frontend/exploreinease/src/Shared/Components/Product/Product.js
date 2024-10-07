@@ -28,7 +28,7 @@ const ProductCard = () => {
   const location = useLocation();
   const { Product,Type } = location.state || {};
  
-  
+  const isSellerOrAdmin = Type === 'seller' || Type === 'admin';
   const [initialProductList, setInitialProductList] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
   const [products, setProducts] = useState([]);
@@ -239,7 +239,7 @@ console.log(Product.ratings)
             <Button variant="outlined" color="secondary" onClick={handleReset}>
               Reset
             </Button>
-            {!Type && (
+            {isSellerOrAdmin && (
               <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
                 Create
               </Button>)}
@@ -261,7 +261,7 @@ console.log(Product.ratings)
                   <Typography>Description: {product.description}</Typography>
                   <Typography>Quantity: {product.originalQuantity}</Typography>
                   <Typography>Seller: {product.sellerType}</Typography>
-                  {!Type && (
+                  {isSellerOrAdmin && (
                     <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
                     </Button>

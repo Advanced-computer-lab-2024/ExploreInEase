@@ -310,15 +310,18 @@ const updateTourist = async (req, res) => {
 };
 
 
-// const checkUsername = (username) => {
-//     return /^[a-zA-Z0-9]+$/.test(username);
-// }
+const checkUsername = (username) => {
+    return /^[a-zA-Z0-9]+$/.test(username);
+}
 const registerUser = async (req, res) => {
     const { type } = req.params;
     const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
-    // if (!type) {
-    //     return res.status(400).json({ message: "User type is required" });
-    // }
+    if (!type) {
+        return res.status(400).json({ message: "User type is required" });
+    }
+    if (!checkUsername(username)) {
+        return res.status(400).json({ message: "Username can only contain letters and numbers" });
+    }
 
     const usernameExists = await userRepository.checkUserExists(username);
     if (usernameExists) {
@@ -330,7 +333,7 @@ const registerUser = async (req, res) => {
         return res.status(409).json({ message: "Email already exists" });
     }
 
-    if(type == 'tourist'){
+    if(type == 'tourist') {
         if (!email||!username||!password||!mobileNum||!nation||!dob||!profession) {
             return res.status(400).json({ message: "Missing Input" });
         }
@@ -402,5 +405,6 @@ module.exports = {
   updateSeller,
   getTourist,
   updateTourist,
-  registerUser
+  registerUser,
+  login
 };
