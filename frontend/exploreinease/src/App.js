@@ -28,6 +28,9 @@ const SellerNavbar = React.lazy(() => import('./Seller/SellerNavbar'));
 const TourGuideNavbar = React.lazy(() => import("./TourGuide/TourGuideNavbar"));
 const Product = React.lazy(() => import("./Shared/Components/Product/Product"));
 const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar"));
+const SignIn = React.lazy(() => import("./Login/login"));
+const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"))
+const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"))
 
 const App = () => {
 
@@ -61,12 +64,13 @@ const App = () => {
           <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} />
           <Route path="/GovernorHomePage" element={<GovernorNavbar />} />
           <Route path="/Activities" element={<Activity />} />
+          <Route path="/Login" element={<SignIn />} />
+          <Route path="/AdminHomePage" element={<AdminHomePage />} />
+          <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
+
         </Routes>
       </Suspense>
     </Router>
-    // <div>
-    //   <TourGuideProfile/>
-    // </div>
   );
 };
 
