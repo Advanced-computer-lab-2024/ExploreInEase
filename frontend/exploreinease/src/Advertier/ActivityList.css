@@ -1,0 +1,67 @@
+/* src/Shared/Components/Activities/ActivityList.css */
+
+.activity-list-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  .activity-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  .activity-card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 15px;
+    padding: 20px;
+    max-width: 400px;
+    flex: 1;
+    min-width: 250px;
+  }
+  
+  .activity-header {
+    margin-bottom: 15px;
+  }
+  
+  .activity-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #444;
+  }
+  
+  .date-time {
+    color: #777;
+    font-size: 14px;
+  }
+  
+  .activity-details p {
+    margin: 10px 0;
+    color: #555;
+  }
+  
+  .booking-status {
+    font-weight: bold;
+  }
+  
+  .booking-status.open {
+    color: #28a745; /* Green for open */
+  }
+  
+  .booking-status.closed {
+    color: #dc3545; /* Red for closed */
+  }
+  .leaflet-container {
+    height: 200px;
+    width: 100%;
+  }
