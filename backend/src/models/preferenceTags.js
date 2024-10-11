@@ -11,6 +11,6 @@ const preferenceTagsSchema = new Schema({
 });
 
 // Create and export the model
-const PreferenceTags = mongoose.model('PreferenceTags', preferenceTagsSchema);
+const PreferenceTags = mongoose.models.PreferenceTags ||mongoose.model('PreferenceTags', preferenceTagsSchema);
 
 module.exports = PreferenceTags;

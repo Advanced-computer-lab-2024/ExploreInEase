@@ -1,0 +1,93 @@
+/* src/Shared/Components/ItineraryList.css */
+
+/* Global styles */
+body {
+    font-family: 'Arial', sans-serif; /* Use a modern font */
+    background-color: #e9ecef; /* Light background for contrast */
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .itinerary-list-container {
+    padding: 20px;
+    max-width: 900px; /* Increased max width for better layout */
+    margin: auto;
+    background-color: #ffffff; /* White background for the cards */
+    border-radius: 12px; /* More rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Enhanced shadow for depth */
+  }
+  
+  h2 {
+    text-align: center;
+    color: #343a40; /* Darker text for better readability */
+    font-size: 2.5em; /* Increased font size */
+    margin-bottom: 20px; /* Spacing below the title */
+  }
+  
+  /* Flex layout for itinerary cards */
+  .itinerary-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Increased spacing between cards */
+  }
+  
+  /* Card styles */
+  .itinerary-card {
+    background-color: #f8f9fa; /* Light grey for cards */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px; /* More padding for content */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth hover effects */
+    border: 1px solid #dee2e6; /* Light border */
+  }
+  
+  .itinerary-card:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+  }
+  
+  /* Header styles */
+  .itinerary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  h3 {
+    font-size: 1.5em; /* Larger font size for activity titles */
+    color: #007bff; /* Blue color for activity titles */
+    margin: 0; /* Remove default margin */
+  }
+  
+  /* Detail styles */
+  .itinerary-details {
+    margin-top: 10px;
+  }
+  
+  .timeline {
+    font-weight: bold;
+    color: #17a2b8; /* Teal color for the timeline */
+    margin-bottom: 5px; /* Space below the timeline */
+  }
+  
+  .activity-duration,
+  .language,
+  .price,
+  .accessibility,
+  .pickup-dropoff {
+    margin: 5px 0; /* Space between details */
+    color: #495057; /* Dark grey for better readability */
+  }
+  
+  .booking-status {
+    font-weight: bold;
+    margin-top: 10px; /* Space above the status */
+  }
+  
+  /* Booking status colors */
+  .booking-status.open {
+    color: #28a745; /* Green for open status */
+  }
+  
+  .booking-status.closed {
+    color: #dc3545; /* Red for closed status */
+  }

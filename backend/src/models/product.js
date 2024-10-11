@@ -25,7 +25,7 @@ const ProductsSchema = new Schema({
     },
     sellerId: {
         type: mongoose.Schema.Types.ObjectId, // Foreign key to reference the seller
-        ref: 'Users',               
+        ref: 'Users',               // Assuming you have a Users schema
         required: [true, 'Seller ID is required']
     },
     ratings: {
@@ -82,6 +82,6 @@ const ProductsSchema = new Schema({
 });
 
 // Create the Products Model
-const Products = mongoose.model('Products', ProductsSchema);
+const Products = mongoose.models.Products || mongoose.model('Products', ProductsSchema);
 
 module.exports = Products;

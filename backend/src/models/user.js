@@ -15,7 +15,6 @@ const UsersSchema = new Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: 8,
-        select: false // Password will not be included in query results by default
     },
     email: {
         type: String,
@@ -110,8 +109,10 @@ const UsersSchema = new Schema({
     },
     sellerType: {
         type: String,
-        enum: ['VTP', 'External'], // Seller types
-        default: 'External' // Set default value to 'External'
+        enum: ['VTP', 'External',''], // Seller types
+        default: function() {
+            return this.sellerType === 'seller' ? 'External' : '';
+        }
     }
 
 }, {
