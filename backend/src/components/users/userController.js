@@ -9,9 +9,9 @@ const userService = require('./userService');
 const { validationResult } = require('express-validator');
 
 // Input validation middleware
-const validateTourGuide = [
-    // Add validation logic here (e.g., check required fields)
-];
+// const validateTourGuide = [
+//     // Add validation logic here (e.g., check required fields)
+// ];
 
 //Tour Guide
 exports.createTourGuide = async (req, res) => {
