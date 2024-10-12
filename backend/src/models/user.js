@@ -27,36 +27,18 @@ const UsersSchema = new Schema({
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         }
         
-<<<<<<< HEAD
-    },
-    documents: {
-        nationalId: {
-            type: String,
-           
-        },
-        certificate: {
-            type: String,
-            
-        },
-        taxation: {
-            type: String,
-            
-        },  
-=======
-    },
+},
+documents: {
     nationalId: {
         type: String,
-       
     },
     certificate: {
         type: String,
-        
     },
     taxation: {
         type: String,
-        
->>>>>>> 3b520d8c5b3edfc82890feb3ab4bc59085f75a94
-    },
+    },  
+},
     experience: {
         type: String,
        
@@ -86,7 +68,6 @@ const UsersSchema = new Schema({
         required: [true, 'User type is required'],
         enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] // User types
     },
-<<<<<<< HEAD
     photo: {
         selfPicture: {
             type: String,
@@ -98,39 +79,23 @@ const UsersSchema = new Schema({
         }
     },
     comment: {
-        type: [String],
-=======
+        type: [String]
+    },
+
+    selfPicture: {
+        type: String, 
+    },
+photo: {
     selfPicture: {
         type: String,
-        
     },
     logo: {
         type: String,
-        
-    },
-    comment: {
-        type: String,
->>>>>>> 3b520d8c5b3edfc82890feb3ab4bc59085f75a94
-        
-    },
-    rating: {
-        type: [Number],
-        min: 0,
-        max: 5,
-        
-    },
-    founded: {
-        type: Number,
-       
-    },
-    specialist: {
-        type: String,
-        
-    },
-    noEmployees: {
-        type: Number,
-      
-    },
+    }
+},
+comment: {
+    type: [String]
+},
     industry: {
         type: String,
         
