@@ -15,7 +15,6 @@ const UsersSchema = new Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: 8,
-        select: false // Password will not be included in query results by default
     },
     email: {
         type: String,
@@ -29,17 +28,19 @@ const UsersSchema = new Schema({
         }
         
     },
-    nationalId: {
-        type: String,
-       
-    },
-    certificate: {
-        type: String,
-        
-    },
-    taxation: {
-        type: String,
-        
+    documents: {
+        nationalId: {
+            type: String,
+           
+        },
+        certificate: {
+            type: String,
+            
+        },
+        taxation: {
+            type: String,
+            
+        },  
     },
     experience: {
         type: String,
@@ -70,20 +71,22 @@ const UsersSchema = new Schema({
         required: [true, 'User type is required'],
         enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] // User types
     },
-    selfPicture: {
-        type: String,
-        
-    },
-    logo: {
-        type: String,
-        
+    photo: {
+        selfPicture: {
+            type: String,
+            
+        },
+        logo: {
+            type: String,
+            
+        }
     },
     comment: {
-        type: String,
+        type: [String],
         
     },
     rating: {
-        type: Number,
+        type: [Number],
         min: 0,
         max: 5,
         
@@ -110,10 +113,26 @@ const UsersSchema = new Schema({
     },
     sellerType: {
         type: String,
-        enum: ['VTP', 'external'], // Seller types
-        
-    }
-
+        enum: ['VTP', 'External',''], // Seller types
+        default: function() {
+            return this.sellerType === 'seller' ? 'External' : '';
+        }
+    },
+    docStatus: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected', ""],
+        default: function() {
+            if(this.documents.nationalId || this.documents.certificate || this.documents.taxation) {
+                return 'pending';
+            } else {
+                return "";
+            }
+        }
+    },
+    termsAndConditions: {
+        type: Boolean,
+        default: false
+    },
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

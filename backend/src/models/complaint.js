@@ -10,9 +10,9 @@ const complaintSchema = new Schema({
   },
   problem: {
     type: String,
-    require,
+    required: true,
   },
-  Date: {
+  dateOfComplaint: {
     type: Date,
     default: Date.now, // bey7ot el date lew7adoo
   },
@@ -28,6 +28,6 @@ const complaintSchema = new Schema({
 });
 
 // Create the Complaint model
-const Complaint = mongoose.model("Complaint", complaintSchema);
+const Complaint = mongoose.models.Complaint ||mongoose.model("Complaint", complaintSchema);
 
 module.exports = Complaint;
