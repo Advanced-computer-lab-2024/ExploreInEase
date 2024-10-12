@@ -53,7 +53,7 @@ const AdminNavbar = () => {
                 navigate('/viewProduct', { state: { Product, Type } });
             } 
             else if (title === "Add User") {
-                navigate('/AdminHomePage');
+                navigate('/AddUser');
             } 
             else if (title === "Delete Account") {
               try{
