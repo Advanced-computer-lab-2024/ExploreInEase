@@ -6,10 +6,10 @@ const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const fs = require('fs'); // Import filesystem module
-require('dotenv').config({ path: "src/.env" });
+require('dotenv').config({ path: ".env" });
 const cors = require('cors');
 
-
+const router = express.Router();
 // Express app
 const ACLapp = express();
 ACLapp.use(cors());
@@ -27,6 +27,8 @@ ACLapp.use((req, res, next) => {
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);
+
+// router.use('/',userRoutes)
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
