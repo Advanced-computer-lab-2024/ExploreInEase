@@ -126,6 +126,10 @@ comment: {
         type: Boolean,
         default: false
     },
+    requestDeletion: {
+        type: Boolean,
+        default: false
+    },
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

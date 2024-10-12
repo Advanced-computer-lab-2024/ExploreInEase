@@ -3,6 +3,7 @@ const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const ActivityCategory = require('../../models/activityCategory'); 
 const PreferenceTags = require('../../models/preferenceTags'); 
+const Tourist = require('../../models/tourist');
 
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
@@ -93,6 +94,47 @@ const deleteTagById = async (id) => {
   
 
 
+
+//New Codeee
+const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
+  const updatedItinerary = await Itinerary.findOneAndUpdate(
+      { _id: itineraryId, created_by: userId }, // Ensure the itinerary is created by the user
+      { isActivated: isActivated },
+      { new: true } // Return the updated document
+  );
+
+  return updatedItinerary; // Return the updated itinerary
+};
+
+const setFlagToZeroForItinerary = async (_id) => {
+  return await Itinerary.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+const setFlagToZeroForActivity = async (_id) => {
+  return await Activity.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+
+const bookEvent = async (touristId, eventType, eventId) => {
+  const updateData = {};
+
+  switch (eventType) {
+      case 'itinerary':
+          updateData.$addToSet = { itineraryId: eventId }; // Use $addToSet to avoid duplicates
+          break;
+      case 'activity':
+          updateData.$addToSet = { activityId: eventId }; // Use $addToSet to avoid duplicates
+          break;
+      case 'historicalPlace':
+          updateData.$addToSet = { historicalplaceId: eventId }; // Use $addToSet to avoid duplicates
+          break;
+      default:
+          throw new Error('Invalid event type');
+  }
+
+  return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
+};
+
 module.exports = {
   createCategory,
   getAllCategories,
@@ -104,7 +146,12 @@ module.exports = {
   deleteTagById,
   getHistoricalPlacesByUserId,
   getItinerariesByUserId,
-  getActivitiesByUserId
+  getActivitiesByUserId,
+  updateItineraryActivation,
+  setFlagToZeroForItinerary,
+  setFlagToZeroForActivity,
+  bookEvent
+ 
 };
 
 

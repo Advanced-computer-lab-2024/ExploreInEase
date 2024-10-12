@@ -82,4 +82,18 @@ router.post('/addGovernorOrAdmin', userController.addGovernorOrAdmin);
  */
 router.get('/fetchAllUsersAndTourists', userController.fetchAllUsersAndTourists);
 
+
+
+
+
+
+//New Codeeee
+
+router.put('/acceptTerms', userController.acceptTerms);
+router.put('/requestDeletion', userController.requestDeletion);
+router.get('/deletionrequests', userController.getUsersForDeletion);
+
+
+
+
 module.exports = router;

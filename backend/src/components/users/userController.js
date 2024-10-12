@@ -72,4 +72,72 @@ const fetchAllUsersAndTourists = async (req, res) => {
 
 
 
-module.exports = { deleteUserByIdAndType ,addGovernorOrAdmin,fetchAllUsersAndTourists};
+
+
+
+
+
+
+//New Codeee
+
+
+
+
+const acceptTerms = async (req, res) => {
+    const { _id, type } = req.params;
+
+    // Check if username and type are provided
+    if (!_id || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.acceptTerms(username, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Terms and conditions accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const requestDeletion = async (req, res) => {
+    const { _id, type } = req.params;
+
+    // Check if username and type are provided
+    if (!_id || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.requestDeletion(username, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Request to be deleted accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+// Controller to handle request for users with requestDeletion set to true
+const getUsersForDeletion = async (req, res) => {
+    try {
+        const result = await userService.fetchUsersForDeletion();
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+module.exports = { deleteUserByIdAndType ,addGovernorOrAdmin,fetchAllUsersAndTourists,acceptTerms,requestDeletion,getUsersForDeletion};

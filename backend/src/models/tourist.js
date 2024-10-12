@@ -42,18 +42,18 @@ const TouristSchema = new Schema({
         required: [true,'Profession is required'],
         required: true
     },
-    itineraryId: {
+    itineraryId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Itinerary', // Foreign key reference to Itinerary schema
-    },
-    activityId: {
+    }],
+    activityId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Activity', // Foreign key reference to Activity schema
-    },
-    historicalplaceId: {
+    }],
+    historicalplaceId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
-    },
+    }],
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
         default: ''
@@ -84,6 +84,10 @@ const TouristSchema = new Schema({
         type: Number,
         default: 0, // Starting wallet balance
         min: 0 // Ensures wallet balance cannot be negative
+    },
+    requestDeletion: {
+        type: Boolean,
+        default: false
     },
     archived: [{
         type: mongoose.Schema.Types.ObjectId,

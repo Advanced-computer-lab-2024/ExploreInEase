@@ -46,5 +46,60 @@ const fetchAllUsersAndTourists = async () => {
 
 
 
-module.exports = { deleteUserByIdAndType, addGovernorOrAdmin, fetchAllUsersAndTourists,getUserById, deleteUserByIdAndType };
+
+
+
+// New Codeeee
+
+
+
+const acceptTerms = async (_id, type) => {
+   
+    return await userRepository.updateTermsAndConditions(_id, type);
+};
+
+const requestDeletion = async (_id, type) => {
+    let canDelete = false;
+
+    if (type === 'tourist') {
+        // Check conditions for tourist
+        canDelete = await userRepository.checkTouristDeletionCriteria(_id);
+    } else if (type === 'tourGuide') {
+        // Check conditions for tour guide in itinerary
+        canDelete = await userRepository.checkTourGuideItineraryDates(_id);
+    } else if (type === 'seller') {
+        // Check conditions for seller in product table
+        canDelete = await userRepository.checkSellerProductStatus(_id);
+    } else if (type === 'advertiser') {
+        // Check conditions for advertiser in activity table
+        canDelete = await userRepository.checkAdvertiserActivityStatus(_id);
+    } else {
+        throw new Error("Invalid user type");
+    }
+
+    if (!canDelete) {
+        throw new Error("Request deletion rejected due to active records.");
+    }
+
+    // Update requestDeletion in the respective table
+    const updateResult = await userRepository.updateRequestDeletion(_id, type);
+    return updateResult;
+};
+
+
+
+const fetchUsersForDeletion = async () => {
+    try {
+        const { users, tourists } = await userRepository.getAllUsersForDeletion();
+        return { users, tourists };
+    } catch (error) {
+        throw new Error('Error fetching users for deletion');
+    }
+};
+
+
+
+module.exports = { deleteUserByIdAndType, addGovernorOrAdmin, fetchAllUsersAndTourists,getUserById, deleteUserByIdAndType,acceptTerms
+    ,requestDeletion,fetchUsersForDeletion 
+};
 

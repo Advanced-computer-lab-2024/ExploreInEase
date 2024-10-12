@@ -78,6 +78,33 @@ const deleteTagById = async (id) => {
 
 
 
+
+//New Codeeee
+
+
+
+const updateItineraryActivation = async (itineraryId, isActivated, userId, userType) => {
+ 
+
+  return await eventRepository.updateItineraryActivation(itineraryId, isActivated, userId);
+};
+
+const updateEventFlag = async ( eventType, eventID) => {
+  
+  if (eventType === 'itinerary') {
+      return await eventRepository.setFlagToZeroForItinerary(eventID);
+  } else if (eventType === 'activity') {
+      return await eventRepository.setFlagToZeroForActivity(eventID);
+  } else {
+      throw new Error('Invalid event type. Must be "itinerary" or "activity".');
+  }
+};
+
+
+const addEventToTourist = async (userType, touristId, eventType, eventId) => {
+  
+  return await eventRepository.bookEvent(touristId, eventType, eventId);
+};
 module.exports = {
   getUserEvents,
   createCategory,
@@ -88,5 +115,8 @@ module.exports = {
   getAllTags,
   updateTagById,
   deleteTagById,
+  updateItineraryActivation,
+  updateEventFlag,
+  addEventToTourist
 };
 

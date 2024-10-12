@@ -268,4 +268,14 @@ router.put('/updateTagById/:id', eventController.updateTagById);
 // Delete a preference tag by name
 router.delete('/deleteTagById/:id', eventController.deleteTagById);
 
+
+
+
+//New Codeeee
+router.put('/updateItineraryActivation', eventController.updateItineraryActivation);
+
+router.put('/inappropriate', eventController.updateEventFlagController);
+router.put('/bookEvent', eventController.bookEvent);
+
+
 module.exports = router;

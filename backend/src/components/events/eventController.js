@@ -138,6 +138,82 @@ const deleteTagById = async (req, res) => {
 };
 
 
+
+
+
+//New Codeeee
+
+
+const updateItineraryActivation = async (req, res) => {
+  
+  const { itineraryId, isActivated, userId, userType } = req.body;
+
+
+  // Validate input
+  if (!itineraryId || isActivated === undefined || !userId || !userType) {
+      return res.status(400).json({ message: "Itinerary ID, activation status, user ID, and userType are required." });
+  }
+  if (userType !== 'tourGuide') {
+    throw new Error('Only tour guides can update itineraries.');
+  }
+  if ( (isActivated !== 0 && isActivated !== 1)) {
+      return res.status(400).json({ error: 'isActivated must be 0 (deactivate) or 1 (activate)' });
+  }
+
+  try {
+      const updatedItinerary = await eventService.updateItineraryActivation(itineraryId, isActivated, userId, userType);
+      if (!updatedItinerary) {
+          return res.status(404).json({ message: 'Itinerary not found or not created by this user.' });
+      }
+      return res.status(200).json(updatedItinerary);
+  } catch (error) {
+      console.error('Error updating itinerary activation:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+const updateEventFlagController = async (req, res) => {
+  const { userType, eventType, eventID } = req.body;
+
+  try {
+        if (userType !== 'admin') {
+          throw new Error('Only admins can update the flag.');
+      }
+
+      const updatedEvent = await eventService.updateEventFlag(eventType, eventID);
+      if (!updatedEvent) {
+          return res.status(404).json({ message: 'Event not found.' });
+      }
+      return res.status(200).json({ message: 'Event flag updated successfully.', updatedEvent });
+  } catch (error) {
+      console.error('Error updating event flag:', error.message);
+      return res.status(400).json({ message: error.message });
+  }
+};
+
+const bookEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID } = req.body;
+
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+     }
+
+      const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID);
+      return res.status(200).json({
+          success: true,
+          message: 'Event updated successfully',
+          data: updatedTourist,
+      });
+  } catch (error) {
+      return res.status(400).json({
+          success: false,
+          message: error.message,
+      });
+  }
+};
+
 module.exports = {
     getUserEvents,
     createCategory,
@@ -148,5 +224,8 @@ module.exports = {
     getAllTags,
     updateTagById,
     deleteTagById,
+    updateItineraryActivation,
+    updateEventFlagController,
+    bookEvent
   };
   
