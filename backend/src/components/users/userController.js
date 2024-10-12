@@ -84,7 +84,7 @@ const fetchAllUsersAndTourists = async (req, res) => {
 
 
 const acceptTerms = async (req, res) => {
-    const { _id, type } = req.params;
+    const { _id, type } = req.body;
 
     // Check if username and type are provided
     if (!_id || !type) {
@@ -93,7 +93,7 @@ const acceptTerms = async (req, res) => {
 
     try {
         
-        const result = await userService.acceptTerms(username, type);
+        const result = await userService.acceptTerms(_id, type);
        
         if (!result) {
             return res.status(404).json({ message: "User not found." });
@@ -105,6 +105,10 @@ const acceptTerms = async (req, res) => {
     }
 };
 
+
+
+
+
 const requestDeletion = async (req, res) => {
     const { _id, type } = req.params;
 
@@ -115,7 +119,7 @@ const requestDeletion = async (req, res) => {
 
     try {
         
-        const result = await userService.requestDeletion(username, type);
+        const result = await userService.requestDeletion(_id, type);
        
         if (!result) {
             return res.status(404).json({ message: "User not found." });

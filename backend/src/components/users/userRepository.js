@@ -109,8 +109,12 @@ const updateTermsAndConditions = async (_id, type) => {
 };
 
 
-const checkTouristDeletionCriteria = async (_id) => {
-    const tourist = await Tourist.findById(_id).populate('itineraryId').populate('activityId');
+const checkTouristDeletionCriteria = async (_id) => { 
+    const tourist = await Tourist.findById(_id)
+        .populate('itineraryId')
+        .populate('activityId')
+        
+
     if (!tourist) return false;
 
     const now = new Date();
@@ -131,6 +135,7 @@ const checkTouristDeletionCriteria = async (_id) => {
 
     return true; // All conditions met
 };
+
 
 const checkTourGuideItineraryDates = async (tourGuideId) => {
     const now = new Date();

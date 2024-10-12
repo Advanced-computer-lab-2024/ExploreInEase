@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const userRoutes = require('./src/components/users/userRoutes');
 const eventRoutes = require('./src/components/events/eventRoutes');
+const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
 const setupSwaggerDocs = require('../backend/src/swagger/swagger');
  
 
@@ -22,6 +23,7 @@ ACLapp.use((req, res, next) => {
 // Routes
 ACLapp.use('/api', userRoutes);
 ACLapp.use('/api', eventRoutes);
+ACLapp.use('/api', checkoutRoutes);
 
 // Setup Swagger
 setupSwaggerDocs(ACLapp); // Add Swagger setup here

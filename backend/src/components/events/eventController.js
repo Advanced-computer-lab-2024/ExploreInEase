@@ -213,6 +213,27 @@ const bookEvent = async (req, res) => {
       });
   }
 };
+const cancelBookingEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID } = req.body;
+
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+     }
+
+      const updatedTourist = await eventService.cancelEventToTourist(userType, touristId, eventType, eventID);
+      return res.status(200).json({
+          success: true,
+          message: 'Event updated successfully',
+          data: updatedTourist,
+      });
+  } catch (error) {
+      return res.status(400).json({
+          success: false,
+          message: error.message,
+      });
+  }
+};
 
 module.exports = {
     getUserEvents,
@@ -226,6 +247,7 @@ module.exports = {
     deleteTagById,
     updateItineraryActivation,
     updateEventFlagController,
-    bookEvent
+    bookEvent,
+    cancelBookingEvent
   };
   

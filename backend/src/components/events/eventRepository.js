@@ -134,6 +134,25 @@ const bookEvent = async (touristId, eventType, eventId) => {
 
   return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
 };
+const cancelEvent = async (touristId, eventType, eventId) => {
+  const updateData = {};
+
+  switch (eventType) {
+      case 'itinerary':
+          updateData.$pull = { itineraryId: eventId }; // Use $pull to remove the event ID from itineraryIds
+          break;
+      case 'activity':
+          updateData.$pull = { activityId: eventId }; // Use $pull to remove the event ID from activityIds
+          break;
+      case 'historicalPlace':
+          updateData.$pull = { historicalplaceId: eventId }; // Use $pull to remove the event ID from historicalplaceIds
+          break;
+      default:
+          throw new Error('Invalid event type');
+  }
+
+  return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
+};
 
 module.exports = {
   createCategory,
@@ -150,7 +169,8 @@ module.exports = {
   updateItineraryActivation,
   setFlagToZeroForItinerary,
   setFlagToZeroForActivity,
-  bookEvent
+  bookEvent,
+  cancelEvent
  
 };
 

@@ -105,6 +105,11 @@ const addEventToTourist = async (userType, touristId, eventType, eventId) => {
   
   return await eventRepository.bookEvent(touristId, eventType, eventId);
 };
+
+const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
+    
+    return await eventRepository.cancelEvent(touristId, eventType, eventId);
+  }
 module.exports = {
   getUserEvents,
   createCategory,
@@ -117,6 +122,7 @@ module.exports = {
   deleteTagById,
   updateItineraryActivation,
   updateEventFlag,
-  addEventToTourist
+  addEventToTourist,
+  cancelEventToTourist
 };
 
