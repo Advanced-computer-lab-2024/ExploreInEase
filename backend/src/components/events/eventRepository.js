@@ -150,7 +150,7 @@ const getAllUpcomingEvents = async () => {
 
     // Fetch all upcoming historical places (assuming they also have a date field)
     const upcomingHistoricalPlaces = await HistoricalPlace.find({
-      dateTimeAvailable: { $gte: currentDate },
+      // dateTimeAvailable: { $gte: currentDate },
     })
       .populate("created_by", "username") // Populating user details (creator) with only username
       .exec();

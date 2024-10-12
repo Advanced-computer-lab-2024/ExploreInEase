@@ -15,7 +15,7 @@ import {
   Tab,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 // Sample data with 'type' field added
 const itemList = [];
@@ -28,11 +28,11 @@ const roleFields = {
 };
 
 const Filter = () => {
-     const location = useLocation();
-   const { events } = location.state || {};
- const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
-   console.log(events);
-   console.log(itemList);
+  const location = useLocation();
+  const { events } = location.state || {};
+  const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
+  console.log(events);
+  console.log(itemList);
 
   const [filters, setFilters] = useState({
     budget: '',
@@ -52,7 +52,7 @@ const Filter = () => {
   const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
 
   useEffect(() => {
-    const initialData = itemList.filter(item => 
+    const initialData = itemList.filter(item =>
       (role === 'Activities' && item.type === 'Activity') ||
       (role === 'Itineraries' && item.type === 'Itinerary') ||
       (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
@@ -162,7 +162,7 @@ const Filter = () => {
       search: '',
       sortBy: '',
     });
-    
+
     // Filter items based on the current role
     const resetData = itemList.filter(item => {
       if (role === 'Activities') return item.type === 'Activity';
@@ -170,7 +170,7 @@ const Filter = () => {
       if (role === 'HistoricalPlaces') return item.type === 'HistoricalPlace';
       return false;
     });
-    
+
     setFilteredData(resetData);
   };
 
@@ -343,6 +343,8 @@ const Filter = () => {
 
                   {item.type === 'Itinerary' && (
                     <>
+                      {/* <Typography color="text.secondary">{item.name}</Typography> */}
+
                       <Typography color="text.secondary">Activities: {item.activities.join(', ')}</Typography>
                       <Typography color="text.secondary">Locations: {item.locations.join(', ')}</Typography>
                       <Typography color="text.secondary">Date Available: {item.dateAvailable}</Typography>
