@@ -11,6 +11,6 @@ const activityCategorySchema = new Schema({
 });
 
 // Create and export the model
-const ActivityCategory = mongoose.model('ActivityCategory', activityCategorySchema);
+const ActivityCategory = mongoose.models.ActivityCategory ||mongoose.model('ActivityCategory', activityCategorySchema);
 
 module.exports = ActivityCategory;

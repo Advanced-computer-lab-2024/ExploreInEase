@@ -15,7 +15,6 @@ const TouristSchema = new Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: 8,
-        select: false // Password will not be included in queries unless explicitly selected
     },
     mobileNum: {
         type: String,
@@ -40,25 +39,21 @@ const TouristSchema = new Schema({
     
     profession: {
         type: String,
-        required: [true, 'profession is required'],
-        enum: ['Job', 'Student'], // Restrict to either 'Job' or 'Student'
+        required: [true,'Profession is required'],
         required: true
     },
-    // itinerary: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Itinerary', // Foreign key reference to Itinerary schema
-    //     required: true
-    // },
-    // activityId: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Activity', // Foreign key reference to Activity schema
-    //     required: true
-    // },
-    // historicalplaceId: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
-    //     required: true
-    // },
+    itineraryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Itinerary', // Foreign key reference to Itinerary schema
+    },
+    activityId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Activity', // Foreign key reference to Activity schema
+    },
+    historicalplaceId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
+    },
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
         default: ''
@@ -70,9 +65,9 @@ const TouristSchema = new Schema({
     },
     addresses: [
         {
-            street: { type: String, required: true },
-            city: { type: String, required: true },
-            country: { type: String, required: true },
+            street: { type: String },
+            city: { type: String},
+            country: { type: String},
             zipCode: { type: String, match: [/^\d{5}$/, 'Invalid zip code'] }
         }
     ],
@@ -81,28 +76,24 @@ const TouristSchema = new Schema({
         default: 0,
         min: 0 // Ensures points cannot go below zero
     },
-    // wishlists: [{
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Product', // Assuming you have a Product schema for products in the wishlist
-    //     required: false
-    // }],
+    wishlists: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product', // Assuming you have a Product schema for products in the wishlist
+    }],
     wallet: {
         type: Number,
         default: 0, // Starting wallet balance
         min: 0 // Ensures wallet balance cannot be negative
-    }
+    },
+    archived: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        default: null
+    }]    
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"
 });
-
-// Middleware to hash password before saving
-// TouristSchema.pre('save', async function(next) {
-//     if (this.isModified('password')) {
-//         this.password = await hashPassword(this.password); // Assumes hashPassword is a function to hash the password
-//     }
-//     next();
-// });
 
 // Model the schema
 const Tourist = mongoose.model('Tourist', TouristSchema);

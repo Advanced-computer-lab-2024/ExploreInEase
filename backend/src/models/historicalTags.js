@@ -2,15 +2,21 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Define the schema for the activity category
-const preferenceTagsSchema = new Schema({
-  tags: {
+const historicalTagsSchema = new Schema({
+  type: {
     type: String,
     required: true,
     unique: true // Ensures tag names are unique
+  },
+  period: {
+    type: String,
+    required: true,
+    
   }
+
 });
 
 // Create and export the model
-const PreferenceTags = mongoose.models.PreferenceTags ||mongoose.model('PreferenceTags', preferenceTagsSchema);
+const historicalTags = mongoose.model('historicalTags', historicalTagsSchema);
 
-module.exports = PreferenceTags;
+module.exports = historicalTags;
