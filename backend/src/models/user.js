@@ -27,6 +27,7 @@ const UsersSchema = new Schema({
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         }
         
+<<<<<<< HEAD
     },
     documents: {
         nationalId: {
@@ -41,6 +42,20 @@ const UsersSchema = new Schema({
             type: String,
             
         },  
+=======
+    },
+    nationalId: {
+        type: String,
+       
+    },
+    certificate: {
+        type: String,
+        
+    },
+    taxation: {
+        type: String,
+        
+>>>>>>> 3b520d8c5b3edfc82890feb3ab4bc59085f75a94
     },
     experience: {
         type: String,
@@ -71,6 +86,7 @@ const UsersSchema = new Schema({
         required: [true, 'User type is required'],
         enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] // User types
     },
+<<<<<<< HEAD
     photo: {
         selfPicture: {
             type: String,
@@ -83,6 +99,18 @@ const UsersSchema = new Schema({
     },
     comment: {
         type: [String],
+=======
+    selfPicture: {
+        type: String,
+        
+    },
+    logo: {
+        type: String,
+        
+    },
+    comment: {
+        type: String,
+>>>>>>> 3b520d8c5b3edfc82890feb3ab4bc59085f75a94
         
     },
     rating: {

@@ -48,7 +48,7 @@ const deleteTourist = async (username) => {
 };
 
 // Add a new user wether admin or tourism governer
-const addGovernerOrAdmin = async (userData) => {
+const addGovernorOrAdmin = async (userData) => {
     try {
         // Check if username already exists
         const existingUser = await Users.findOne({ username: userData.username });
@@ -86,4 +86,4 @@ const fetchAllTourists = async () => {
 
 
 
-module.exports = { deleteTourist,addGovernerOrAdmin,fetchAllUsers, fetchAllTourists,deleteTouristById,deleteUserById,findUserById};
+module.exports = { deleteTourist,addGovernorOrAdmin,fetchAllUsers, fetchAllTourists,deleteTouristById,deleteUserById,findUserById};

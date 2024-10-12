@@ -45,14 +45,26 @@ const TouristSchema = new Schema({
     itineraryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Itinerary', // Foreign key reference to Itinerary schema
+<<<<<<< HEAD
+=======
+        required: true
+>>>>>>> 3b520d8c5b3edfc82890feb3ab4bc59085f75a94
     },
     activityId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Activity', // Foreign key reference to Activity schema
+<<<<<<< HEAD
+=======
+        required: true
+>>>>>>> 3b520d8c5b3edfc82890feb3ab4bc59085f75a94
     },
     historicalplaceId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
+<<<<<<< HEAD
+=======
+        required: true
+>>>>>>> 3b520d8c5b3edfc82890feb3ab4bc59085f75a94
     },
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
