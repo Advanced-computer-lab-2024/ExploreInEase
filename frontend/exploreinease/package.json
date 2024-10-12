@@ -38,7 +38,6 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "concurrently \"npm run start\" \"npm run start:backend\""
-
   },
   "eslintConfig": {
     "extends": [
