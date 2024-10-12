@@ -1,4 +1,5 @@
 import React, { useState , useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   TextField,
   Card,
@@ -20,61 +21,55 @@ import {
   DialogTitle,
   List,
   ListItem,
-  ListItemText,
-  Divider,
+  ListItemText,Divider,
 } from '@mui/material';
-import { useLocation } from 'react-router-dom';
-
-
-
-
-
-
-
 
 const ProductCard = () => {
   const location = useLocation();
-  const { Product } = location.state || {};
-  
+  const { Product,Type } = location.state || {};
+ 
+  const isSellerOrAdmin = Type === 'seller' || Type === 'admin';
   const [initialProductList, setInitialProductList] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
-
-  useEffect(() => {
-    if (Product) {
-      setInitialProductList([...Product]);
-      setMaxPrice(Math.max(...Product.map(item => item.price)));
-    }
-  }, [Product]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [priceRange, setPriceRange] = useState([0, maxPrice]);
-  const [sortOption, setSortOption] = useState('');
   const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priceRange, setPriceRange] = useState([0, 0]);
+  const [sortOption, setSortOption] = useState('');
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
-  const [openReviews, setOpenReviews] = useState(false); // State for opening reviews dialog
+  const [openReviews, setOpenReviews] = useState(false);
   const [productData, setProductData] = useState({
     productId: null,
     name: '',
     price: '',
     description: '',
     sellerType: '',
-    rating: '',
+    ratings: '',
     originalQuantity: '',
     reviews: [],
-    picture:'',
-
+    picture: '',
   });
-
   const [errors, setErrors] = useState({});
-  const [nextId, setNextId] = useState(initialProductList.length + 1);
-  const [selectedReviews, setSelectedReviews] = useState([]); // State for reviews of selected product
-  
+  const [nextId, setNextId] = useState(0);
+  const [selectedReviews, setSelectedReviews] = useState([]);
+
   useEffect(() => {
-    setProducts(initialProductList);
-    setNextId(initialProductList.length + 1);
-  }, [initialProductList]);
+    if (Product && Array.isArray(Product)) {
+      console.log("Received Product data:", Product);
+      setInitialProductList(Product);
+      setProducts(Product);
+      const maxProductPrice = Math.max(...Product.map(item => Number(item.price) || 0));
+      setMaxPrice(maxProductPrice);
+      setPriceRange([0, maxProductPrice]);
+      setNextId(Product.length + 1);
+    } else {
+      console.log("No Product data received or it's not an array");
+    }
+  }, [Product]);
 
-
+  useEffect(() => {
+    console.log("Current products state:", products);
+  }, [products]);
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -118,7 +113,7 @@ const ProductCard = () => {
       price: '',
       description: '',
       sellerType: '',
-      rating: '',
+      ratings: '',
       originalQuantity: '',
       picture:'',
       reviews: [],
@@ -131,7 +126,7 @@ const ProductCard = () => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
-
+console.log(Product.ratings)
   const validateForm = () => {
     let formErrors = {};
 
@@ -149,8 +144,8 @@ const ProductCard = () => {
     if (!productData.sellerType) {
       formErrors.sellerType = 'Seller is required';
     }
-    if (!productData.rating || productData.rating < 0 || productData.rating > 5) {
-      formErrors.rating = 'Rating must be between 0 and 5';
+    if (!productData.ratings || productData.ratings < 0 || productData.ratings > 5) {
+      formErrors.ratings = 'ratings must be between 0 and 5';
     }
     if (!productData.originalQuantity) {
       formErrors.originalQuantity = 'Quantity is required';
@@ -165,7 +160,7 @@ const ProductCard = () => {
         productId: nextId,
         name: productData.name,
         price: parseFloat(productData.price),
-        rating: parseFloat(productData.rating),
+        ratings: parseFloat(productData.ratings),
       };
       setProducts((prev) => [...prev, newProduct]);
       setNextId((prev) => prev + 1);
@@ -178,7 +173,7 @@ const ProductCard = () => {
       setProducts((prev) =>
         prev.map((product) =>
           product.id === productData.id
-            ? { ...product, name: productData.name, price: parseFloat(productData.price), rating: parseFloat(productData.rating) }
+            ? { ...product, name: productData.name, price: parseFloat(productData.price), ratings: parseFloat(productData.ratings) }
             : product
         )
       );
@@ -186,18 +181,17 @@ const ProductCard = () => {
     }
   };
 
-  const filteredProducts = products
-    .filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        product.price >= priceRange[0] &&
-        product.price <= priceRange[1]
-    )
-    .sort((a, b) => {
-      if (sortOption === 'ratingAsc') return a.rating - b.rating;
-      if (sortOption === 'ratingDesc') return b.rating - a.rating;
-      return 0;
-    });
+  const filteredProducts = products.filter((product) => {
+    const nameMatch = product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
+    return nameMatch && priceMatch;
+  }).sort((a, b) => {
+    if (sortOption === 'ratingsAsc') return a.ratings - b.ratings;
+    if (sortOption === 'ratingsDesc') return b.ratings - a.ratings;
+    return 0;
+  });
+
+// const 
 
   return (
     <Box display="flex" flexDirection="row" py={3} px={2} justifyContent="center">
@@ -231,10 +225,10 @@ const ProductCard = () => {
           </Typography>
 
           <FormControl fullWidth style={{ marginBottom: '20px', marginTop: '20px' }}>
-            <InputLabel>Sort by Rating</InputLabel>
+            <InputLabel>Sort by ratings</InputLabel>
             <Select value={sortOption} onChange={handleSortChange}>
-              <MenuItem value="ratingAsc">Rating: Low to High</MenuItem>
-              <MenuItem value="ratingDesc">Rating: High to Low</MenuItem>
+              <MenuItem value="ratingsAsc">ratings: Low to High</MenuItem>
+              <MenuItem value="ratingsDesc">ratings: High to Low</MenuItem>
             </Select>
           </FormControl>
 
@@ -245,9 +239,10 @@ const ProductCard = () => {
             <Button variant="outlined" color="secondary" onClick={handleReset}>
               Reset
             </Button>
-            <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
-              Create
-            </Button>
+            {isSellerOrAdmin && (
+              <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
+                Create
+              </Button>)}
           </Box>
         </Paper>
       </Box>
@@ -255,20 +250,26 @@ const ProductCard = () => {
       <Box width="70%" px={2}>
         <Grid container spacing={3}>
           {filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} md={4} key={product.id}>
+            <Grid item xs={12} sm={6} md={4} key={product.productId}>
               <Card elevation={3}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     {product.name}
                   </Typography>
                   <Typography>Price: ${product.price}</Typography>
-                  <Typography>Rating: {product.rating}</Typography>
+                  <Typography>Ratings: {product.ratings}</Typography>
                   <Typography>Description: {product.description}</Typography>
                   <Typography>Quantity: {product.originalQuantity}</Typography>
                   <Typography>Seller: {product.sellerType}</Typography>
-                  <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
-                    Update
-                  </Button>
+                  {isSellerOrAdmin && (
+                    <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
+                      Update
+                    </Button>
+
+
+
+
+                  )}
                   <Button
                     variant="contained"
                     color="primary"
@@ -334,14 +335,14 @@ const ProductCard = () => {
           />
           <TextField
             margin="dense"
-            label="Rating"
-            name="rating"
+            label="ratings"
+            name="ratings"
             type="number"
-            value={productData.rating || ''}
+            value={productData.ratings || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.rating}
-            helperText={errors.rating}
+            error={!!errors.ratings}
+            helperText={errors.ratings}
           />
           <TextField
             margin="dense"
@@ -415,14 +416,14 @@ const ProductCard = () => {
           />
           <TextField
             margin="dense"
-            label="Rating"
-            name="rating"
+            label="Ratings"
+            name="ratings"
             type="number"
-            value={productData.rating || ''}
+            value={productData.ratings || ''}
             onChange={handleInputChange}
             fullWidth
-            error={!!errors.rating}
-            helperText={errors.rating}
+            error={!!errors.ratings}
+            helperText={errors.ratings}
           />
           <TextField
             margin="dense"
@@ -449,16 +450,20 @@ const ProductCard = () => {
       <Dialog open={openReviews} onClose={handleClose}>
         <DialogTitle>Product Reviews</DialogTitle>
         <DialogContent>
-          <DialogContentText>Here are the reviews for the selected product:</DialogContentText>
           <List>
-            {selectedReviews.map((review, index) => (
-              <React.Fragment key={index}>
-                <ListItem>
-                  <ListItemText primary={`${index + 1}. ${review}`} /> {/* Add numbering to the review */}
+            {selectedReviews.length > 0 ? (
+              selectedReviews.map((review, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={`Review ${index + 1}: ${review.comment}`}
+                    secondary={`ratings: ${review.ratings}`}
+                  />
+                  <Divider />
                 </ListItem>
-                {index < selectedReviews.length - 1 && <Divider />} {/* Add Divider between items except the last one */}
-              </React.Fragment>
-            ))}
+              ))
+            ) : (
+              <Typography>No reviews available for this product.</Typography>
+            )}
           </List>
         </DialogContent>
         <DialogActions>

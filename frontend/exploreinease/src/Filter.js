@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import {
   TextField,
   MenuItem,
@@ -17,82 +17,80 @@ import {
 } from '@mui/material';
 
 // Sample data with 'type' field added
-const itemList = [
-  {
-    id: 1,
-    name: 'Activity 1',
-    budget: 1000,
-    date: '2023-09-01',
-    location: 'Loc',
-    category: 'Food',
-    tags: 'Monuments',
-    specialDiscount: '20',
-    type: 'Activity',
-  },
-  {
-    id: 2,
-    name: 'Activity 2',
-    budget: 1500,
-    date: '2024-03-08',
-    location: 'Loc2',
-    category: 'Concert',
-    tags: 'sightseeing',
-    specialDiscount: '15',
-    type: 'Activity',
-  },
-  {
-    id: 3,
-    name: 'Itinerary 1',
-    activities: ['Activity 1', 'Activity 2'],
-    locations: ['Cairo', 'Paris'],
-    dateAvailable: '2024-01-15',
-    price: 150,
-    directions: 'Start at main gate',
-    language: 'Spanish',
-    accessibility: 'WheelChair Accessible',
-    pickupLocation: 'Lobby',
-    dropoffLocation: 'Main Square',
-    rating: 4.0,
-    type: 'Itinerary',
-  },
-  {
-    id: 4,
-    name: 'Itinerary 2',
-    activities: ['Activity 1', 'Activity 2'],
-    locations: ['Prague', 'Madrid'],
-    dateAvailable: '2023-06-25',
-    price: 270,
-    directions: 'Main at square',
-    language: 'English',
-    accessibility: 'WheelChair Accessible',
-    pickupLocation: 'Lobby',
-    dropoffLocation: 'Main Square',
-    rating: 2.5,
-    type: 'Itinerary',
-  },
-  {
-    id: 5,
-    name: 'Historical Place 1',
-    description: 'Perfect place to relax',
-    pictures: ['implement picture'],
-    location: 'to be revised',
-    openingHours: '6 to 9',
-    ticketPrice: 'to be revised',
-    tags: ['Museums'],
-    type: 'HistoricalPlace',
-  },
-  {
-    id: 6,
-    name: 'Historical Place 2',
-    description: 'test for museum',
-    pictures: ['implement picture'],
-    location: 'to be revised',
-    openingHours: '3 to 7',
-    ticketPrice: 'to be revised',
-    tags: ['history'],
-    type: 'HistoricalPlace',
-  },
-];
+const data = {
+  activities: [
+    {
+      id: "607d1e3eab1e3f001fddf72a",
+      name: "Disney",
+      date: "2024-10-15",
+      time: "10:00 AM",
+      location: "Paris",
+      budget: 50,
+      category: "Cultural"
+        ,
+      tags: [
+        "sightseeing"
+      ],
+      specialDiscounts: [
+        "string"
+      ],
+      created_by: "admin",
+      flag: true,
+      isOpen: true,
+      rating: 4.5,
+      comments: [
+        "string"
+      ],
+      createdAt: "2024-08-10T12:00:00Z",
+      description: "Explore the city's history and culture."
+    }
+  ],
+  itineraries: [
+    {
+      id: "607d1e3eab1e3f001fddf72b",
+      name: "Paris Tour",
+      activities: [
+        "string"
+      ],
+      locations: [
+        "string"
+      ],
+      timeline: "09:00 AM - 05:00 PM",
+      directions: "Start at the main square.",
+      language: "English",
+      price: 150,
+      dateAvailable: "2024-10-15",
+      accessibility: "Wheelchair accessible",
+      pickupLocation: "Hotel Lobby",
+      dropoffLocation: "Main Square",
+      isActivated: true,
+      created_by: "admin",
+      flag: false,
+      rating: 4,
+      comments: [
+        "string"
+      ]
+    }
+  ],
+  historicalPlaces: [
+    {
+      id: "607d1e3eab1e3f001fddf72c",
+      name: "Egyption Museum",
+      description: "A beautiful historical site.",
+      pictures: [
+        "http://example.com/image.jpg"
+      ],
+      location: "Cairo"
+        ,
+      openingHours: "9 AM - 6 PM",
+      ticketPrice: "40",
+      createdAt: "2024-08-10T12:00:00Z",
+      tags: [
+        "history"
+      ]
+    }
+  ]
+};
 
 // Role-based fields
 const roleFields = {
@@ -115,9 +113,16 @@ const Filter = () => {
     sortBy: '',
   });
 
-  const [filteredData, setFilteredData] = useState(itemList);
-  const [role, setRole] = useState('Main'); // Default to Main to show all
+  const [filteredData, setFilteredData] = useState([]);
+  const [role, setRole] = useState('Activities'); // Default to Main to show all
   const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
+
+  useEffect(() => {
+    applyFilters();
+  }, [role]);
+
+
+
 
   // Handle Input Change
   const handleFilterChange = (e) => {
@@ -141,86 +146,74 @@ const Filter = () => {
   };
 
   // Apply Filters
-  const applyFilters = (roleToFilter = role) => {
-    let data = itemList;
+  const applyFilters = () => {
+    let filteredItems = [];
 
-    // Filter by role-specific type
-    if (roleToFilter === 'Activities') {
-      data = data.filter((item) => item.type === 'Activity');
-    } else if (roleToFilter === 'Itineraries') {
-      data = data.filter((item) => item.type === 'Itinerary');
-    } else if (roleToFilter === 'HistoricalPlaces') {
-      data = data.filter((item) => item.type === 'HistoricalPlace');
+    switch (role) {
+      case 'Activities':
+        filteredItems = data.activities;
+        break;
+      case 'Itineraries':
+        filteredItems = data.itineraries;
+        break;
+      case 'HistoricalPlaces':
+        filteredItems = data.historicalPlaces;
+        break;
+      default:
+        filteredItems = [];
     }
 
-    // Apply other filters
-    if (filters.budget) {
-      data = data.filter((item) => item.budget <= parseFloat(filters.budget));
-    }
-
-    if (filters.price) {
-      data = data.filter((item) => item.price.toString() === filters.price);
-    }
-
-    if (filters.date) {
-      data = data.filter((item) => item.date === filters.date);
-    }
-
-    if (filters.rating) {
-      data = data.filter((item) => item.rating >= filters.rating && item.rating <= 5);
-    }
-
-    if (filters.category) {
-      data = data.filter((item) => item.category === filters.category);
-    }
-
-    if (filters.language) {
-      data = data.filter((item) => item.language === filters.language);
-    }
-
-    if (filters.preferences) {
-      data = data.filter((item) => item.preferences === filters.preferences);
-    }
-
-    if (filters.Tag) {
-      data = data.filter((item) => item.Tag === filters.Tag);
-    }
-
-    // Search by name
-    if (filters.search) {
-      data = data.filter((item) =>
-        item.name.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
+    // Apply filters
+    filteredItems = filteredItems.filter(item => {
+      if (filters.budget && item.budget > parseFloat(filters.budget)) return false;
+      if (filters.price && item.price > parseFloat(filters.price)) return false;
+      if (filters.date && item.date !== filters.date && item.dateAvailable !== filters.date) return false;
+      if (filters.rating && item.rating < filters.rating) return false;
+      if (filters.category && item.category?.name !== filters.category) return false;
+      if (filters.language && item.language !== filters.language) return false;
+      if (filters.tags && !item.tags.includes(filters.tags)) return false;
+      if (filters.search && !item.name?.toLowerCase().includes(filters.search.toLowerCase()) &&
+          !item.description?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+      return true;
+    });
 
     // Sort logic
     if (filters.sortBy === 'price') {
-      data.sort((a, b) => b.price - a.price);
+      filteredItems.sort((a, b) => (b.price || b.budget) - (a.price || a.budget));
     } else if (filters.sortBy === 'rating') {
-      data.sort((a, b) => b.rating - a.rating);
+      filteredItems.sort((a, b) => b.rating - a.rating);
     }
 
-    setFilteredData(data);
+    setFilteredData(filteredItems);
   };
-
 
   // Reset Filters
   const resetFilters = () => {
-    setFilters({ budget: '', price: '', date: '', rating: 0, category: '', language: '', preferences: '', Tag: '', search: '', sortBy: '' });
-    setFilteredData(itemList);
-    // Keep the role the same when resetting
+    setFilters({
+      budget: '',
+      price: '',
+      date: '',
+      rating: 0,
+      category: '',
+      language: '',
+      tags: '',
+      search: '',
+      sortBy: '',
+    });
+    applyFilters();
   };
 
-  // Helper function to check if a field should be displayed for the current role
   const shouldDisplayField = (field) => {
     return roleFields[role]?.includes(field);
   };
+
+
+  
 
   return (
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
         <Tabs value={role} onChange={handleRoleChange}>
-          <Tab label="Main" value="Main" />
           <Tab label="Activities" value="Activities" />
           <Tab label="Itineraries" value="Itineraries" />
           <Tab label="Historical Places" value="HistoricalPlaces" />
@@ -365,7 +358,7 @@ const Filter = () => {
                     {item.name}
                   </Typography>
 
-                  {item.type === 'Activity' && (
+                  {role === 'Activities' && (
                     <>
                       <Typography color="text.secondary">Budget: {item.budget}</Typography>
                       <Typography color="text.secondary">Date: {item.date}</Typography>
@@ -378,10 +371,10 @@ const Filter = () => {
                     </>
                   )}
 
-                  {item.type === 'Itinerary' && (
+                  {role === 'Itineraries' && (
                     <>
-                      <Typography color="text.secondary">Activities: {item.activities.join(', ')}</Typography>
-                      <Typography color="text.secondary">Locations: {item.locations.join(', ')}</Typography>
+                      <Typography color="text.secondary">Activities: {item.activities}</Typography>
+                      <Typography color="text.secondary">Locations: {item.locations}</Typography>
                       <Typography color="text.secondary">Date Available: {item.dateAvailable}</Typography>
                       <Typography color="text.secondary">Price: {item.price}</Typography>
                       <Typography color="text.secondary">Rating: {item.rating}</Typography>
@@ -394,7 +387,7 @@ const Filter = () => {
                     </>
                   )}
 
-                  {item.type === 'HistoricalPlace' && (
+                  {role === 'HistoricalPlaces' && (
                     <>
                       <Typography color="text.secondary">Description: {item.description}</Typography>
                       <Typography color="text.secondary">Location: {item.location}</Typography>

@@ -1,476 +1,840 @@
+/*
+
 import React, { useState , useEffect } from 'react';
 import {
   TextField,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Slider,
   MenuItem,
   Select,
   InputLabel,
   FormControl,
   Button,
+  Rating,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
   Box,
-  Paper,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import { useLocation } from 'react-router-dom';
 
-
-
-
-
-
-
-
-const ProductCard = () => {
-  const location = useLocation();
-  const { Product } = location.state || {};
-  
-  const [initialProductList, setInitialProductList] = useState([]);
-  const [maxPrice, setMaxPrice] = useState(0);
-
-  useEffect(() => {
-    if (Product) {
-      setInitialProductList([...Product]);
-      setMaxPrice(Math.max(...Product.map(item => item.price)));
+// Sample data with 'type' field added
+const data = {
+  activities: [
+    {
+      id: "607d1e3eab1e3f001fddf72a",
+      name: "City Tour",
+      date: "2024-10-15",
+      time: "10:00 AM",
+      location: []
+        
+      ,
+      budget: 50,
+      category: []
+         
+      ,
+      tags: [
+        "sightseeing"
+      ],
+      specialDiscounts: [
+        "string"
+      ],
+      created_by: "admin",
+      flag: true,
+      isOpen: true,
+      rating: 4.5,
+      comments: [
+        "string"
+      ],
+      createdAt: "2024-08-10T12:00:00Z",
+      description: "Explore the city's history and culture."
     }
-  }, [Product]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [priceRange, setPriceRange] = useState([0, maxPrice]);
-  const [sortOption, setSortOption] = useState('');
-  const [products, setProducts] = useState([]);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openUpdate, setOpenUpdate] = useState(false);
-  const [openReviews, setOpenReviews] = useState(false); // State for opening reviews dialog
-  const [productData, setProductData] = useState({
-    productId: null,
-    name: '',
-    price: '',
-    description: '',
-    sellerType: '',
-    rating: '',
-    originalQuantity: '',
-    reviews: [],
-    picture:'',
+  ],
+  itineraries: [
+    {
+      id: "607d1e3eab1e3f001fddf72b",
+      activities: [
+        "string"
+      ],
+      locations: [
+        "string"
+      ],
+      timeline: "09:00 AM - 05:00 PM",
+      directions: "Start at the main square.",
+      language: "English",
+      price: 150,
+      dateAvailable: "2024-10-15",
+      accessibility: "Wheelchair accessible",
+      pickupLocation: "Hotel Lobby",
+      dropoffLocation: "Main Square",
+      isActivated: true,
+      created_by: "admin",
+      flag: false,
+      rating: 4,
+      comments: [
+        "string"
+      ]
+    }
+  ],
+  historicalPlaces: [
+    {
+      id: "607d1e3eab1e3f001fddf72c",
+      description: "A beautiful historical site.",
+      pictures: [
+        "http://example.com/image.jpg"
+      ],
+      location: "Cairo"
+        ,
+      openingHours: "9 AM - 6 PM",
+      ticketPrice: "40"
+        ,
+      createdAt: "2024-08-10T12:00:00Z",
+      tags: [
+        "history"
+      ]
+    }
+  ]
+};
 
+// Role-based fields
+const roleFields = {
+  HistoricalPlaces: ['Tag'],
+  Activities: ['budget', 'date', 'category', 'rating'],
+  Itineraries: ['budget', 'date', 'preferences', 'language'],
+};
+
+const Filter = () => {
+  const [filters, setFilters] = useState({
+    budget: '',
+    price: '',
+    date: '',
+    rating: 0,
+    category: '',
+    language: '',
+    preferences: '',
+    Tag: '',
+    search: '',
+    sortBy: '',
   });
 
-  const [errors, setErrors] = useState({});
-  const [nextId, setNextId] = useState(initialProductList.length + 1);
-  const [selectedReviews, setSelectedReviews] = useState([]); // State for reviews of selected product
-  
+  const [filteredData, setFilteredData] = useState([]);
+  const [role, setRole] = useState('Activities'); // Default to Main to show all
+  const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
+
   useEffect(() => {
-    setProducts(initialProductList);
-    setNextId(initialProductList.length + 1);
-  }, [initialProductList]);
+    applyFilters();
+  }, [role]);
 
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+
+
+  // Handle Input Change
+  const handleFilterChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handlePriceChange = (event, newValue) => {
-    setPriceRange(newValue);
+  // Handle Rating Change
+  const handleRatingChange = (event, newRating) => {
+    setFilters({
+      ...filters,
+      rating: newRating,
+    });
   };
 
-  const handleSortChange = (event) => {
-    setSortOption(event.target.value);
+  const handleRoleChange = (event, newValue) => {
+    setRole(newValue);
+    applyFilters(newValue); // Apply filters immediately when changing tabs
   };
 
-  const handleReset = () => {
-    setSearchTerm('');
-    setPriceRange([0, maxPrice]);
-    setSortOption('');
+  // Apply Filters
+  const applyFilters = () => {
+    let filteredItems = [];
+
+    switch (role) {
+      case 'Activities':
+        filteredItems = data.activities;
+        break;
+      case 'Itineraries':
+        filteredItems = data.itineraries;
+        break;
+      case 'HistoricalPlaces':
+        filteredItems = data.historicalPlaces;
+        break;
+      default:
+        filteredItems = [];
+    }
+
+    // Apply filters
+    filteredItems = filteredItems.filter(item => {
+      if (filters.budget && item.budget > parseFloat(filters.budget)) return false;
+      if (filters.price && item.price > parseFloat(filters.price)) return false;
+      if (filters.date && item.date !== filters.date && item.dateAvailable !== filters.date) return false;
+      if (filters.rating && item.rating < filters.rating) return false;
+      if (filters.category && item.category?.name !== filters.category) return false;
+      if (filters.language && item.language !== filters.language) return false;
+      if (filters.tags && !item.tags.includes(filters.tags)) return false;
+      if (filters.search && !item.name?.toLowerCase().includes(filters.search.toLowerCase()) &&
+          !item.description?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+      return true;
+    });
+
+    // Sort logic
+    if (filters.sortBy === 'price') {
+      filteredItems.sort((a, b) => (b.price || b.budget) - (a.price || a.budget));
+    } else if (filters.sortBy === 'rating') {
+      filteredItems.sort((a, b) => b.rating - a.rating);
+    }
+
+    setFilteredData(filteredItems);
   };
 
-  const handleClickOpenCreate = () => {
-    setOpenCreate(true);
-  };
-
-  const handleClickOpenUpdate = (product) => {
-    setProductData(product); // Set the current product data
-    setOpenUpdate(true);
-  };
-
-  const handleClickOpenReviews = (reviews) => {
-    setSelectedReviews(reviews); // Set the reviews of the selected product
-    setOpenReviews(true);
-  };
-
-  const handleClose = () => {
-    setOpenCreate(false);
-    setOpenUpdate(false);
-    setOpenReviews(false); // Close the reviews dialog
-
-    setProductData({
-      productId: null,
-      name: '',
+  // Reset Filters
+  const resetFilters = () => {
+    setFilters({
+      budget: '',
       price: '',
-      description: '',
-      sellerType: '',
-      rating: '',
-      originalQuantity: '',
-      picture:'',
-      reviews: [],
+      date: '',
+      rating: 0,
+      category: '',
+      language: '',
+      tags: '',
+      search: '',
+      sortBy: '',
     });
-    setErrors({});
+    applyFilters();
+  };
+
+  const shouldDisplayField = (field) => {
+    return roleFields[role]?.includes(field);
   };
 
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProductData({ ...productData, [name]: value });
-  };
-
-  const validateForm = () => {
-    let formErrors = {};
-
-    if (!productData.name) {
-      formErrors.name = 'Name is required';
-    }
-    if (!productData.price) {
-      formErrors.price = 'Price is required';
-    } else if (productData.price < 0) {
-      formErrors.price = 'Price must be a positive number';
-    }
-    if (!productData.description) {
-      formErrors.description = 'Description is required';
-    }
-    if (!productData.sellerType) {
-      formErrors.sellerType = 'Seller is required';
-    }
-    if (!productData.rating || productData.rating < 0 || productData.rating > 5) {
-      formErrors.rating = 'Rating must be between 0 and 5';
-    }
-    if (!productData.originalQuantity) {
-      formErrors.originalQuantity = 'Quantity is required';
-    }
-    setErrors(formErrors);
-    return Object.keys(formErrors).length === 0;
-  };
-
-  const handleSubmitCreate = () => {
-    if (validateForm()) {
-      const newProduct = {
-        productId: nextId,
-        name: productData.name,
-        price: parseFloat(productData.price),
-        rating: parseFloat(productData.rating),
-      };
-      setProducts((prev) => [...prev, newProduct]);
-      setNextId((prev) => prev + 1);
-      handleClose();
-    }
-  };
-
-  const handleSubmitUpdate = () => {
-    if (validateForm()) {
-      setProducts((prev) =>
-        prev.map((product) =>
-          product.id === productData.id
-            ? { ...product, name: productData.name, price: parseFloat(productData.price), rating: parseFloat(productData.rating) }
-            : product
-        )
-      );
-      handleClose();
-    }
-  };
-
-  const filteredProducts = products
-    .filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        product.price >= priceRange[0] &&
-        product.price <= priceRange[1]
-    )
-    .sort((a, b) => {
-      if (sortOption === 'ratingAsc') return a.rating - b.rating;
-      if (sortOption === 'ratingDesc') return b.rating - a.rating;
-      return 0;
-    });
+  
 
   return (
-    <Box display="flex" flexDirection="row" py={3} px={2} justifyContent="center">
-      <Box width="30%" px={2}>
-        <Paper elevation={3} style={{ padding: '20px' }}>
-          <Typography variant="h6" gutterBottom align="center">
-            Filter Products
-          </Typography>
+    <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
+        <Tabs value={role} onChange={handleRoleChange}>
+          <Tab label="Activities" value="Activities" />
+          <Tab label="Itineraries" value="Itineraries" />
+          <Tab label="Historical Places" value="HistoricalPlaces" />
+        </Tabs>
+      </Box>
 
+      <div style={{ display: 'flex', flex: 1 }}>
+        <div style={{ width: '300px', padding: '20px', backgroundColor: '#f5f5f5' }}>
+          <h3>Filters</h3>
           <TextField
-            label="Search by name"
+            label="Search by Name"
             variant="outlined"
-            value={searchTerm}
-            onChange={handleSearchChange}
+            name="search"
+            value={filters.search}
+            onChange={handleFilterChange}
             fullWidth
             style={{ marginBottom: '20px' }}
           />
+          {role == 'Itineraries' && (
+            <FormControl fullWidth style={{ marginBottom: '20px' }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="rating">Rating</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+          {role == 'Activities' && (
+            <FormControl fullWidth style={{ marginBottom: '20px' }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="rating">Rating</MenuItem>
+              </Select>
+            </FormControl>
+          )}
 
-          <Typography gutterBottom>Filter by price</Typography>
-          <Slider
-            value={priceRange}
-            onChange={handlePriceChange}
-            valueLabelDisplay="auto"
-            min={0}
-            max={maxPrice}
-            step={10}
-            style={{ marginBottom: '20px' }}
-          />
-          <Typography align="center">
-            Price range: ${priceRange[0]} - ${priceRange[1]}
-          </Typography>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {shouldDisplayField('budget') && (
+              <TextField
+                label="Budget"
+                variant="outlined"
+                name="budget"
+                value={filters.budget}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
 
-          <FormControl fullWidth style={{ marginBottom: '20px', marginTop: '20px' }}>
-            <InputLabel>Sort by Rating</InputLabel>
-            <Select value={sortOption} onChange={handleSortChange}>
-              <MenuItem value="ratingAsc">Rating: Low to High</MenuItem>
-              <MenuItem value="ratingDesc">Rating: High to Low</MenuItem>
-            </Select>
-          </FormControl>
+            {shouldDisplayField('Tag') && (
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Tag</InputLabel>
+                <Select
+                  label="Tag"
+                  name="Tag"
+                  value={filters.Tag}
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value="Monuments">Monuments</MenuItem>
+                  <MenuItem value="Museums">Museums</MenuItem>
+                  <MenuItem value="Palaces">Palaces</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
-          <Box mt={3} display="flex" justifyContent="space-between">
-            <Button variant="contained" color="primary" onClick={() => { /* handleFilter */ }}>
-              Confirm
+            {shouldDisplayField('preferences') && (
+              <TextField
+                label="Preferences"
+                variant="outlined"
+                name="preferences"
+                value={filters.preferences}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
+            {shouldDisplayField('category') && (
+              <TextField
+                label="Category"
+                variant="outlined"
+                name="category"
+                value={filters.category}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
+            {shouldDisplayField('language') && (
+              <TextField
+                label="Language"
+                variant="outlined"
+                name="language"
+                value={filters.language}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
+            {shouldDisplayField('date') && (
+              <TextField
+                label="Date"
+                variant="outlined"
+                name="date"
+                type="date"
+                value={filters.date}
+                onChange={handleFilterChange}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+
+            {shouldDisplayField('rating') && (
+              <div>
+                <Typography component="legend">Rating</Typography>
+                <Rating
+                  name="rating"
+                  value={filters.rating}
+                  onChange={handleRatingChange}
+                  precision={0.5}
+                />
+              </div>
+            )}
+
+            <Button variant="contained" color="primary" onClick={() => applyFilters()}>
+              Apply Filters
             </Button>
-            <Button variant="outlined" color="secondary" onClick={handleReset}>
-              Reset
+            <Button variant="outlined" color="secondary" onClick={resetFilters}>
+              Reset Filters
             </Button>
-            <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
-              Create
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
+          </div>
+        </div>
 
-      <Box width="70%" px={2}>
-        <Grid container spacing={3}>
-          {filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} md={4} key={product.id}>
-              <Card elevation={3}>
+        <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
+          {filteredData.map((item) => (
+            <Grid item xs={12} sm={6} md={4} key={item.id}>
+              <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {product.name}
+                  <Typography variant="h5" component="div">
+                    {item.name}
                   </Typography>
-                  <Typography>Price: ${product.price}</Typography>
-                  <Typography>Rating: {product.rating}</Typography>
-                  <Typography>Description: {product.description}</Typography>
-                  <Typography>Quantity: {product.originalQuantity}</Typography>
-                  <Typography>Seller: {product.sellerType}</Typography>
-                  <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
-                    Update
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleClickOpenReviews(product.reviews)} // Open reviews dialog
-                    style={{ marginTop: '10px' }}
-                  >
-                    View Reviews
-                  </Button>
+
+                  {role === 'Activities' && (
+                    <>
+                      <Typography color="text.secondary">Budget: {item.budget}</Typography>
+                      <Typography color="text.secondary">Date: {item.date}</Typography>
+                      <Typography color="text.secondary">Category: {item.category}</Typography>
+                      <Typography color="text.secondary">Location: {item.location}</Typography>
+                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
+                      {item.specialDiscount && (
+                        <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
+                      )}
+                    </>
+                  )}
+
+                  {role === 'Itineraries' && (
+                    <>
+                      <Typography color="text.secondary">Activities: {item.activities}</Typography>
+                      <Typography color="text.secondary">Locations: {item.locations}</Typography>
+                      <Typography color="text.secondary">Date Available: {item.dateAvailable}</Typography>
+                      <Typography color="text.secondary">Price: {item.price}</Typography>
+                      <Typography color="text.secondary">Rating: {item.rating}</Typography>
+                      <Typography color="text.secondary">Language: {item.language}</Typography>
+                      <Typography color="text.secondary">Accessibility: {item.accessibility}</Typography>
+                      <Typography color="text.secondary">Dropoff location: {item.dropoffLocation}</Typography>
+                      <Typography color="text.secondary">Pickup location: {item.pickupLocation}</Typography>
+                      <Typography color="text.secondary">Directions: {item.directions}</Typography>
+
+                    </>
+                  )}
+
+                  {role === 'HistoricalPlaces' && (
+                    <>
+                      <Typography color="text.secondary">Description: {item.description}</Typography>
+                      <Typography color="text.secondary">Location: {item.location}</Typography>
+                      <Typography color="text.secondary">Opening Hours: {item.openingHours}</Typography>
+                      <Typography color="text.secondary">Ticket Price: {item.ticketPrice}</Typography>
+                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
-      </Box>
 
-      {/* Create Product Dialog */}
-      <Dialog open={openCreate} onClose={handleClose}>
-        <DialogTitle>Add New Product</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please fill in the details to create a new product.
-          </DialogContentText>
-          <TextField
-            margin="dense"
-            label="Name"
-            name="name"
-            value={productData.name || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.name}
-            helperText={errors.name}
-          />
-          <TextField
-            margin="dense"
-            label="Price"
-            name="price"
-            type="number"
-            value={productData.price || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.price}
-            helperText={errors.price}
-          />
-          <TextField
-            margin="dense"
-            label="Description"
-            name="description"
-            value={productData.description || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.description}
-            helperText={errors.description}
-          />
-          <TextField
-            margin="dense"
-            label="Seller"
-            name="seller"
-            value={productData.sellerType || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.sellerType}
-            helperText={errors.sellerType}
-          />
-          <TextField
-            margin="dense"
-            label="Rating"
-            name="rating"
-            type="number"
-            value={productData.rating || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.rating}
-            helperText={errors.rating}
-          />
-          <TextField
-            margin="dense"
-            label="Quantity"
-            name="quantity"
-            type="number"
-            value={productData.originalQuantity || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.originalQuantity}
-            helperText={errors.originalQuantity}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmitCreate} color="primary">
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Update Product Dialog */}
-      <Dialog open={openUpdate} onClose={handleClose}>
-        <DialogTitle>Update Product</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please update the details for the product.
-          </DialogContentText>
-          <TextField
-            margin="dense"
-            label="Name"
-            name="name"
-            value={productData.name || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.name}
-            helperText={errors.name}
-          />
-          <TextField
-            margin="dense"
-            label="Price"
-            name="price"
-            type="number"
-            value={productData.price || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.price}
-            helperText={errors.price}
-          />
-          <TextField
-            margin="dense"
-            label="Description"
-            name="description"
-            value={productData.description || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.description}
-            helperText={errors.description}
-          />
-          <TextField
-            margin="dense"
-            label="Seller"
-            name="seller"
-            value={productData.sellerType || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.sellerType}
-            helperText={errors.sellerType}
-          />
-          <TextField
-            margin="dense"
-            label="Rating"
-            name="rating"
-            type="number"
-            value={productData.rating || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.rating}
-            helperText={errors.rating}
-          />
-          <TextField
-            margin="dense"
-            label="Quantity"
-            name="quantity"
-            type="number"
-            value={productData.originalQuantity || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.originalQuantity}
-            helperText={errors.originalQuantity}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmitUpdate} color="primary">
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
-      {/* Reviews Dialog */}
-      <Dialog open={openReviews} onClose={handleClose}>
-        <DialogTitle>Product Reviews</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Here are the reviews for the selected product:</DialogContentText>
-          <List>
-            {selectedReviews.map((review, index) => (
-              <React.Fragment key={index}>
-                <ListItem>
-                  <ListItemText primary={`${index + 1}. ${review}`} /> {/* Add numbering to the review */}
-                </ListItem>
-                {index < selectedReviews.length - 1 && <Divider />} {/* Add Divider between items except the last one */}
-              </React.Fragment>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-
-    </Box>
+      </div>
+    </div>
   );
 };
 
-export default ProductCard;
+export default Filter;
+
+
+// For picture in Historical Locations
+
+// <img src={item.pictures[0]} alt={item.name} style={{ width: '100%', marginTop: '10px' }} />
+
+*/
+
+
+
+
+import React, { useState , useEffect } from 'react';
+import {
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Button,
+  Rating,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Box,
+  Tabs,
+  Tab,
+} from '@mui/material';
+
+// Sample data with 'type' field added
+const data = {
+  activities: [
+    {
+      id: "607d1e3eab1e3f001fddf72a",
+      name: "Disney",
+      date: "2024-10-15",
+      time: "10:00 AM",
+      location: "Paris",
+      budget: 50,
+      category: "Cultural"
+        ,
+      tags: [
+        "sightseeing"
+      ],
+      specialDiscounts: [
+        "string"
+      ],
+      created_by: "admin",
+      flag: true,
+      isOpen: true,
+      rating: 4.5,
+      comments: [
+        "string"
+      ],
+      createdAt: "2024-08-10T12:00:00Z",
+      description: "Explore the city's history and culture."
+    }
+  ],
+  itineraries: [
+    {
+      id: "607d1e3eab1e3f001fddf72b",
+      name: "Paris Tour",
+      activities: [
+        "string"
+      ],
+      locations: [
+        "string"
+      ],
+      timeline: "09:00 AM - 05:00 PM",
+      directions: "Start at the main square.",
+      language: "English",
+      price: 150,
+      dateAvailable: "2024-10-15",
+      accessibility: "Wheelchair accessible",
+      pickupLocation: "Hotel Lobby",
+      dropoffLocation: "Main Square",
+      isActivated: true,
+      created_by: "admin",
+      flag: false,
+      rating: 4,
+      comments: [
+        "string"
+      ]
+    }
+  ],
+  historicalPlaces: [
+    {
+      id: "607d1e3eab1e3f001fddf72c",
+      name: "Egyption Museum",
+      description: "A beautiful historical site.",
+      pictures: [
+        "http://example.com/image.jpg"
+      ],
+      location: "Cairo"
+        ,
+      openingHours: "9 AM - 6 PM",
+      ticketPrice: "40",
+      createdAt: "2024-08-10T12:00:00Z",
+      tags: [
+        "history"
+      ]
+    }
+  ]
+};
+
+// Role-based fields
+const roleFields = {
+  HistoricalPlaces: ['Tag'],
+  Activities: ['budget', 'date', 'category', 'rating'],
+  Itineraries: ['budget', 'date', 'preferences', 'language'],
+};
+
+const Filter = () => {
+  const [filters, setFilters] = useState({
+    budget: '',
+    price: '',
+    date: '',
+    rating: 0,
+    category: '',
+    language: '',
+    preferences: '',
+    Tag: '',
+    search: '',
+    sortBy: '',
+  });
+
+  const [filteredData, setFilteredData] = useState([]);
+  const [role, setRole] = useState('Activities'); // Default to Main to show all
+  const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
+
+  useEffect(() => {
+    applyFilters();
+  }, [role]);
+
+
+
+
+  // Handle Input Change
+  const handleFilterChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Handle Rating Change
+  const handleRatingChange = (event, newRating) => {
+    setFilters({
+      ...filters,
+      rating: newRating,
+    });
+  };
+
+  const handleRoleChange = (event, newValue) => {
+    setRole(newValue);
+    applyFilters(newValue); // Apply filters immediately when changing tabs
+  };
+
+  // Apply Filters
+  const applyFilters = () => {
+    let filteredItems = [];
+
+    switch (role) {
+      case 'Activities':
+        filteredItems = data.activities;
+        break;
+      case 'Itineraries':
+        filteredItems = data.itineraries;
+        break;
+      case 'HistoricalPlaces':
+        filteredItems = data.historicalPlaces;
+        break;
+      default:
+        filteredItems = [];
+    }
+
+    // Apply filters
+    filteredItems = filteredItems.filter(item => {
+      if (filters.budget && item.budget > parseFloat(filters.budget)) return false;
+      if (filters.price && item.price > parseFloat(filters.price)) return false;
+      if (filters.date && item.date !== filters.date && item.dateAvailable !== filters.date) return false;
+      if (filters.rating && item.rating < filters.rating) return false;
+      if (filters.category && item.category?.name !== filters.category) return false;
+      if (filters.language && item.language !== filters.language) return false;
+      if (filters.tags && !item.tags.includes(filters.tags)) return false;
+      if (filters.search && !item.name?.toLowerCase().includes(filters.search.toLowerCase()) &&
+          !item.description?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+      return true;
+    });
+
+    // Sort logic
+    if (filters.sortBy === 'price') {
+      filteredItems.sort((a, b) => (b.price || b.budget) - (a.price || a.budget));
+    } else if (filters.sortBy === 'rating') {
+      filteredItems.sort((a, b) => b.rating - a.rating);
+    }
+
+    setFilteredData(filteredItems);
+  };
+
+  // Reset Filters
+  const resetFilters = () => {
+    setFilters({
+      budget: '',
+      price: '',
+      date: '',
+      rating: 0,
+      category: '',
+      language: '',
+      tags: '',
+      search: '',
+      sortBy: '',
+    });
+    applyFilters();
+  };
+
+  const shouldDisplayField = (field) => {
+    return roleFields[role]?.includes(field);
+  };
+
+
+  
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
+        <Tabs value={role} onChange={handleRoleChange}>
+          <Tab label="Activities" value="Activities" />
+          <Tab label="Itineraries" value="Itineraries" />
+          <Tab label="Historical Places" value="HistoricalPlaces" />
+        </Tabs>
+      </Box>
+
+      <div style={{ display: 'flex', flex: 1 }}>
+        <div style={{ width: '300px', padding: '20px', backgroundColor: '#f5f5f5' }}>
+          <h3>Filters</h3>
+          <TextField
+            label="Search by Name"
+            variant="outlined"
+            name="search"
+            value={filters.search}
+            onChange={handleFilterChange}
+            fullWidth
+            style={{ marginBottom: '20px' }}
+          />
+          {role == 'Itineraries' && (
+            <FormControl fullWidth style={{ marginBottom: '20px' }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="rating">Rating</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+          {role == 'Activities' && (
+            <FormControl fullWidth style={{ marginBottom: '20px' }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="rating">Rating</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {shouldDisplayField('budget') && (
+              <TextField
+                label="Budget"
+                variant="outlined"
+                name="budget"
+                value={filters.budget}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
+            {shouldDisplayField('Tag') && (
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Tag</InputLabel>
+                <Select
+                  label="Tag"
+                  name="Tag"
+                  value={filters.Tag}
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value="Monuments">Monuments</MenuItem>
+                  <MenuItem value="Museums">Museums</MenuItem>
+                  <MenuItem value="Palaces">Palaces</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+
+            {shouldDisplayField('preferences') && (
+              <TextField
+                label="Preferences"
+                variant="outlined"
+                name="preferences"
+                value={filters.preferences}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
+            {shouldDisplayField('category') && (
+              <TextField
+                label="Category"
+                variant="outlined"
+                name="category"
+                value={filters.category}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
+            {shouldDisplayField('language') && (
+              <TextField
+                label="Language"
+                variant="outlined"
+                name="language"
+                value={filters.language}
+                onChange={handleFilterChange}
+                fullWidth
+              />
+            )}
+
+            {shouldDisplayField('date') && (
+              <TextField
+                label="Date"
+                variant="outlined"
+                name="date"
+                type="date"
+                value={filters.date}
+                onChange={handleFilterChange}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+
+            {shouldDisplayField('rating') && (
+              <div>
+                <Typography component="legend">Rating</Typography>
+                <Rating
+                  name="rating"
+                  value={filters.rating}
+                  onChange={handleRatingChange}
+                  precision={0.5}
+                />
+              </div>
+            )}
+
+            <Button variant="contained" color="primary" onClick={() => applyFilters()}>
+              Apply Filters
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={resetFilters}>
+              Reset Filters
+            </Button>
+          </div>
+        </div>
+
+        <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
+          {filteredData.map((item) => (
+            <Grid item xs={12} sm={6} md={4} key={item.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h5" component="div">
+                    {item.name}
+                  </Typography>
+
+                  {role === 'Activities' && (
+                    <>
+                      <Typography color="text.secondary">Budget: {item.budget}</Typography>
+                      <Typography color="text.secondary">Date: {item.date}</Typography>
+                      <Typography color="text.secondary">Category: {item.category}</Typography>
+                      <Typography color="text.secondary">Location: {item.location}</Typography>
+                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
+                      {item.specialDiscount && (
+                        <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
+                      )}
+                    </>
+                  )}
+
+                  {role === 'Itineraries' && (
+                    <>
+                      <Typography color="text.secondary">Activities: {item.activities}</Typography>
+                      <Typography color="text.secondary">Locations: {item.locations}</Typography>
+                      <Typography color="text.secondary">Date Available: {item.dateAvailable}</Typography>
+                      <Typography color="text.secondary">Price: {item.price}</Typography>
+                      <Typography color="text.secondary">Rating: {item.rating}</Typography>
+                      <Typography color="text.secondary">Language: {item.language}</Typography>
+                      <Typography color="text.secondary">Accessibility: {item.accessibility}</Typography>
+                      <Typography color="text.secondary">Dropoff location: {item.dropoffLocation}</Typography>
+                      <Typography color="text.secondary">Pickup location: {item.pickupLocation}</Typography>
+                      <Typography color="text.secondary">Directions: {item.directions}</Typography>
+
+                    </>
+                  )}
+
+                  {role === 'HistoricalPlaces' && (
+                    <>
+                      <Typography color="text.secondary">Description: {item.description}</Typography>
+                      <Typography color="text.secondary">Location: {item.location}</Typography>
+                      <Typography color="text.secondary">Opening Hours: {item.openingHours}</Typography>
+                      <Typography color="text.secondary">Ticket Price: {item.ticketPrice}</Typography>
+                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+      </div>
+    </div>
+  );
+};
+
+export default Filter;
+
+
+// For picture in Historical Locations
+
+// <img src={item.pictures[0]} alt={item.name} style={{ width: '100%', marginTop: '10px' }} />
