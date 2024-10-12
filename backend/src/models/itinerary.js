@@ -3,9 +3,17 @@ const Schema = mongoose.Schema;
 
 // Define the Itinerary schema
 const itinerarySchema = new Schema({
+  name:{
+    type: String,
+  },
   activities: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Activity', // Referencing the Activity schema
+    required: true,
+  }],
+  preftag: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PreferenceTags', // Referencing the Activity schema
     required: true,
   }],
   locations: {
@@ -59,18 +67,22 @@ const itinerarySchema = new Schema({
     default: 1,
   },
   rating: {
-    type: Number,
+    type: [Number], // Changed from Number to an array of Numbers
     min: 0,
     max: 5, // Rating on a scale of 0 to 5
   },
   comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Comments related to the itinerary
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' }, // Comments related to the itinerary
     text: { type: String, required: true },
     date: { type: Date, default: Date.now },
   }],
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  isSpecial: {
+    type: Boolean,
+    default: false,
   },
 });
 
