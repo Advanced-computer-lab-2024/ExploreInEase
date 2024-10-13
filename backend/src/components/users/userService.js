@@ -1,4 +1,6 @@
 const userRepository = require('../users/userRepository');
+const Itinerary = require('../models/Itinerary'); // Assuming you have an Itinerary model
+
 const bcrypt = require('bcrypt');
 const getUserById = async (id) => {
     // Retrieve the user from the Users table based on id
@@ -213,6 +215,46 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+
+const rateTourGuide = async (tourGuideId, touristId, itineraryId, rating) => {
+    // Check if the itinerary was created by the tour guide
+    const itinerary = await Itinerary.findById(itineraryId).populate('created_by'); // Fetch the itinerary and populate the 'created_by' field
+    
+    if (!itinerary) {
+        throw new Error("Itinerary not found.");
+    }
+
+    // Check if the itinerary was created by the tour guide
+    if (itinerary.created_by._id.toString() !== tourGuideId) {
+        throw new Error("This tour guide did not create the itinerary.");
+    }
+
+    // Check if the itinerary was completed by the tourist
+    const completedTour = await userRepository.checkTourCompletion(touristId, itineraryId);
+    if (!completedTour) {
+        throw new Error("You cannot rate this tour guide because you haven't completed this itinerary.");
+    }
+
+    // Validate the rating value (between 1 and 5)
+    if (rating < 1 || rating > 5) {
+        throw new Error("Rating must be between 1 and 5.");
+    }
+
+    // Find the tour guide and update their rating
+    const tourGuide = await userRepository.findUserById(tourGuideId);
+    if (!tourGuide || tourGuide.type !== 'tourGuide') {
+        throw new Error("Tour guide not found.");
+    }
+
+    tourGuide.rating.push(rating); // Add the new rating to the rating array
+
+    const updatedTourGuide = await userRepository.updateUserData(tourGuideId, { rating: tourGuide.rating });
+    return { message: "Rating submitted successfully", updatedTourGuide };
+};
+
+
+
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -233,6 +275,7 @@ module.exports = {
   updateTourist,
   registerTourist,
   registerUser,
-  login
+  login,
+  rateTourGuide
 };
 

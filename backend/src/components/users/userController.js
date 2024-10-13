@@ -389,6 +389,20 @@ const login = async (req, res) => {
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
 }
+
+const rateTourGuide = async (req, res) => {
+    const { tourGuideId, itineraryId } = req.params; // Include itineraryId in the request
+    const { touristId, rating } = req.body; // Rating and touristId provided in the request body
+
+    try {
+        const result = await userService.rateTourGuide(tourGuideId, touristId, itineraryId, rating);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -406,5 +420,6 @@ module.exports = {
   getTourist,
   updateTourist,
   registerUser,
-  login
+  login,
+  rateTourGuide
 };

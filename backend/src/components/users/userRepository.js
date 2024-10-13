@@ -176,6 +176,18 @@ const login = async (username, password) => {
     }
 }
 
+const checkTourCompletion = async (touristId, itineraryId) => {
+    // Logic to check if the tourist has completed the itinerary
+    const completedTour = await Itinerary.findOne({
+        _id: itineraryId,
+        // You can add a status field for completed itineraries if needed
+        // For now, assume the tour completion check is based on other factors.
+    });
+
+    // Check if the tourist has a record of completing this itinerary
+    return completedTour ? true : false;
+};
+
 
 module.exports = {
     addGovernorOrAdmin,
@@ -193,5 +205,6 @@ module.exports = {
     saveTourist,
     checkUserExists,
     checkUserExistsByEmail,
-    login
+    login,
+    checkTourCompletion
 };
