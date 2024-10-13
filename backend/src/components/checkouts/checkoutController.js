@@ -34,16 +34,17 @@ const addProduct = async (req, res) => {
 const getAvailableProducts = async (req, res) => {
     const {userId} = req.params;
     const user = await checkoutRepository.findUserById(userId);
-    console.log(type);
+    // console.log(type);
     if (user.type !== 'admin' && user.type !== 'seller' && user.tourist !== 'tourist') 
     {
-        return res.status(400).json(type);
+        return res.status(400).json({ message: 'Invalid type' });
     }
 
     try {
         const products = await checkoutService.getAvailableProducts();
         res.status(200).json({message: "Fetched successfully!",Products: products});
-        } catch (error) {
+        
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
