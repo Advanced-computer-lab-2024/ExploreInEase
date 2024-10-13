@@ -7,8 +7,8 @@ const addProduct = async (req, res) => {
     if (!productId || !price || !originalQuantity || !name || !description || !sellerId || !picture) {
         return res.status(400).json({ message: "ProductId, price, picture, original quantity, description, sellerId and name are required." });
     }
-    const type = await checkoutRepository.getType(userId);
-    if (type !== 'admin' || type !== 'seller') 
+    const user = await checkoutRepository.findUserById(userId);
+    if (user.type !== 'admin' && user.type !== 'seller') 
     {
         return res.status(400).json({ message: 'Invalid type' });
     }
@@ -20,7 +20,7 @@ const addProduct = async (req, res) => {
         description,
         sellerId,
         originalQuantity,
-        name,
+        name
     };
 
     try {
@@ -33,9 +33,9 @@ const addProduct = async (req, res) => {
 
 const getAvailableProducts = async (req, res) => {
     const {userId} = req.params;
-    const type = await checkoutRepository.getType(userId);
+    const user = await checkoutRepository.findUserById(userId);
     console.log(type);
-    if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
+    if (user.type !== 'admin' && user.type !== 'seller' && user.tourist !== 'tourist') 
     {
         return res.status(400).json(type);
     }
@@ -51,8 +51,8 @@ const getAvailableProducts = async (req, res) => {
 
 const getProductsByPriceRange = async (req, res) => {
     const {userId} = req.params;
-    const type = await checkoutRepository.getType(userId);
-    if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
+    const user = await checkoutRepository.findUserById(userId);
+    if (user.type !== 'admin' && user.type !== 'seller' && user.tourist !== 'tourist') 
         {
         return res.status(400).json({ message: 'Invalid type' });
     }
@@ -82,11 +82,10 @@ const updateProduct = async (req, res) => {
     }
 
     // Fetch the user's type (admin or seller)
-    const type = await checkoutRepository.getType(userId);
-    
-    // Validate user type
-    if (type !== 'admin' && type !== 'seller') {
-        return res.status(403).json({ message: 'Invalid user type. Only admins and sellers can update products.' });
+    const user = await checkoutRepository.findUserById(userId);
+    if (user.type !== 'admin' && user.type !== 'seller') 
+    {
+        return res.status(400).json({ message: 'Invalid type' });
     }
 
     try {
@@ -121,8 +120,8 @@ const updateProduct = async (req, res) => {
 
 const getAvailableProductsSortedByRatings = async (req, res) => {
     const {userId} = req.params;
-    const type = await checkoutRepository.getType(userId);
-    if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
+    const user = await checkoutRepository.findUserById(userId);
+    if (user.type !== 'admin' && user.type !== 'seller' && user.tourist !== 'tourist') 
     {
         return res.status(400).json({ message: 'Invalid type' });
     }
@@ -137,11 +136,10 @@ const getAvailableProductsSortedByRatings = async (req, res) => {
 
 const searchProductByName = async (req, res) => {
     const {userId} = req.params;
-    const type = await checkoutRepository.getType(userId);
-    if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
+    if (user.type !== 'admin' || user.type !== 'seller' || user.tourist !== 'tourist') 
         {
-        return res.status(400).json({ message: 'Invalid type' });
-    }
+            return res.status(400).json({ message: 'Invalid type' });
+        }
     
     const { productName } = req.body;
 
