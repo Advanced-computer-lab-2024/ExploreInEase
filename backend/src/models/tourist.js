@@ -89,6 +89,11 @@ const TouristSchema = new Schema({
         type: Boolean,
         default: false
     },
+    redeemedPoints: {
+        type: Number,
+        default: 0,
+        min: 0 // Ensures points cannot go below zero
+    },
     archived: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',

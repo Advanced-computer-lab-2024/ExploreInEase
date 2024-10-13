@@ -134,24 +134,67 @@ const bookEvent = async (touristId, eventType, eventId) => {
 
   return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
 };
+
 const cancelEvent = async (touristId, eventType, eventId) => {
+  const currentTime = new Date();
+  const fortyEightHoursInMs = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+
+  // Define the update data
   const updateData = {};
 
+  // Check event type and validate cancellation eligibility
+  let startDate;
+
   switch (eventType) {
-      case 'itinerary':
-          updateData.$pull = { itineraryId: eventId }; // Use $pull to remove the event ID from itineraryIds
-          break;
-      case 'activity':
-          updateData.$pull = { activityId: eventId }; // Use $pull to remove the event ID from activityIds
-          break;
-      case 'historicalPlace':
-          updateData.$pull = { historicalplaceId: eventId }; // Use $pull to remove the event ID from historicalplaceIds
-          break;
-      default:
-          throw new Error('Invalid event type');
+    case 'itinerary':
+      // Retrieve the itinerary and its start date
+      const itinerary = await Itinerary.findById(eventId);
+      if (!itinerary) throw new Error('Itinerary not found');
+      
+      // Check the soonest available date in dateTimeAvailable
+      startDate = itinerary.dateTimeAvailable.sort((a, b) => a - b)[0];
+      if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
+        throw new Error('Cancellations must be made at least 48 hours before the itinerary start date.');
+      }
+      updateData.$pull = { itineraryId: eventId };
+      break;
+
+    case 'activity':
+      // Retrieve the activity and its start date
+      const activity = await Activity.findById(eventId);
+      if (!activity) throw new Error('Activity not found');
+      
+      // Check activity date
+      startDate = activity.date;
+      if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
+        throw new Error('Cancellations must be made at least 48 hours before the activity start date.');
+      }
+      updateData.$pull = { activityId: eventId };
+      break;
+
+    case 'historicalPlace':
+      // If there are specific rules for historical places, handle them here
+      updateData.$pull = { historicalplaceId: eventId };
+      break;
+
+    default:
+      throw new Error('Invalid event type');
   }
 
+  // Proceed with updating the Tourist's record if eligible for cancellation
   return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
+};
+
+
+
+const getTouristEmailById = async (touristId) => {
+  try {
+      const tourist = await Tourist.findById(touristId);
+      return tourist ? tourist.email : null;
+  } catch (error) {
+      console.error(`Error fetching tourist email: ${error.message}`);
+      throw new Error('Could not fetch tourist email');
+  }
 };
 
 module.exports = {
@@ -170,7 +213,8 @@ module.exports = {
   setFlagToZeroForItinerary,
   setFlagToZeroForActivity,
   bookEvent,
-  cancelEvent
+  cancelEvent,
+  getTouristEmailById
  
 };
 

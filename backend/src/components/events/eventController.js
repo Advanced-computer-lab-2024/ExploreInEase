@@ -235,6 +235,18 @@ const cancelBookingEvent = async (req, res) => {
   }
 };
 
+const sendEventEmail = async (req, res) => {
+  const { touristId, receiverEmail } = req.params;
+  const eventDetails = req.body;
+
+  try {
+      const result = await eventService.sendEventEmail(touristId, receiverEmail, eventDetails);
+      res.status(200).json(result);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
     getUserEvents,
     createCategory,
@@ -248,6 +260,7 @@ module.exports = {
     updateItineraryActivation,
     updateEventFlagController,
     bookEvent,
-    cancelBookingEvent
+    cancelBookingEvent,
+    sendEventEmail
   };
   

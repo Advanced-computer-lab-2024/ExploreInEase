@@ -1,6 +1,7 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
-
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 
 const getUserEvents = async (_id, userType) => {
@@ -110,6 +111,44 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
     
     return await eventRepository.cancelEvent(touristId, eventType, eventId);
   }
+
+
+
+
+  const sendEventEmail = async (touristId, receiverEmail, eventDetails) => {
+    // Get the tourist's email
+    const touristEmail = await eventRepository.getTouristEmailById(touristId);
+    if (!touristEmail) {
+      throw new Error('Tourist not found');
+    }
+  
+    // Configure the email transporter (adjust the credentials as necessary)
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // or another service
+      auth: {
+        user: "aclproject7@gmail.com", // Sender's email credentials
+        pass: "qodo imkr adxs jred", // App-specific password
+      },
+    });
+  
+    // Format the event details in a clean style
+    const formattedDetails = Object.entries(eventDetails)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+  
+    // Email options
+    const mailOptions = {
+      from: touristEmail,
+      to: receiverEmail,
+      subject: 'Event Details',
+      text: `Hello!\nHere are the event details:\n\n${formattedDetails}`, // Use the formatted details
+    };
+  
+    // Send the email
+    await transporter.sendMail(mailOptions);
+    return { message: 'Email sent successfully' };
+  };
+  
 module.exports = {
   getUserEvents,
   createCategory,
@@ -123,6 +162,7 @@ module.exports = {
   updateItineraryActivation,
   updateEventFlag,
   addEventToTourist,
-  cancelEventToTourist
+  cancelEventToTourist,
+  sendEventEmail
 };
 

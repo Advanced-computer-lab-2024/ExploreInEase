@@ -108,7 +108,7 @@ const updateTermsAndConditions = async (_id, type) => {
     }
 };
 
-
+//tested alllll
 const checkTouristDeletionCriteria = async (_id) => { 
     const tourist = await Tourist.findById(_id)
         .populate('itineraryId')
@@ -126,15 +126,17 @@ const checkTouristDeletionCriteria = async (_id) => {
         }
     }
 
-    // Check activity open status for the tourist
-    for (const activity of tourist.activityId) {
-        if (activity.isOpen) {
+    
+     // Check if any activity has a future date
+     for (const activity of tourist.activityId) {
+        if (new Date(activity.date) > now) {
             return false; // Active activity found, reject deletion
         }
     }
 
     return true; // All conditions met
 };
+
 
 
 const checkTourGuideItineraryDates = async (tourGuideId) => {
@@ -166,9 +168,19 @@ const checkSellerProductStatus = async (sellerId) => {
 
 
 const checkAdvertiserActivityStatus = async (advertiserId) => {
-    const openActivities = await Activity.find({ created_by: advertiserId, isOpen: true });
-    return openActivities.length === 0; // Return true if no open activities
+    const now = new Date();
+
+    // Find activities created by the advertiser with a future date
+    const futureActivities = await Activity.find({ 
+        created_by: advertiserId, 
+        date: { $gt: now } // Filter for future dates
+    });
+
+    return futureActivities.length === 0; // Return true if no future-dated activities
 };
+
+
+
 
 // Generic update function to set requestDeletion to true
 const updateRequestDeletion = async (_id, type) => {

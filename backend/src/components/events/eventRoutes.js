@@ -276,6 +276,8 @@ router.put('/updateItineraryActivation', eventController.updateItineraryActivati
 
 router.put('/inappropriate', eventController.updateEventFlagController);
 router.put('/bookEvent', eventController.bookEvent);
+router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
+router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEventEmail);
 
 
 module.exports = router;

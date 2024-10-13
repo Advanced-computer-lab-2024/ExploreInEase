@@ -110,7 +110,7 @@ const acceptTerms = async (req, res) => {
 
 
 const requestDeletion = async (req, res) => {
-    const { _id, type } = req.params;
+    const { _id, type } = req.body;
 
     // Check if username and type are provided
     if (!_id || !type) {
