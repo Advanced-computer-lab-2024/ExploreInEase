@@ -33,7 +33,6 @@ const Login = () => {
       setError('Please fill in all fields.');
       return;
     }
-
     const options = {
       apiPath: '/login',
       body: {
@@ -41,7 +40,6 @@ const Login = () => {
         password: formData.password,
       }
     };
-    
     try {
       // Send the POST request to the /login endpoint
       const response = await NetworkService.post(options);
@@ -51,7 +49,12 @@ const Login = () => {
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
         console.log(response.user)
         console.log(response.user._id);
-        navigate('/AdminHomePage', { state: { tourist: response.user } }); // Use navigate to change the route
+        if (formData.role=='admin'){
+          navigate('/AdminHomePage', { state: { tourist: response.user } }); // Use navigate to change the route
+        }
+        else {
+          navigate('/TouristGovernorHP', { state: { tourist: response.user } }); // Use navigate to change the route
+        }
         setError('');
       }
     } catch (error) {
