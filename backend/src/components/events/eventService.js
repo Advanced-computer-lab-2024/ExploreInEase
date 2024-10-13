@@ -141,7 +141,7 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
       from: touristEmail,
       to: receiverEmail,
       subject: 'Event Details',
-      text: `Hello!\nHere are the event details:\n\n${formattedDetails}`, // Use the formatted details
+      text: `Hello!\nYour friend sent you an event!!\nHere are the event details:\n\n${formattedDetails}`, // Use the formatted details
     };
   
     // Send the email
