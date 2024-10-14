@@ -1,84 +1,73 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
   Button,
-  Paper,
-  Typography,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   TextField,
-  IconButton,
-  Checkbox,
-  FormControl, FormControlLabel 
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import NetworkService from '../NetworkService';
 import dayjs from 'dayjs';
 
-function ItineraryForm() {
-  const [activeTourIndex, setActiveTourIndex] = React.useState(0);
-  const [activeDayIndex, setActiveDayIndex] = React.useState(0);
-  const [tours, setTours] = React.useState([]);
-  const [open, setOpen] = React.useState(false);
-  const [tourData, setTourData] = React.useState({
+function Itinerary() {
+  const [itineraries, setItineraries] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [currentItinerary, setCurrentItinerary] = useState(null);
+  const [itineraryForm, setItineraryForm] = useState({
     name: '',
-    startDate: '',
-    endDate: '',
-    numberOfDays: 0,
-    activities: [],
-    isSpecial: false, 
+    activities: [], // Changed to an array to hold selected activities for each day
+    startDate: null,
+    endDate: null,
+    language: '',
+    price: '',
+    availableDates: [{ start: null, end: null }],
+    accessibility: '',
+    pickupLocation: '',
+    dropoffLocation: '',
   });
+  const [availableActivities, setAvailableActivities] = useState([]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  useEffect(() => {
+    // Fetch activities from your API or state management
+    const fetchActivities = async () => {
+      try {
+        const response = await NetworkService.get('http://localhost:3030/activity/user/${userId}/allActivities;'); // Replace with your actual API endpoint
+        setAvailableActivities(response.activities || []);
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+      }
+    };
 
-    if (name === "numberOfDays") {
-      // Ensure the activities array matches the number of days
-      const newActivities = Array.from({ length: value }, (_, index) => ({
-        activity: tourData.activities[index]?.activity || '',
-        location: tourData.activities[index]?.location || '',
-        price: tourData.activities[index]?.price || '',
-        tag: tourData.activities[index]?.tag || '',
-        category: tourData.activities[index]?.category || '',
-      }));
-
-      setTourData((prevData) => ({
-        ...prevData,
-        [name]: value,
-        activities: newActivities,
-      }));
-    } else {
-      setTourData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleActivityChange = (index, field, value) => {
-    const updatedActivities = [...tourData.activities];
-    updatedActivities[index][field] = value;
-    setTourData((prevData) => ({
-      ...prevData,
-      activities: updatedActivities,
-    }));
-  };
+    fetchActivities();
+  }, []);
 
   const handleClickOpen = () => {
-    setTourData({
+    setItineraryForm({
       name: '',
-      startDate: '',
-      endDate: '',
-      numberOfDays: 0,
-      activities: [],
+      activities: [], // Resetting activities to empty array for new itineraries
+      startDate: null,
+      endDate: null,
+      language: '',
+      price: '',
+      availableDates: [{ start: null, end: null }],
+      accessibility: '',
+      pickupLocation: '',
+      dropoffLocation: '',
     });
+    setCurrentItinerary(null);
     setOpen(true);
   };
 
@@ -86,255 +75,252 @@ function ItineraryForm() {
     setOpen(false);
   };
 
-  const validateDates = () => {
-    const start = dayjs(tourData.startDate);
-    const end = dayjs(tourData.endDate);
-    return start.isValid() && end.isValid() && start.isBefore(end);
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setItineraryForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddTour = async () => {
-    if (!validateDates()) {
-      alert("Please enter valid start and end dates.");
-      return;
-    }
-  
-    // Prepare the tour data
-    const newTour = {
-      name: tourData.name,
-      startDate: tourData.startDate,
-      endDate: tourData.endDate,
-      activities: tourData.activities,
-      isSpecial: tourData.isSpecial,
-    };
-  
-    // Add the tour to local state (optional, depending on whether you need to manage it locally)
-    setTours((prevTours) => [...prevTours, newTour]);
-  
-    // Prepare the itinerary data for the API
-    const itineraryData = {
-      name: tourData.name,
-      startDate: tourData.startDate,
-      endDate: tourData.endDate,
-      activities: tourData.activities,
-      isSpecial: tourData.isSpecial,
-    };
-  
-    // Define the options for the API call
-    const options = {
-      apiPath: '/itinerary',
-      body: itineraryData, // Data to be sent in the body of the POST request
-    };
-  
-    try {
-      // Make the API POST request using NetworkService
-      const newItinerary = await NetworkService.post(options);
-      console.log('Itinerary Created:', newItinerary);
-    } catch (error) {
-      console.error('Error creating itinerary:', error);
-    }
-  
-    // Close the dialog or form after adding the tour
-    handleClose();
-  };
-  
-
-  const handleEditTour = (index) => {
-    const tourToEdit = tours[index];
-    setTourData(
-      {...tourToEdit, 
-         isSpecial: tourToEdit.isSpecial || false,
+  const handleAvailableDateChange = (index, field, newValue) => {
+    const newAvailableDates = itineraryForm.availableDates.map((dateRange, i) => {
+      if (i === index) {
+        return { ...dateRange, [field]: newValue };
+      }
+      return dateRange;
     });
+    setItineraryForm((prev) => ({ ...prev, availableDates: newAvailableDates }));
+  };
+
+  const handleAddAvailableDate = () => {
+    setItineraryForm((prev) => ({
+      ...prev,
+      availableDates: [...prev.availableDates, { start: null, end: null }],
+    }));
+  };
+
+  const handleActivityChange = (index, event) => {
+    const newActivities = [...itineraryForm.activities];
+    newActivities[index] = event.target.value;
+    setItineraryForm((prev) => ({ ...prev, activities: newActivities }));
+  };
+
+  const handleSaveItinerary = async () => {
+    const updatedItinerary = {
+      ...itineraryForm,
+      startDate: itineraryForm.startDate ? dayjs(itineraryForm.startDate).toISOString() : null,
+      endDate: itineraryForm.endDate ? dayjs(itineraryForm.endDate).toISOString() : null,
+      availableDates: itineraryForm.availableDates.map((dateRange) => ({
+        start: dateRange.start ? dayjs(dateRange.start).toISOString() : null,
+        end: dateRange.end ? dayjs(dateRange.end).toISOString() : null,
+      })),
+    };
+
+    try {
+      if (currentItinerary !== null) {
+        // Update existing itinerary
+        setItineraries((prevItineraries) =>
+          prevItineraries.map((itinerary, index) =>
+            index === currentItinerary ? updatedItinerary : itinerary
+          )
+        );
+      } else {
+        // Create a new itinerary
+        const response = await NetworkService.post({
+          apiPath: '/itinerary', // Your API endpoint for creating itineraries
+          body: updatedItinerary,
+        });
+        if (response && response.itinerary) {
+          setItineraries((prevItineraries) => [...prevItineraries, response.itinerary]);
+        }
+      }
+      handleClose();
+    } catch (error) {
+      console.error('Error saving itinerary:', error);
+    }
+  };
+
+  const handleEditItinerary = (index) => {
+    setCurrentItinerary(index);
+    setItineraryForm(itineraries[index]);
     setOpen(true);
   };
 
-  const handleDeleteTour = (index) => {
-    
-    setTours((prevTours) => prevTours.filter((_, idx) => idx !== index));
+  const handleDeleteItinerary = (index) => {
+    setItineraries((prevItineraries) => prevItineraries.filter((_, i) => i !== index));
   };
 
-  const handleNextTour = () => {
-    setActiveTourIndex((prevIndex) => Math.min(prevIndex + 1, tours.length - 1));
-    setActiveDayIndex(0); // Reset to first day of the next tour
+  const calculateDays = (startDate, endDate) => {
+    if (startDate && endDate) {
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+      return end.diff(start, 'day') + 1; // Include start date
+    }
+    return 0;
   };
 
-  const handleBackTour = () => {
-    setActiveTourIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-    setActiveDayIndex(0); // Reset to first day of the previous tour
-  };
-
-  const handleNextDay = () => {
-    const activitiesCount = tours[activeTourIndex]?.activities.length || 0;
-    setActiveDayIndex((prevIndex) => Math.min(prevIndex + 1, activitiesCount - 1));
-  };
-
-  const handleBackDay = () => {
-    setActiveDayIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-  };
-
-  const handleReset = () => {
-    setActiveTourIndex(0);
-    setActiveDayIndex(0);
-  };
+  const numberOfDays = calculateDays(itineraryForm.startDate, itineraryForm.endDate);
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Add Tour
-      </Button>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <div>
+        <Button variant="contained" onClick={handleClickOpen}>
+          Add Itinerary
+        </Button>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{tourData.name ? 'Edit Tour' : 'Add Tour'}</DialogTitle>
-        <DialogContent>
-        <FormControl component="fieldset">
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={tourData.isSpecial || false}
-              onChange={(e) => setTourData({ ...tourData, isSpecial: e.target.checked })} // Handle the change
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{currentItinerary !== null ? 'Edit Itinerary' : 'Add Itinerary'}</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              margin="normal"
+              name="name"
+              label="Itinerary Name"
+              value={itineraryForm.name}
+              onChange={handleInputChange}
             />
-          }
-          label="Is for Special Tourist?"
-          />
+            <DatePicker
+              label="Start Date"
+              value={itineraryForm.startDate}
+              onChange={(newValue) => setItineraryForm((prev) => ({ ...prev, startDate: newValue }))}
+              renderInput={(params) => (
+                <TextField {...params} fullWidth margin="normal" />
+              )}
+            />
+            <DatePicker
+              label="End Date"
+              value={itineraryForm.endDate}
+              onChange={(newValue) => setItineraryForm((prev) => ({ ...prev, endDate: newValue }))}
+              renderInput={(params) => (
+                <TextField {...params} fullWidth margin="normal" />
+              )}
+            />
+
+            {/* Activity selection for each day of the tour */}
+            {Array.from({ length: numberOfDays }, (_, index) => (
+              <FormControl fullWidth margin="normal" key={index}>
+                <InputLabel id={`activity-label-${index}`}>Activity for Day {index + 1}</InputLabel>
+                <Select
+                  labelId={`activity-label-${index}`}
+                  value={itineraryForm.activities[index] || ''}
+                  onChange={(event) => handleActivityChange(index, event)}
+                >
+                  {availableActivities.map((activity) => (
+                    <MenuItem key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
+            ))}
 
-          <TextField
-            margin="dense"
-            name="name"
-            label="Name of Tour"
-            type="text"
-            fullWidth
-            value={tourData.name}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="startDate"
-            label="Start Date"
-            type="date"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={tourData.startDate}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="endDate"
-            label="End Date"
-            type="date"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={tourData.endDate}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="numberOfDays"
-            label="Number of Days"
-            type="number"
-            fullWidth
-            value={tourData.numberOfDays}
-            onChange={handleChange}
-          />
-          {Array.from({ length: tourData.numberOfDays }).map((_, index) => (
-            <Box key={index} sx={{ mb: 2 }}>
-              <Typography variant="h6">Day {index + 1}</Typography>
-              <TextField
-                margin="dense"
-                label="Activity"
-                type="text"
-                fullWidth
-                value={tourData.activities[index]?.activity || ''}
-                onChange={(e) => handleActivityChange(index, 'activity', e.target.value)}
-              />
-              <TextField
-                margin="dense"
-                label="Location"
-                type="text"
-                fullWidth
-                value={tourData.activities[index]?.location || ''}
-                onChange={(e) => handleActivityChange(index, 'location', e.target.value)}
-              />
-              <TextField
-                margin="dense"
-                label="Price"
-                type="text"
-                fullWidth
-                value={tourData.activities[index]?.price || ''}
-                onChange={(e) => handleActivityChange(index, 'price', e.target.value)}
-              />
-              <TextField
-                margin="dense"
-                label="Tags"
-                type="text"
-                fullWidth
-                value={tourData.activities[index]?.tag || ''}
-                onChange={(e) => handleActivityChange(index, 'tag', e.target.value)}
-              />
-              <TextField
-                margin="dense"
-                label="Category"
-                type="text"
-                fullWidth
-                value={tourData.activities[index]?.category || ''}
-                onChange={(e) => handleActivityChange(index, 'category', e.target.value)}
-              />
-            </Box>
+            {itineraryForm.availableDates.map((dateRange, index) => (
+              <div key={index} style={{ display: 'flex', marginBottom: '16px' }}>
+                <DatePicker
+                  label={`Available Start Date ${index + 1}`}
+                  value={dateRange.start}
+                  onChange={(newValue) => handleAvailableDateChange(index, 'start', newValue)}
+                  renderInput={(params) => (
+                    <TextField {...params} fullWidth margin="normal" style={{ marginRight: '8px' }} />
+                  )}
+                />
+                <DatePicker
+                  label={`Available End Date ${index + 1}`}
+                  value={dateRange.end}
+                  onChange={(newValue) => handleAvailableDateChange(index, 'end', newValue)}
+                  renderInput={(params) => (
+                    <TextField {...params} fullWidth margin="normal" />
+                  )}
+                />
+              </div>
+            ))}
+            <Button onClick={handleAddAvailableDate} variant="outlined" style={{ marginBottom: '16px' }}>
+              Add More Available Dates
+            </Button>
+            <TextField
+              fullWidth
+              margin="normal"
+              name="language"
+              label="Language"
+              value={itineraryForm.language}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="price"
+              label="Price"
+              value={itineraryForm.price}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="accessibility"
+              label="Accessibility"
+              value={itineraryForm.accessibility}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="pickupLocation"
+              label="Pickup Location"
+              value={itineraryForm.pickupLocation}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="dropoffLocation"
+              label="Drop-off Location"
+              value={itineraryForm.dropoffLocation}
+              onChange={handleInputChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveItinerary} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Grid container spacing={2}>
+          {itineraries.map((itinerary, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">{itinerary.name}</Typography>
+                  <Typography variant="body2">Activities: {itinerary.activities.join(', ')}</Typography>
+                  <Typography variant="body2">Start Date: {dayjs(itinerary.startDate).format('DD/MM/YYYY')}</Typography>
+                  <Typography variant="body2">End Date: {dayjs(itinerary.endDate).format('DD/MM/YYYY')}</Typography>
+                  {itinerary.availableDates.map((dateRange, idx) => (
+                    <Typography key={idx} variant="body2">
+                      Available Dates: {dayjs(dateRange.start).format('DD/MM/YYYY')} - {dayjs(dateRange.end).format('DD/MM/YYYY')}
+                    </Typography>
+                  ))}
+                  <Typography variant="body2">Language: {itinerary.language}</Typography>
+                  <Typography variant="body2">Price: {itinerary.price}</Typography>
+                  <Typography variant="body2">Accessibility: {itinerary.accessibility}</Typography>
+                  <Typography variant="body2">Pickup Location: {itinerary.pickupLocation}</Typography>
+                  <Typography variant="body2">Drop-off Location: {itinerary.dropoffLocation}</Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" onClick={() => handleEditItinerary(index)}>
+                    Edit
+                  </Button>
+                  <Button size="small" color="error" onClick={() => handleDeleteItinerary(index)}>
+                    Delete
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
           ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleAddTour}>Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Outer Stepper for Tour Names */}
-      <Stepper activeStep={activeTourIndex} orientation="vertical">
-        {tours.map((tour, index) => (
-          <Step key={index}>
-            <StepLabel>{tour.name}</StepLabel>
-            <StepContent>
-              <Typography>{`Tour from ${dayjs(tour.startDate).format('YYYY-MM-DD')} to ${dayjs(tour.endDate).format('YYYY-MM-DD')}`}</Typography>
-              {tour.isSpecial && <Typography color="secondary">Special Tour</Typography>} 
-              {/* Inner Stepper for Tour Activities */}
-              <Stepper activeStep={activeDayIndex} orientation="vertical">
-                {tour.activities.map((activity, idx) => (
-                  <Step key={idx}>
-                    <StepLabel>{`Day ${idx + 1}`}</StepLabel>
-                    <StepContent>
-                      <Paper sx={{ padding: 2, marginBottom: 1 }}>
-                        <Typography variant="h6">Activity: {activity.activity}</Typography>
-                        <Typography color="textSecondary">Location: {activity.location}</Typography>
-                        <Typography color="textSecondary">Price: {activity.price}</Typography>
-                        <Typography color="textSecondary">Tags: {activity.tag}</Typography>
-                        <Typography color="textSecondary">Category: {activity.category}</Typography>
-                        <IconButton onClick={() => handleEditTour(index)}>
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton onClick={() => handleDeleteTour(index)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Paper>
-                    </StepContent>
-                  </Step>
-                ))}
-              </Stepper>
-
-              <Box>
-                <Button onClick={handleBackTour} disabled={activeTourIndex === 0}>Back Tour</Button>
-                <Button onClick={handleNextTour} disabled={activeTourIndex === tours.length - 1}>Next Tour</Button>
-                <Button onClick={handleBackDay} disabled={activeDayIndex === 0}>Back Day</Button>
-                <Button onClick={handleNextDay} disabled={activeDayIndex === (tour.activities.length - 1)}>Next Day</Button>
-              </Box>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-
-      {tours.length === 0 && (
-        <Typography variant="h6" sx={{ mt: 2 }}>No Tours Available</Typography>
-      )}
-    </Box>
+        </Grid>
+      </div>
+    </LocalizationProvider>
   );
 }
-export default ItineraryForm;
+
+export default Itinerary;
