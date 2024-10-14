@@ -11,5 +11,14 @@ router.get("/filteritineraries",eventController.getFilteredItineraries);
 
 router.get("/historicalPlacesByTags", eventController.filterHistoricalPlacesByTags);
 
+
+
+
+
+//sprint 2
+
+
+
+
 module.exports = router;
 

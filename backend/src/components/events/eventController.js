@@ -1,17 +1,10 @@
 const eventService = require("../events/eventService");
 
-
-
 //sarah
 
 const GetupcommingActivitesFilter = async (req, res) => {
   try {
-    const {
-      budget,
-      date,
-      categoryId,
-      rating,
-    } = req.query;
+    const { budget, date, categoryId, rating } = req.query;
 
     const filters = {
       budget: budget ? parseFloat(budget) : undefined, //ye7welo to float
@@ -64,8 +57,6 @@ const filterHistoricalPlacesByTags = async (req, res) => {
   }
 };
 
-
-
 const getFilteredItineraries = async (req, res) => {
   try {
     const { budget, date, preferences, language } = req.query;
@@ -92,6 +83,8 @@ const getFilteredItineraries = async (req, res) => {
     });
   }
 };
+
+//sprint 2
 
 module.exports = {
   GetupcommingActivitesFilter,

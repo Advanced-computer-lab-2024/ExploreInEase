@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const userRoutes = require("./src/components/users/userRoutes");
 const eventRoutes = require("./src/components/events/eventRoutes");
+const complaintRoutes = require("./src/components/complaints/complaintRoutes");
 
 // Express app
 const ACLapp = express();
@@ -18,6 +19,7 @@ ACLapp.use((req, res, next) => {
 });
 
 // Routes
+ACLapp.use("/api", complaintRoutes);
 ACLapp.use("/api", userRoutes);
 ACLapp.use("/api", eventRoutes);
 
