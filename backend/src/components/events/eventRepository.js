@@ -59,9 +59,9 @@ const deleteCategoryById = async (id) => {
 };
 
 // Update a category by ID
-const updateCategoryById = async (_id, updateData) => {
+const updateCategoryById = async (_id, updatedCategoryName) => {
   try {
-      const updatedCategory = await ActivityCategory.findByIdAndUpdate(_id, updateData, { new: true });
+      const updatedCategory = await ActivityCategory.findByIdAndUpdate(_id, updatedCategoryName, { new: true });
       return updatedCategory; // Return the updated category
   } catch (error) {
       console.error(`Error updating category: ${error.message}`);

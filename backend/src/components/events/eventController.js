@@ -50,10 +50,11 @@ const getAllCategories = async (req, res) => {
 // Update an activity category by ID
 const updateCategoryById = async (req, res) => {
   const { _id } = req.params; 
-  const updateData = req.body; // Get the update data from the request body
-
+  const categoryName = req.body; // Use req.body directly
+  console.log(categoryName); // Ensure correct data is being logged
   try {
-    const updatedCategory = await eventService.updateCategoryById(_id, updateData);
+    const updatedCategory = await eventService.updateCategoryById(_id, categoryName);
+    console.log(updatedCategory);
     if (!updatedCategory) {
       return res.status(404).json({ message: 'Category not found' });
     }
@@ -63,6 +64,7 @@ const updateCategoryById = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 const deleteCategoryById = async (req, res) => {
   const { _id } = req.params; // Get the ID from the URL

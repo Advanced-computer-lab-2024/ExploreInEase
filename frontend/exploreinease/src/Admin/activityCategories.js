@@ -83,7 +83,7 @@ function ActivityCategory() {
         try {
           const apiPath = `http://localhost:3030/updateCategoryById/${categoryId}`;
           const body = {
-           updateData: newCategory,
+            categoryName: newCategory,
             // Send the previous category to the API
           };
           const response = await axios.put(apiPath, body);
@@ -120,20 +120,24 @@ function ActivityCategory() {
     setNewCategory(event.target.value); // Update the input value
   };
 
-  const handleDeleteCategory = async (index) => {
-    const categoryId = allcategories[index]?._id;
+  const handleDeleteCategory = async (category) => {
+     const categoryId = allcategories.find(item =>item.categoryName===category)?._id;
    console.log("new Id",categoryId);
    
     try{
-      const apiPath=`http://localhost:3030/deleteCategoryById/${categoryId}`;
-      const response = await axios.delete(apiPath);
+      const options ={
+        apiPath:`/deleteCategoryById/${categoryId}` ,
+        urlParam: categoryId
+      };
+      const response = await NetworkService.delete(options);
       console.log(response);
-      setCategory((prevCategory) => prevCategory.filter((_, i) => i !== index));  // Remove the category
-
+      setCategory((prevCategory) => prevCategory.filter((categoryy) => categoryy !== category));
     }
     catch{
+    console.log("error");
+    
+  }
 
-    }
   };
 
   const handleEditCategory = (index) => {
@@ -211,7 +215,7 @@ function ActivityCategory() {
                     <IconButton edge="end" aria-label="edit" onClick={() => handleEditCategory(index)} sx={{ color: 'green' }}>
                       <EditIcon />
                     </IconButton>
-                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteCategory(index)} sx={{ color: 'red' }}>
+                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteCategory(category)} sx={{ color: 'red' }}>
                       <DeleteIcon />
                     </IconButton>
                   </Box>

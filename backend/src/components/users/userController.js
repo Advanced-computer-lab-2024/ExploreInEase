@@ -5,9 +5,11 @@ const bcrypt = require('bcrypt');
 // Delete user by _id and userType, ensuring self-id check
 const deleteUserByIdAndType = async (req, res) => {
     const { _id, userType, selfId } = req.body;
-
+    
+    console.log(req.body);
     // Validation
     if (!_id || !userType || !selfId) {
+        console.log("here");
         return res.status(400).json({ error: 'Missing parameters' });
     }
 

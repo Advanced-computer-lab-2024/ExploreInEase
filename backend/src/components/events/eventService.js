@@ -49,8 +49,8 @@ const deleteCategoryById = async (_id) => {
 };
 
 // Update a category by ID
-const updateCategoryById = async (_id, updateData) => {
-  return await eventRepository.updateCategoryById(_id, updateData);
+const updateCategoryById = async (_id, categoryName) => {
+  return await eventRepository.updateCategoryById(_id, categoryName);
 };
 
 
