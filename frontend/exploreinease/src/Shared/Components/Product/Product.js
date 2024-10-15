@@ -55,7 +55,7 @@ const ProductCard = () => {
 
   useEffect(() => {
     if (Product && Array.isArray(Product)) {
-      console.log("Received Product data:", Product);
+      // console.log("Received Product data:", Product);
       setInitialProductList(Product);
       setProducts(Product);
       const maxProductPrice = Math.max(...Product.map(item => Number(item.price) || 0));
@@ -63,12 +63,12 @@ const ProductCard = () => {
       setPriceRange([0, maxProductPrice]);
       setNextId(Product.length + 1);
     } else {
-      console.log("No Product data received or it's not an array");
+      // console.log("No Product data received or it's not an array");
     }
   }, [Product]);
 
   useEffect(() => {
-    console.log("Current products state:", products);
+    // console.log("Current products state:", products);
   }, [products]);
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -126,7 +126,7 @@ const ProductCard = () => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
-console.log(Product.ratings)
+// console.log(Product.ratings)
   const validateForm = () => {
     let formErrors = {};
 
@@ -148,6 +148,7 @@ console.log(Product.ratings)
       formErrors.ratings = 'ratings must be between 0 and 5';
     }
     if (!productData.originalQuantity) {
+      
       formErrors.originalQuantity = 'Quantity is required';
     }
     setErrors(formErrors);
@@ -155,6 +156,7 @@ console.log(Product.ratings)
   };
 
   const handleSubmitCreate = () => {
+    
     if (validateForm()) {
       const newProduct = {
         productId: nextId,
@@ -163,6 +165,8 @@ console.log(Product.ratings)
         ratings: parseFloat(productData.ratings),
       };
       setProducts((prev) => [...prev, newProduct]);
+      console.log(products);
+      
       setNextId((prev) => prev + 1);
       handleClose();
     }
@@ -265,10 +269,6 @@ console.log(Product.ratings)
                     <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
                     </Button>
-
-
-
-
                   )}
                   <Button
                     variant="contained"
@@ -284,7 +284,6 @@ console.log(Product.ratings)
           ))}
         </Grid>
       </Box>
-
       {/* Create Product Dialog */}
       <Dialog open={openCreate} onClose={handleClose}>
         <DialogTitle>Add New Product</DialogTitle>
@@ -326,7 +325,7 @@ console.log(Product.ratings)
           <TextField
             margin="dense"
             label="Seller"
-            name="seller"
+            name="sellerType"
             value={productData.sellerType || ''}
             onChange={handleInputChange}
             fullWidth
@@ -347,9 +346,9 @@ console.log(Product.ratings)
           <TextField
             margin="dense"
             label="Quantity"
-            name="quantity"
-            type="number"
+            name="originalQuantity"
             value={productData.originalQuantity || ''}
+            type='number'
             onChange={handleInputChange}
             fullWidth
             error={!!errors.originalQuantity}
@@ -428,8 +427,7 @@ console.log(Product.ratings)
           <TextField
             margin="dense"
             label="Quantity"
-            name="quantity"
-            type="number"
+            name="Quantity"
             value={productData.originalQuantity || ''}
             onChange={handleInputChange}
             fullWidth
