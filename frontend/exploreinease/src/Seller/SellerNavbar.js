@@ -47,7 +47,7 @@ const HomePage = () => {
           console.log(response);
           const Product=response.Products;
           const Type='Seller';
-          navigate(`/viewProduct`,{state:{Product:Product,Type:Type}});          
+          navigate(`/viewProduct`,{ state: { Product, Type ,User:user} });          
         } catch (err) {
           if (err.response) {
               console.log(err.message);

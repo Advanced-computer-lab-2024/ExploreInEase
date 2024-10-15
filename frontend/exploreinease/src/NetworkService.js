@@ -48,7 +48,7 @@ class NetworkService {
   static async post(options) {
     const apiPath = this.transform(options.apiPath, options.urlParam);
     const params = this.prepareQuery(options.query);
-    
+    console.log(apiPath)
     try {
       const response = await axios.post(`${BASE_URL}${apiPath}`, options.body || {}, {
         params: params,

@@ -112,7 +112,7 @@ const UsersSchema = new Schema({
         type: String,
         enum: ['VTP', 'External',''], // Seller types
         default: function() {
-            return this.sellerType === 'seller' ? 'External' : '';
+            return this.type === 'seller' ? 'External' : '';
         }
     }
 
