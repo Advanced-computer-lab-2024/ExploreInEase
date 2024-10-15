@@ -67,6 +67,7 @@ const App = () => {
           <Route path="/Login" element={<SignIn />} />
           <Route path="/AdminHomePage" element={<AdminHomePage />} />
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
+          <Route path="/AddUser" element={<AddUser />} />
         </Routes>
       </Suspense>
     </Router>

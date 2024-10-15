@@ -4,6 +4,7 @@ import './GuestHP.css'; // Import the CSS file
 import Avatar from '@mui/material/Avatar';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import axios from 'axios';
 
 const HomePage = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -12,12 +13,14 @@ const HomePage = () => {
   function handleLoginClick(){
     navigate('/Login');
   }
-  function handleRegisterClick(title){
+  async function handleRegisterClick(title){
     if (title == "Register"){
     navigate('/register'); 
   }
   else if (title=="Activity Categories"){
-    navigate('/explore');
+    const response= await axios.get('http://localhost:3030/upcomingEvents')
+    const events=response.data;
+    navigate('/explore',{state:{events:events}});
   }
   };
   return (

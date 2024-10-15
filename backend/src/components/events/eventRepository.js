@@ -59,9 +59,9 @@ const deleteCategoryById = async (id) => {
 };
 
 // Update a category by ID
-const updateCategoryById = async (id, updateData) => {
+const updateCategoryById = async (_id, updatedCategoryName) => {
   try {
-      const updatedCategory = await ActivityCategory.findByIdAndUpdate(id, updateData, { new: true });
+      const updatedCategory = await ActivityCategory.findByIdAndUpdate(_id, updatedCategoryName, { new: true });
       return updatedCategory; // Return the updated category
   } catch (error) {
       console.error(`Error updating category: ${error.message}`);
@@ -150,7 +150,7 @@ const getAllUpcomingEvents = async () => {
 
     // Fetch all upcoming historical places (assuming they also have a date field)
     const upcomingHistoricalPlaces = await HistoricalPlace.find({
-      dateTimeAvailable: { $gte: currentDate },
+      // dateTimeAvailable: { $gte: currentDate },
     })
       .populate("created_by", "username") // Populating user details (creator) with only username
       .exec();
@@ -246,7 +246,21 @@ const getActivityById = async (id) => {
 
 const createActivity = async (activityData) => {
   const activity = new Activity(activityData);
-  return await activity.save();
+  const newActivity = await activity.save();
+  const createdActivity = {
+    _id: newActivity._id,
+    name: newActivity.name,
+    date: newActivity.date,
+    time: newActivity.time,
+    location: newActivity.location,
+    price: newActivity.price,
+    category: newActivity.category,
+    tags: newActivity.tags,
+    specialDiscounts: newActivity.specialDiscounts,
+    isOpen: newActivity.isOpen,
+    created_by: newActivity.created_by,
+  }
+  return createdActivity;
 };
 
 const findCategoryById = async (categoryId) => {
@@ -271,6 +285,7 @@ const getAllActivities = async (userId) => {
 const getAllActivitiesAdvertiser = async (userId) => {
   return await Activity.find({ created_by: userId });
 };
+
 
 const getAllItineraries = async (userId) => {
   return await Itinerary.find({ created_by: userId });

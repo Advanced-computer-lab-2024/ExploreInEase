@@ -5,9 +5,11 @@ const bcrypt = require('bcrypt');
 // Delete user by _id and userType, ensuring self-id check
 const deleteUserByIdAndType = async (req, res) => {
     const { _id, userType, selfId } = req.body;
-
+    
+    console.log(req.body);
     // Validation
     if (!_id || !userType || !selfId) {
+        console.log("here");
         return res.status(400).json({ error: 'Missing parameters' });
     }
 
@@ -122,10 +124,8 @@ const getTourGuide = async (req, res) => {
 
 // Update a tour guide profile
 const updateTourGuide = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedTourGuide = await userService.updateTourGuide(req.params._id, req.body);
@@ -146,10 +146,8 @@ const updateTourGuide = async (req, res) => {
 //Advertiser
 const createAdvertiser = async (req, res) => {
     console.log("dakahal");
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         console.log("conroller : ",req.params._id,req.body)
@@ -182,10 +180,8 @@ const getAdvertiser = async (req, res) => {
 
 // Update an advertiser profile
 const updateAdvertiser = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedAdvertiser = await userService.updateAdvertiser(req.params._id, req.body);
@@ -208,10 +204,8 @@ const updateAdvertiser = async (req, res) => {
 
 // Create a seller
 const createSeller = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const seller = await userService.createSeller(req.params._id,req.body);
@@ -242,10 +236,8 @@ const getSeller = async (req, res) => {
 
 // Update a seller profile
 const updateSeller = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedSeller = await userService.updateSeller(req.params._id, req.body);
@@ -281,10 +273,8 @@ const getTourist = async (req, res) => {
 
 // Update a tourist profile (excluding username and wallet)
 const updateTourist = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updateData = { ...req.body };
@@ -294,6 +284,10 @@ const updateTourist = async (req, res) => {
             return res.status(400).json({ message: 'Cannot update wallet' });
         }
 
+        console.log(updateData)
+
+        console.log('dakhal')
+
         const updatedTourist = await userService.updateTourist(req.params._id, updateData);
         if (!updatedTourist) {
             return res.status(404).json({ message: 'Tourist not found' });
@@ -302,6 +296,9 @@ const updateTourist = async (req, res) => {
             message: "Tourist updated successfully",
             tourist: updatedTourist
         }
+
+        console.log('3adda')
+        console.log(updatedTourist)
 
         res.status(200).json(reponse);
     } catch (error) {

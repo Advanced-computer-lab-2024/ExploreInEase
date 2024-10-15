@@ -38,7 +38,8 @@ const fetchAllUsersAndTourists = async () => {
     try {
         const users = await userRepository.fetchAllUsers();
         const tourists = await userRepository.fetchAllTourists();
-        return { users, tourists };
+        const combinedArray = [...users, ...tourists];
+        return combinedArray;
     } catch (error) {
         throw new Error(`Error fetching users and tourists: ${error.message}`);
     }
@@ -110,7 +111,9 @@ const createTourGuide = async (_id,tourGuideData) => {
 
 // Get a tour guide
 const getTourGuide = async (_id) => {
-    return await userRepository.findUserById(_id);
+    res= await userRepository.findUserById(_id);
+    console.log(res);
+    return res;
 };
 
 

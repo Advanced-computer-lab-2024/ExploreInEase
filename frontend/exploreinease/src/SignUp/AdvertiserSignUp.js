@@ -36,6 +36,10 @@ const GuideAdvertiserSignUp = () => {
           const response =await NetworkService.post(options);
           setSuccess(response.message); // Set success message
           const user=response.User;
+          console.log(response.User);
+          console.log(response.User._id);
+          window.localStorage.setItem('_id',response.User._id);
+          window.localStorage.setItem('username',response.User.username);
            navigate(`/TourGuideHomePage`,{state:{user}});
            console.log(response.User);
            } catch (err) {

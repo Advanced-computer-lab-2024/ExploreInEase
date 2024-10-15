@@ -23,7 +23,7 @@ const AddUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     const options = {
       apiPath: '/addGovernorOrAdmin', 
       body: { username: user.username, password: user.password, type: user.type }, // Request body
@@ -39,7 +39,7 @@ const AddUser = () => {
       navigate('/viewAddedUsers');
 
     } catch (error) {
-      setShowError(error.response?.data?.message || 'An error occurred while adding the user.');
+      setShowError('An error occurred while adding the user.');
     }
   };
 

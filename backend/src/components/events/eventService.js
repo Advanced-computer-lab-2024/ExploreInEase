@@ -44,13 +44,13 @@ const getAllCategories = async () => {
 };
 
 // Delete a category by ID
-const deleteCategoryById = async (id) => {
-  return await eventRepository.deleteCategoryById(id);
+const deleteCategoryById = async (_id) => {
+  return await eventRepository.deleteCategoryById(_id);
 };
 
 // Update a category by ID
-const updateCategoryById = async (id, updateData) => {
-  return await eventRepository.updateCategoryById(id, updateData);
+const updateCategoryById = async (_id, categoryName) => {
+  return await eventRepository.updateCategoryById(_id, categoryName);
 };
 
 
@@ -134,24 +134,56 @@ const getAllUpcomingEvents = async () => {
       await eventRepository.getAllUpcomingEvents();
 
     // Format activities
-    const formattedActivities = activities.map((activity) => ({
-      id: activity._id,
-      name: activity.name,
-      date: activity.date,
-      time: activity.time,
-      location: activity.location, // Include location details (latitude, longitude)
-      budget: activity.price, // Handle budget or price depending on schema
-      category: activity.category, // Assuming category is populated and has a 'name' field
-      tags: activity.tags, // Include tags if applicable
-      specialDiscounts: activity.specialDiscounts,
-      created_by: activity.created_by,
-      flag: activity.flag,
-      isOpen: activity.isOpen,
-      rating: activity.rating,
-      comments: activity.comments,
-      createdAt: activity.createdAt,
-      description: activity.description,
-    }));
+     const formattedActivities= activities.map((activity)=>{
+      console.log(1)
+      lat=activity.location.latitude
+      long=activity.location.longitude
+      category=activity.category.categoryName
+      loc=[lat,long]
+      console.log(2)
+
+      return{
+        id: activity._id,
+        name: activity.name,
+        date: activity.date,
+        time: activity.time,
+        location: loc, // Include location details (latitude, longitude)
+        budget: activity.price, // Handle budget or price depending on schema
+        category: category, // Assuming category is populated and has a 'name' field
+        tags: activity.tags, // Include tags if applicable
+        specialDiscounts: activity.specialDiscounts,
+        created_by: activity.created_by,
+        flag: activity.flag,
+        isOpen: activity.isOpen,
+        rating: activity.rating,
+        comments: activity.comments,
+        createdAt: activity.createdAt,
+        description: activity.description,
+        type:"Activity"
+      }
+     })
+
+
+
+    // const formattedActivities = activities.map((activity) => ({
+    //   id: activity._id,
+    //   name: activity.name,
+    //   date: activity.date,
+    //   time: activity.time,
+    //   location: activity.location, // Include location details (latitude, longitude)
+    //   budget: activity.price, // Handle budget or price depending on schema
+    //   category: activity.category, // Assuming category is populated and has a 'name' field
+    //   tags: activity.tags, // Include tags if applicable
+    //   specialDiscounts: activity.specialDiscounts,
+    //   created_by: activity.created_by,
+    //   flag: activity.flag,
+    //   isOpen: activity.isOpen,
+    //   rating: activity.rating,
+    //   comments: activity.comments,
+    //   createdAt: activity.createdAt,
+    //   description: activity.description,
+    //   type:"Activity"
+    // }));
 
     // Format itineraries
     const formattedItineraries = itineraries.map((itinerary) => ({
@@ -172,20 +204,55 @@ const getAllUpcomingEvents = async () => {
       flag: itinerary.flag,
       rating: itinerary.rating,
       comments: itinerary.comments,
+      type:"Itinerary"
     }));
 
+    const formattedHistoricalPlaces = historicalPlaces.map((place)=>{
+      lat=place.location.latitude
+      long=place.location.longitude
+      address= place.location.address
+
+      student=place.ticketPrice.student
+      native=place.ticketPrice.native
+      foreign=place.ticketPrice.foreign
+
+      ticketPrice=[student,native,foreign]
+
+      loc=[lat,long]
+      return {
+        id: place._id,
+        name: place.name,
+        description: place.description,
+        pictures: place.pictures, // Array of pictures
+        location: loc, // Location details (latitude, longitude, address)
+        openingHours: place.openingHours, // Opening hours
+        ticketPrice: ticketPrice, // Detailed ticket price (student/native/foreign)
+        createdAt: place.createdAt,
+        tags: place.tags, // Associated tags if needed
+        type:"HistoricalPlace"
+      }
+
+    })
+
     // Format historical places
-    const formattedHistoricalPlaces = historicalPlaces.map((place) => ({
-      id: place._id,
-      name:place.name,
-      description: place.description,
-      pictures: place.pictures, // Array of pictures
-      location: place.location, // Location details (latitude, longitude, address)
-      openingHours: place.openingHours, // Opening hours
-      ticketPrice: place.ticketPrice, // Detailed ticket price (student/native/foreign)
-      createdAt: place.createdAt,
-      tags: place.tags, // Associated tags if needed
-    }));
+    // const formattedHistoricalPlaces = historicalPlaces.map((place) => ({
+    //   id: place._id,
+    //   name:place.name,
+    //   description: place.description,
+    //   pictures: place.pictures, // Array of pictures
+    //   location: place.location, // Location details (latitude, longitude, address)
+    //   openingHours: place.openingHours, // Opening hours
+    //   ticketPrice: place.ticketPrice, // Detailed ticket price (student/native/foreign)
+    //   createdAt: place.createdAt,
+    //   tags: place.tags, // Associated tags if needed
+    //   type:"HistoricalPlace"
+    // }));
+
+    const response= {
+      Activity: formattedActivities,
+      itineraries: formattedItineraries,
+      historicalPlaces: formattedHistoricalPlaces,
+    }
 
     // Return formatted data
     return [formattedActivities, formattedItineraries, formattedHistoricalPlaces];

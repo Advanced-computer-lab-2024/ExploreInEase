@@ -50,10 +50,11 @@ const getAllCategories = async (req, res) => {
 // Update an activity category by ID
 const updateCategoryById = async (req, res) => {
   const { _id } = req.params; 
-  const updateData = req.body; // Get the update data from the request body
-
+  const categoryName = req.body; // Use req.body directly
+  console.log(categoryName); // Ensure correct data is being logged
   try {
-    const updatedCategory = await eventService.updateCategoryById(_id, updateData);
+    const updatedCategory = await eventService.updateCategoryById(_id, categoryName);
+    console.log(updatedCategory);
     if (!updatedCategory) {
       return res.status(404).json({ message: 'Category not found' });
     }
@@ -64,12 +65,13 @@ const updateCategoryById = async (req, res) => {
   }
 };
 
+
 const deleteCategoryById = async (req, res) => {
-  const { id } = req.params; // Get the ID from the URL
+  const { _id } = req.params; // Get the ID from the URL
   
 
   try {
-      const result = await eventService.deleteCategoryById(id); 
+      const result = await eventService.deleteCategoryById(_id); 
       if (!result) {
           return res.status(404).json({ message: 'Category not found' });
       }
@@ -100,7 +102,7 @@ const getAllTags = async (req, res) => {
   try {
     const tags = await eventService.getAllTags();
     const tagsArray = tags.map(tag => tag.tags);
-    return res.status(200).json({message: 'Fetched all tags', tags: tagsArray});
+    return res.status(200).json({message: 'Fetched all tags', tags: tags});
   } catch (error) {
     console.error('Error fetching tags:', error.message);
     return res.status(500).json({ message: error.message });
@@ -290,7 +292,6 @@ const getActivityById = async (req, res) => {
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' });
     }
-
     if (activity.created_by !== userId) {
       return res.status(403).json({ message: 'Unauthorized access' });
     }
@@ -301,11 +302,10 @@ const getActivityById = async (req, res) => {
 };
 
 const getAllActivities = async (req, res) => {
-  const { userId } = req.params;
+  const {userId} = req.params;
   if (!userId) {
     return res.status(400).json({ message: 'Missing userId' });
   }
-
   try {
     const type = await eventRepository.getType(userId);
     if (type !== 'advertiser') {
@@ -381,7 +381,7 @@ const updateActivity = async (req, res) => {
       return res.status(404).json({ message: 'Activity not found.' });
     }
 
-    if (getActivity.created_by !== userId) {
+    if (getActivity.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'You are not authorized to update this activity.' });
     }
     const updatedActivity = await eventService.updateActivity(_id, updateData);
@@ -411,7 +411,8 @@ const deleteActivity = async (req, res) => {
     if (!getActivity) {
       return res.status(404).json({ message: 'Activity not found.' });
     }
-    if(getActivity.created_by !== userId) {
+    if(getActivity.created_by.toString()
+       !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Activity as it is not yours.' });
     }
     const deletedActivity = await eventService.deleteActivity(_id);

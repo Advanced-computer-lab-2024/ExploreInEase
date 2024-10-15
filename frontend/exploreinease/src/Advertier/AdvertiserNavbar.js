@@ -3,22 +3,23 @@ import React,{ useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import '../Guest/GuestHP.css'; // Import the CSS file
 import HomePageLogo from '../HomePageLogo.png';
+import axios from 'axios'; // Ensure Axios is imported
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-
 const HomePage = () => {
     const navigate=useNavigate();
     const location = useLocation();
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const { User } = location.state || {};
+    console.log(User);
     
-     const initialUsername = User.User?.username;
-     console.log(User.User);
+     const initialUsername = User.User?.username || User.username;
+   
      
-    const userId=User.User._id;
-    console.log(User.User._id);
+    const userId=User.User?._id || User._id;
+ 
 
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     async function handleRegisterClick(title) {
@@ -41,45 +42,30 @@ const HomePage = () => {
             }
           }
         }
-      else if ( title =="View All Activities"){
-        try {
-          const options = {
-            apiPath: `/upcomingEvents`,
-          };
-          
-          const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          console.log(response);
-          const events=response.events;
-          navigate(`/explore`,{state:{events}});          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
+        else {
+          try {
+            // Construct the API path
+            const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;  // Ensure this matches your API route
+            // Make the GET request using Axios
+            const response = await axios.get(apiPath);
+        
+            // Log the response data
+            console.log('API Response:', response);
+        
+            // Pass the fetched activities to the Activities page
+            navigate(`/Activities`, { state: { allActivity: response.data ,id:userId} });
+            
+          } catch (err) {
+            // Check if there is a response from the server and handle error
+            if (err.response) {
+              console.error('API Error:', err.message);
+              setError(err.response.data.message);  // Display error message from the server
+            } else {
+              console.error('Unexpected Error:', err);
+              setError('An unexpected error occurred.');  // Display generic error message
+            }
           }
         }
-      }
-      else {
-        try {
-          const options = {
-            apiPath: `/activity/user/${userId}/allActivities`,
-          };
-
-          const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          console.log(response);
-           navigate(`/Activities`,{state:{allActivity:response}});          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
-        }
-      }
       };
   return (
     <div className="homepage">
@@ -94,9 +80,7 @@ const HomePage = () => {
         </div>
         <div className="nav-links">
           <button  onClick={() => handleRegisterClick("Activities")}
-              style={{width:160}}>Create Activities</button>
-          <button  onClick={() => handleRegisterClick("View All Activities")}
-               style={{width:160}}>View All Activities</button>
+              style={{width:160}}>CRUD Activities</button>
           <button  onClick={() => handleRegisterClick("My profile")}
                style={{width:160}}>My profile</button>
  

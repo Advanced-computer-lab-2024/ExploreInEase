@@ -60,7 +60,7 @@ const ProductCard = () => {
   
   useEffect(() => {
     if (Product && Array.isArray(Product)) {
-      console.log("Received Product data:", Product);
+      // console.log("Received Product data:", Product);
       setInitialProductList(Product);
       setProducts(Product);
       const maxProductPrice = Math.max(...Product.map(item => Number(item.price) || 0));
@@ -68,12 +68,12 @@ const ProductCard = () => {
       setPriceRange([0, maxProductPrice]);
       setNextId(Product.length + 1);
     } else {
-      console.log("No Product data received or it's not an array");
+      // console.log("No Product data received or it's not an array");
     }
   }, [Product]);
 
   useEffect(() => {
-    console.log("Current products state:", products);
+    // console.log("Current products state:", products);
   }, [products]);
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -131,6 +131,8 @@ const ProductCard = () => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
+
+
   const validateForm = () => {
     let formErrors = {};
 
@@ -154,12 +156,14 @@ const ProductCard = () => {
     // if (!productData.originalQuantity) {
     //   formErrors.originalQuantity = 'Quantity is required';
     // }
+
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
 
   const handleSubmitCreate = () => {
     console.log(productData);
+
     if (validateForm()) {
       const newProduct = {
         productId: nextId,
@@ -176,6 +180,8 @@ const ProductCard = () => {
       const response = NetworkService.post(option);
       console.log(response);
       setProducts((prev) => [...prev, newProduct]);
+      console.log(products);
+      
       setNextId((prev) => prev + 1);
       handleClose();
     }
@@ -305,7 +311,7 @@ const handleSubmitUpdate = async () => {
 
 
 
-                  
+
                   <Button
                     variant="contained"
                     color="primary"
@@ -320,7 +326,6 @@ const handleSubmitUpdate = async () => {
           ))}
         </Grid>
       </Box>
-
       {/* Create Product Dialog */}
       <Dialog open={openCreate} onClose={handleClose}>
         <DialogTitle>Add New Product</DialogTitle>
@@ -364,7 +369,9 @@ const handleSubmitUpdate = async () => {
             label="originalQuantity"
             name="originalQuantity"
             type="number"
+
             value={productData.originalQuantity || ''}
+            type='number'
             onChange={handleInputChange}
             fullWidth
             error={!!errors.originalQuantity}
@@ -421,9 +428,11 @@ const handleSubmitUpdate = async () => {
           />
           <TextField
             margin="dense"
+
             label="originalQuantity"
             name="originalQuantity"
             type="number"
+
             value={productData.originalQuantity || ''}
             onChange={handleInputChange}
             fullWidth

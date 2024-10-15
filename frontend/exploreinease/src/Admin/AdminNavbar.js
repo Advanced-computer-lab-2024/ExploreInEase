@@ -30,17 +30,19 @@ const AdminNavbar = () => {
                 options = { apiPath: `/getAllCategories/admin` };
                 response = await NetworkService.get(options);
                 setSuccess(response.message);
-                console.log(response);
-                const allcategories = response;
-                navigate('/viewActivityCategory', { state: { Categories:allcategories,id:adminId } });
+                console.log("response for activities from navbar",response);
+                const allcategories = response;        
+                navigate('/viewActivityCategory', { state: { allcategories,adminId } });
             } 
             else if (title === "CRUD Preference Tag") {
                 options = { apiPath: `/getAllPreferenceTags/${adminId}`, urlParam: adminId };
                 response = await NetworkService.get(options);
                 setSuccess(response.message);
                 console.log(response);
-                const PreferenceTag = response;
-                navigate('/viewPreferencatags', { state: { PreferenceTag } });
+                const PreferenceTag = response.tags;
+                console.log(PreferenceTag);
+
+                navigate('/viewPreferencatags', { state: { PreferenceTag,adminId } });
             } 
             else if (title === "View Products") {
                 console.log(adminId)
@@ -54,7 +56,7 @@ const AdminNavbar = () => {
                 navigate('/viewProduct', { state: { Product, Type ,User:tourist} });
             } 
             else if (title === "Add User") {
-                navigate('/AdminHomePage');
+                navigate('/AddUser');
             } 
             else if (title === "Delete Account") {
               try{
@@ -62,7 +64,7 @@ const AdminNavbar = () => {
                 response = await NetworkService.get(options);
                 setSuccess(response.message);
                 console.log(response);
-                const allUsers = response;     
+                const allUsers = response;
                 navigate('/viewAllUserProfiles', { state: { Product: allUsers, AdminId: adminId } });} 
               catch (err) {
                 if (err.response) {

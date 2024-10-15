@@ -6,6 +6,8 @@ import NetworkService from '../NetworkService';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+
+//
 const TourGuideHP = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -22,11 +24,12 @@ const TourGuideHP = () => {
             const options = {
               apiPath: `/getTourGuide/${userId}`,
             };
-            
+            //
             const response = await NetworkService.get(options);
             setSuccess(response.message); // Set success message
-            const TourGuide=response;
-            navigate(`/viewTourGuideProfile`,{state:{TourGuide:TourGuide.tourGuide}});          
+            const TourGuide=response.tourGuide;
+            console.log(TourGuide)
+            navigate(`/viewTourGuideProfile`,{state:{TourGuide:TourGuide}});          
           } catch (err) {
             if (err.response) {
                 // console.log(err.message);
