@@ -110,7 +110,9 @@ const createTourGuide = async (_id,tourGuideData) => {
 
 // Get a tour guide
 const getTourGuide = async (_id) => {
-    return await userRepository.findUserById(_id);
+    res= await userRepository.findUserById(_id);
+    console.log(res);
+    return res;
 };
 
 

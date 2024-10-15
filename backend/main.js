@@ -6,7 +6,7 @@ const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const fs = require('fs'); // Import filesystem module
-require('dotenv').config({ path: ".env" });
+require('dotenv').config({ path: "src/.env" });
 const cors = require('cors');
 
 const router = express.Router();

@@ -5,6 +5,7 @@ const Tourist = require('../../models/tourist');
 const findUserById = async (id) => {
     try {
         const user = await Users.findById(id);
+        
         return user ? user : null;
     } catch (error) {
         console.error(`Error finding user: ${error.message}`);

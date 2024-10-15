@@ -122,10 +122,8 @@ const getTourGuide = async (req, res) => {
 
 // Update a tour guide profile
 const updateTourGuide = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedTourGuide = await userService.updateTourGuide(req.params._id, req.body);
@@ -146,10 +144,8 @@ const updateTourGuide = async (req, res) => {
 //Advertiser
 const createAdvertiser = async (req, res) => {
     console.log("dakahal");
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         console.log("conroller : ",req.params._id,req.body)
@@ -182,10 +178,8 @@ const getAdvertiser = async (req, res) => {
 
 // Update an advertiser profile
 const updateAdvertiser = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedAdvertiser = await userService.updateAdvertiser(req.params._id, req.body);
@@ -208,10 +202,8 @@ const updateAdvertiser = async (req, res) => {
 
 // Create a seller
 const createSeller = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const seller = await userService.createSeller(req.params._id,req.body);
@@ -242,10 +234,8 @@ const getSeller = async (req, res) => {
 
 // Update a seller profile
 const updateSeller = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedSeller = await userService.updateSeller(req.params._id, req.body);
@@ -281,10 +271,8 @@ const getTourist = async (req, res) => {
 
 // Update a tourist profile (excluding username and wallet)
 const updateTourist = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updateData = { ...req.body };
