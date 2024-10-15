@@ -33,7 +33,6 @@ const Login = () => {
       setError('Please fill in all fields.');
       return;
     }
-
     const options = {
       apiPath: '/login',
       body: {
@@ -41,7 +40,6 @@ const Login = () => {
         password: formData.password,
       }
     };
-    
     try {
       // Send the POST request to the /login endpoint
       const response = await NetworkService.post(options);
@@ -49,9 +47,31 @@ const Login = () => {
       // Handle successful login
       if (response.message === "Logged in Successfully") {
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-        console.log(response.user)
+        console.log(response)
         console.log(response.user._id);
-        navigate('/AdminHomePage', { state: { tourist: response.user } }); // Use navigate to change the route
+        if (formData.role=='admin'){
+          navigate('/AdminHomePage', { state: { tourist: response.user } }); // Use navigate to change the route
+        }
+        else if (formData.role=='touristGovern') {
+          navigate('/TouristGovernorHP', { state: {tourist:response.user } }); // Use navigate to change the route
+        }
+        else if (formData.role=='seller'){
+          
+          navigate('/SellerHomePage', { state: { User:response.user } }); // Use navigate to change the route
+
+        }
+        else if(formData.role=='tourGuide'){
+          navigate('/TourGuideHomePage', { state: {User: response.user } }); // Use navigate to change the route
+
+        }
+        else if (formData.role=='advertiser'){
+          navigate('/AdvertiserHomePage', { state: { User: response.user } }); // Use navigate to change the route
+
+        }
+        else {   //tourist 
+          navigate('/TouristHomePage', { state: { User:response.user } }); // Use navigate to change the route
+
+        }
         setError('');
       }
     } catch (error) {
@@ -104,6 +124,12 @@ const Login = () => {
         >
           <option value="admin">Admin</option>
           <option value="touristGovern">Tourist Governor</option>
+          <option value="tourist">Tourist</option>
+          <option value="tourGuide">Tour Guide</option>
+          <option value="advertiser">Advertiser</option>
+          <option value="seller">Seller</option>
+
+
         </select>
 
         <button type="submit">Sign In</button>

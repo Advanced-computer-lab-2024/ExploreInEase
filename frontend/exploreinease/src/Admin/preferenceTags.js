@@ -1,10 +1,11 @@
-import * as React from 'react';
+import React,{ useState } from 'react';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import axios from 'axios'; // Ensure Axios is imported
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
@@ -22,15 +23,28 @@ function Preferencetags() {
   const [tags, setTags] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [newTag, setNewTag] = React.useState('');
+  const [prevTag, setPrevTag] = React.useState('');
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
   const [editingTagIndex, setEditingTagIndex] = React.useState(null);
   const location = useLocation();
   const { PreferenceTag } = location.state || {}; // Use destructuring to access PreferenceTag
+ const {adminId}=location.state || {};
   React.useEffect(() => {
-    // Set the initial tags if PreferenceTag exists
-    if (PreferenceTag.tags) {
-      setTags(PreferenceTag.tags);
-    }
-  }, [PreferenceTag.tags]); // Run the effect when PreferenceTag changes
+    getAllPreferenceTags();
+    
+  }, []); // Run the effect when PreferenceTag changes
+
+
+ const getAllPreferenceTags =async() => {
+  const options = { apiPath: `/getAllPreferenceTags/${adminId}`, urlParam: adminId };
+  const response = await NetworkService.get(options);
+  setSuccess(response.message);
+  console.log(response);
+  const PreferenceTag = response.tags;
+  console.log(PreferenceTag);
+  setTags(PreferenceTag.map(item =>item.tags));
+};
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -40,16 +54,17 @@ function Preferencetags() {
     setOpen(false);
     setNewTag('');  // Clear the input when dialog is closed
     setEditingTagIndex(null);  // Reset editing index
+    setPrevTag('');  // Reset previous category
+
   };
 
   const handleSaveTag = async () => {
     if (newTag.trim()) {
-      console.log(newTag);
       if (editingTagIndex !== null) {
-        const updatedTagId = PreferenceTag.ids[editingTagIndex];
-        console.log(updatedTagId);
+        // Edit existing tags
+        const tagId = PreferenceTag.find(item => item.tags === prevTag)?._id;
         const options = {
-          apiPath: `/updatePreferenceTagById/${updatedTagId}`,
+          apiPath: `/updatePreferenceTagById/${tagId}`,
           body: {
             tags: newTag
           }
@@ -65,7 +80,7 @@ function Preferencetags() {
         });
       } else {
         const options = {
-          apiPath: '/createPreferenceTag/0',
+          apiPath: '/createPreferenceTag/${adminId}',
           body: {
             tags: newTag
           }
@@ -83,7 +98,7 @@ function Preferencetags() {
   };
 
   const handleDeleteTag = async (index) => {
-    const deletedId = PreferenceTag.ids[index];
+    const deletedId = PreferenceTag[index]?._id;
     console.log(deletedId)
     const options = {
       apiPath: `/deletePreferenceTagById/${deletedId}`,
@@ -97,6 +112,7 @@ function Preferencetags() {
   const handleEditTag = (index) => {
     setNewTag(tags[index]);  // Set the tag to edit
     setEditingTagIndex(index);  // Store the index of the tag being edited
+    setPrevTag(tags[index]);
     setOpen(true);  // Open the dialog for editing
   };
 

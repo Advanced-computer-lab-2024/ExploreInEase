@@ -38,7 +38,8 @@ const fetchAllUsersAndTourists = async () => {
     try {
         const users = await userRepository.fetchAllUsers();
         const tourists = await userRepository.fetchAllTourists();
-        return { users, tourists };
+        const combinedArray = [...users, ...tourists];
+        return combinedArray;
     } catch (error) {
         throw new Error(`Error fetching users and tourists: ${error.message}`);
     }

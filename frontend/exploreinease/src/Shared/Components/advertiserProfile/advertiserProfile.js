@@ -65,7 +65,7 @@ const AdvertiserProfile = (props) => {
     });
     const [showPassword, setShowPassword] = useState(false);
 
-    const toggleEditMode = (field) => {
+    const toggleEditMode = (field) => { 
       setIsEditable((prev) => ({
         ...prev,
         [field]: !prev[field]

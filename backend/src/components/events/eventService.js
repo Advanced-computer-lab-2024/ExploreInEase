@@ -44,13 +44,13 @@ const getAllCategories = async () => {
 };
 
 // Delete a category by ID
-const deleteCategoryById = async (id) => {
-  return await eventRepository.deleteCategoryById(id);
+const deleteCategoryById = async (_id) => {
+  return await eventRepository.deleteCategoryById(_id);
 };
 
 // Update a category by ID
-const updateCategoryById = async (id, updateData) => {
-  return await eventRepository.updateCategoryById(id, updateData);
+const updateCategoryById = async (_id, categoryName) => {
+  return await eventRepository.updateCategoryById(_id, categoryName);
 };
 
 
