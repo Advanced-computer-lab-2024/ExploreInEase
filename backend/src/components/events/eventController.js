@@ -411,7 +411,8 @@ const deleteActivity = async (req, res) => {
     if (!getActivity) {
       return res.status(404).json({ message: 'Activity not found.' });
     }
-    if(getActivity.created_by !== userId) {
+    if(getActivity.created_by.toString()
+       !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Activity as it is not yours.' });
     }
     const deletedActivity = await eventService.deleteActivity(_id);

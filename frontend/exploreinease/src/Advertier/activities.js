@@ -1,16 +1,7 @@
 import React, { useState, useCallback,useEffect } from 'react';
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  TextField,
-  DialogTitle,
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
-  ListItemText,
+  Dialog, DialogActions, DialogContent, TextField,DialogTitle,Card, CardContent,Typography,CardActions,ListItemText,
 } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
@@ -28,6 +19,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import NetworkService from '../NetworkService';
 const containerStyle = {
   width: '100%',
   height: '400px',
@@ -55,7 +47,6 @@ function Activity() {
   const [open, setOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
   const [map, setMap] = useState(null);
-
   const [placesService, setPlacesService] = useState(null);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
@@ -77,6 +68,7 @@ function Activity() {
   });
   const [searchInput, setSearchInput] = useState('');
   const [isApiLoaded, setIsApiLoaded] = useState(false);
+console.log(id);
 
   useEffect(() => {
     getAllTags();
@@ -234,7 +226,7 @@ function convertTimeToFullDate(timeString) {
 }
 
 const handleSaveActivity = async () => {
-  
+
   try {
     const updatedPrice =
       activityForm.price[0] === activityForm.price[1]
@@ -244,28 +236,29 @@ const handleSaveActivity = async () => {
       ...activityForm,
       price: updatedPrice,
       tags: Array.isArray(activityForm.tags) ? activityForm.tags : [], // Ensure tags is always an array of objects
-
     };
-
     if (currentActivity !== null) {
-      console.log(currentActivity);
-      
+      // console.log("Activity",currentActivity);
+      console.log("Id of activity",currentActivity._id);
+      const currentActivityId=currentActivity._id;
       // Updating existing activity
-      const apiPath=`http://localhost:3030/activity/${currentActivity._id}/${id}`;
-      const body = {
-        name: currentActivity.name,
-        date: dayjs(currentActivity.date).format('YYYY-MM-DD'),
-        time: currentActivity.time,
-        location: currentActivity.location,
-        price: currentActivity.price[1],
-        category: categoryList.find(item =>item.id===currentActivity.category)?.id,
-        // tags: currentActivity.tags||[],
-        specialDiscounts:currentActivity.specialDiscounts,
-        isOpen: currentActivity.isOpen || false,
-        created_by: id
+      const options = {
+        apiPath: `/activity/${currentActivity._id}/${id}`,
+        params: { currentActivityId, id },
+        body: {
+          name: currentActivity.name,
+          date: dayjs(currentActivity.date).format('YYYY-MM-DD'),
+          time: currentActivity.time,
+          location: currentActivity.location,
+          price: currentActivity.price[1],
+          category: categoryList.find(item => item.id === currentActivity.category)?.id,
+          tags: currentActivity.tags || [],
+          specialDiscounts: currentActivity.specialDiscounts,
+          isOpen: currentActivity.isOpen || false,
+          created_by: id,
+        },
       };
-      console.log("Body",body);
-      const response = await axios.put(apiPath, body);
+      const response = await NetworkService.put(options);
       setActivities((prevActivities) =>
         prevActivities.map((activity) =>
           activity.id === activityForm.id ? response.data : activity
@@ -341,11 +334,11 @@ console.log("Activity to show",activity);
     console.log(id);
     console.log(allActivity);
     
-    
-    
     try {
-      const apiPath=`http://localhost:3030/activity/${activityid}/${id}`;
-      const response = await axios.delete(apiPath);
+      const options ={
+         apiPath:`/activity/${activityid}/${id}`,
+      };
+      const response = NetworkService.delete(options);
       setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
     } catch (err) {
       if (err.response) {
