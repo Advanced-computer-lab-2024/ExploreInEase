@@ -1,5 +1,6 @@
 import React, { useState , useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import NetworkService from '../../../NetworkService';
 import {
   TextField,
   Card,
@@ -26,8 +27,11 @@ import {
 
 const ProductCard = () => {
   const location = useLocation();
-  const { Product,Type } = location.state || {};
- 
+  const { Product,Type, User } = location.state || {};
+  console.log(User);
+  const userId = User._id;
+  console.log(Product);
+  const productId = Product._id;
   const isSellerOrAdmin = Type === 'seller' || Type === 'admin';
   const [initialProductList, setInitialProductList] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -43,16 +47,17 @@ const ProductCard = () => {
     name: '',
     price: '',
     description: '',
-    sellerType: '',
-    ratings: '',
+    sellerType: User.sellerType,
+    ratings: 0,
     originalQuantity: '',
     reviews: [],
     picture: '',
   });
+  console.log(products);
   const [errors, setErrors] = useState({});
   const [nextId, setNextId] = useState(0);
   const [selectedReviews, setSelectedReviews] = useState([]);
-
+  
   useEffect(() => {
     if (Product && Array.isArray(Product)) {
       console.log("Received Product data:", Product);
@@ -112,8 +117,8 @@ const ProductCard = () => {
       name: '',
       price: '',
       description: '',
-      sellerType: '',
-      ratings: '',
+      sellerType: User.sellerType,
+      ratings: 0,
       originalQuantity: '',
       picture:'',
       reviews: [],
@@ -126,7 +131,6 @@ const ProductCard = () => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
-console.log(Product.ratings)
   const validateForm = () => {
     let formErrors = {};
 
@@ -141,45 +145,79 @@ console.log(Product.ratings)
     if (!productData.description) {
       formErrors.description = 'Description is required';
     }
-    if (!productData.sellerType) {
-      formErrors.sellerType = 'Seller is required';
-    }
-    if (!productData.ratings || productData.ratings < 0 || productData.ratings > 5) {
-      formErrors.ratings = 'ratings must be between 0 and 5';
-    }
-    if (!productData.originalQuantity) {
-      formErrors.originalQuantity = 'Quantity is required';
-    }
+    // if (!productData.sellerType) {
+    //   formErrors.sellerType = 'Seller is required';
+    // }
+    // if (!productData.ratings || productData.ratings < 0 || productData.ratings > 5) {
+    //   formErrors.ratings = 'ratings must be between 0 and 5';
+    // }
+    // if (!productData.originalQuantity) {
+    //   formErrors.originalQuantity = 'Quantity is required';
+    // }
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
 
   const handleSubmitCreate = () => {
+    console.log(productData);
     if (validateForm()) {
       const newProduct = {
         productId: nextId,
         name: productData.name,
         price: parseFloat(productData.price),
-        ratings: parseFloat(productData.ratings),
+        description: productData.description,
+        originalQuantity: productData.originalQuantity
       };
+      const option = {
+        apiPath: `/addProduct/${userId}`,
+        urlParam: userId,
+        body: newProduct
+      }
+      const response = NetworkService.post(option);
+      console.log(response);
       setProducts((prev) => [...prev, newProduct]);
       setNextId((prev) => prev + 1);
       handleClose();
-    }
-  };
+    }
+  };
 
-  const handleSubmitUpdate = () => {
-    if (validateForm()) {
-      setProducts((prev) =>
-        prev.map((product) =>
-          product.id === productData.id
-            ? { ...product, name: productData.name, price: parseFloat(productData.price), ratings: parseFloat(productData.ratings) }
-            : product
-        )
-      );
-      handleClose();
+const handleSubmitUpdate = async () => {
+  console.log("ProductData: ", productData);
+  if (validateForm()) {
+    const updatedProduct = {
+      name: productData.name,
+      price: parseFloat(productData.price),
+      description: productData.description,
+      originalQuantity: productData.originalQuantity,
+    };
+    
+    const option = {
+      apiPath: `/editProducts/${userId}/${productData._id}`,
+      urlParam: userId, productId: productData._id,
+      body: updatedProduct,
+    };
+    
+    try {
+      const response = await NetworkService.put(option); // Await the response from backend
+      console.log("Response: ", response);
+      
+      if (response.message === "Product updated successfully") {
+        // Update the frontend with the newly updated product
+        setProducts((prevProducts) => 
+          prevProducts.map((product) => 
+            product._id === productData._id ? { ...product, ...updatedProduct } : product
+          )
+        );
+        handleClose();
+      } else {
+        console.error("Failed to update product:", response.message);
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
     }
-  };
+  }
+};
+
 
   const filteredProducts = products.filter((product) => {
     const nameMatch = product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -239,10 +277,9 @@ console.log(Product.ratings)
             <Button variant="outlined" color="secondary" onClick={handleReset}>
               Reset
             </Button>
-            {isSellerOrAdmin && (
               <Button variant="contained" color="success" onClick={handleClickOpenCreate}>
                 Create
-              </Button>)}
+              </Button>
           </Box>
         </Paper>
       </Box>
@@ -261,7 +298,6 @@ console.log(Product.ratings)
                   <Typography>Description: {product.description}</Typography>
                   <Typography>Quantity: {product.originalQuantity}</Typography>
                   <Typography>Seller: {product.sellerType}</Typography>
-                  {isSellerOrAdmin && (
                     <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
                     </Button>
@@ -269,7 +305,7 @@ console.log(Product.ratings)
 
 
 
-                  )}
+                  
                   <Button
                     variant="contained"
                     color="primary"
@@ -325,29 +361,8 @@ console.log(Product.ratings)
           />
           <TextField
             margin="dense"
-            label="Seller"
-            name="seller"
-            value={productData.sellerType || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.sellerType}
-            helperText={errors.sellerType}
-          />
-          <TextField
-            margin="dense"
-            label="ratings"
-            name="ratings"
-            type="number"
-            value={productData.ratings || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.ratings}
-            helperText={errors.ratings}
-          />
-          <TextField
-            margin="dense"
-            label="Quantity"
-            name="quantity"
+            label="originalQuantity"
+            name="originalQuantity"
             type="number"
             value={productData.originalQuantity || ''}
             onChange={handleInputChange}
@@ -406,29 +421,8 @@ console.log(Product.ratings)
           />
           <TextField
             margin="dense"
-            label="Seller"
-            name="seller"
-            value={productData.sellerType || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.sellerType}
-            helperText={errors.sellerType}
-          />
-          <TextField
-            margin="dense"
-            label="Ratings"
-            name="ratings"
-            type="number"
-            value={productData.ratings || ''}
-            onChange={handleInputChange}
-            fullWidth
-            error={!!errors.ratings}
-            helperText={errors.ratings}
-          />
-          <TextField
-            margin="dense"
-            label="Quantity"
-            name="quantity"
+            label="originalQuantity"
+            name="originalQuantity"
             type="number"
             value={productData.originalQuantity || ''}
             onChange={handleInputChange}

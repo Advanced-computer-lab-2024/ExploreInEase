@@ -26,7 +26,7 @@ const TouristNavbar = () => {
                 console.log(response);
                 const Product=response.Products;
                 const Type='tourist';
-                navigate(`/viewProduct`,{state:{Product:Product,Type:Type}});          
+                navigate(`/viewProduct`,{ state: { Product, Type ,User:tourist} });          
               } catch (err) {
                 if (err.response) {
                     console.log(err.message);

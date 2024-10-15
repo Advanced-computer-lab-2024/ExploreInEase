@@ -50,7 +50,8 @@ const AdminNavbar = () => {
                 console.log(response);
                 const Product = response.Products;
                 const Type = 'admin';
-                navigate('/viewProduct', { state: { Product, Type } });
+                console.log(tourist)
+                navigate('/viewProduct', { state: { Product, Type ,User:tourist} });
             } 
             else if (title === "Add User") {
                 navigate('/AdminHomePage');
