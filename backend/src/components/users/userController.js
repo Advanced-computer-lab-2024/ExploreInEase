@@ -282,6 +282,10 @@ const updateTourist = async (req, res) => {
             return res.status(400).json({ message: 'Cannot update wallet' });
         }
 
+        console.log(updateData)
+
+        console.log('dakhal')
+
         const updatedTourist = await userService.updateTourist(req.params._id, updateData);
         if (!updatedTourist) {
             return res.status(404).json({ message: 'Tourist not found' });
@@ -290,6 +294,9 @@ const updateTourist = async (req, res) => {
             message: "Tourist updated successfully",
             tourist: updatedTourist
         }
+
+        console.log('3adda')
+        console.log(updatedTourist)
 
         res.status(200).json(reponse);
     } catch (error) {

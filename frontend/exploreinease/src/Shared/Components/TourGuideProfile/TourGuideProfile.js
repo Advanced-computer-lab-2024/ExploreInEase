@@ -16,7 +16,7 @@ import Button from '@mui/material/Button'; // Import Button
 import NetworkService from '../../../NetworkService';
 import { useLocation } from 'react-router-dom';
 
-
+//
 const tourGuide = {};
 const useForm = (initialValues) => {
   const [formValues, setFormValues] = useState(initialValues);
@@ -344,7 +344,7 @@ const GenericDialog = (props) => {
             variant="standard"
             type="text"
             fullWidth
-            value={formValues.languages.join(', ')}
+            value={formValues.languages}
             onChange={handleFormChange('languages')}
           />
         ) : (

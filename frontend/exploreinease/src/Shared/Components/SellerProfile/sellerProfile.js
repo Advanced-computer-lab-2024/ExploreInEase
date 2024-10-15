@@ -146,7 +146,18 @@ const SellerProfile = (props) => {
                 <Typography>{formValues.email}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('email')} aria-label={isEditable.email ? 'save' : 'edit'}>
+              <IconButton 
+              //onClick={() => toggleEditMode('email')} 
+              
+              onClick={() => {
+                if (isEditable.email) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('email');
+                }
+              }}aria-label={isEditable.email ? 'save' : 'edit'}>
                 {isEditable.email ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -178,7 +189,18 @@ const SellerProfile = (props) => {
                 <Typography>{formValues.password}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('password')} aria-label={isEditable.password ? 'save' : 'edit'}>
+              <IconButton 
+              //onClick={() => toggleEditMode('password')} 
+              onClick={() => {
+                if (isEditable.password) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('password');
+                }
+              }}
+              aria-label={isEditable.password ? 'save' : 'edit'}>
                 {isEditable.password ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -193,7 +215,18 @@ const SellerProfile = (props) => {
                 <Typography>{formValues.specialties}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('specialties')} aria-label={isEditable.specialties ? 'save' : 'edit'}>
+              <IconButton 
+              //onClick={() => toggleEditMode('specialties')}
+              
+              onClick={() => {
+                if (isEditable.specialties) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('specialties');
+                }
+              }}aria-label={isEditable.specialties ? 'save' : 'edit'}>
                 {isEditable.specialties ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>

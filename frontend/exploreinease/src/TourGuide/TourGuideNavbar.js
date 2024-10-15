@@ -6,6 +6,8 @@ import NetworkService from '../NetworkService';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+
+//
 const TourGuideHP = () => {
     const navigate = useNavigate();
     const location = useLocation();

@@ -19,7 +19,7 @@ import Button from '@mui/material/Button';
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../../../NetworkService';
 import dayjs from 'dayjs';
-
+import axios from 'axios';
 const useForm = (initialValues) => {
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -102,22 +102,32 @@ const TouristProfile = (props) => {
         mobileNum: formValues.mobileNumber,
         password: formValues.password,
         profession: formValues.educationState,
-        nation: formValues.nationality,
-        username: formValues.username,
-        dateOfBirth: formValues.dateOfBirth?.toISOString(),
+        nation: formValues.nationality
+        // username: formValues.username,
+        // dateOfBirth: formValues.dateOfBirth
       };
+
+      console.log(updatedTourist);
       const options = {
         apiPath:  ` /updateTourist/${Tourist._id}`,
-        urlParam: Tourist._id,
+        // urlParam: Tourist._id,
         body: updatedTourist,
       };
-      const response = await NetworkService.put(options);
+
+      const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`,updatedTourist);
+
+
+      // const response = await NetworkService.put(options);
+      console.log(response.data)
+      console.log("test :",response.data.tourist)
+      console.log(Tourist._id)
+
       // Update frontend form with the updated values
       handleChange({
         ...formValues,
-        email: response.tourist.email,
-        mobileNumber: response.tourist.mobileNum,
-        dateOfBirth: response.tourist.dateOfBirth, // Convert back to Day.js format if needed
+        email: response.data.tourist.email,
+        mobileNumber: response.data.tourist.mobileNum,
+        // dateOfBirth: response.data.tourist.dateOfBirth, // Convert back to Day.js format if needed
       });
 
       setIsEditable({
@@ -184,7 +194,18 @@ const TouristProfile = (props) => {
             )}
           </Box>
           <div>
-            <IconButton onClick={() => toggleEditMode('email')} aria-label={isEditable.email ? 'save' : 'edit'}>
+            <IconButton o
+            //nClick={() => toggleEditMode('email')} 
+            onClick={() => {
+              if (isEditable.email) {
+                // Save the changes if in edit mode
+                handleSave();
+              } else {
+                // Enable edit mode if not in edit mode
+                toggleEditMode('email');
+              }
+            }}
+            aria-label={isEditable.email ? 'save' : 'edit'}>
               {isEditable.email ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -218,7 +239,18 @@ const TouristProfile = (props) => {
             )}
           </Box>
           <div>
-            <IconButton onClick={() => toggleEditMode('password')} aria-label={isEditable.password ? 'save' : 'edit'}>
+            <IconButton 
+            //onClick={() => toggleEditMode('password')}
+            onClick={() => {
+              if (isEditable.password) {
+                // Save the changes if in edit mode
+                handleSave();
+              } else {
+                // Enable edit mode if not in edit mode
+                toggleEditMode('password');
+              }
+            }}
+            aria-label={isEditable.password ? 'save' : 'edit'}>
               {isEditable.password ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -242,7 +274,18 @@ const TouristProfile = (props) => {
             )}
           </Box>
           <div>
-            <IconButton onClick={() => toggleEditMode('mobileNumber')} aria-label={isEditable.mobileNumber ? 'save' : 'edit'}>
+            <IconButton o
+            //nClick={() => toggleEditMode('mobileNumber')} 
+            onClick={() => {
+              if (isEditable.mobileNumber) {
+                // Save the changes if in edit mode
+                handleSave();
+              } else {
+                // Enable edit mode if not in edit mode
+                toggleEditMode('mobileNumber');
+              }
+            }}
+            aria-label={isEditable.mobileNumber ? 'save' : 'edit'}>
               {isEditable.mobileNumber ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -266,7 +309,19 @@ const TouristProfile = (props) => {
             )}
           </Box>
           <div>
-            <IconButton onClick={() => toggleEditMode('nationality')} aria-label={isEditable.nationality ? 'save' : 'edit'}>
+            <IconButton 
+            //onClick={() => toggleEditMode('nationality')} 
+            onClick={() => {
+              if (isEditable.nationality) {
+                // Save the changes if in edit mode
+                console.log(1)
+                handleSave();
+              } else {
+                // Enable edit mode if not in edit mode
+                toggleEditMode('nationality');
+              }
+            }}
+            aria-label={isEditable.nationality ? 'save' : 'edit'}>
               {isEditable.nationality ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -312,7 +367,18 @@ const TouristProfile = (props) => {
             )}
           </Box>
           <div>
-            <IconButton onClick={() => toggleEditMode('educationState')} aria-label={isEditable.educationState ? 'save' : 'edit'}>
+            <IconButton o
+            //nClick={() => toggleEditMode('educationState')} 
+            onClick={() => {
+              if (isEditable.educationState) {
+                // Save the changes if in edit mode
+                handleSave();
+              } else {
+                // Enable edit mode if not in edit mode
+                toggleEditMode('educationState');
+              }
+            }}
+            aria-label={isEditable.educationState ? 'save' : 'edit'}>
               {isEditable.educationState ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
