@@ -381,7 +381,7 @@ const updateActivity = async (req, res) => {
       return res.status(404).json({ message: 'Activity not found.' });
     }
 
-    if (getActivity.created_by !== userId) {
+    if (getActivity.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'You are not authorized to update this activity.' });
     }
     const updatedActivity = await eventService.updateActivity(_id, updateData);
