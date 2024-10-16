@@ -61,6 +61,8 @@ const TourGuideHP = () => {
         try {
           const options = {
             apiPath: `/itinerary/user/${userId}/allItineraries`,
+            urlParam: userId
+
           };
           const response = await NetworkService.get(options);
           setSuccess(response.message); // Set success message

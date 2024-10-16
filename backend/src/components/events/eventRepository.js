@@ -268,6 +268,11 @@ const getAllActivities = async (userId) => {
   return await Activity.find();
 };
 
+const getAllActivitiesInDatabase = async () => {
+  return await Activity.find();
+}
+
+
 const getAllActivitiesAdvertiser = async (userId) => {
   return await Activity.find({ created_by: userId });
 };
@@ -404,7 +409,8 @@ module.exports = {
   findTagByTypeAndPeriod,
   checkTourismGovernor,
   getTypeForTag,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
 };
 
 

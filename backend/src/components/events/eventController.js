@@ -754,6 +754,19 @@ const getAllHistoricalTags = async (req, res) => {
       .json({ error: "An error occurred", details: error.message });
   }
 }
+
+const getAllActivitiesInDatabase = async (req, res) => {
+  try {
+    const activities = await eventService.getAllActivitiesInDatabase();
+    return res.status(200).json({ activities });
+  } catch (error) {
+    console.error('Error fetching activities:', error.message);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+}
+
+
+
 module.exports = {
   getUserEvents,
   createCategory,
@@ -784,6 +797,7 @@ module.exports = {
   deleteHistoricalPlace,
   getAllItineraries,
   getAllActivities,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
   };
   

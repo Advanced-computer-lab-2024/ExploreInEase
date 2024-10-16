@@ -44,8 +44,14 @@ function Itinerary() {
     // Fetch activities from your API or state management
     const fetchActivities = async () => {
       try {
-        const response = await NetworkService.get('http://localhost:3030/activity/user/${userId}/allActivities;'); // Replace with your actual API endpoint
+        const options = {
+          apiPath: `/allActivities`,
+        };
+        
+        const response = await NetworkService.get(options); // Replace with your actual API endpoint
+        console.log(response)
         setAvailableActivities(response.activities || []);
+        console.log(availableActivities)
       } catch (error) {
         console.error('Error fetching activities:', error);
       }

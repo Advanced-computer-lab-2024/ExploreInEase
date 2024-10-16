@@ -2501,7 +2501,7 @@ router.post('/createHistoricalTag/:_id', eventController.createHistoricalTag);
  *                   type: string
  *                   example: "Error deleting historical place."
  */
-
+router.get('/allActivities', eventController.getAllActivitiesInDatabase);
 router.get('/activity/:_id/:userId', eventController.getActivityById);
 router.get('/activity/user/:userId/allActivities', eventController.getAllActivities);
 router.post('/activity', eventController.addActivity);
