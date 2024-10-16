@@ -240,13 +240,9 @@ const handleSaveActivity = async () => {
     if (currentActivity !== null) {
       // console.log("Activity",currentActivity);
       console.log("Id of activity",currentActivity._id);
-      const currentActivityId=currentActivity._id;
       // Updating existing activity
-      const options = {
-        apiPath: `/activity/${currentActivity._id}/${id}`,
-        params: { currentActivityId, id },
-        body: {
-          name: currentActivity.name,
+      const apiPath=`http://localhost:3030/activity/${currentActivity._id}/${id}`;
+      const body= {
           date: dayjs(currentActivity.date).format('YYYY-MM-DD'),
           time: currentActivity.time,
           location: currentActivity.location,
@@ -255,13 +251,14 @@ const handleSaveActivity = async () => {
           tags: currentActivity.tags || [],
           specialDiscounts: currentActivity.specialDiscounts,
           isOpen: currentActivity.isOpen || false,
-          created_by: id,
-        },
-      };
-      const response = await NetworkService.put(options);
+        };
+        
+        const response = await axios.put(apiPath,body);
+        console.log(response.data.activity);
+        
       setActivities((prevActivities) =>
         prevActivities.map((activity) =>
-          activity.id === activityForm.id ? response.data : activity
+          activity.id === activityForm.id ? response.data.activity : activity
         )
       );
     } else {

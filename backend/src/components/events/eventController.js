@@ -358,11 +358,9 @@ const addActivity = async (req, res) => {
 const updateActivity = async (req, res) => {
   const { _id, userId } = req.params;
   const updateData = req.body; 
-
   if(!_id || !userId) {
     return res.status(400).json({ message: 'Missing inputs' });
   }
-
   const type = await eventRepository.getType(userId);
   if (type !== 'advertiser') {
     return res.status(400).json({ message: 'Invalid type' });
@@ -372,6 +370,8 @@ const updateActivity = async (req, res) => {
   const invalidUpdates = Object.keys(updateData).filter(key => !allowedUpdates.includes(key));
 
   if (invalidUpdates.length) {
+    console.log("hena  ");
+    console.log("Invalid fields here:",invalidUpdates);
     return res.status(400).json({ message: `Invalid fields: ${invalidUpdates.join(', ')}` });
   }
 
@@ -385,6 +385,8 @@ const updateActivity = async (req, res) => {
       return res.status(400).json({ message: 'You are not authorized to update this activity.' });
     }
     const updatedActivity = await eventService.updateActivity(_id, updateData);
+    console.log("Updated activity:",updatedActivity);
+  
     if (!updatedActivity) {
       return res.status(404).json({ message: 'Activity not found.' });
     }
@@ -393,6 +395,7 @@ const updateActivity = async (req, res) => {
     console.error('Error updating activity:', error.message);
     return res.status(500).json({ message: error.message });
   }
+ 
 };
 
 const deleteActivity = async (req, res) => {
