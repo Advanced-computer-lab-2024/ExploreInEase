@@ -6,4 +6,14 @@ const complaintController = require("../complaints/complaintController");
 // Route for filing a complaint
 router.post("/fileComplaint", complaintController.fileComplaint);
 
+router.get("/ViewComplaints", complaintController.AdminViewComplain);
+
+router.get("/ViewSelectedComplaint/:complaintId",complaintController.AdminViewSelectedComplain);
+
+router.patch("/markComplaint/:complaintId",complaintController.markComplaint);
+
+router.patch("/replyComplaint/:complaintId",complaintController.replyToComplaint);
+
+router.get("/myComplaints", complaintController.getMyComplaints);
+
 module.exports = router;

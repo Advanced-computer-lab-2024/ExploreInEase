@@ -1,144 +1,140 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 // Define the Users Schema
-const UsersSchema = new Schema({
+const UsersSchema = new Schema(
+  {
     username: {
-        type: String,
-        required: [true, 'Username is required'],
-        unique: true,
-        trim: true,
-        minlength: 3,
-        maxlength: 50
+      type: String,
+      required: [true, "Username is required"],
+      unique: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 50,
     },
     password: {
-        type: String,
-        required: [true, 'Password is required'],
-        minlength: 8,
+      type: String,
+      required: [true, "Password is required"],
+      minlength: 8,
     },
     email: {
-        type: String,
-        required: function() {
-            // Required for specific types
-            return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
-        },
-        unique: function() {
-            // Required for specific types
-            return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
-        }
-        
+      type: String,
+      required: function () {
+        // Required for specific types
+        return (
+          this.type === "tourGuide" ||
+          this.type === "advertiser" ||
+          this.type === "seller"
+        );
+      },
+      unique: function () {
+        // Required for specific types
+        return (
+          this.type === "tourGuide" ||
+          this.type === "advertiser" ||
+          this.type === "seller"
+        );
+      },
     },
     documents: {
-        nationalId: {
-            type: String,
-           
-        },
-        certificate: {
-            type: String,
-            
-        },
-        taxation: {
-            type: String,
-            
-        },  
+      nationalId: {
+        type: String,
+      },
+      certificate: {
+        type: String,
+      },
+      taxation: {
+        type: String,
+      },
     },
     experience: {
-        type: String,
-       
+      type: String,
     },
     previousWork: {
-        type: String,
-       
+      type: String,
     },
     linkWebsite: {
-        type: String,
-        
+      type: String,
     },
     hotline: {
-        type: String,
-        
+      type: String,
     },
     companyProfile: {
-        type: String,
-        
+      type: String,
     },
     sellerName: {
-        type: String,
-        
+      type: String,
     },
     type: {
-        type: String,
-        required: [true, 'User type is required'],
-        enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] // User types
+      type: String,
+      required: [true, "User type is required"],
+      enum: ["advertiser", "tourGuide", "seller", "tourismGovernor", "admin"], // User types
     },
     photo: {
-        selfPicture: {
-            type: String,
-            
-        },
-        logo: {
-            type: String,
-            
-        }
+      selfPicture: {
+        type: String,
+      },
+      logo: {
+        type: String,
+      },
     },
     comment: {
-        type: [String],
-        
+      type: [String],
     },
     rating: {
-        type: [Number],
-        min: 0,
-        max: 5,
-        
+      type: [Number],
+      min: 0,
+      max: 5,
     },
     founded: {
-        type: Number,
-       
+      type: Number,
     },
     specialist: {
-        type: String,
-        
+      type: String,
     },
     noEmployees: {
-        type: Number,
-      
+      type: Number,
     },
     industry: {
-        type: String,
-        
+      type: String,
     },
     linkedInLink: {
-        type: String,
-        
+      type: String,
     },
     sellerType: {
-        type: String,
-        enum: ['VTP', 'External',''], // Seller types
-        default: function() {
-            return this.sellerType === 'seller' ? 'External' : '';
-        }
+      type: String,
+      enum: ["VTP", "External", ""], // Seller types
+      default: function () {
+        return this.sellerType === "seller" ? "External" : "";
+      },
     },
     docStatus: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected', ""],
-        default: function() {
-            if(this.documents.nationalId || this.documents.certificate || this.documents.taxation) {
-                return 'pending';
-            } else {
-                return "";
-            }
+      type: String,
+      enum: ["pending", "approved", "rejected", ""],
+      default: function () {
+        if (
+          this.documents.nationalId ||
+          this.documents.certificate ||
+          this.documents.taxation
+        ) {
+          return "pending";
+        } else {
+          return "";
         }
+      },
     },
     termsAndConditions: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
-}, {
+  },
+  {
     timestamps: true, // Automatically add createdAt and updatedAt fields
-    versionKey: false // Disable the "__v" version key
-});
+    versionKey: false, // Disable the "__v" version key
+  }
+);
 
 // Create the Users Model
-const Users = mongoose.model('Users', UsersSchema);
+const Users = mongoose.model("Users", UsersSchema);
 
 module.exports = Users;
