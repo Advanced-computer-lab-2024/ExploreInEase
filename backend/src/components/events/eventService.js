@@ -263,7 +263,11 @@ const getAllUpcomingEvents = async () => {
 };
 
 const createHistoricalTag = async (tag) => {
+  console.log(tag);
+  
     return await eventRepository.createHistoricalTag(tag);
+    console.log("createHistoricalTag Service:",eventRepository.createHistoricalTag(tag));
+    
 };
 
 const getActivityById = async (id) => {
@@ -301,6 +305,9 @@ const addActivity = async ({ name, date, time, location, price, category, tags, 
   
   return createdActivity;
 };
+const getAllActivitiesInDatabase = async () => {
+  return await eventRepository.getAllActivitiesInDatabase();
+}
 
 const updateActivity = async (id, updateData) => {
   // You can add additional validation or processing here if needed
@@ -543,6 +550,7 @@ module.exports = {
   getAllActivitiesAdvertiser,
   getFilteredItineraries,
   getFilteredHistoricalPlaces,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
 };
 

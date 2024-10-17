@@ -61,6 +61,8 @@ const Login = () => {
 
         }
         else if(formData.role=='tourGuide'){
+          console.log(response);
+          
           navigate('/TourGuideHomePage', { state: {User: response.user } }); // Use navigate to change the route
 
         }

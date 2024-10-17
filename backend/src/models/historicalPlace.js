@@ -15,15 +15,15 @@ const historicalPlaceSchema = new Schema({
     required: true,
   },
   location: {
-    type: {
-      latitude: {
-        type: Number,
-        required: true,
-      },
-      longitude: {
-        type: Number,
-        required: true,
-      },
+    type:  {
+      // latitude: {
+      //   type: Number,
+      //   required: true,
+      // },
+      // longitude: {
+      //   type: Number,
+      //   required: true,
+      // },
       address: {
         type: String,
         required: true,

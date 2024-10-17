@@ -1,31 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
+  Button,Dialog, DialogActions,DialogContent,DialogTitle,TextField,Typography,Grid, Card,CardContent, CardActions,Select, MenuItem, FormControl, InputLabel,
 } from '@mui/material';
+import axios from 'axios';  // Import Axios
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import NetworkService from '../NetworkService';
 import dayjs from 'dayjs';
+import { useLocation } from 'react-router-dom';
 
 function Itinerary() {
+  const location = useLocation();
+  const {userId}=location.state||{};
   const [itineraries, setItineraries] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState(null);
+
   const [itineraryForm, setItineraryForm] = useState({
     name: '',
     activities: [], // Changed to an array to hold selected activities for each day
@@ -41,25 +32,19 @@ function Itinerary() {
   const [availableActivities, setAvailableActivities] = useState([]);
 
   useEffect(() => {
-    // Fetch activities from your API or state management
-    const fetchActivities = async () => {
-      try {
-        const options = {
-          apiPath: `/allActivities`,
-        };
-        
-        const response = await NetworkService.get(options); // Replace with your actual API endpoint
-        console.log(response)
-        setAvailableActivities(response.activities || []);
-        console.log(availableActivities)
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-      }
-    };
-
     fetchActivities();
   }, []);
 
+  const fetchActivities = async () => {
+    try {  
+      const response = await axios.get(`http://localhost:3030/allActivities`); // Replace with your actual API endpoint
+      // console.log(response);
+      setAvailableActivities(response.data.activities);
+      console.log(availableActivities);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    }
+  };
   const handleClickOpen = () => {
     setItineraryForm({
       name: '',
@@ -105,7 +90,7 @@ function Itinerary() {
 
   const handleActivityChange = (index, event) => {
     const newActivities = [...itineraryForm.activities];
-    newActivities[index] = event.target.value;
+    newActivities[index] = event.target.value;  // Update activity for the specific day
     setItineraryForm((prev) => ({ ...prev, activities: newActivities }));
   };
 
@@ -119,21 +104,65 @@ function Itinerary() {
         end: dateRange.end ? dayjs(dateRange.end).toISOString() : null,
       })),
     };
+    console.log(updatedItinerary);
 
     try {
       if (currentItinerary !== null) {
         // Update existing itinerary
+      try{
+        const apiPath=`http://localhost:3030/itinerary/${updatedItinerary._id}/${userId}`;
+        const body= {
+          //     activities,
+          //     locations:updatedActivity.location,
+          //     timeline,
+          //    directions,
+          //     language,
+          //     price:updatedActivity.price,
+          //     dateTimeAvailable,
+          //    accessibility,
+          //    pickupLocation,
+          //    dropoffLocation,
+          //    isActivated, 
+          //   created_by, 
+          //   flag,        
+          //  isSpecial
+          };
+          console.log("body:",body);
+          const response = await axios.put(apiPath,body);
         setItineraries((prevItineraries) =>
           prevItineraries.map((itinerary, index) =>
             index === currentItinerary ? updatedItinerary : itinerary
           )
         );
+      }catch {
+        console.log("Error:");
+
+      }
       } else {
         // Create a new itinerary
+        const body= {
+          //     activities,
+          //     locations:updatedActivity.location,
+          //     timeline,
+          //    directions,
+          //     language,
+          //     price:updatedActivity.price,
+          //     dateTimeAvailable,
+          //    accessibility,
+          //    pickupLocation,
+          //    dropoffLocation,
+          //    isActivated, 
+          //   created_by, 
+          //   flag,        
+          //  isSpecial
+          };
         const response = await NetworkService.post({
-          apiPath: '/itinerary', // Your API endpoint for creating itineraries
-          body: updatedItinerary,
+          apiPath: '/itinerary', 
+          body: body,
         });
+        // /itinerary/:_id/:userId
+        console.log(response);
+        
         if (response && response.itinerary) {
           setItineraries((prevItineraries) => [...prevItineraries, response.itinerary]);
         }
@@ -151,6 +180,12 @@ function Itinerary() {
   };
 
   const handleDeleteItinerary = (index) => {
+    const activityid=itineraries[index]._id;
+    const options ={
+      apiPath:`/activity/${activityid}/${userId}`,
+   };
+   const response = NetworkService.delete(options);
+   console.log(response);
     setItineraries((prevItineraries) => prevItineraries.filter((_, i) => i !== index));
   };
 
@@ -202,21 +237,21 @@ function Itinerary() {
 
             {/* Activity selection for each day of the tour */}
             {Array.from({ length: numberOfDays }, (_, index) => (
-              <FormControl fullWidth margin="normal" key={index}>
-                <InputLabel id={`activity-label-${index}`}>Activity for Day {index + 1}</InputLabel>
-                <Select
-                  labelId={`activity-label-${index}`}
-                  value={itineraryForm.activities[index] || ''}
-                  onChange={(event) => handleActivityChange(index, event)}
-                >
-                  {availableActivities.map((activity) => (
-                    <MenuItem key={activity.id} value={activity.id}>
-                      {activity.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            ))}
+  <FormControl fullWidth margin="normal" key={index}>
+    <InputLabel id={`activity-label-${index}`}>Activity for Day {index + 1}</InputLabel>
+    <Select
+      labelId={`activity-label-${index}`}
+      value={itineraryForm.activities[index] || ''}  // Display selected activity
+      onChange={(event) => handleActivityChange(index, event)}  // Update on selection change
+    >
+      {availableActivities.map((activity) => (
+        <MenuItem key={activity.id} value={activity.id}>
+          {activity.name}  {/* Display activity name */}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+))}
 
             {itineraryForm.availableDates.map((dateRange, index) => (
               <div key={index} style={{ display: 'flex', marginBottom: '16px' }}>

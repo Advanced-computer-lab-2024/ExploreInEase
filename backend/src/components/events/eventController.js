@@ -233,18 +233,23 @@ const getFilteredItineraries = async (req, res) => {
 
 // Create a new preference tag
 const createHistoricalTag = async (req, res) => {
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("TAG Error 1");
       return res.status(400).json({ errors: errors.array() });
   }
 
   try {
-      const checkUserType =await eventRepo.getTypeForTag(req.params._id);
-      console.log(checkUserType)
+      const checkUserType =await eventRepository.getTypeForTag(req.params._id);
       if(checkUserType !== 'tourismGovernor'){
+        console.log("TAG Error 2");
+
           return res.status(400).json({ message: 'Only tourism governors can create historical tags' });
       }
+
       const checkTagType = req.body.type.toLowerCase();
+
       if (
       checkTagType === 'monuments' || 
       checkTagType === 'museums' || 
@@ -265,16 +270,21 @@ const createHistoricalTag = async (req, res) => {
           }
           catch (error) {
               res.status(400).json({ message: error.message });
+              console.log("TAG Error 3:",error.message);
           }
 
       }else{
+        console.log("TAG Error 4");
           return res.status(400).json({ message: 'Only historical tags can be created' });
       }
 
 
       
   } catch (error) {
+
       res.status(400).json({ message: error.message });
+      console.log("TAG Error 5",error.message);
+
   }
 };
 
@@ -354,7 +364,15 @@ const addActivity = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
+const getAllActivitiesInDatabase = async (req, res) => {
+  try {
+    const activities = await eventService.getAllActivitiesInDatabase();
+    return res.status(200).json({ activities });
+  } catch (error) {
+    console.error('Error fetching activities:', error.message);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+}
 const updateActivity = async (req, res) => {
   const { _id, userId } = req.params;
   const updateData = req.body; 
@@ -485,7 +503,20 @@ const getItineraryById = async (req, res) => {
 
 const createItinerary = async (req, res) => {
   try {
-    const {activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
+    const {activities,
+       locations,
+        timeline,
+         directions,
+          language,
+          price,
+          dateTimeAvailable,
+         accessibility,
+         pickupLocation,
+         dropoffLocation,
+         isActivated, 
+        created_by, 
+        flag,        
+       isSpecial} = req.body;
     
     if(!activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -788,6 +819,7 @@ module.exports = {
   deleteHistoricalPlace,
   getAllItineraries,
   getAllActivities,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
   };
   

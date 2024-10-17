@@ -906,7 +906,6 @@ router.get("/upcomingEvents", eventController.getUpcomingEvents);
  *                   example: "Error details message"
  */
 router.get("/filterUpcommingActivites", eventController.GetupcommingActivitesFilter);
-
 /**
  * @swagger
  * /filteritineraries:
@@ -2584,5 +2583,6 @@ router.delete('/historical-places/:_id/:userId', eventController.deleteHistorica
 router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags);
 
 
+router.get('/allActivities', eventController.getAllActivitiesInDatabase);
 
 module.exports = router;

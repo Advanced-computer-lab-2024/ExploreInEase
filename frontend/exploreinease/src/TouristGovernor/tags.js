@@ -13,12 +13,18 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import ListSubheader from '@mui/material/ListSubheader';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import axios from 'axios'; // Ensure Axios is imported
 
 function Tags() {
   const location = useLocation();
+  const { governorId } = location.state || {};
   const [tags, setTags] = React.useState([]);
   const [open, setOpen] = React.useState(false);
-  const [newTag, setNewTag] = React.useState('');
+  const [tagType, setTagType] = React.useState('');  // State for tag type
+  const [period, setPeriod] = React.useState('');    // State for period
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -26,54 +32,83 @@ function Tags() {
 
   const handleClose = () => {
     setOpen(false);
-    setNewTag('');  // Clear the input when dialog is closed
+    setTagType('');
+    setPeriod('');
   };
 
-  const handleSaveTag = () => {
-    if (newTag.trim()) {
-      setTags((prevTags) => [...prevTags, newTag]);
+  const handleSaveTag = async () => {
+    if (tagType && period.trim()) {
+      const body = {
+        type: tagType,
+        period: period
+      };
+      console.log(body);
+      console.log(governorId);
+      
+      const apiPath = `http://localhost:3030/createHistoricalTag/${governorId}`;
+      
+      try {
+        const response = await axios.post(apiPath, body);
+        console.log(response);
+  
+        setTags((prevTags) => [...prevTags, { type: tagType, period }]);
+        handleClose();
+      } catch (error) {
+        console.error('Error while saving the tag:', error);
+      }
     }
-    handleClose();
-  };
-
-  const handleInputChange = (event) => {
-    setNewTag(event.target.value); // Update the input value
   };
 
   return (
     <div>
-      {/* Button outside of the box */}
-      <Button variant="contained" onClick={handleClickOpen}  sx={{width:200, marginLeft: 2,marginTop:2,height:50}} >
+      <Button variant="contained" onClick={handleClickOpen} sx={{ width: 200, marginLeft: 2, marginTop: 2, height: 50 }}>
         Create Tag
       </Button>
       <Box
         sx={{
           maxWidth: 360,
           bgcolor: 'white',
-          border: '1px solid #ccc', // Add border
-          marginTop: 4, // Add top margin
-          borderRadius: 1, // Slight border radius for aesthetics
-          padding: 2 // Add padding inside the box
+          border: '1px solid #ccc',
+          marginTop: 4,
+          borderRadius: 1,
+          padding: 2
         }}
       >
         {/* Dialog for creating a new tag */}
-        <Dialog open={open} onClose={handleClose} 
-                    
-        >
+        <Dialog open={open} onClose={handleClose}>
           <DialogTitle>Create a usable Tag</DialogTitle>
           <DialogContent>
+            {/* Replace TextField with Select for the tagType */}
+            <InputLabel id="tags-label">type</InputLabel>
+            <Select
+              required
+              labelId="tags-label"
+              id="type"
+              margin="dense"
+              name="type"
+              fullWidth
+              value={tagType}
+              onChange={(e) => setTagType(e.target.value)}
+            >
+              <MenuItem value="monuments">Monuments</MenuItem>
+              <MenuItem value="museums">Museums</MenuItem>
+              <MenuItem value="religious sites">Religious Sites</MenuItem>
+              <MenuItem value="palaces">Palaces</MenuItem>
+              <MenuItem value="castles">Castles</MenuItem>
+              <MenuItem value="palaces/castles">Palaces/Castles</MenuItem>
+            </Select>
+
             <TextField
-                required
+              required
               margin="normal"
-              sx={{minHeight:100}}
-              id="name"
-              name="name"
-              label="Name"
+              id="period"
+              name="period"
+              label="Period"
               type="text"
               fullWidth
               variant="outlined"
-              value={newTag} // Bind the input value to state
-              onChange={handleInputChange} // Handle input change
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
             />
           </DialogContent>
           <DialogActions>
@@ -83,29 +118,27 @@ function Tags() {
             </Button>
           </DialogActions>
         </Dialog>
-        <nav aria-label="main tags folders" >
+
+        <nav aria-label="main tags folders">
           <List
             sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
             subheader={
-              <ListSubheader
-                sx={{
-                  fontWeight: 'bold', 
-                  fontSize: '1.25rem', 
-                  color:'red'
-                }}
-              >
+              <ListSubheader sx={{ fontWeight: 'bold', fontSize: '1.25rem', color: 'red' }}>
                 Tags
               </ListSubheader>
             }
           >
             {tags.map((tag, index) => (
               <React.Fragment key={index}>
-                <ListItem sx={{marginLeft:6}}>
+                <ListItem sx={{ marginLeft: 6 }}>
                   <ListItemButton>
-                    <ListItemText primary={tag} />
+                    <ListItemText
+                      primary={`Type: ${tag.type}`}
+                      secondary={`Period: ${tag.period}`}
+                    />
                   </ListItemButton>
                 </ListItem>
-                {index < tags.length - 1 && <Divider />} 
+                {index < tags.length - 1 && <Divider />}
               </React.Fragment>
             ))}
           </List>

@@ -9,12 +9,13 @@ import { useLocation } from 'react-router-dom';
 const TourGuideHP = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = location.state || {};
+    const { User } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
-    const initialUsername = user.username;
-    const userId=user._id;
-    // console.log(user);
+    console.log(User);
+    
+    const initialUsername =User.username;
+    const userId=User._id;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     async function handleClick(title) {
         if (title == "My Profile"){
@@ -39,7 +40,7 @@ const TourGuideHP = () => {
        else if(title == 'View My Created Itineraries') {
         try {
           const options = {
-            apiPath: `/itinerary/user/670328ceacfd9e94933ea931/allItineraries`,
+            apiPath: `/itinerary/user/${userId}/allItineraries`,
           };
           
           const response = await NetworkService.get(options);
@@ -66,7 +67,7 @@ const TourGuideHP = () => {
           setSuccess(response.message); // Set success message
           const TourGuideItinerary=response;
           console.log(TourGuideItinerary);
-          navigate(`/viewMyItinerary`,{state:{TourGuideItinerary}});          
+          navigate(`/viewMyItinerary`,{state:{TourGuideItinerary,userId}});          
         } catch (err) {
           if (err.response) {
               console.log(err.message);
@@ -94,8 +95,8 @@ const TourGuideHP = () => {
           <button  
           onClick={() => handleClick("My Profile")}
           className="small-button">My Profile</button>
-          <button onClick={() => handleClick("View My Created Itineraries")}
-              className="small-button">View My Created Itineraries</button>
+          {/* <button onClick={() => handleClick("View My Created Itineraries")}
+              className="small-button">View My Created Itineraries</button> */}
           <button onClick={() => handleClick("Create/Read/Update/Delete Itineraries")}
               style={{width:220}}>Create/Read/Update/Delete Itineraries</button>
      
