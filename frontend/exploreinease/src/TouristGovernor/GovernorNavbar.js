@@ -24,7 +24,11 @@ const GovernorNavbar = () => {
           navigate(`/viewHistoricalTags`,{state:{governorId}});          
        }
       else {
-       navigate(`/HistoricalPlaces`,{state:{governorId}});          
+        try{
+       navigate(`/HistoricalPlaces`,{state:{governorId}});   
+        }catch {
+
+        }       
       }
       };
   return (

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React ,{useEffect} from 'react';
 import { useLocation } from "react-router-dom";
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -25,6 +25,42 @@ function Tags() {
   const [open, setOpen] = React.useState(false);
   const [tagType, setTagType] = React.useState('');  // State for tag type
   const [period, setPeriod] = React.useState('');    // State for period
+
+  useEffect(() => {
+    getAllTags();
+  }, []);
+
+  
+  const getAllTags=async ()=>{
+    try {
+      const apiPath = `http://localhost:3030/getAllHistoricalTags/${governorId}`;  // Ensure this matches your API route
+      const response = await axios.get(apiPath);
+      console.log(response.data.tags);
+      
+      if (Array.isArray(response.data.tags)) {
+        const tags = response.data.tags.map(tag => ({
+          id: tag._id,
+          tagType: tag.type,
+        period:tag.period
+        }));
+        setTags(tags);    
+          
+      } else {
+        console.error('Unexpected data format from API');
+      }
+      
+    } catch (err) {
+      // Check if there is a response from the server and handle error
+      if (err.response) {
+        console.error('API Error:', err.message);
+        // setError(err.response.data.message);  // Display error message from the server
+      } else {
+        console.error('Unexpected Error:', err);
+        // setError('An unexpected error occurred.');  // Display generic error message
+      }
+    }
+  }
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -133,7 +169,7 @@ function Tags() {
                 <ListItem sx={{ marginLeft: 6 }}>
                   <ListItemButton>
                     <ListItemText
-                      primary={`Type: ${tag.type}`}
+                      primary={`Type: ${tag.tagType}`}
                       secondary={`Period: ${tag.period}`}
                     />
                   </ListItemButton>

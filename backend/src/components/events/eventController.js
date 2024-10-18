@@ -773,12 +773,12 @@ const deleteHistoricalPlace = async (req, res) => {
 const getAllHistoricalTags = async (req, res) => {
   const { userId } = req.params;
   if(!userId) {
+    console.log("test 1");
+    
     res.status(400).json({ message: 'Missing inputs' });
   }
   const type = await eventRepository.getType(userId);
-  if (type !== 'tourGuide' || type !== 'tourist' || type != 'guest') {
-    return res.status(400).json({ message: 'Invalid type' });
-  }
+  console.log("type:",type);
   try {
     const tags = await eventService.getAllHistoricalTags();
     return res.status(200).json({message: "Tags fetched successfully", tags: tags});
