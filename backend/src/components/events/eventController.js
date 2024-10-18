@@ -213,6 +213,8 @@ const bookEvent = async (req, res) => {
       });
   }
 };
+
+
 const cancelBookingEvent = async (req, res) => {
   const { userType, touristId, eventType, eventID } = req.body;
 

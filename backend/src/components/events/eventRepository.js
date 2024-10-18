@@ -116,24 +116,72 @@ const setFlagToZeroForActivity = async (_id) => {
 
 
 const bookEvent = async (touristId, eventType, eventId) => {
-  const updateData = {};
+  // Retrieve the tourist's wallet balance
+  const tourist = await Tourist.findById(touristId);
+  if (!tourist) {
+    throw new Error('Tourist not found');
+  }
+  
+  let eventPrice = 0;
 
+  // Retrieve the price based on event type
   switch (eventType) {
-      case 'itinerary':
-          updateData.$addToSet = { itineraryId: eventId }; // Use $addToSet to avoid duplicates
-          break;
-      case 'activity':
-          updateData.$addToSet = { activityId: eventId }; // Use $addToSet to avoid duplicates
-          break;
-      case 'historicalPlace':
-          updateData.$addToSet = { historicalplaceId: eventId }; // Use $addToSet to avoid duplicates
-          break;
-      default:
-          throw new Error('Invalid event type');
+    case 'itinerary':
+      const itinerary = await Itinerary.findById(eventId);
+      if (!itinerary) {
+        throw new Error('Itinerary not found');
+      }
+      eventPrice = itinerary.price;
+      break;
+      
+    case 'activity':
+      const activity = await Activity.findById(eventId);
+      if (!activity) {
+        throw new Error('Activity not found');
+      }
+      eventPrice = activity.price;
+      break;
+
+    case 'historicalPlace':
+      const historicalPlace = await HistoricalPlace.findById(eventId);
+      if (!historicalPlace) {
+        throw new Error('Historical place not found');
+      }
+      eventPrice = historicalPlace.ticketPrice.native; // Use native, student, or foreign based on logic
+      break;
+
+    default:
+      throw new Error('Invalid event type');
   }
 
+  // Check if the tourist has enough funds in their wallet
+  if (tourist.wallet < eventPrice) {
+    throw new Error('Insufficient funds to book this event');
+  }
+
+  // Deduct the event price from the tourist's wallet
+  tourist.wallet -= eventPrice;
+  await tourist.save(); // Save the updated wallet balance
+
+  // Update the tourist's event list
+  const updateData = {};
+  switch (eventType) {
+    case 'itinerary':
+      updateData.$addToSet = { itineraryId: eventId }; // Avoid duplicates
+      break;
+    case 'activity':
+      updateData.$addToSet = { activityId: eventId }; // Avoid duplicates
+      break;
+    case 'historicalPlace':
+      updateData.$addToSet = { historicalplaceId: eventId }; // Avoid duplicates
+      break;
+  }
+
+  // Update the tourist's events
   return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
 };
+
+
 
 const cancelEvent = async (touristId, eventType, eventId) => {
   const currentTime = new Date();
@@ -141,6 +189,9 @@ const cancelEvent = async (touristId, eventType, eventId) => {
 
   // Define the update data
   const updateData = {};
+
+  // Initialize variable for event price
+  let eventPrice = 0;
 
   // Check event type and validate cancellation eligibility
   let startDate;
@@ -156,6 +207,10 @@ const cancelEvent = async (touristId, eventType, eventId) => {
       if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
         throw new Error('Cancellations must be made at least 48 hours before the itinerary start date.');
       }
+
+      // Get itinerary price to refund
+      eventPrice = itinerary.price;
+
       updateData.$pull = { itineraryId: eventId };
       break;
 
@@ -169,11 +224,21 @@ const cancelEvent = async (touristId, eventType, eventId) => {
       if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
         throw new Error('Cancellations must be made at least 48 hours before the activity start date.');
       }
+
+      // Get activity price to refund
+      eventPrice = activity.price;
+
       updateData.$pull = { activityId: eventId };
       break;
 
     case 'historicalPlace':
-      // If there are specific rules for historical places, handle them here
+      // Retrieve the historical place event price
+      const historicalPlace = await HistoricalPlace.findById(eventId);
+      if (!historicalPlace) throw new Error('Historical place event not found');
+      
+      // Get historical place event price to refund
+      eventPrice = historicalPlace.price;
+
       updateData.$pull = { historicalplaceId: eventId };
       break;
 
@@ -181,9 +246,20 @@ const cancelEvent = async (touristId, eventType, eventId) => {
       throw new Error('Invalid event type');
   }
 
-  // Proceed with updating the Tourist's record if eligible for cancellation
-  return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
+  // Update the Tourist's record to remove the event
+  const updatedTourist = await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
+
+  if (updatedTourist) {
+    // Refund the event price to the tourist's wallet
+    updatedTourist.wallet += eventPrice;
+
+    // Save the updated wallet balance
+    await updatedTourist.save();
+  }
+
+  return updatedTourist;
 };
+
 
 
 
