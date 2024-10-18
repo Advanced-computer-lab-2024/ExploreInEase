@@ -148,6 +148,27 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
     await transporter.sendMail(mailOptions);
     return { message: 'Email sent successfully' };
   };
+
+
+
+
+  const searchCityAndAirport = async (parameter) => {
+    try {
+        const result = await eventRepository.cityAndAirportSearch(parameter);
+        return result;
+    } catch (error) {
+        throw new Error('Error fetching city and airport data: ' + error.message);
+    }
+};
+
+const searchFlights = async ({ originCode, destinationCode, dateOfDeparture }) => {
+    try {
+        const result = await eventRepository.flightSearch({ originCode, destinationCode, dateOfDeparture });
+        return result;
+    } catch (error) {
+        throw new Error('Error fetching flights: ' + error.message);
+    }
+};
   
 module.exports = {
   getUserEvents,
@@ -163,6 +184,9 @@ module.exports = {
   updateEventFlag,
   addEventToTourist,
   cancelEventToTourist,
-  sendEventEmail
+  sendEventEmail,
+  searchCityAndAirport,
+  searchFlights
+
 };
 

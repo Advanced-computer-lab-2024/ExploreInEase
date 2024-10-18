@@ -249,6 +249,31 @@ const sendEventEmail = async (req, res) => {
   }
 };
 
+
+
+const cityAndAirportSearch = async (req, res) => {
+    const parameter = req.params.parameter;
+    try {
+        const result = await eventService.searchCityAndAirport(parameter);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const flightSearch = async (req, res) => {
+    const { originCode, destinationCode, dateOfDeparture } = req.body;
+    try {
+        const result = await eventService.searchFlights({ originCode, destinationCode, dateOfDeparture });
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+
 module.exports = {
     getUserEvents,
     createCategory,
@@ -263,6 +288,8 @@ module.exports = {
     updateEventFlagController,
     bookEvent,
     cancelBookingEvent,
-    sendEventEmail
+    sendEventEmail,
+    cityAndAirportSearch,
+    flightSearch
   };
   

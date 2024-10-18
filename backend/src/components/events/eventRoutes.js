@@ -279,5 +279,12 @@ router.put('/bookEvent', eventController.bookEvent);
 router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
 router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEventEmail);
 
+// City and Airport search route
+router.get('/city-and-airport-search/:parameter', eventController.cityAndAirportSearch);
+
+// Flight search route
+router.get('/flight-search', eventController.flightSearch);
+
+
 
 module.exports = router;

@@ -273,6 +273,81 @@ const getTouristEmailById = async (touristId) => {
   }
 };
 
+
+
+
+const Amadeus = require('amadeus');
+
+const amadeus = new Amadeus({
+    clientId: process.env.AMADEUS_CLIENT_ID, // Store your API keys in environment variables
+    clientSecret: process.env.AMADEUS_CLIENT_SECRET,
+});
+
+// City and Airport search
+const cityAndAirportSearch = async (parameter) => {
+  try {
+      const response = await amadeus.referenceData.locations.get({
+          keyword: parameter,
+          subType: Amadeus.location.any,
+      });
+      
+      // Filter to get only airports and map to desired format
+      const airports = response.data
+          .filter(location => location.subType === "AIRPORT") // Get only locations with subType "AIRPORT"
+          .map(airport => ({
+              name: airport.name,
+              iataCode: airport.iataCode
+          }));
+      
+      return airports; // Return the filtered list of airport names and IATA codes
+  } catch (error) {
+      throw new Error(error.response ? error.response.body : error.message);
+  }
+};
+
+
+// Flight search
+const flightSearch = async ({ originCode, destinationCode, dateOfDeparture }) => {
+  try {
+      const response = await amadeus.shopping.flightOffersSearch.get({
+          originLocationCode: originCode,
+          destinationLocationCode: destinationCode,
+          departureDate: dateOfDeparture,
+          adults: '1',
+          max: '7',
+      });
+
+      // Transform the response data into the desired format
+      const transformedData = {
+          flightOffers: response.data.map(flight => ({
+              offerId: flight.id, // Mapping id to offerId
+              segments: flight.itineraries.map(itinerary => ({
+                  departure: {
+                      airport: itinerary.segments[0].departure.iataCode, // Change from departureAirport to airport
+                      time: itinerary.segments[0].departure.at, // Change from departureDateTime to time
+                  },
+                  arrival: {
+                      airport: itinerary.segments[0].arrival.iataCode, // Change from arrivalAirport to airport
+                      time: itinerary.segments[0].arrival.at, // Change from arrivalDateTime to time
+                  },
+              })),
+              price: {
+                  total: parseFloat(flight.price.total), // Ensure total is a number
+              },
+              travelerPricing: {
+                  fareDetails: {
+                      cabin: flight.travelerPricings[0].fareDetailsBySegment[0].cabin, // Mapping cabin from fareDetailsBySegment
+                  }
+              }
+          })),
+      };
+
+      return transformedData;
+  } catch (error) {
+      throw new Error(error.response ? error.response.body : error.message);
+  }
+};
+
 module.exports = {
   createCategory,
   getAllCategories,
@@ -290,7 +365,9 @@ module.exports = {
   setFlagToZeroForActivity,
   bookEvent,
   cancelEvent,
-  getTouristEmailById
+  getTouristEmailById,
+  cityAndAirportSearch,
+  flightSearch
  
 };
 
