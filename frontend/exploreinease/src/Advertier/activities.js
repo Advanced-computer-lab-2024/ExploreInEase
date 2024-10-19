@@ -48,6 +48,7 @@ function Activity() {
   const [currentActivity, setCurrentActivity] = useState(null);
   const [map, setMap] = useState(null);
   const [placesService, setPlacesService] = useState(null);
+  const [markerPosition, setMarkerPosition] = useState(null);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [activityForm, setActivityForm] = useState({
@@ -95,7 +96,7 @@ const getAllActivities =async()=>{
 
     // Pass the fetched activities to the Activities page
         setActivities(response.data);
-        console.log(activities);
+        console.log("Activities:",activities);
             
   } catch (err) {
     // Check if there is a response from the server and handle error
@@ -157,9 +158,14 @@ const getAllTags=async ()=>{
   try {
     const apiPath = `http://localhost:3030/getAllPreferenceTags/${id}`;  // Ensure this matches your API route
     const response = await axios.get(apiPath);
+    console.log(response);
+    
     if (Array.isArray(response.data.tags)) {
-      setTagsList(response.data.tags);
-
+      const tags = response.data.tags.map(tag => ({
+        id: tag._id,
+        name: tag.tags
+      }));
+      setTagsList(tags);      
     } else {
       console.error('Unexpected data format from API');
     }
@@ -221,57 +227,65 @@ function convertTimeToFullDate(timeString) {
 
   // Step 4: Set the time on the current date
   currentDate.setHours(hours, minutes, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
+  console.log("Current Date",currentDate);
 
   return currentDate;
+  
 }
+console.log("Data",activities);
 
 const handleSaveActivity = async () => {
 
   try {
     const updatedPrice =
       activityForm.price[0] === activityForm.price[1]
-        ? [activityForm.price[0]]
+        ? activityForm.price[0]
         : activityForm.price;
+        // console.log("updatedPrice",activityForm.price[0]);
+        
     const updatedActivity = {
       ...activityForm,
-      price: updatedPrice,
       tags: Array.isArray(activityForm.tags) ? activityForm.tags : [], // Ensure tags is always an array of objects
     };
+    
     if (currentActivity !== null) {
       // console.log("Activity",currentActivity);
-      console.log("Id of activity",currentActivity._id);
-      const currentActivityId=currentActivity._id;
+      console.log("Updated activity:",updatedActivity);
       // Updating existing activity
-      const options = {
-        apiPath: `/activity/${currentActivity._id}/${id}`,
-        params: { currentActivityId, id },
-        body: {
-          name: currentActivity.name,
-          date: dayjs(currentActivity.date).format('YYYY-MM-DD'),
-          time: currentActivity.time,
-          location: currentActivity.location,
-          price: currentActivity.price[1],
-          category: categoryList.find(item => item.id === currentActivity.category)?.id,
-          tags: currentActivity.tags || [],
-          specialDiscounts: currentActivity.specialDiscounts,
-          isOpen: currentActivity.isOpen || false,
-          created_by: id,
-        },
-      };
-      const response = await NetworkService.put(options);
-      setActivities((prevActivities) =>
-        prevActivities.map((activity) =>
-          activity.id === activityForm.id ? response.data : activity
-        )
-      );
+      const apiPath=`http://localhost:3030/activity/${updatedActivity._id}/${id}`;
+      const body= {
+          date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
+          time: typeof updatedActivity.time === 'string' 
+          ? updatedActivity.time 
+          : dayjs(updatedActivity.time).format('hh:mm'),
+          location: updatedActivity.location,
+          price: updatedActivity.price,
+          category: updatedActivity.categoryId,
+          tags: updatedActivity.tags || [],
+          specialDiscounts: updatedActivity.specialDiscounts,
+          isOpen: updatedActivity.isOpen || false,
+        };
+        console.log("body:",body);
+
+        const response = await axios.put(apiPath,body);
+        console.log("response:",response.data.activity);
+        
+      // setActivities((prevActivities) =>
+      //   prevActivities.map((activity) =>
+      //     activity.id === activityForm.id ? response.data.activity : activity
+      //   )
+      // );
+      getAllActivities();
+
     } else {
+      console.log("hehhe");
       
       // Creating new activity
       const apiPath = `http://localhost:3030/activity`;
       const body = {
         name: updatedActivity.name,
         date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-        time: dayjs(updatedActivity.time).format('HH:mm'),
+        time: dayjs(updatedActivity.time).format('hh:mm'),
         location: updatedActivity.location,
         price: updatedActivity.price[1],
         category: updatedActivity.categoryId,
@@ -280,33 +294,27 @@ const handleSaveActivity = async () => {
         isOpen: updatedActivity.isOpen || false,
         created_by: id
       }
-      console.log(updatedActivity.time);
+      // console.log(updatedActivity.time);
       
-      console.log(body);
+      // console.log(body);
       
       const response = await axios.post(apiPath, body);
-      console.log(response);
-
-      // Add the new activity to the state
-      setActivities((prevActivities) => [...prevActivities, response.data]);
+      // console.log(response);
+      console.log("save",response.data);
+      getAllActivities();
     }
 
     handleClose();
   } catch (err) {
     if (err.response) {
       console.error('API Error:', err);
-      // You might want to set an error state here to display to the user
-      // setError(err.response.data.message);
     } else {
       console.error('Unexpected Error:', err);
-      // setError('An unexpected error occurred.');
     }
   }
 };
 
   const handleEditActivity = (activity) => {
-    console.log('Editing activity:', activity); // Log the activity being edited
-console.log("Activity to show",activity);
       setCurrentActivity(activity);
       if (activity.location) {        
       setActivityForm({
@@ -327,19 +335,15 @@ console.log("Activity to show",activity);
        setOpen(true); 
   };
 
-  const handleDeleteActivity = async (index) => {
-    
+  const handleDeleteActivity = async (index) => {  
     const activityid=activities[index]._id;
-    console.log(activityid);
-    console.log(id);
-    console.log(allActivity);
-    
     try {
       const options ={
          apiPath:`/activity/${activityid}/${id}`,
       };
       const response = NetworkService.delete(options);
-      setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
+       setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
+
     } catch (err) {
       if (err.response) {
         console.error('API Error:', err);
@@ -414,7 +418,6 @@ console.log("Activity to show",activity);
     const geocoder = new window.google.maps.Geocoder();
     
     setActivityForm((prev) => {
-      console.log('Updating activityForm:', { lat, lng }); // Debug log
       return {
         ...prev,
         location: {
@@ -423,11 +426,11 @@ console.log("Activity to show",activity);
         },
       };
     });
-    console.log(activityForm.location);
-    console.log(activityForm.location.latitude);
-    console.log(activityForm.location.longitude);
+  
  
     setMapCenter({ lat, lng });
+    setMarkerPosition({ lat, lng }); // Set the marker position
+
   }, []);
 
   // Handle Date change
@@ -508,10 +511,10 @@ console.log("Activity to show",activity);
                 renderValue={(selected) => selected.map(tag => tag).join(', ')}
                 label="Tags"
               >
-                {tagsList.map((tag,index) => (
-                  <MenuItem key={index} value={tag}>
+                {tagsList.map((tag) => (
+                  <MenuItem key={tag.id} value={tag.name}>
                   <Checkbox checked={activityForm.tags.indexOf(tag) > -1} />
-                        <ListItemText primary={tag} />
+                        <ListItemText primary={tag.name} />
                    </MenuItem>
                 ))}
               </Select>
@@ -546,9 +549,11 @@ console.log("Activity to show",activity);
                 onLoad={onLoad}
                 onClick={handleMapClick}
               >
-          {activityForm.location.latitude && activityForm.location.longitude && (
-              <Marker position={{ lat: activityForm.location.latitude, lng: activityForm.location.longitude }} />
-            )}
+                   {markerPosition && (
+                        <Marker 
+                          position={markerPosition||activityForm.location}
+                        />
+                      )}
               </GoogleMap>
 
             <TextField
@@ -578,10 +583,11 @@ console.log("Activity to show",activity);
                   <Typography variant="body2">Time: {activity.time}</Typography>
                   <Typography variant="body2">Price: {activity.price}</Typography>
                   <Typography variant="body2">Category: {categoryList.find(item =>item.id===activity.category)?.name}</Typography>
-                  <Typography variant="body2"> Tags: {activity.tags}</Typography>  
+                  <Typography variant="body2"> Tags: {activity.tags||'no tags fetched'}</Typography>  
                     <Typography variant="body2">Discounts: {activity.specialDiscounts}</Typography>
                   <Typography variant="body2">Location longitude: {activity.location?.longitude || mapCenter.lng}</Typography>
                   <Typography variant="body2">Location latitude: {activity.location?.latitude|| mapCenter.lat}</Typography>
+                  <Typography variant="body2">Booking: {activity.isOpen?"true":"false"}</Typography>
 
                 </CardContent>
                 <CardActions>

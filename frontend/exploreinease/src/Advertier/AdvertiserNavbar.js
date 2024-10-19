@@ -32,7 +32,7 @@ const HomePage = () => {
             const response = await NetworkService.get(options);
             setSuccess(response.message); // Set success message
             console.log(response);
-             navigate(`/viewAdvertiserProfile`,{state:{advertiser:response}});          
+             navigate(`/viewAdvertiserProfile`,{state:{advertiser:response,userId:userId}});          
           } catch (err) {
             if (err.response) {
                 console.log(err.message);

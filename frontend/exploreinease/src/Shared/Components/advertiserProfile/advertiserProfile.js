@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -27,10 +27,10 @@ const useForm = (initialValues) => {
   };
   return [formValues, handleChange];
 };
+
 const AdvertiserProfile = (props) => {
   const location=useLocation();
-  const { advertiser } = location.state || {};  
-
+  const { advertiser,userId } = location.state || {};  
   const initialUsername = advertiser?.advertiser.username || '';
   const initialEmail = advertiser?.advertiser.email || '';
   const initialPassword = advertiser?.advertiser.password || '';
@@ -53,6 +53,28 @@ const AdvertiserProfile = (props) => {
     founded: initialfounded || '',
   });
 
+  useEffect(() => {
+    getProfileData();
+  }, []);
+
+  const getProfileData =async ()=>{
+    try {
+      const options = {
+        apiPath: `/getAdvertiser/${userId}`,
+      };
+      
+      const response = await NetworkService.get(options);
+      const updatedAdvertiser = response.data.advertiser; // Adjust based on the actual structure of your response 
+      // Update form values with the fetched data
+    } catch (err) {
+      if (err.response) {
+          console.log(err.message);
+        console.log(err.response.data.message); // Set error message from server response if exists
+      } else {
+        console.log('An unexpected error occurred.'); // Generic error message
+      }
+    }
+  }
     const [isEditable, setIsEditable] = useState({
       email: false,
       password: false,
