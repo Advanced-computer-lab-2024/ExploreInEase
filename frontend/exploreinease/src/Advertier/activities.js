@@ -25,8 +25,8 @@ const containerStyle = {
   height: '400px',
 };
 const defaultCenter = {
-  lat: 30.033333, 
-  lng: 31.233334, 
+  lat: 30.033333, // Default to Egypt's latitude
+  lng: 31.233334, // Default to Egypt's longitude
 };
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -49,8 +49,6 @@ function Activity() {
   const [map, setMap] = useState(null);
   const [placesService, setPlacesService] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
-  const [searchInput, setSearchInput] = useState('');
-  const [isApiLoaded, setIsApiLoaded] = useState(false);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [activityForm, setActivityForm] = useState({
@@ -69,7 +67,8 @@ function Activity() {
     specialDiscounts: 0,
     isOpen: true,
   });
-
+  const [searchInput, setSearchInput] = useState('');
+  const [isApiLoaded, setIsApiLoaded] = useState(false);
 console.log(id);
 
   useEffect(() => {
@@ -88,7 +87,7 @@ useEffect(()=>
 const getAllActivities =async()=>{
   try {
     // Construct the API path
-    const apiPath = `http://localhost:3030/activity/${id}`;  // Ensure this matches your API route
+    const apiPath = `http://localhost:3030/activity/user/${id}/allActivities`;  // Ensure this matches your API route
     // Make the GET request using Axios
     const response = await axios.get(apiPath);
 
@@ -228,8 +227,10 @@ function convertTimeToFullDate(timeString) {
 
   // Step 4: Set the time on the current date
   currentDate.setHours(hours, minutes, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
+  console.log("Current Date",currentDate);
 
   return currentDate;
+  
 }
 console.log("Data",activities);
 
@@ -277,13 +278,14 @@ const handleSaveActivity = async () => {
       getAllActivities();
 
     } else {
+      console.log("hehhe");
       
       // Creating new activity
       const apiPath = `http://localhost:3030/activity`;
       const body = {
         name: updatedActivity.name,
         date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-        time: dayjs(updatedActivity.time).format('HH:mm'),
+        time: dayjs(updatedActivity.time).format('hh:mm'),
         location: updatedActivity.location,
         price: updatedActivity.price[1],
         category: updatedActivity.categoryId,
@@ -321,10 +323,11 @@ const handleSaveActivity = async () => {
   const handleEditActivity = (activity) => {
    
       setCurrentActivity(activity);
+      
       if (activity.location) {        
       setActivityForm({
         ...activity,
-        time:activity.time,
+        time:convertTimeToFullDate(activity.time),
         category: categoryList.find(item =>item.id===activity.category)?.name,
           location:{
           latitude:activity.location.latitude||mapCenter.lat,

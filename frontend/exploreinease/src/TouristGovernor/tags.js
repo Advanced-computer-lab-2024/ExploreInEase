@@ -85,8 +85,7 @@ function Tags() {
       try {
         const response = await axios.post(apiPath, body);
         console.log(response);
-  
-        setTags((prevTags) => [...prevTags, { type: tagType, period }]);
+        getAllTags();
         handleClose();
       } catch (error) {
         console.error('Error while saving the tag:', error);
@@ -127,7 +126,8 @@ function Tags() {
             >
               <MenuItem value="monuments">Monuments</MenuItem>
               <MenuItem value="museums">Museums</MenuItem>
-              <MenuItem value="religious sites">Religious Sites</MenuItem>
+              <MenuItem value="religious">Religious </MenuItem>
+              <MenuItem value="sites">Sites</MenuItem>
               <MenuItem value="palaces">Palaces</MenuItem>
               <MenuItem value="castles">Castles</MenuItem>
               <MenuItem value="palaces/castles">Palaces/Castles</MenuItem>
