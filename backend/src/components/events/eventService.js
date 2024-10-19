@@ -161,6 +161,7 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
     }
 };
 
+
 const searchFlights = async ({ originCode, destinationCode, dateOfDeparture }) => {
     try {
         const result = await eventRepository.flightSearch({ originCode, destinationCode, dateOfDeparture });
@@ -169,6 +170,111 @@ const searchFlights = async ({ originCode, destinationCode, dateOfDeparture }) =
         throw new Error('Error fetching flights: ' + error.message);
     }
 };
+
+
+const Amadeus = require('amadeus');
+
+const amadeus = new Amadeus({
+    clientId: process.env.AMADEUS_CLIENT_ID2, // Store your API keys in environment variables
+    clientSecret: process.env.AMADEUS_CLIENT_SECRET2,
+});
+
+
+// Fetch city code by city name (returns city name and IATA code only)
+const fetchCityCode = async (city) => {
+  try {
+      const response = await amadeus.referenceData.locations.cities.get({ keyword: city });
+      
+      // Extract and return only the city name and IATA code, excluding those without an IATA code
+      const simplifiedResponse = response.data
+        .filter(location => location.iataCode) // Exclude locations without an IATA code
+        .map(location => ({
+            name: location.name,
+            iataCode: location.iataCode
+        }));
+      
+      return simplifiedResponse;
+  } catch (error) {
+      throw new Error(`Error fetching city code: ${error.message}`);
+  }
+};
+
+
+// Fetch hotels by city code (returns only iata code, name, and hotel id)
+const fetchHotelsByCityCode = async (cityCode) => {
+  try {
+      const response = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
+      
+      // Extract only the iataCode, name, and hotelId from the response
+      const simplifiedResponse = response.data.map(hotel => ({
+          iataCode: hotel.iataCode,
+          name: hotel.name,
+          hotelId: hotel.hotelId
+      }));
+      
+      return simplifiedResponse;  // Return the simplified response
+  } catch (error) {
+      throw new Error(`Error fetching hotels: ${error.message}`);
+  }
+};
+
+
+// Fetch offers by hotel ID (returns formatted response for all offers)
+const fetchOffersByHotelId = async (hotelId) => {
+    try {
+        const response = await amadeus.shopping.hotelOffersSearch.get({ hotelIds: hotelId, adults: '2' });
+
+        // Check if response data contains offers
+        const formattedResponse = response.data.flatMap(hotel => {
+            return hotel.offers.map(offer => {
+                const roomType = offer.room.typeEstimated;  // Extract room type information
+
+                return {
+                    hotelId: hotel.hotel.hotelId,
+                    name: hotel.hotel.name,
+                    cityCode: hotel.hotel.cityCode,
+                    checkInDate: offer.checkInDate,
+                    checkOutDate: offer.checkOutDate,
+                    boardType: offer.boardType,
+                    category: roomType ? roomType.category : null,
+                    beds: roomType ? roomType.beds : null,
+                    bedType: roomType ? roomType.bedType : null,
+                    text: offer.room.description ? offer.room.description.text : null,
+                    adults: offer.guests ? offer.guests.adults : null,
+                    total: offer.price ? offer.price.total : null
+                };
+            });
+        });
+
+        return formattedResponse;  // Return the formatted response
+    } catch (error) {
+        throw new Error(`Error fetching hotel offers: ${error.message}`);
+    }
+};
+
+
+// Service method to search for transfer offers
+const searchTransferOffers = async (transferData) => {
+  try {
+      const response = await amadeus.shopping.transferOffers.post(transferData);
+      return response.data; // Return the response data
+  } catch (error) {
+      throw new Error(`Error fetching transfer offers: ${error.message}`);
+  }
+};
+
+// Service method to book a transfer
+const bookTransfer = async (offerId, bookingData) => {
+  try {
+      const response = await amadeus.ordering.transferOrders.post(bookingData, offerId);
+      return response.data; // Return the response data
+  } catch (error) {
+      throw new Error(`Error booking transfer: ${error.message}`);
+  }
+};
+
+
+
   
 module.exports = {
   getUserEvents,
@@ -186,7 +292,12 @@ module.exports = {
   cancelEventToTourist,
   sendEventEmail,
   searchCityAndAirport,
-  searchFlights
+  searchFlights,
+  fetchCityCode,
+  fetchHotelsByCityCode,
+  fetchOffersByHotelId,
+  searchTransferOffers,
+  bookTransfer
 
 };
 

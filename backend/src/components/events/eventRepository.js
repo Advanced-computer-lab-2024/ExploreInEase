@@ -279,8 +279,8 @@ const getTouristEmailById = async (touristId) => {
 const Amadeus = require('amadeus');
 
 const amadeus = new Amadeus({
-    clientId: process.env.AMADEUS_CLIENT_ID, // Store your API keys in environment variables
-    clientSecret: process.env.AMADEUS_CLIENT_SECRET,
+    clientId: process.env.AMADEUS_CLIENT_ID2, // Store your API keys in environment variables
+    clientSecret: process.env.AMADEUS_CLIENT_SECRET2,
 });
 
 // City and Airport search

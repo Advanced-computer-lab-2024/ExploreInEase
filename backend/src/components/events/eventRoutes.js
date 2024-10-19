@@ -285,6 +285,24 @@ router.get('/city-and-airport-search/:parameter', eventController.cityAndAirport
 // Flight search route
 router.get('/flight-search', eventController.flightSearch);
 
+// Route to get city code by city name
+router.get('/city/:city', eventController.getCityCode);
+
+// Route to get hotel IDs by city code
+router.get('/hotels/:cityCode', eventController.getHotelsByCityCode);
+
+// Route to get offers by hotel ID
+router.get('/offers/:hotelId', eventController.getOffersByHotelId);
+
+
+// Route to search for transfer offers
+router.get('/transfer', eventController.searchTransferOffers);
+
+// Route to book a transfer
+router.post('/transfer/book/:offerId', eventController.bookTransfer);
+
+
+
 
 
 module.exports = router;

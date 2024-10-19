@@ -274,6 +274,64 @@ const flightSearch = async (req, res) => {
 
 
 
+// Controller to get city code by city name (returns full Amadeus response)
+const getCityCode = async (req, res) => {
+  try {
+      const response = await eventService.fetchCityCode(req.params.city);
+      res.status(200).json(response);  // Return full response
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+// Controller to get hotel IDs by city code (returns full Amadeus response)
+const getHotelsByCityCode = async (req, res) => {
+  try {
+      const response = await eventService.fetchHotelsByCityCode(req.params.cityCode);
+      res.status(200).json(response);  // Return full response
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+// Controller to get offers by hotel ID (returns full Amadeus response)
+const getOffersByHotelId = async (req, res) => {
+  try {
+      const response = await eventService.fetchOffersByHotelId(req.params.hotelId);
+      res.status(200).json(response);  // Return full response
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+// Controller method to search for transfer offers
+const searchTransferOffers = async (req, res) => {
+  try {
+      const transferData = req.body; // Expecting the body to contain the search parameters
+      const offers = await eventService.searchTransferOffers(transferData);
+      res.status(200).json(offers);
+  } catch (error) {
+      console.error('Error fetching transfer offers:', error);
+      res.status(500).json({ message: error.message });
+  }
+};
+
+// Controller method to book a transfer
+const bookTransfer = async (req, res) => {
+  try {
+      const offerId = req.params.offerId;
+      const bookingData = req.body; // Expecting booking parameters in the body
+      const bookingConfirmation = await eventService.bookTransfer(offerId, bookingData);
+      res.status(200).json(bookingConfirmation);
+  } catch (error) {
+      console.error('Error booking transfer:', error);
+      res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
     getUserEvents,
     createCategory,
@@ -290,6 +348,12 @@ module.exports = {
     cancelBookingEvent,
     sendEventEmail,
     cityAndAirportSearch,
-    flightSearch
+    flightSearch,
+    getCityCode,
+    getHotelsByCityCode,
+    getOffersByHotelId,
+    searchTransferOffers,
+    bookTransfer
+
   };
   
