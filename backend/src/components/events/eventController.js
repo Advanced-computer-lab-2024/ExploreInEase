@@ -718,18 +718,24 @@ const updateHistoricalPlace = async (req, res) => {
       const { updateValues } = req.body;
 
       if (!_id || !userId) {
+        console.log("test 1");
+        
           return res.status(400).json({ message: 'Missing inputs' });
       }
 
       const type = await eventRepository.getType(userId);
       if (type !== 'tourismGovernor') {
+        console.log("test 2");
+
           return res.status(400).json({ message: 'Invalid type' });
       }
       const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id);
       if (!getHistoricalPlace) {
         return res.status(404).json({ message: 'Historical Place not found.' });
       }
-      if(getHistoricalPlace.created_by !== userId) {
+      if(getHistoricalPlace.response.historicalPlace.created_by.toString()  !== userId) {
+        console.log("test 3");
+
         return res.status(400).json({ message: 'Cannot Update the Historical Place as it is not yours.' });
       }
       const updatedPlace = await eventService.updateHistoricalPlace(_id, userId, updateValues);
@@ -754,11 +760,11 @@ const deleteHistoricalPlace = async (req, res) => {
       if (type !== 'tourismGovernor') {
           return res.status(400).json({ message: 'Invalid type' });
       }
-      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id);
+      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id, userId);
       if (!getHistoricalPlace) {
         return res.status(404).json({ message: 'Historical Place not found.' });
       }
-      if(getHistoricalPlace.created_by !== userId) {
+      if(getHistoricalPlace.response.historicalPlace.created_by.toString() !== userId) {
         return res.status(400).json({ message: 'Cannot Delete the Historical Place as it is not yours.' });
       }
       const deletedPlace = await eventService.deleteHistoricalPlace(_id, userId);
@@ -779,6 +785,9 @@ const getAllHistoricalTags = async (req, res) => {
   }
   const type = await eventRepository.getType(userId);
   console.log("type:",type);
+  if (type !== 'tourGuide' && type !== 'tourist' && type != 'guest' && type != 'tourismGovernor') {
+    return res.status(400).json({ message: 'Invalid type' });
+  }
   try {
     const tags = await eventService.getAllHistoricalTags();
     return res.status(200).json({message: "Tags fetched successfully", tags: tags});

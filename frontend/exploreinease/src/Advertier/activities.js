@@ -25,8 +25,8 @@ const containerStyle = {
   height: '400px',
 };
 const defaultCenter = {
-  lat: 30.033333, // Default to Egypt's latitude
-  lng: 31.233334, // Default to Egypt's longitude
+  lat: 30.033333, 
+  lng: 31.233334, 
 };
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -49,6 +49,8 @@ function Activity() {
   const [map, setMap] = useState(null);
   const [placesService, setPlacesService] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
+  const [searchInput, setSearchInput] = useState('');
+  const [isApiLoaded, setIsApiLoaded] = useState(false);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [activityForm, setActivityForm] = useState({
@@ -67,8 +69,7 @@ function Activity() {
     specialDiscounts: 0,
     isOpen: true,
   });
-  const [searchInput, setSearchInput] = useState('');
-  const [isApiLoaded, setIsApiLoaded] = useState(false);
+
 console.log(id);
 
   useEffect(() => {
@@ -87,7 +88,7 @@ useEffect(()=>
 const getAllActivities =async()=>{
   try {
     // Construct the API path
-    const apiPath = `http://localhost:3030/activity/user/${id}/allActivities`;  // Ensure this matches your API route
+    const apiPath = `http://localhost:3030/activity/${id}`;  // Ensure this matches your API route
     // Make the GET request using Axios
     const response = await axios.get(apiPath);
 
@@ -255,7 +256,7 @@ const handleSaveActivity = async () => {
           date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
           time: typeof updatedActivity.time === 'string' 
           ? updatedActivity.time 
-          : dayjs(updatedActivity.time).format('HH:mm'),
+          : dayjs(updatedActivity.time).format('hh:mm'),
           location: updatedActivity.location,
           price: updatedActivity.price,
           category: updatedActivity.categoryId,

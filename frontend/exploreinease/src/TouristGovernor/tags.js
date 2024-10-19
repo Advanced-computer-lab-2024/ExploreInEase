@@ -29,7 +29,6 @@ function Tags() {
   useEffect(() => {
     getAllTags();
   }, []);
-
   
   const getAllTags=async ()=>{
     try {

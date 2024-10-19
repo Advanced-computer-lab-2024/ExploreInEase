@@ -25,9 +25,17 @@ const GovernorNavbar = () => {
        }
       else {
         try{
-       navigate(`/HistoricalPlaces`,{state:{governorId}});   
-        }catch {
-
+            const options = 
+            {
+              apiPath: `/historical-places/${governorId}/allHistoricalPlaces`,
+            };
+            const response1 = await NetworkService.get(options);
+            // setSuccess(response.message); // Set success message
+            const response = response1.filter(item=>item.created_by.toString()===governorId);
+            navigate(`/HistoricalPlaces`,{state:{governorId,response}});   
+          } 
+        catch {
+          console.log('An unexpected error occurred.'); // Generic error message
         }       
       }
       };
