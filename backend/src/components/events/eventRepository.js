@@ -359,9 +359,10 @@ const getHistoricalPlaceById = async (id) => {
 };
 
 // Update a Historical Place by ID
-const updateHistoricalPlace = async (id, data) => {
-  return await HistoricalPlace.findByIdAndUpdate(id, data, { new: true });
-};
+const updateHistoricalPlace = async (_id, data) => {
+  console.log("data:", data.updateValues);
+  return await HistoricalPlace.findByIdAndUpdate(_id, data.updateValues);
+};                      
 
 // Delete a Historical Place by ID
 const deleteHistoricalPlace = async (id) => {

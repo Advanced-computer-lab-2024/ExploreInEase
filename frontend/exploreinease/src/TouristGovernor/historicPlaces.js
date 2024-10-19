@@ -189,31 +189,36 @@ if (currentPlace==null){
     console.log("current place",currentPlace);
     
     try{
-      //     const formattedOpeningHours = currentPlace.openingHours 
-      // ? `${currentPlace?.openingHours[0].format("hh:mm a")} - ${currentPlace?.openingHours[1].format("hh:mm a")}` 
-      // : '';
-      const body = {
-        name: currentPlace.name,
-        description: currentPlace.description,
+          const formattedOpeningHours = newHistoricPlace.openingHours 
+      ? `${newHistoricPlace?.openingHours[0].format("hh:mm a")} - ${newHistoricPlace?.openingHours[1].format("hh:mm a")}` 
+      : '';
+      const updateValues =
+      {
+        name: newHistoricPlace.name,
+        description: newHistoricPlace.description,
         pictures: images.map((file) => URL.createObjectURL(file)),
         location: {
-          latitude: currentPlace.location.latitude,
-          longitude: currentPlace.location.longitude,
-          address: currentPlace.location.address,
+          latitude: newHistoricPlace.location.latitude,
+          longitude: newHistoricPlace.location.longitude,
+          address: newHistoricPlace.location.address,
         },
-        openingHours: currentPlace.openingHours ,
+        openingHours: formattedOpeningHours ,
         ticketPrice: {
-          student: currentPlace.ticketPrice.student,
-          native: currentPlace.ticketPrice.native,
-          foreign: currentPlace.ticketPrice.foreign,
+          student: newHistoricPlace.studentTicketPrice,
+          native: newHistoricPlace.nativeTicketPrice,
+          foreign: newHistoricPlace.foreignerTicketPrice,
         },
         created_by: governorId,
       };
-      console.log(body);
+      const body={updateValues: {updateValues}};
+      console.log(updateValues);
       
+      console.log("Body sent:",body);
       const response = await axios.put(`http://localhost:3030/historical-places/${currentPlace._id}/${governorId}`, body);
+    
       console.log(response);
       getAllHistoricalPlaces();
+      handleClose();
     }catch (error) {
       console.error('Error creating historical place:', error);
       setErrorMessage('Error: Something went wrong. Please try again.');

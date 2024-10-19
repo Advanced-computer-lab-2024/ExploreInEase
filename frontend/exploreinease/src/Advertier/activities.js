@@ -300,30 +300,22 @@ const handleSaveActivity = async () => {
       
       const response = await axios.post(apiPath, body);
       // console.log(response);
-
-      // Add the new activity to the state
       console.log("save",response.data);
       getAllActivities();
-      // setActivities((prevActivities) => [...prevActivities, response.data]);
     }
 
     handleClose();
   } catch (err) {
     if (err.response) {
       console.error('API Error:', err);
-      // You might want to set an error state here to display to the user
-      // setError(err.response.data.message);
     } else {
       console.error('Unexpected Error:', err);
-      // setError('An unexpected error occurred.');
     }
   }
 };
 
   const handleEditActivity = (activity) => {
-   
       setCurrentActivity(activity);
-      
       if (activity.location) {        
       setActivityForm({
         ...activity,

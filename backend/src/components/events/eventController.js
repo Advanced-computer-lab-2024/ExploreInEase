@@ -717,25 +717,23 @@ const updateHistoricalPlace = async (req, res) => {
       const { _id, userId } = req.params;
       const { updateValues } = req.body;
 
+      console.log(updateValues);
+
       if (!_id || !userId) {
-        console.log("test 1");
-        
           return res.status(400).json({ message: 'Missing inputs' });
       }
 
       const type = await eventRepository.getType(userId);
+      console.log(type);
       if (type !== 'tourismGovernor') {
-        console.log("test 2");
-
           return res.status(400).json({ message: 'Invalid type' });
       }
-      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id);
+      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id, userId);
       if (!getHistoricalPlace) {
         return res.status(404).json({ message: 'Historical Place not found.' });
       }
-      if(getHistoricalPlace.response.historicalPlace.created_by.toString()  !== userId) {
-        console.log("test 3");
-
+      console.log(getHistoricalPlace);
+      if(getHistoricalPlace.response.historicalPlace.created_by.toString() !== userId) {
         return res.status(400).json({ message: 'Cannot Update the Historical Place as it is not yours.' });
       }
       const updatedPlace = await eventService.updateHistoricalPlace(_id, userId, updateValues);

@@ -430,12 +430,14 @@ const updateHistoricalPlace = async (id, userId, data) => {
   if (!historicalPlace) {
     return {status: 404, response: {message: 'Historical Place not found'}};
   }
-  if(historicalPlace.created_by != userId) {
+  console.log(historicalPlace.created_by.toString());
+  if(historicalPlace.created_by.toString() != userId) {
     return {status: 400, response: {message: 'You are not authorized to update this Historical Place'}};
   }
   const updatedHistoricalPlace = await eventRepository.updateHistoricalPlace(id, data);
+  console.log("updatedHistoricalPlace", updatedHistoricalPlace)
   if (!updatedHistoricalPlace) {
-    return {status: 500, response: {message: 'Failed to update Historical Place'}};
+    return {status: 500, response: {message: 'Failed to update Historical Placeeeeee'}};
   }
   return {status: 200, response: {message: 'Historical Place updated', updatedHistoricalPlace: updatedHistoricalPlace}};
 };
