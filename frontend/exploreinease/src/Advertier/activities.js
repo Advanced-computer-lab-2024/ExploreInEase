@@ -227,8 +227,10 @@ function convertTimeToFullDate(timeString) {
 
   // Step 4: Set the time on the current date
   currentDate.setHours(hours, minutes, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
+  console.log("Current Date",currentDate);
 
   return currentDate;
+  
 }
 console.log("Data",activities);
 
@@ -255,7 +257,7 @@ const handleSaveActivity = async () => {
           date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
           time: typeof updatedActivity.time === 'string' 
           ? updatedActivity.time 
-          : dayjs(updatedActivity.time).format('HH:mm'),
+          : dayjs(updatedActivity.time).format('hh:mm'),
           location: updatedActivity.location,
           price: updatedActivity.price,
           category: updatedActivity.categoryId,
@@ -276,13 +278,14 @@ const handleSaveActivity = async () => {
       getAllActivities();
 
     } else {
+      console.log("hehhe");
       
       // Creating new activity
       const apiPath = `http://localhost:3030/activity`;
       const body = {
         name: updatedActivity.name,
         date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-        time: dayjs(updatedActivity.time).format('HH:mm'),
+        time: dayjs(updatedActivity.time).format('hh:mm'),
         location: updatedActivity.location,
         price: updatedActivity.price[1],
         category: updatedActivity.categoryId,
@@ -320,10 +323,11 @@ const handleSaveActivity = async () => {
   const handleEditActivity = (activity) => {
    
       setCurrentActivity(activity);
+      
       if (activity.location) {        
       setActivityForm({
         ...activity,
-        time:activity.time,
+        time:convertTimeToFullDate(activity.time),
         category: categoryList.find(item =>item.id===activity.category)?.name,
           location:{
           latitude:activity.location.latitude||mapCenter.lat,
