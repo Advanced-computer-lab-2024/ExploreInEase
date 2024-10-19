@@ -15,7 +15,7 @@ const historicalPlaceSchema = new Schema({
     required: true,
   },
   location: {
-    type: {
+    type:  {
       latitude: {
         type: Number,
         required: true,

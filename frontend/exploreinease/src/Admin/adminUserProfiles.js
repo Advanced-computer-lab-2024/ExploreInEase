@@ -34,7 +34,7 @@ const AdminUserProfiles = () => {
 
   const handleDelete = async (id) => {
     console.log(id);
-    const accountType=userList.find(item=>item._id===id)?.type;
+    const accountType=userList.find(item=>item._id===id)?.type || 'tourist';
     console.log(accountType);
     console.log(AdminId);
     
@@ -63,7 +63,7 @@ const AdminUserProfiles = () => {
       };
       
       const response = await NetworkService.delete(options);
-      const updatedUsers = userList.filter((user) => user._id !== accountType);
+      const updatedUsers = userList.filter((user) => user._id !== id);
       setUserList(updatedUsers);
           console.log(response);
           

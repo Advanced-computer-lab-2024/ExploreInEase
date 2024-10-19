@@ -230,12 +230,14 @@ const getFilteredItineraries = async (filters) => {
 };
 
 const createHistoricalTag = async (tagData) => {
-  const tag = new HistoricalTag(tagData);
+  console.log(tagData);
+  
+  const tag = new historicalTags(tagData);
   return await tag.save();
 };  
 
 const getTypeForTag = async (id) => {
-  const user = await User.findOne({ _id: id });
+  const user = await Users.findOne({ _id: id });
   return user.type
 };
   
@@ -266,7 +268,9 @@ const createActivity = async (activityData) => {
 const findCategoryById = async (categoryId) => {
   return await ActivityCategory.findById(categoryId);
 };
-
+const getAllActivitiesInDatabase = async () => {
+  return await Activity.find();
+}
 const updateActivity = async (id, updateData) => {
   // Use the mongoose method to update an activity
   return await Activity.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
@@ -355,9 +359,10 @@ const getHistoricalPlaceById = async (id) => {
 };
 
 // Update a Historical Place by ID
-const updateHistoricalPlace = async (id, data) => {
-  return await HistoricalPlace.findByIdAndUpdate(id, data, { new: true });
-};
+const updateHistoricalPlace = async (_id, data) => {
+  console.log("data:", data.updateValues);
+  return await HistoricalPlace.findByIdAndUpdate(_id, data.updateValues);
+};                      
 
 // Delete a Historical Place by ID
 const deleteHistoricalPlace = async (id) => {
@@ -419,7 +424,8 @@ module.exports = {
   findTagByTypeAndPeriod,
   checkTourismGovernor,
   getTypeForTag,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
 };
 
 
