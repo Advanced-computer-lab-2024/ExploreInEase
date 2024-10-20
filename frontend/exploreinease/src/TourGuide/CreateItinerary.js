@@ -1,52 +1,90 @@
 import React, { useEffect, useState } from "react";
-import Select from 'react-select';
+import { Theme, useTheme } from '@mui/material/styles';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import NetworkService from "../NetworkService";
+import { useLocation } from "react-router-dom";
 import "./CreateItinerary.css"; // Import your CSS for styling
 
-const CreateItinerary = ({ userId }) => {
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+const getStyles = (name, selectedActivities, theme) => {
+  return {
+    fontWeight: selectedActivities.includes(name)
+      ? theme.typography.fontWeightMedium
+      : theme.typography.fontWeightRegular,
+  };
+};
+
+const CreateItinerary = () => {
+  const theme = useTheme();
   const [itineraryName, setItineraryName] = useState("");
-  const [activities, setActivities] = useState([]); // List of activities
-  const [selectedActivities, setSelectedActivities] = useState([]); // Selected activities
+  const [activities, setActivities] = useState([]); // List of all activities from backend
+  const [selectedActivityNames, setSelectedActivityNames] = useState([]); // Store selected activity names
+  const [selectedActivityIds, setSelectedActivityIds] = useState([]); // Store corresponding selected activity IDs
   const [locations, setLocations] = useState([]); // Store locations for activities
   const [durations, setDurations] = useState([]); // Store durations for activities
   const [language, setLanguage] = useState("");
   const [price, setPrice] = useState("");
   const [availableDates, setAvailableDates] = useState([]); // Store selected dates
-  const [accessibility, setAccessibility] = useState("");
+  const [accessibility, setAccessibility] = useState(false);
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropoffLocation, setDropoffLocation] = useState("");
   const [timeline, setTimeline] = useState("");
   const [directions, setDirections] = useState("");
-  const [activate, setActivate] = useState(false); // Change to boolean state
-  const [special, setSpecial] = useState(false); // Change to boolean state
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Track if the dropdown is open
+  const [activate, setActivate] = useState(false);
+  const [special, setSpecial] = useState(false);
+  const location = useLocation();
+  const { user } = location.state || {};
+  const userId = user._id;
+  console.log(userId);
 
   // Fetch activities from backend on component mount
   useEffect(() => {
     const fetchActivities = async () => {
       const response = await NetworkService.get({ apiPath: '/getAllActivities' });
-      const formattedActivities = response.map(activity => ({
-        value: activity.id,
-        label: activity.name, // Ensure this is the correct property for activity name
-      }));
-      setActivities(formattedActivities); // Set formatted activities
+      setActivities(response); // Store the full activity objects, including id and name
     };
 
     fetchActivities();
   }, []);
 
-  // Handle selection of activities
-  const handleActivityChange = (selectedOptions) => {
-    const newSelectedActivities = selectedOptions || [];
-    setSelectedActivities(newSelectedActivities);
+  // Handle selection of activities by names
+  const handleActivityChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+  
+    const selectedNames = typeof value === 'string' ? value.split(',') : value;
+    setSelectedActivityNames(selectedNames);
+  
+    // Get the corresponding activity IDs for the selected names
+    const selectedIds = selectedNames.map(name => {
+      const activity = activities.find(activity => activity.name === name);
+      return activity ? activity._id : null; // Change 'id' to '_id'
+    }).filter(id => id !== null); // Filter out any null values
+    setSelectedActivityIds(selectedIds);
     
-    // Update locations and durations based on the new selected activities
-    const updatedLocations = Array(newSelectedActivities.length).fill("");
-    const updatedDurations = Array(newSelectedActivities.length).fill("");
-    
+    // Reset locations and durations based on the number of selected activities
+    const updatedLocations = Array(selectedNames.length).fill("");
+    const updatedDurations = Array(selectedNames.length).fill("");
+  
     setLocations(updatedLocations);
     setDurations(updatedDurations);
   };
+  
 
   // Handle input changes for locations and durations
   const handleLocationChange = (index, value) => {
@@ -82,28 +120,27 @@ const CreateItinerary = ({ userId }) => {
     event.preventDefault();
 
     const itineraryData = {
-      userId,
       name: itineraryName,
-      activities: selectedActivities.map(activity => activity.value), // Extracting activity values
+      activities: selectedActivityIds, // Send the activity IDs instead of names
       locations,
       durations,
       language,
       price,
-      availableDates,
+      dateTimeAvailable: availableDates,
       accessibility,
       pickupLocation,
       dropoffLocation,
       timeline,
       directions,
       isActivated: activate ? 1 : 0,
-      isSpecial: special ? true: false,
-      createdBy: userId,
+      isSpecial: special ? true : false,
+      created_by: userId,
       flag: 1,
     };
 
     // Make an API call to create the itinerary
     const response = await NetworkService.post({ apiPath: '/itinerary', body: itineraryData });
-    console.log(response);
+    console.log(response.message);
     // Handle success/failure here
   };
 
@@ -124,71 +161,75 @@ const CreateItinerary = ({ userId }) => {
         </div>
 
         <div className="form-group">
-          <label>
-            Select Activities:
+          <label>Select Activities:</label>
+          <FormControl sx={{ m: 1, width: 300 }}>
+            <InputLabel id="activity-multiple-select-label">Activities</InputLabel>
             <Select
-              isMulti
-              options={activities.filter(activity => 
-                !selectedActivities.some(selected => selected.value === activity.value)
-              )}
+              labelId="activity-multiple-select-label"
+              id="activity-multiple-select"
+              multiple
+              value={selectedActivityNames}
               onChange={handleActivityChange}
-              onMenuOpen={() => setIsMenuOpen(true)} // Open the menu
-              onMenuClose={() => setIsMenuOpen(false)} // Close the menu
-              menuIsOpen={isMenuOpen} // Control the visibility of the menu
-              className="react-select"
-              classNamePrefix="select"
-              placeholder="Choose activities..."
-              required
-            />
-          </label>
+              input={<OutlinedInput label="Activities" />}
+              MenuProps={MenuProps}
+            >
+              {activities.map((activity) => (
+                <MenuItem
+                  key={activity.id}
+                  value={activity.name}
+                  style={getStyles(activity.name, selectedActivityNames, theme)}
+                >
+                  {activity.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
 
-        {/* Dynamically generate fields based on selected activities */}
-        {selectedActivities.map((activity, index) => (
-            <div key={activity.value} className="activity-fields">
-                <h4>{activity.label}</h4>
-                <div className="form-group">
-                    <label>
-                        Location:
-                        <input
-                            type="text"
-                            value={locations[index] || ""}
-                            onChange={(e) => handleLocationChange(index, e.target.value)}
-                            required
-                        />
-                    </label>
-                </div>
-
-                <div className="form-group">
-                    <label>
-                        Duration:
-                        <input
-                            type="text"
-                            value={durations[index] || ""}
-                            onChange={(e) => handleDurationChange(index, e.target.value)}
-                            required
-                        />
-                    </label>
-                </div>
+        {selectedActivityNames.map((activity, index) => (
+          <div key={activity} className="activity-fields">
+            <h4>{activity}</h4>
+            <div className="form-group">
+              <label>
+                Location:
+                <input
+                  type="text"
+                  value={locations[index] || ""}
+                  onChange={(e) => handleLocationChange(index, e.target.value)}
+                  required
+                />
+              </label>
             </div>
+
+            <div className="form-group">
+              <label>
+                Duration:
+                <input
+                  type="text"
+                  value={durations[index] || ""}
+                  onChange={(e) => handleDurationChange(index, e.target.value)}
+                  required
+                />
+              </label>
+            </div>
+          </div>
         ))}
 
         <div className="form-group">
           <label>Available Dates:</label>
           {availableDates.map((date, index) => (
-            <div key={date + index} className="date-input-group"> {/* Use a combination of date and index as key */}
-                <input
+            <div key={index} className="date-input-group">
+              <input
                 type="datetime-local"
                 value={date}
                 onChange={(e) => handleDateChange(index, e.target.value)}
                 required
-                />
-                <button type="button" className="remove-date-button" onClick={() => removeDateInput(index)}>
+              />
+              <button type="button" className="remove-date-button" onClick={() => removeDateInput(index)}>
                 x
-                </button>
+              </button>
             </div>
           ))}
-
           <button type="button" className="add-date-button" onClick={addDateInput}>
             +
           </button>
@@ -256,7 +297,7 @@ const CreateItinerary = ({ userId }) => {
 
         <div className="form-group">
           <label>
-            Drop Off Location:
+            Dropoff Location:
             <input
               type="text"
               value={dropoffLocation}
@@ -299,9 +340,11 @@ const CreateItinerary = ({ userId }) => {
           </label>
         </div>
 
-        <button type="submit" className="submit-button">
-          Create Itinerary
-        </button>
+        <div className="form-group">
+          <button type="submit" className="submit-button">
+            Create Itinerary
+          </button>
+        </div>
       </form>
     </div>
   );

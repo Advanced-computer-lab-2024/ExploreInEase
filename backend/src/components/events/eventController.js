@@ -491,9 +491,11 @@ const getItineraryById = async (req, res) => {
 const createItinerary = async (req, res) => {
   try {
     const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
-    console.log(req.body);
-    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
+    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !flag) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+    if(!created_by){
+      return res.status(400).json({ message: 'Missing created_by' });
     }
     if(!isSpecial){
       const isSpecial = false;
@@ -512,7 +514,7 @@ const createItinerary = async (req, res) => {
     if(!allActivities) {
       return res.status(404).json({ message: 'Activities not found.' });
     }
-
+    console.log(activities);
     const allActivitiesIds = allActivities.map(activity => activity._id.toString());
     const areAllActivitiesValid = activities.every(activityId => allActivitiesIds.includes(activityId));
 
