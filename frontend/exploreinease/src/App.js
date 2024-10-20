@@ -20,6 +20,7 @@ const ItineraryForm = React.lazy(() => import('./TourGuide/Itinerary'));
 const MuseumList = React.lazy(() => import('./TouristGovernor/MuseumList'));
 const ActivityList = React.lazy(() => import('./Advertier/ActivityList'));
 const ItineraryList = React.lazy(() => import('./TourGuide/ItineraryList'));
+const CreateItinerary = React.lazy(() => import('./TourGuide/CreateItinerary'));
 const GuestNavbar = React.lazy(() => import("./Guest/GuestNavbar"));
 const AdminNavbar = React.lazy(() => import('./Admin/AdminNavbar'));
 const AdvertiserNavbar = React.lazy(() => import("./Advertier/AdvertiserNavbar"));
@@ -53,6 +54,7 @@ const App = () => {
           <Route path="/viewTourGuideProfile" element={<TourGuideProfile />} />
           <Route path="/viewCreatedItineraryList" element={<ItineraryList />} />
           <Route path="/viewMyItinerary" element={<ItineraryForm />} />
+          <Route path="/createItinerary" element={<CreateItinerary />} />
           <Route path="/viewActivityCategory" element={<ActivityCategory />} />
           <Route path="/viewPreferencatags" element={<Preferencetags />} />
           <Route path="/viewAddedUsers" element={<AddUser />} />

@@ -42,14 +42,15 @@ const TourGuideHP = () => {
        else if(title == 'View My Created Itineraries') {
         try {
           const options = {
-            apiPath: `/itinerary/user/670328ceacfd9e94933ea931/allItineraries`,
+            apiPath: `/itinerary/user/${userId}/allItineraries`,
+            urlParam: userId
           };
           
           const response = await NetworkService.get(options);
           setSuccess(response.message); // Set success message
           const TourGuideItinerary=response;
           console.log(TourGuideItinerary);
-          navigate(`/viewCreatedItineraryList`,{state:{TourGuideItinerary}});          
+          navigate(`/viewCreatedItineraryList`,{state:{TourGuideItinerary, userId}});          
         } catch (err) {
           if (err.response) {
               console.log(err.message);
@@ -61,25 +62,7 @@ const TourGuideHP = () => {
         //  navigate('/viewCreatedItineraryList');
        }
        else {
-        try {
-          const options = {
-            apiPath: `/itinerary/user/${userId}/allItineraries`,
-          };
-          const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          const TourGuideItinerary=response;
-          console.log(TourGuideItinerary);
-          navigate(`/viewMyItinerary`,{state:{TourGuideItinerary}});          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
-        }
-        // navigate('/viewMyItinerary');
-
+        navigate('/createItinerary', {state: { user }});
        }
     };
   return (
@@ -100,7 +83,7 @@ const TourGuideHP = () => {
           <button onClick={() => handleClick("View My Created Itineraries")}
               className="small-button">View My Created Itineraries</button>
           <button onClick={() => handleClick("Create/Read/Update/Delete Itineraries")}
-              style={{width:220}}>Create/Read/Update/Delete Itineraries</button>
+              className="small-button">Create an Itinerary</button>
      
         <div style={{marginRight:5,marginTop:30,marginLeft:60}}>
           <select>
@@ -109,23 +92,23 @@ const TourGuideHP = () => {
             <option value="egp">EGP (ج.م)</option>
           </select>
         </div>
-        </div>
-        <div className="avatar-container">
+      </div>
+      <div className="avatar-container">
         <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
-        </div>
-      </nav>
-    </div>
+          sx={{
+            bgcolor: 'darkblue',
+            color: 'white',
+            width: 56,
+            height: 56,
+            fontSize: 24,
+            marginLeft: 2,
+          }}
+        >
+          {firstInitial}
+        </Avatar>
+      </div>
+    </nav>
+  </div>
   );
 };
 

@@ -16,6 +16,9 @@ const getActivitiesByUserId = async (userId) => {
     .exec(); 
 };
 
+const getAllActivitiesInDatabase = async () => {
+  return await Activity.find().select('name');
+};
 
 const getHistoricalPlacesByUserId = async (userId) => {
   return await HistoricalPlace.find({ created_by: userId })
@@ -288,8 +291,18 @@ const getAllActivitiesAdvertiser = async (userId) => {
 
 
 const getAllItineraries = async (userId) => {
-  return await Itinerary.find({ created_by: userId });
+  const itineraries = await Itinerary.find({ created_by: userId });
+
+  // Optional: Ensure each itinerary has a name
+  itineraries.forEach(itinerary => {
+    if (!itinerary.name) {
+      console.error(`Itinerary with ID ${itinerary._id} does not have a name.`);
+    }
+  });
+
+  return itineraries;
 };
+
 
 const getItineraryById = async (id) => {
   const itinerary = await Itinerary.findById(id)
@@ -419,7 +432,8 @@ module.exports = {
   findTagByTypeAndPeriod,
   checkTourismGovernor,
   getTypeForTag,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
 };
 
 

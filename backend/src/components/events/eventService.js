@@ -270,6 +270,9 @@ const getActivityById = async (id) => {
   return await eventRepository.getActivityById(id);
 };
 
+const getAllActivitiesInDatabase = async () => {
+  return await eventRepository.getAllActivitiesInDatabase();
+}
 const addActivity = async ({ name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by }) => {
   // Check if the category exists
   const categoryExists = await eventRepository.findCategoryById(category);
@@ -543,6 +546,7 @@ module.exports = {
   getAllActivitiesAdvertiser,
   getFilteredItineraries,
   getFilteredHistoricalPlaces,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
 };
 

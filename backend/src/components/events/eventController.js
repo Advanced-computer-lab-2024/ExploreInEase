@@ -284,7 +284,8 @@ const getActivityById = async (req, res) => {
     res.status(400).json({ message: 'Missing inputs' });
   }
   const type = await eventRepository.getType(userId);
-  if (type !== 'advertiser') {
+  console.log(type);
+  if (type !== 'advertiser' && type !== 'tourGuide') {
     return res.status(400).json({ message: 'Invalid type' });
   }
   try {
@@ -292,14 +293,21 @@ const getActivityById = async (req, res) => {
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' });
     }
-    if (activity.created_by !== userId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
-    }
     return res.status(200).json(activity);
   } catch (error) {
       return res.status(500).json({ message: error.message });
   }
 };
+
+const getAllActivitiesInDatabase = async (req, res) => {
+  try {
+    const activities = await eventService.getAllActivitiesInDatabase();
+    return res.status(200).json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+}
 
 const getAllActivities = async (req, res) => {
   const {userId} = req.params;
@@ -482,9 +490,9 @@ const getItineraryById = async (req, res) => {
 
 const createItinerary = async (req, res) => {
   try {
-    const {activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
-    
-    if(!activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
+    const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
+    console.log(req.body);
+    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
     if(!isSpecial){
@@ -512,7 +520,7 @@ const createItinerary = async (req, res) => {
       return res.status(400).json({ message: 'One or more provided activities are invalid.' });
     }
     
-    const itineraryData = { activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
+    const itineraryData = { name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
     
     // Call the service to create the itinerary
     const newItinerary = await eventService.createItinerary(itineraryData);
@@ -543,7 +551,7 @@ const updateItinerary = async (req, res) => {
     if (!getItinerary) {
       return res.status(404).json({ message: 'Itinerary not found.' });
     }
-    if(getItinerary.created_by !== userId) {
+    if(getItinerary.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
     }
       const updatedItinerary = await eventService.updateItinerary(_id, itineraryData);
@@ -578,7 +586,7 @@ const deleteItinerary = async (req, res) => {
     if (!getItinerary) {
       return res.status(404).json({ message: 'Itinerary not found.' });
     }
-    if(getItinerary.created_by !== userId) {
+    if(getItinerary.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
     }
       const deletedItinerary = await eventService.deleteItinerary(_id);
@@ -785,6 +793,7 @@ module.exports = {
   deleteHistoricalPlace,
   getAllItineraries,
   getAllActivities,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase
   };
   
