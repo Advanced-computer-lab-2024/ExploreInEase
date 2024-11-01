@@ -30,6 +30,8 @@ const ProductCard = () => {
   const { Product,Type, User } = location.state || {};
   console.log(User);
   const userId = User._id;
+  console.log("admin id",userId);
+  
   console.log(Product);
   const productId = Product._id;
   const isSellerOrAdmin = Type === 'seller' || Type === 'admin';
@@ -184,7 +186,7 @@ const ProductCard = () => {
       
       setNextId((prev) => prev + 1);
       handleClose();
-    }
+     }
   };
 
 const handleSubmitUpdate = async () => {
@@ -369,9 +371,7 @@ const handleSubmitUpdate = async () => {
             label="originalQuantity"
             name="originalQuantity"
             type="number"
-
             value={productData.originalQuantity || ''}
-            type='number'
             onChange={handleInputChange}
             fullWidth
             error={!!errors.originalQuantity}

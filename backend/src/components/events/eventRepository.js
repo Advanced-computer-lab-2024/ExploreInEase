@@ -16,6 +16,9 @@ const getActivitiesByUserId = async (userId) => {
     .exec(); 
 };
 
+const getAllActivitiesInDatabase = async () => {
+  return await Activity.find().select('name');
+};
 
 const getHistoricalPlacesByUserId = async (userId) => {
   return await HistoricalPlace.find({ created_by: userId })
@@ -262,6 +265,7 @@ const createActivity = async (activityData) => {
     isOpen: newActivity.isOpen,
     created_by: newActivity.created_by,
   }
+  console.log(createdActivity);
   return createdActivity;
 };
 
@@ -292,8 +296,18 @@ const getAllActivitiesAdvertiser = async (userId) => {
 
 
 const getAllItineraries = async (userId) => {
-  return await Itinerary.find({ created_by: userId });
+  const itineraries = await Itinerary.find({ created_by: userId });
+
+  // Optional: Ensure each itinerary has a name
+  itineraries.forEach(itinerary => {
+    if (!itinerary.name) {
+      console.error(`Itinerary with ID ${itinerary._id} does not have a name.`);
+    }
+  });
+
+  return itineraries;
 };
+
 
 const getItineraryById = async (id) => {
   const itinerary = await Itinerary.findById(id)
@@ -384,7 +398,12 @@ const getType = async (id) => {
 const getAllHistoricalTags = async () => {
   return await historicalTags.find();
 }
+
+const getHistoricalTagDetails = async (id) => {
+  return await historicalTags.find({ _id: id });
+}
 module.exports = {
+  getHistoricalTagDetails,
   createCategory,
   getAllCategories,
   updateCategoryById,

@@ -2503,6 +2503,7 @@ router.post('/createHistoricalTag/:_id', eventController.createHistoricalTag);
 
 router.get('/activity/:_id/:userId', eventController.getActivityById);
 router.get('/activity/user/:userId/allActivities', eventController.getAllActivities);
+router.get('/getAllActivities', eventController.getAllActivitiesInDatabase);
 router.post('/activity', eventController.addActivity);
 router.put('/activity/:_id/:userId', eventController.updateActivity);
 router.delete('/activity/:_id/:userId', eventController.deleteActivity);
@@ -2582,7 +2583,11 @@ router.delete('/historical-places/:_id/:userId', eventController.deleteHistorica
  */
 router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags);
 
+// <<<<<<< HEAD
 
 router.get('/allActivities', eventController.getAllActivitiesInDatabase);
+// =======
+router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
+// >>>>>>> FullMergeKSA
 
 module.exports = router;

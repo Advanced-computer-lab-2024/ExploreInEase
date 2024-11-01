@@ -1,93 +1,186 @@
-/* src/Shared/Components/ItineraryList.css */
-
 /* Global styles */
 body {
-    font-family: 'Arial', sans-serif; /* Use a modern font */
-    background-color: #e9ecef; /* Light background for contrast */
-    margin: 0;
-    padding: 20px;
-  }
-  
-  .itinerary-list-container {
-    padding: 20px;
-    max-width: 900px; /* Increased max width for better layout */
-    margin: auto;
-    background-color: #ffffff; /* White background for the cards */
-    border-radius: 12px; /* More rounded corners */
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Enhanced shadow for depth */
-  }
-  
-  h2 {
-    text-align: center;
-    color: #343a40; /* Darker text for better readability */
-    font-size: 2.5em; /* Increased font size */
-    margin-bottom: 20px; /* Spacing below the title */
-  }
-  
-  /* Flex layout for itinerary cards */
-  .itinerary-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Increased spacing between cards */
-  }
-  
-  /* Card styles */
-  .itinerary-card {
-    background-color: #f8f9fa; /* Light grey for cards */
-    border-radius: 8px; /* Rounded corners */
-    padding: 20px; /* More padding for content */
-    transition: transform 0.3s, box-shadow 0.3s; /* Smooth hover effects */
-    border: 1px solid #dee2e6; /* Light border */
-  }
-  
-  .itinerary-card:hover {
-    transform: translateY(-5px); /* Lift effect on hover */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
-  }
-  
-  /* Header styles */
-  .itinerary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  h3 {
-    font-size: 1.5em; /* Larger font size for activity titles */
-    color: #007bff; /* Blue color for activity titles */
-    margin: 0; /* Remove default margin */
-  }
-  
-  /* Detail styles */
-  .itinerary-details {
-    margin-top: 10px;
-  }
-  
-  .timeline {
-    font-weight: bold;
-    color: #17a2b8; /* Teal color for the timeline */
-    margin-bottom: 5px; /* Space below the timeline */
-  }
-  
-  .activity-duration,
-  .language,
-  .price,
-  .accessibility,
-  .pickup-dropoff {
-    margin: 5px 0; /* Space between details */
-    color: #495057; /* Dark grey for better readability */
-  }
-  
-  .booking-status {
-    font-weight: bold;
-    margin-top: 10px; /* Space above the status */
-  }
-  
-  /* Booking status colors */
-  .booking-status.open {
-    color: #28a745; /* Green for open status */
-  }
-  
-  .booking-status.closed {
-    color: #dc3545; /* Red for closed status */
-  }
+  font-family: 'Arial', sans-serif; /* Modern font */
+  background-color: #e9ecef; /* Light background */
+  margin: 0;
+  padding: 20px;
+}
+
+.itinerary-list-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  background-color: #ffffff; /* White background for cards */
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Shadow for depth */
+}
+
+h2 {
+  text-align: center;
+  color: #343a40; /* Dark text */
+  font-size: 2.5em; /* Title size */
+  margin-bottom: 20px; /* Spacing */
+}
+
+/* Itinerary cards */
+.itinerary-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between cards */
+}
+
+/* Card styles */
+.itinerary-card {
+  background-color: #f8f9fa; /* Light grey for cards */
+  border-radius: 8px;
+  padding: 20px;
+  transition: transform 0.3s, box-shadow 0.3s; /* Hover effects */
+  border: 1px solid #dee2e6; /* Light border */
+  position: relative; /* Relative position for action icons */
+  overflow: hidden; /* Ensure no overflow */
+}
+
+.itinerary-card:hover {
+  transform: translateY(-5px); /* Lift effect */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow */
+}
+
+/* Modal styles */
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white; /* White background for modal */
+  padding: 20px;
+  border-radius: 8px;
+  width: 500px; /* Width of the modal */
+  max-width: 90%; /* Responsive width */
+  max-height: 80vh; /* Maximum height for scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  position: relative;
+}
+
+
+.close {
+  color: #aaa; /* Close button color */
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000; /* Darker color on hover */
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Input styles */
+label {
+  display: block; /* Block display for labels */
+  margin-top: 15px; /* Space above each label */
+  margin-right: 10px; /* Space between label and input */
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+  width: 100%; /* Full width inputs */
+  padding: 10px; /* Inner padding */
+  margin-top: 5px; /* Space between label and input */
+  border-radius: 4px; /* Rounded corners */
+  border: 1px solid #ced4da; /* Light border */
+  transition: border 0.3s; /* Smooth border transition */
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  border-color: #007bff; /* Blue border on focus */
+  outline: none; /* Remove default outline */
+}
+
+/* Button styles */
+button {
+  margin-top: 15px; /* Space above button */
+  padding: 10px 15px; /* Button padding */
+  background-color: #007bff; /* Primary button color */
+  color: white; /* Text color */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor */
+  transition: background-color 0.3s; /* Smooth color transition */
+}
+
+button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Add and Remove Date Button */
+.add-date-button,
+.remove-date-button {
+  margin-right: 10px;
+  margin-top: 15px; /* Space above button */
+  padding: 5px 10px; /* Smaller padding for a smaller button */
+  background-color: #007bff; /* Primary button color */
+  color: white; /* Text color */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor */
+  transition: background-color 0.3s; /* Smooth color transition */
+  font-size: 14px; /* Smaller font size */
+}
+
+.add-date-button:hover,
+.remove-date-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.add-date-button2 {
+  margin-right: 10px;
+  margin-left: 30px;
+  margin-top: 15px; /* Space above button */
+  padding: 5px 10px; /* Smaller padding for a smaller button */
+  background-color: #007bff; /* Primary button color */
+  color: white; /* Text color */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor */
+}
+
+.add-date-button2:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Itinerary actions container */
+.itinerary-actions {
+  position: relative; /* Allow positioning of icons */
+  display: flex; /* Flexbox for alignment */
+  justify-content: flex-end; /* Align to the right */
+  margin-top: 10px; /* Space above the actions */
+}
+
+/* Icon styles */
+.itinerary-edit-icon,
+.itinerary-delete-icon {
+  color: blue; /* Blue color for icons */
+  font-size: 24px; /* Increase icon size */
+  margin-left: 15px; /* Space between icons */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: color 0.3s; /* Smooth color transition */
+}
+
+.itinerary-edit-icon:hover,
+.itinerary-delete-icon:hover {
+  color: darkblue; /* Darker blue on hover */
+}

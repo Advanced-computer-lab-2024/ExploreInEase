@@ -85,4 +85,5 @@ const GovernorNavbar = () => {
   );
 };
 
+
 export default GovernorNavbar;

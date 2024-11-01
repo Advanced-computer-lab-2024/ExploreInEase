@@ -294,7 +294,8 @@ const getActivityById = async (req, res) => {
     res.status(400).json({ message: 'Missing inputs' });
   }
   const type = await eventRepository.getType(userId);
-  if (type !== 'advertiser') {
+  console.log(type);
+  if (type !== 'advertiser' && type !== 'tourGuide') {
     return res.status(400).json({ message: 'Invalid type' });
   }
   try {
@@ -302,14 +303,21 @@ const getActivityById = async (req, res) => {
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' });
     }
-    if (activity.created_by !== userId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
-    }
     return res.status(200).json(activity);
   } catch (error) {
       return res.status(500).json({ message: error.message });
   }
 };
+
+const getAllActivitiesInDatabase = async (req, res) => {
+  try {
+    const activities = await eventService.getAllActivitiesInDatabase();
+    return res.status(200).json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+}
 
 const getAllActivities = async (req, res) => {
   const {userId} = req.params;
@@ -322,7 +330,6 @@ const getAllActivities = async (req, res) => {
       return res.status(400).json({ message: 'Invalid user type' });
     }
     const activities = await eventService.getAllActivitiesAdvertiser(userId); // Same here
-    console.log(activities);
     return res.status(200).json(activities);
   } catch (error) {
     console.error('Error fetching activitiesss:', error.message);
@@ -332,7 +339,7 @@ const getAllActivities = async (req, res) => {
 
 const addActivity = async (req, res) => {
   const { name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
-
+  console.log(tags);
   // Validate required fields
   if (!name || !date || !time || !location || !price || !category || !tags || typeof isOpen === 'undefined' || !created_by) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -503,23 +510,31 @@ const getItineraryById = async (req, res) => {
 
 const createItinerary = async (req, res) => {
   try {
-    const {activities,
-       locations,
-        timeline,
-         directions,
-          language,
-          price,
-          dateTimeAvailable,
-         accessibility,
-         pickupLocation,
-         dropoffLocation,
-         isActivated, 
-        created_by, 
-        flag,        
-       isSpecial} = req.body;
+    const {activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
     
     if(!activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+    if(!flag){
+      const flag = false;
+    }
+    else{
+      const flag = true;
+    }
+    if(!isActivated){
+      const isActivated = false;
+    }
+    else{
+      const isActivated = true;
+    }
+    if(!created_by){
+      return res.status(400).json({ message: 'Missing created_by' });
+    }
+    if(!accessibility){
+      const accessibility = false;
+    }
+    else{
+      const accessibility = true;
     }
     if(!isSpecial){
       const isSpecial = false;
@@ -538,7 +553,7 @@ const createItinerary = async (req, res) => {
     if(!allActivities) {
       return res.status(404).json({ message: 'Activities not found.' });
     }
-
+    console.log(activities);
     const allActivitiesIds = allActivities.map(activity => activity._id.toString());
     const areAllActivitiesValid = activities.every(activityId => allActivitiesIds.includes(activityId));
 
@@ -546,7 +561,7 @@ const createItinerary = async (req, res) => {
       return res.status(400).json({ message: 'One or more provided activities are invalid.' });
     }
     
-    const itineraryData = { activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
+    const itineraryData = { name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
     
     // Call the service to create the itinerary
     const newItinerary = await eventService.createItinerary(itineraryData);
@@ -577,7 +592,7 @@ const updateItinerary = async (req, res) => {
     if (!getItinerary) {
       return res.status(404).json({ message: 'Itinerary not found.' });
     }
-    if(getItinerary.created_by !== userId) {
+    if(getItinerary.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
     }
       const updatedItinerary = await eventService.updateItinerary(_id, itineraryData);
@@ -612,7 +627,7 @@ const deleteItinerary = async (req, res) => {
     if (!getItinerary) {
       return res.status(404).json({ message: 'Itinerary not found.' });
     }
-    if(getItinerary.created_by !== userId) {
+    if(getItinerary.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
     }
       const deletedItinerary = await eventService.deleteItinerary(_id);
@@ -796,7 +811,24 @@ const getAllHistoricalTags = async (req, res) => {
       .json({ error: "An error occurred", details: error.message });
   }
 }
+
+const getHistoricalTagDetails = async (req, res) => {
+  const { tagId } = req.params;
+  if(!tagId) {    
+    res.status(400).json({ message: 'Missing inputs' });
+  }
+  try {
+    const tag = await eventService.getHistoricalTagDetails(tagId);
+    return res.status(200).json({message: "Tags fetched successfully", tags: tag});
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred", details: error.message });
+  }
+}
 module.exports = {
+  getHistoricalTagDetails,
   getUserEvents,
   createCategory,
   getAllCategories,

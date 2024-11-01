@@ -40,7 +40,7 @@ const GuideAdvertiserSignUp = () => {
           console.log(response.User._id);
           window.localStorage.setItem('_id',response.User._id);
           window.localStorage.setItem('username',response.User.username);
-           navigate(`/TourGuideHomePage`,{state:{user}});
+           navigate(`/TourGuideHomePage`,{state:{User:user}});
            console.log(response.User);
            } catch (err) {
           if (err.response) {
@@ -64,7 +64,7 @@ const GuideAdvertiserSignUp = () => {
         const response =await NetworkService.post(options);
         const user=response.User;
         setSuccess(response.message); // Set success message
-        navigate(`/SellerHomePage`,{state:{user}});
+        navigate(`/SellerHomePage`,{state:{User:user}});
 
         } catch (err) {
         if (err.response) {
