@@ -308,10 +308,6 @@ const addActivity = async ({ name, date, time, location, price, category, tags, 
   
   return createdActivity;
 };
-const getAllActivitiesInDatabase = async () => {
-  return await eventRepository.getAllActivitiesInDatabase();
-}
-
 const updateActivity = async (id, updateData) => {
   // You can add additional validation or processing here if needed
   return await eventRepository.updateActivity(id, updateData);

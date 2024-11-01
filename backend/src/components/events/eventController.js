@@ -309,16 +309,6 @@ const getActivityById = async (req, res) => {
   }
 };
 
-const getAllActivitiesInDatabase = async (req, res) => {
-  try {
-    const activities = await eventService.getAllActivitiesInDatabase();
-    return res.status(200).json(activities);
-  } catch (error) {
-    console.error('Error fetching activities:', error.message);
-    return res.status(500).json({ message: error.message });
-  }
-}
-
 const getAllActivities = async (req, res) => {
   const {userId} = req.params;
   if (!userId) {
