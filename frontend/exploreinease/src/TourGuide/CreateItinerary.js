@@ -47,8 +47,8 @@ const CreateItinerary = () => {
   const [activate, setActivate] = useState(false);
   const [special, setSpecial] = useState(false);
   const location = useLocation();
-  const { user } = location.state || {};
-  const userId = user._id;
+  const { User } = location.state || {};
+  const userId = User._id;
   console.log(userId);
 
   // Fetch activities from backend on component mount

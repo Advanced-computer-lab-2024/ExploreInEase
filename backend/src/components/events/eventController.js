@@ -491,11 +491,31 @@ const getItineraryById = async (req, res) => {
 const createItinerary = async (req, res) => {
   try {
     const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
-    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !flag) {
+    console.log("      ");
+    console.log(req.body);
+    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !pickupLocation || !dropoffLocation) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+    if(!flag){
+      const flag = false;
+    }
+    else{
+      const flag = true;
+    }
+    if(!isActivated){
+      const isActivated = false;
+    }
+    else{
+      const isActivated = true;
     }
     if(!created_by){
       return res.status(400).json({ message: 'Missing created_by' });
+    }
+    if(!accessibility){
+      const accessibility = false;
+    }
+    else{
+      const accessibility = true;
     }
     if(!isSpecial){
       const isSpecial = false;

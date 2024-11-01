@@ -369,9 +369,7 @@ const handleSubmitUpdate = async () => {
             label="originalQuantity"
             name="originalQuantity"
             type="number"
-
             value={productData.originalQuantity || ''}
-            type='number'
             onChange={handleInputChange}
             fullWidth
             error={!!errors.originalQuantity}

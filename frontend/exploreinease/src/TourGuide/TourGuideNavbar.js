@@ -11,12 +11,11 @@ import { useLocation } from 'react-router-dom';
 const TourGuideHP = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = location.state || {};
+    const { User } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
-    const initialUsername = user.username;
-    const userId=user._id;
-    // console.log(user);
+    const initialUsername = User.username;
+    const userId=User._id;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     async function handleClick(title) {
         if (title == "My Profile"){
@@ -62,7 +61,7 @@ const TourGuideHP = () => {
         //  navigate('/viewCreatedItineraryList');
        }
        else {
-        navigate('/createItinerary', {state: { user }});
+        navigate('/createItinerary', {state: { User }});
        }
     };
   return (

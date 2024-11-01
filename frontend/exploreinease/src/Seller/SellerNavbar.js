@@ -11,9 +11,9 @@ const HomePage = () => {
     const navigate = useNavigate();
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
-    const { user } = location.state || {};
-    const initialUsername = user?.username;
-    const userId=user._id;
+    const { User } = location.state || {};
+    const initialUsername = User?.username;
+    const userId=User._id;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     async function handleClick(title) {
        if (title=="My Profile"){
@@ -47,7 +47,7 @@ const HomePage = () => {
           console.log(response);
           const Product=response.Products;
           const Type='Seller';
-          navigate(`/viewProduct`,{ state: { Product, Type ,User:user} });          
+          navigate(`/viewProduct`,{ state: { Product, Type ,User:User} });          
         } catch (err) {
           if (err.response) {
               console.log(err.message);
