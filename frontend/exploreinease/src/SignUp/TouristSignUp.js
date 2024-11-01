@@ -58,7 +58,7 @@ const TouristSignUp = () => {
       const tourist=response.tourist;
       setSuccess(response.message); // Set success message
       // console.log(response);
-      navigate(`/TouristHomePage`,{state:{tourist:tourist}});
+      navigate(`/TouristHomePage`,{state:{User:tourist}});
 
     } catch (err) {
       if (err.response) {

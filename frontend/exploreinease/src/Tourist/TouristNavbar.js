@@ -8,12 +8,13 @@ import { useLocation } from 'react-router-dom';
 const TouristNavbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { tourist } = location.state || {};
+    const { User } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
-    const initialUsername = tourist?.username;
+    const initialUsername = User?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-     const userId=tourist._id;
+     const userId=User?._id;
+     
     async function handleRegisterClick(title) {
         if (title == "View Products") {
             try {
@@ -26,7 +27,7 @@ const TouristNavbar = () => {
                 console.log(response);
                 const Product=response.Products;
                 const Type='tourist';
-                navigate(`/viewProduct`,{ state: { Product, Type ,User:tourist} });          
+                navigate(`/viewProduct`,{ state: { Product, Type ,User:User} });          
               } catch (err) {
                 if (err.response) {
                     console.log(err.message);
