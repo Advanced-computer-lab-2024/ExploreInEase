@@ -45,7 +45,7 @@ const App = () => {
           <Route path="/explore" element={<Filter />} />
           <Route path="/viewProduct" element={<Product />} />
           <Route path="/viewTouristProfile" element={<TouristProfile />} />
-          <Route path="/" element={<HistoricalPlaces />} />
+          <Route path="/HistoricalPlaces" element={<HistoricalPlaces />} />
           <Route path="/viewAllGovernorCreatedMuseum" element={<MuseumList />} />
           <Route path="/viewHistoricalTags" element={<Tags />} />
           <Route path="/viewSellerProfile" element={<SellerProfile />} />
