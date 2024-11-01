@@ -1,14 +1,17 @@
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
-
+const Itinerary = require('../../models/itinerary')
 // Find user by ID
-const findUserById = async (id) => {
+const findUserById = async (_id) => {
     try {
-        const user = await Users.findById(id);
-        return user ? user : null;
+        const existsUser = await Users.findOne({ _id });
+        if (existsUser) return existsUser;
+
+        const existsTourist = await Tourist.findOne({ _id });
+        return existsTourist ? {tourist: existsTourist, type: "tourist"} : false;
     } catch (error) {
-        console.error(`Error finding user: ${error.message}`);
-        return null;
+        console.error(`Error checking if user exists: ${error.message}`);
+        return false;
     }
 };
 
@@ -176,18 +179,20 @@ const login = async (username, password) => {
     }
 }
 
+// Check if the itinerary was completed by the tourist (after date passed and booked)
 const checkTourCompletion = async (touristId, itineraryId) => {
-    // Logic to check if the tourist has completed the itinerary
-    const completedTour = await Itinerary.findOne({
+    const itinerary = await Itinerary.findOne({
         _id: itineraryId,
-        // You can add a status field for completed itineraries if needed
-        // For now, assume the tour completion check is based on other factors.
+        tourists: touristId,
+        date: { $lt: new Date() }
     });
-
-    // Check if the tourist has a record of completing this itinerary
-    return completedTour ? true : false;
+    return itinerary !== null;
 };
 
+// Update tour guide data with a new rating
+const updateTourGuideRating = async (tourGuideId, updatedData) => {
+    return await Users.findByIdAndUpdate(tourGuideId, updatedData, { new: true });
+};
 
 module.exports = {
     addGovernorOrAdmin,
@@ -206,5 +211,6 @@ module.exports = {
     checkUserExists,
     checkUserExistsByEmail,
     login,
-    checkTourCompletion
+    checkTourCompletion,
+    updateTourGuideRating
 };

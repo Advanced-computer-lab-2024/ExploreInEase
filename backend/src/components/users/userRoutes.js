@@ -1147,7 +1147,7 @@ router.post('/login', userController.login);
 
 
 
-router.post('/rateTourGuide/:tourGuideId/:itineraryId', userController.rateTourGuide);
+router.post('/rateTourGuide', userController.rateTourGuide);
 
 
 module.exports = router;

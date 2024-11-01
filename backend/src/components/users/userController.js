@@ -391,16 +391,15 @@ const login = async (req, res) => {
 }
 
 const rateTourGuide = async (req, res) => {
-    const { tourGuideId, itineraryId } = req.params; // Include itineraryId in the request
-    const { touristId, rating } = req.body; // Rating and touristId provided in the request body
+    const { tourGuideId, touristId, itineraryId, rating } = req.body;
 
     try {
         const result = await userService.rateTourGuide(tourGuideId, touristId, itineraryId, rating);
-        res.status(200).json(result);
+        res.status(200).json({ message: "Rating submitted successfully", tourGuide: result });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
-};
+}
 
 
 module.exports = {
