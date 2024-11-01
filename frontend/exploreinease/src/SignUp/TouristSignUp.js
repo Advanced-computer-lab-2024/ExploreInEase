@@ -55,10 +55,10 @@ const TouristSignUp = () => {
       };
       
       const response = await NetworkService.post(options);
-      const tourist=response.tourist;
+      const User=response.tourist;
       setSuccess(response.message); // Set success message
-      // console.log(response);
-      navigate(`/TouristHomePage`,{state:{tourist:tourist}});
+      console.log(response.tourist);
+      navigate(`/TouristHomePage`,{state:{User:User}});
 
     } catch (err) {
       if (err.response) {

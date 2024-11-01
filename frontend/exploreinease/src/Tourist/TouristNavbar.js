@@ -11,6 +11,8 @@ const TouristNavbar = () => {
     const { User } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
+    console.log(User);
+    
     const initialUsername = User?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=User._id;
