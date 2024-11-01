@@ -54,7 +54,7 @@ const App = () => {
           <Route path="/viewTourGuideProfile" element={<TourGuideProfile />} />
           <Route path="/viewCreatedItineraryList" element={<ItineraryList />} />
           <Route path="/viewMyItinerary" element={<ItineraryForm />} />
-          <Route path="/createItinerary" element={<CreateItinerary />} />
+          <Route path="/CreateItinerary" element={<CreateItinerary />} />
           <Route path="/viewActivityCategory" element={<ActivityCategory />} />
           <Route path="/viewPreferencatags" element={<Preferencetags />} />
           <Route path="/viewAddedUsers" element={<AddUser />} />
