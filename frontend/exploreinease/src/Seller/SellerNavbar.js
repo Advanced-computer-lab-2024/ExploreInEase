@@ -11,9 +11,9 @@ const HomePage = () => {
     const navigate = useNavigate();
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
-    const { user } = location.state || {};
-    const initialUsername = user?.username;
-    const userId=user._id;
+    const { User } = location.state || {};
+    const initialUsername = User?.username;
+    const userId=User._id;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     async function handleClick(title) {
        if (title=="My Profile"){
@@ -21,13 +21,11 @@ const HomePage = () => {
           const options = {
             apiPath: `/getSeller/${userId}`,
           };
-          
           const response = await NetworkService.get(options);
           setSuccess(response.message); // Set success message
           const tourist=response.seller;
           console.log(response.seller);
           navigate(`/viewSellerProfile`,{state:{tourist:response.seller}});     
-
         } catch (err) {
           if (err.response) {
               console.log(err.message);
@@ -47,7 +45,7 @@ const HomePage = () => {
           console.log(response);
           const Product=response.Products;
           const Type='Seller';
-          navigate(`/viewProduct`,{ state: { Product, Type ,User:user} });          
+          navigate(`/viewProduct`,{ state: { Product, Type ,User:User} });          
         } catch (err) {
           if (err.response) {
               console.log(err.message);
@@ -71,12 +69,7 @@ const HomePage = () => {
         </div>
         <div className="nav-links">
           <button onClick={() => handleClick("View List of Available Products")}
-              className="small-button">View List of Available Products</button>
-          <button onClick={() => handleClick("Add Product")}
-              className="small-button">Add Product</button>
-          <button onClick={() => handleClick("Edit Product")}  
-           className="small-button"
-            >Edit Product</button>
+              className="small-button">List of Available Products</button>
           <button 
           onClick={() => handleClick("My Profile")}
           className="small-button">My Profile</button>
