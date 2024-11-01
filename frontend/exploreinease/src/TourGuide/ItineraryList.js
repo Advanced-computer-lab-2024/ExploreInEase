@@ -5,8 +5,8 @@ import NetworkService from "../NetworkService";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
-import "./ItineraryList.css"; 
+ import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
+ import "./ItineraryList.css"; 
 
 const ItineraryList = () => {
   const location = useLocation();

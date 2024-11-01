@@ -4,11 +4,10 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
 import NetworkService from "../NetworkService";
 import { useLocation } from "react-router-dom";
-import "./CreateItinerary.css"; // Import your CSS for styling
-
+ import "./CreateItinerary.css"; // Import your CSS for styling
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
