@@ -320,7 +320,6 @@ const getAllActivities = async (req, res) => {
       return res.status(400).json({ message: 'Invalid user type' });
     }
     const activities = await eventService.getAllActivitiesAdvertiser(userId); // Same here
-    console.log(activities);
     return res.status(200).json(activities);
   } catch (error) {
     console.error('Error fetching activitiesss:', error.message);
@@ -330,7 +329,7 @@ const getAllActivities = async (req, res) => {
 
 const addActivity = async (req, res) => {
   const { name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
-
+  console.log(tags);
   // Validate required fields
   if (!name || !date || !time || !location || !price || !category || !tags || typeof isOpen === 'undefined' || !created_by) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -788,7 +787,24 @@ const getAllHistoricalTags = async (req, res) => {
       .json({ error: "An error occurred", details: error.message });
   }
 }
+
+const getHistoricalTagDetails = async (req, res) => {
+  const { tagId } = req.params;
+  if(!tagId) {    
+    res.status(400).json({ message: 'Missing inputs' });
+  }
+  try {
+    const tag = await eventService.getHistoricalTagDetails(tagId);
+    return res.status(200).json({message: "Tags fetched successfully", tags: tag});
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred", details: error.message });
+  }
+}
 module.exports = {
+  getHistoricalTagDetails,
   getUserEvents,
   createCategory,
   getAllCategories,

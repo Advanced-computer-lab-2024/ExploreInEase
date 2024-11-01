@@ -263,6 +263,7 @@ const createActivity = async (activityData) => {
     isOpen: newActivity.isOpen,
     created_by: newActivity.created_by,
   }
+  console.log(createdActivity);
   return createdActivity;
 };
 
@@ -392,7 +393,12 @@ const getType = async (id) => {
 const getAllHistoricalTags = async () => {
   return await historicalTags.find();
 }
+
+const getHistoricalTagDetails = async (id) => {
+  return await historicalTags.find({ _id: id });
+}
 module.exports = {
+  getHistoricalTagDetails,
   createCategory,
   getAllCategories,
   updateCategoryById,

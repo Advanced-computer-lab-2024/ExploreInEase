@@ -513,8 +513,11 @@ const getAllHistoricalTags = async () => {
   return await eventRepository.getAllHistoricalTags();
 }
 
-
+const getHistoricalTagDetails = async (tagId) => {
+  return await eventRepository.getHistoricalTagDetails(tagId);
+}
 module.exports = {
+  getHistoricalTagDetails,
   getUserEvents,
   createCategory,
   getAllCategories,

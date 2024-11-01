@@ -2584,6 +2584,6 @@ router.delete('/historical-places/:_id/:userId', eventController.deleteHistorica
  */
 router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags);
 
-
+router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
 
 module.exports = router;
