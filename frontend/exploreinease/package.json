@@ -11,6 +11,7 @@
     "@mui/icons-material": "^6.1.2",
     "@mui/material": "^6.1.4",
     "@mui/x-date-pickers": "^7.19.0",
+    "@mui/x-date-pickers-pro": "^7.22.1",
     "@react-google-maps/api": "^2.19.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
