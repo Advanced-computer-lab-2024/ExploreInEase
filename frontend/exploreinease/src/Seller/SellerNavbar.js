@@ -1,8 +1,8 @@
 import React,{ useState } from 'react';
 import HomePageLogo from '../HomePageLogo.png';
 import '../Guest/GuestHP.css';
-import Avatar from '@mui/material/Avatar';
 import NetworkService from '../NetworkService';
+import Avatar from '@mui/material/Avatar';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 

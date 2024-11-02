@@ -95,6 +95,9 @@ const TouristNavbar = () => {
           <button 
           onClick={() => handleRegisterClick("My Profile")}
           className="small-button">My Profile</button>
+          <button 
+          onClick={() => handleRegisterClick("View Booked items")}
+          className="small-button">View Booked items</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

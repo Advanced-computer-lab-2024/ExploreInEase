@@ -2582,12 +2582,7 @@ router.delete('/historical-places/:_id/:userId', eventController.deleteHistorica
  *                   example: "Detailed error message"
  */
 router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags);
-
-// <<<<<<< HEAD
-
 router.get('/allActivities', eventController.getAllActivitiesInDatabase);
-// =======
 router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
-// >>>>>>> FullMergeKSA
 
 module.exports = router;

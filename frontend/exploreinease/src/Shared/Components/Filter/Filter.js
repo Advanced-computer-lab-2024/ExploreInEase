@@ -17,6 +17,7 @@ import {
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 // Sample data with 'type' field added
 const itemList = [];
@@ -47,12 +48,11 @@ const Filter = () => {
     search: '',
     sortBy: '',
   });
-
   const [filteredData, setFilteredData] = useState([]);
   const [role, setRole] = useState('Activities'); // Default to Main to show all
   const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
   const [addressCache, setAddressCache] = useState({});
-
+  const [historicalTags, setHistoricalTags] = useState({});
   const getAddressFromCoordinates = async (coordinates) => {
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
       return 'Location not available';
@@ -101,13 +101,15 @@ const Filter = () => {
   const LocationDisplay = ({ coordinates }) => {
     const [address, setAddress] = useState('Loading...');
 
-    useEffect(() => {
-      const fetchAddress = async () => {
-        const result = await getAddressFromCoordinates(coordinates);
-        setAddress(result);
-      };
-      fetchAddress();
-    }, [coordinates]);
+      useEffect(() => {
+        const fetchAddress = async () => {
+          const result = await getAddressFromCoordinates(coordinates);
+          console.log(result);
+          
+          setAddress(result);
+        };
+        fetchAddress();
+      }, [coordinates]);
 
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -253,6 +255,25 @@ const Filter = () => {
     return roleFields[role]?.includes(field);
   };
 
+  const getHistoricalTags = async (tagId) => {
+    try {
+      const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
+      const response = await axios.get(apiPath);
+      const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
+      setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
+    } catch (err) {
+      console.log(err.response ? err.message : 'An unexpected error occurred.');
+    }
+  };
+
+  // useEffect(() => {
+  //   filteredData.forEach((item) => {
+  //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
+  //       getHistoricalTags(item.tags);
+  //     }
+  //   });
+  // }, [filteredData, historicalTags]);
+// getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
   return (
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
@@ -398,7 +419,7 @@ const Filter = () => {
               <Card    
                style={{
                  width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
-                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '350px',
+                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '340px',
                 }}>
                 <CardContent>
                   <Typography variant="h5" component="div">
@@ -409,16 +430,16 @@ const Filter = () => {
                       <Typography color="text.secondary">Budget: {item.budget}</Typography>
                       <Typography color="text.secondary">Date: {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
                       <Typography color="text.secondary">Category: {item.category}</Typography>
-                      <Typography color="text.secondary">  
-                        Locations: {Array.isArray(item.location[0]) ? 
-                        item.location.map((loc, index) => (
-                          <span key={index}>
-                            <LocationDisplay coordinates={loc} />
-                            {index < item.location.length - 1 ? ', ' : ''}
-                          </span>
-                        )) : 
-                        <LocationDisplay coordinates={item.location} />}
-                        </Typography>
+                      <Typography color="text.secondary">
+                          Locations: {Array.isArray(item.location[0]) ? 
+                          item.location.map((loc, index) => (
+                            <span key={index}>
+                              <LocationDisplay coordinates={loc} />
+                              {index < item.location.length - 1 ? ', ' : ''}
+                            </span>
+                          )) : 
+                          <LocationDisplay coordinates={item.location} />}
+                      </Typography>
                       <Typography color="text.secondary">Tags: {item.tags}</Typography>
                       {item.specialDiscount && (
                         <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
@@ -447,16 +468,25 @@ const Filter = () => {
                   {item.type === 'HistoricalPlace' && (
                     <>
                       <Typography color="text.secondary">Description: {item.description}</Typography>
-                      <Typography color="text.secondary">Location: {item.location.join(', ')}</Typography>
+                      <Typography color="text.secondary">
+                          Locations: {Array.isArray(item.location[0]) ? 
+                          item.location.map((loc, index) => (
+                            <span key={index}>
+                              <LocationDisplay coordinates={loc} />
+                              {index < item.location.length - 1 ? ', ' : ''}
+                            </span>
+                          )) : 
+                          <LocationDisplay coordinates={item.location} />}
+                      </Typography>
                       <Typography color="text.secondary">Opening Hours: {item.openingHours}</Typography>
                       <Typography color="text.secondary">Students ticket price: {item.ticketPrice[0]}</Typography>
                       <Typography color="text.secondary">Native ticket price: {item.ticketPrice[1]}</Typography>
                       <Typography color="text.secondary">Foreign ticket price: {item.ticketPrice[2]}</Typography>
 
-                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
-                    </>
+                      Tags: {historicalTags[item.tags] ? historicalTags[item.tags].join(', ') : 'No tag selected'}
+                      </>
                   )}
-                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
+                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                  <Button variant="contained" color="primary" onClick={() => applyFilters()}>
                     Book a ticket 
                   </Button> 

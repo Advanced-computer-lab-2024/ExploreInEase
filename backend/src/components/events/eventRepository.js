@@ -272,9 +272,7 @@ const createActivity = async (activityData) => {
 const findCategoryById = async (categoryId) => {
   return await ActivityCategory.findById(categoryId);
 };
-const getAllActivitiesInDatabase = async () => {
-  return await Activity.find();
-}
+
 const updateActivity = async (id, updateData) => {
   // Use the mongoose method to update an activity
   return await Activity.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
