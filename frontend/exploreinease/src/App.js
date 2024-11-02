@@ -1,6 +1,7 @@
 import './App.css'; 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import React, { Suspense } from 'react';
+import Signup from './SignUp/Signup';
   
 // Lazy load components
 const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
@@ -41,7 +42,7 @@ const App = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
           <Route path="/" element={<GuestNavbar />} />
-          <Route path="/register" element={<RoleSelection />} />
+          <Route path="/register" element={<Signup />} />
           <Route path="/explore" element={<Filter />} />
           <Route path="/viewProduct" element={<Product />} />
           <Route path="/viewTouristProfile" element={<TouristProfile />} />
