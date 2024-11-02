@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import axios from 'axios';  // Import Axios
+import { AiFillCheckCircle, AiFillCloseCircle } from 'react-icons/ai';
+import { useNavigate } from 'react-router-dom';
 import NetworkService from '../NetworkService';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './login.css';
 
 const Login = () => {
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'admin'  // Default role set to 'admin'
+    role: 'admin',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -17,123 +17,96 @@ const Login = () => {
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Reset error and success states
     setError('');
     setSuccess('');
 
-    // Basic validation for email, password, and role
     if (!formData.email || !formData.password) {
       setError('Please fill in all fields.');
       return;
     }
+
     const options = {
       apiPath: '/login',
       body: {
-        username: formData.email,  // Assuming email as username
+        username: formData.email,
         password: formData.password,
-      }
+      },
     };
+
     try {
-      // Send the POST request to the /login endpoint
       const response = await NetworkService.post(options);
-      console.log("Response:", response);
-      // Handle successful login
-      if (response.message === "Logged in Successfully") {
+
+      if (response.message === 'Logged in Successfully') {
+        console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-        console.log(response)
-        console.log(response.user._id);
-        if (formData.role=='admin'){
-          navigate('/AdminHomePage', { state: { tourist: response.user } }); // Use navigate to change the route
-        }
-        else if (formData.role=='touristGovern') {
-          navigate('/TouristGovernorHP', { state: {tourist:response.user } }); // Use navigate to change the route
-        }
-        else if (formData.role=='seller'){
-          
-          navigate('/SellerHomePage', { state: { User:response.user } }); // Use navigate to change the route
-
-        }
-        else if(formData.role=='tourGuide'){
-          navigate('/TourGuideHomePage', { state: {User: response.user } }); // Use navigate to change the route
-
-        }
-        else if (formData.role=='advertiser'){
-          navigate('/AdvertiserHomePage', { state: { User: response.user } }); // Use navigate to change the route
-
-        }
-        else {   //tourist 
-          navigate('/TouristHomePage', { state: { User:response.user } }); // Use navigate to change the route
-
-        }
-        setError('');
+        navigateToHomePage(response.user);
       }
     } catch (error) {
-      // Handle different error responses
-      if (error.response) {
-        if (error.response.status === 400) {
-          setError('Missing parameters');
-        } else if (error.response.status === 404) {
-          setError('Invalid username or password');
-        } else {
-          setError('An error occurred while logging in');
-        }
-      } else {
-        setError('Network error. Please try again later.');
-      }
-      setSuccess('');
+      setError(
+        error.response?.status === 404
+          ? 'Invalid username or password'
+          : 'An error occurred while logging in'
+      );
+    }
+  };
+
+  const navigateToHomePage = (user) => {
+    switch (formData.role) {
+      case 'admin':
+        navigate('/AdminHomePage', { state: { tourist: user } });
+        break;
+      case 'touristGovern':
+        navigate('/TouristGovernorHP', { state: { tourist: user } });
+        break;
+      case 'seller':
+        navigate('/SellerHomePage', { state: { User: user } });
+        break;
+      case 'tourGuide':
+        navigate('/TourGuideHomePage', { state: { User: user } });
+        break;
+      case 'advertiser':
+        navigate('/AdvertiserHomePage', { state: { User: user } });
+        break;
+      default:
+        navigate('/TouristHomePage', { state: { User: user } });
     }
   };
 
   return (
-    <div className="sign-in-form">
-      <h2>Sign In</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
-        <label>Email/Username:</label>
-        <input
-          type="text"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Password:</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Role:</label>
-        <select
-          name="role"
-          value={formData.role}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="admin">Admin</option>
-          <option value="touristGovern">Tourist Governor</option>
-          <option value="tourist">Tourist</option>
-          <option value="tourGuide">Tour Guide</option>
-          <option value="advertiser">Advertiser</option>
-          <option value="seller">Seller</option>
-
-
-        </select>
-
-        <button type="submit">Sign In</button>
-      </form>
+    <div className="login-container">
+      <div className="login-card">
+        <h2>Sign In</h2>
+        {error && <p className="error"><AiFillCloseCircle /> {error}</p>}
+        {success && <p className="success"><AiFillCheckCircle /> {success}</p>}
+        <form onSubmit={handleSubmit}>
+          <label>Username:</label>
+          <input type="text" name="email" value={formData.email} onChange={handleInputChange} required />
+          <label>Password:</label>
+          <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
+          <label>Role:</label>
+          <select name="role" value={formData.role} onChange={handleInputChange} required>
+            <option value="admin">Admin</option>
+            <option value="touristGovern">Tourist Governor</option>
+            <option value="tourist">Tourist</option>
+            <option value="tourGuide">Tour Guide</option>
+            <option value="advertiser">Advertiser</option>
+            <option value="seller">Seller</option>
+          </select>
+          <div className="button-group">
+            <button type="submit" className="login-button">Sign In</button>
+          </div>
+        </form>
+        <p className="signup-prompt">
+          Don't have an account? 
+          <span className="signup-link" onClick={() => navigate('/register')}> Sign Up</span>
+        </p>
+      </div>
     </div>
   );
 };
