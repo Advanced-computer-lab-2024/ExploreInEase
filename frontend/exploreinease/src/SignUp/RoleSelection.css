@@ -1,0 +1,26 @@
+.role-selection {
+    text-align: center;
+  }
+  
+  .button-group {
+    margin: 20px 0;
+  }
+  
+  .role-button {
+    padding: 10px 20px;
+    margin: 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .role-button.active {
+    background-color: #0056b3;
+  }
+  
+  .role-button:hover {
+    background-color: #0056b3;
+  }
+  
