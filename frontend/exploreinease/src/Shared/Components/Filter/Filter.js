@@ -13,15 +13,15 @@ import {
   Box,
   Tabs,
   Tab,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 import axios from "axios";
 
 // Sample data with 'type' field added
@@ -59,6 +59,9 @@ const Filter = () => {
   const [addressCache, setAddressCache] = useState({});
   const [historicalTags, setHistoricalTags] = useState({});
   const [open, setOpen] = React.useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [type, setType] = useState(''); // State to store the selected item
+  const [budget, setBudget] = useState('');
 
   const getAddressFromCoordinates = async (coordinates) => {
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
@@ -271,12 +274,22 @@ const Filter = () => {
   };
   const handleClose = () => {
     setOpen(false);
+    setType(null);
+    setBudget(null);
+     setSelectedItem(null); 
+    
   };
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (item) => {
+     setSelectedItem(item);   
     setOpen(true);
   };
-
+  const handleChange = (event) => {
+    setType(event.target.value);
+  };
+  const handleBudgetChange = (event) => {
+    setBudget(event.target.value);
+  };
   // useEffect(() => {
   //   filteredData.forEach((item) => {
   //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
@@ -441,7 +454,7 @@ const Filter = () => {
                       <Typography color="text.secondary">Budget: {item.budget}</Typography>
                       <Typography color="text.secondary">Date: {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
                       <Typography color="text.secondary">Category: {item.category}</Typography>
-                      <Typography color="text.secondary">
+                      {/* <Typography color="text.secondary">
                           Locations: {Array.isArray(item.location[0]) ? 
                           item.location.map((loc, index) => (
                             <span key={index}>
@@ -450,7 +463,7 @@ const Filter = () => {
                             </span>
                           )) : 
                           <LocationDisplay coordinates={item.location} />}
-                      </Typography>
+                      </Typography> */}
                       <Typography color="text.secondary">Tags: {item.tags}</Typography>
                       {item.specialDiscount && (
                         <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
@@ -479,7 +492,7 @@ const Filter = () => {
                   {item.type === 'HistoricalPlace' && (
                     <>
                       <Typography color="text.secondary">Description: {item.description}</Typography>
-                      <Typography color="text.secondary">
+                      {/* <Typography color="text.secondary">
                           Locations: {Array.isArray(item.location[0]) ? 
                           item.location.map((loc, index) => (
                             <span key={index}>
@@ -488,7 +501,7 @@ const Filter = () => {
                             </span>
                           )) : 
                           <LocationDisplay coordinates={item.location} />}
-                      </Typography>
+                      </Typography> */}
                       <Typography color="text.secondary">Opening Hours: {item.openingHours}</Typography>
                       <Typography color="text.secondary">Students ticket price: {item.ticketPrice[0]}</Typography>
                       <Typography color="text.secondary">Native ticket price: {item.ticketPrice[1]}</Typography>
@@ -498,19 +511,83 @@ const Filter = () => {
                       </>
                   )}
                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                 <Button variant="contained" color="primary" onClick={handleClickOpen}>
-                    Book a ticket 
+                 <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
+                 Book a ticket 
                   </Button> 
-                </div>
-              </CardContent>
-           </Card>
-         </Grid>
-          ))}
-        </Grid>
-      </div>
-    </div>
-  );
-};
+                   </div>
+                  </CardContent>
+                  </Card>    
+                </Grid>
+                  ))}
+                </Grid>
+                <Dialog
+                  open={open}
+                  onClose={handleClose}
+                  disableBackdropClick
+                  disableEscapeKeyDown
+               >
+                <DialogTitle id="alert-dialog-title">
+                {'Book a Ticket for '} {selectedItem?.name}
+                </DialogTitle>
+                <DialogContent>
+                {selectedItem && (
+        <>
+          {selectedItem.type === 'Activity' && (
+            <>
+              <Typography>Budget for Activity: {selectedItem.budget}</Typography>
+              <div  style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Write your Budget for the Activity:</span>
+                     <TextField id="standard-basic" label="budget" type="number" variant="standard" style={{ width: '150px' }}
+                       required value={budget} onChange={handleBudgetChange}  />  
+                    </div>
+            </>
+          )}
+          {selectedItem.type === 'Itinerary' && (
+            <>
+              <Typography>Activities: {selectedItem.activities.join(', ')}</Typography>
+              {/* Add more Itinerary-specific fields here */}
+            </>
+          )}
+          {selectedItem.type === 'HistoricalPlace' && (
+            <>
+                     <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={type}
+                          label="Type"
+                          onChange={handleChange}
+                          required
+                        >
+                          <MenuItem value={'native'}>Native</MenuItem>
+                          <MenuItem value={'student'}>Student</MenuItem>
+                          <MenuItem value={'foreigner'}>Foreigner</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+            </>
+          )}
+        </>
+      )}
+                    <div>
+                    <strong>Important Note:</strong>
+                    <p>*Please note that you must bring a Student ID/Passport/National ID to the location*</p>
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleClose} autoFocus>
+                    Book
+                  </Button>
+                  <Button onClick={handleClose}>Close</Button>
+                </DialogActions>
+              </Dialog>
+              </div>
+            </div>
+          );
+        };
 export default Filter;
 
 
