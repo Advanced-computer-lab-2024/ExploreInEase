@@ -300,16 +300,16 @@ const getCityCode = async (req, res) => {
 };
 
 const flightOffers = async (req, res) => {
-  const { originCode, destinationCode, dateOfDeparture } = req.body;
+  const { originCode, destinationCode, dateOfDeparture,currency,personCount } = req.body;
 
-  // Validate request parameters
-  if (!originCode || !destinationCode || !dateOfDeparture) {
+  
+  if (!originCode || !destinationCode || !dateOfDeparture || !currency || !personCount) {
       return res.status(400).json({ message: "Origin, destination, and departure date are required." });
   }
 
   try {
       
-      const flights = await eventService.flightOffers({ originCode, destinationCode, dateOfDeparture });
+      const flights = await eventService.flightOffers( originCode, destinationCode, dateOfDeparture,currency,parseInt(personCount) || 1 );
       return res.status(200).json(flights);
   } catch (error) {
       console.error('Error searching flights:', error.message);
@@ -325,17 +325,22 @@ const flightOffers = async (req, res) => {
 
 
 
-
-
-// Controller to get hotel IDs by city code (returns full Amadeus response)
 const getHotelsByCityCode = async (req, res) => {
   try {
-      const response = await eventService.fetchHotelsByCityCode(req.params.cityCode);
-      res.status(200).json(response);  // Return full response
+      const { startDate, endDate, currency, personCount } = req.body; 
+      const response = await eventService.fetchHotelsByCityCode(
+          req.params.cityCode,
+          startDate,
+          endDate,
+          currency,  
+          parseInt(personCount) || 1  
+      );
+      res.status(200).json(response); 
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 };
+
 
 // Controller to get offers by hotel ID (returns full Amadeus response)
 const getOffersByHotelId = async (req, res) => {
@@ -352,7 +357,7 @@ const getOffersByHotelId = async (req, res) => {
 // Controller method to search for transfer offers
 const searchTransferOffers = async (req, res) => {
   try {
-      const transferData = req.body; // Expecting the body to contain the search parameters
+      const transferData = req.body; 
       const offers = await eventService.searchTransferOffers(transferData);
       res.status(200).json(offers);
   } catch (error) {
@@ -361,18 +366,7 @@ const searchTransferOffers = async (req, res) => {
   }
 };
 
-// Controller method to book a transfer
-const bookTransfer = async (req, res) => {
-  try {
-      const offerId = req.params.offerId;
-      const bookingData = req.body; // Expecting booking parameters in the body
-      const bookingConfirmation = await eventService.bookTransfer(offerId, bookingData);
-      res.status(200).json(bookingConfirmation);
-  } catch (error) {
-      console.error('Error booking transfer:', error);
-      res.status(500).json({ message: error.message });
-  }
-};
+
 
 
 
@@ -398,7 +392,6 @@ module.exports = {
     getHotelsByCityCode,
     getOffersByHotelId,
     searchTransferOffers,
-    bookTransfer,
     bookedEvents,
     flightOffers
 

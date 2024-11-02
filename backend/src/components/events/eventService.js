@@ -180,8 +180,8 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
 const Amadeus = require('amadeus');
 
 const amadeus = new Amadeus({
-    clientId: process.env.AMADEUS_CLIENT_ID2, 
-    clientSecret: process.env.AMADEUS_CLIENT_SECRET2,
+    clientId: process.env.AMADEUS_CLIENT_ID, 
+    clientSecret: process.env.AMADEUS_CLIENT_SECRET,
 });
 
 
@@ -205,11 +205,18 @@ const fetchCityCode = async (city) => {
 };
 
 
-const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) => {
+const flightOffers = async ({ originCode, destinationCode, dateOfDeparture, currency, personCount  }) => {
   try {
-      
+      if (currency === 'euro') {
+          currency = 'EUR';
+      } else if (currency === 'dollar') {
+          currency = 'USD';
+      } else {
+          currency = 'EGP';
+      }
+
       const requestBody = {
-          currencyCode: 'USD', 
+          currencyCode: currency, 
           originDestinations: [
               {
                   id: '1',
@@ -242,40 +249,39 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) =>
           }
       };
 
-      
       const response = await amadeus.shopping.flightOffersSearch.post(requestBody);
 
-      
       if (Object.keys(response.data).length === 0) {
           throw new Error("No flights available");
       }
 
-      
-      const formattedFlights = response.data.map(flightOffer => ({
-          id: flightOffer.id,
-          price: flightOffer.price.total,
-          currency: flightOffer.price.currency,
-          departure: flightOffer.itineraries[0].segments[0].departure,
-          arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
-          carrierCode: flightOffer.validatingAirlineCodes[0],
-          segments: flightOffer.itineraries[0].segments.map(segment => ({
-              carrierCode: segment.carrierCode,
-              departure: segment.departure,
-              arrival: segment.arrival,
-              duration: segment.duration,
-          })),
-      }));
+      const formattedFlights = response.data.map(flightOffer => {
+          const basePrice = parseFloat(flightOffer.price.total);
+          const totalPrice = Math.round(basePrice * personCount * 100) / 100; 
+
+          return {
+              id: flightOffer.id,
+              price: totalPrice.toFixed(2), 
+              currency: flightOffer.price.currency,
+              departure: flightOffer.itineraries[0].segments[0].departure,
+              arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
+              carrierCode: flightOffer.validatingAirlineCodes[0],
+              segments: flightOffer.itineraries[0].segments.map(segment => ({
+                  carrierCode: segment.carrierCode,
+                  departure: segment.departure,
+                  arrival: segment.arrival,
+                  duration: segment.duration,
+              })),
+          };
+      });
 
       return formattedFlights; 
   } catch (error) {
-     
       if (error.message === "Error fetching flights: undefined") {
           throw new Error("Server busy, try again");
       } else if (error.message === "No flights available") {
           throw new Error("No flights available");
       } else {
-          
-         
           throw new Error("Server busy, try again");
       }
   }
@@ -285,65 +291,46 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) =>
 
 
 
-
-
-
-
-
-
-
-
-// Fetch hotels by city code (returns only iata code, name, and hotel id)
-const fetchHotelsByCityCode = async (cityCode) => {
+// Fetch hotels by city code with start date, end date, currency adjustments, and person count
+const fetchHotelsByCityCode = async (cityCode, startDate, endDate, currency, personCount) => {
   try {
       const response = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
       
-      // Extract only the iataCode, name, and hotelId from the response
-      const simplifiedResponse = response.data.map(hotel => ({
-          iataCode: hotel.iataCode,
-          name: hotel.name,
-          hotelId: hotel.hotelId
-      }));
+      const simplifiedResponse = response.data.map(hotel => {
+          let basePrice = Math.floor(Math.random() * (6000 - 3000 + 1)) + 3000; 
+        
+          if (currency === 'euro') {
+              basePrice = basePrice / 55;
+          } else if (currency === 'dollar') {
+              basePrice = basePrice / 50;
+          }
+
+          
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24))); 
+
+          
+          const price = Math.round(basePrice * personCount * days * 100) / 100;
+
+          return {
+              iataCode: hotel.iataCode,
+              name: hotel.name,
+              hotelId: hotel.hotelId,
+              startDate: startDate || null,
+              endDate: endDate || null,
+              price: price
+          };
+      });
       
-      return simplifiedResponse;  // Return the simplified response
+      return simplifiedResponse; 
   } catch (error) {
       throw new Error(`Error fetching hotels: ${error.message}`);
   }
 };
 
 
-// Fetch offers by hotel ID (returns formatted response for all offers)
-const fetchOffersByHotelId = async (hotelId) => {
-    try {
-        const response = await amadeus.shopping.hotelOffersSearch.get({ hotelIds: hotelId, adults: '2' });
 
-        // Check if response data contains offers
-        const formattedResponse = response.data.flatMap(hotel => {
-            return hotel.offers.map(offer => {
-                const roomType = offer.room.typeEstimated;  // Extract room type information
-
-                return {
-                    hotelId: hotel.hotel.hotelId,
-                    name: hotel.hotel.name,
-                    cityCode: hotel.hotel.cityCode,
-                    checkInDate: offer.checkInDate,
-                    checkOutDate: offer.checkOutDate,
-                    boardType: offer.boardType,
-                    category: roomType ? roomType.category : null,
-                    beds: roomType ? roomType.beds : null,
-                    bedType: roomType ? roomType.bedType : null,
-                    text: offer.room.description ? offer.room.description.text : null,
-                    adults: offer.guests ? offer.guests.adults : null,
-                    total: offer.price ? offer.price.total : null
-                };
-            });
-        });
-
-        return formattedResponse;  // Return the formatted response
-    } catch (error) {
-        throw new Error(`Error fetching hotel offers: ${error.message}`);
-    }
-};
 
 
 // Service method to search for transfer offers
@@ -356,15 +343,7 @@ const searchTransferOffers = async (transferData) => {
   }
 };
 
-// Service method to book a transfer
-const bookTransfer = async (offerId, bookingData) => {
-  try {
-      const response = await amadeus.ordering.transferOrders.post(bookingData, offerId);
-      return response.data; // Return the response data
-  } catch (error) {
-      throw new Error(`Error booking transfer: ${error.message}`);
-  }
-};
+
 
 
 
@@ -387,9 +366,7 @@ module.exports = {
   sendEventEmail,
   fetchCityCode,
   fetchHotelsByCityCode,
-  fetchOffersByHotelId,
   searchTransferOffers,
-  bookTransfer,
   bookedEvents,
   flightOffers
 
