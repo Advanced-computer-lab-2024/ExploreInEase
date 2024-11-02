@@ -17,6 +17,11 @@ import {
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import axios from "axios";
 
 // Sample data with 'type' field added
@@ -53,19 +58,19 @@ const Filter = () => {
   const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
   const [addressCache, setAddressCache] = useState({});
   const [historicalTags, setHistoricalTags] = useState({});
+  const [open, setOpen] = React.useState(false);
+
   const getAddressFromCoordinates = async (coordinates) => {
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
       return 'Location not available';
     }
-
     const [longitude, latitude] = coordinates;
-    
+
     // Check cache first
     const cacheKey = `${latitude},${longitude}`;
     if (addressCache[cacheKey]) {
       return addressCache[cacheKey];
     }
-
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
@@ -98,6 +103,7 @@ const Filter = () => {
       return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
     }
   };
+  
   const LocationDisplay = ({ coordinates }) => {
     const [address, setAddress] = useState('Loading...');
 
@@ -110,7 +116,6 @@ const Filter = () => {
         };
         fetchAddress();
       }, [coordinates]);
-
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {address}
@@ -129,7 +134,6 @@ const Filter = () => {
     );
   };
 
-  
   useEffect(() => {
     const initialData = itemList.filter(item =>
       (role === 'Activities' && item.type === 'Activity') ||
@@ -264,6 +268,13 @@ const Filter = () => {
     } catch (err) {
       console.log(err.response ? err.message : 'An unexpected error occurred.');
     }
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
   };
 
   // useEffect(() => {
@@ -487,13 +498,13 @@ const Filter = () => {
                       </>
                   )}
                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                 <Button variant="contained" color="primary" onClick={() => applyFilters()}>
+                 <Button variant="contained" color="primary" onClick={handleClickOpen}>
                     Book a ticket 
                   </Button> 
-            </div>
-           </CardContent>
-            </Card>
-            </Grid>
+                </div>
+              </CardContent>
+           </Card>
+         </Grid>
           ))}
         </Grid>
       </div>
