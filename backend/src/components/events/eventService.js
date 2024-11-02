@@ -142,7 +142,6 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
       throw new Error('Tourist not found');
     }
   
-    
     const transporter = nodemailer.createTransport({
       service: 'gmail', 
       auth: {
@@ -151,23 +150,21 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
       },
     });
   
-    
     const formattedDetails = Object.entries(eventDetails)
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
   
-    
     const mailOptions = {
       from: touristEmail,
       to: receiverEmail,
       subject: 'Event Details',
-      text: `Hello!\nYour friend sent you an event!!\nHere are the event details:\n\n${formattedDetails}`, // Use the formatted details
+      text: `Hello!\nYour friend with email ${touristEmail} sent you an event!!\n\nHere are the event details:\n\n${formattedDetails}`, // Including tourist email in the message
     };
   
-    
     await transporter.sendMail(mailOptions);
     return { message: 'Email sent successfully' };
   };
+  
 
 
 
@@ -262,6 +259,7 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture, curr
           return {
               id: flightOffer.id,
               price: totalPrice.toFixed(2), 
+              personCount: personCount,
               currency: flightOffer.price.currency,
               departure: flightOffer.itineraries[0].segments[0].departure,
               arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
