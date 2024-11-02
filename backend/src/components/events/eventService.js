@@ -101,10 +101,30 @@ const updateEventFlag = async ( eventType, eventID) => {
   }
 };
 
+const bookedEvents = async (touristId) => {
+  const tourist = await eventRepository.bookedEvents({ touristId });
 
-const addEventToTourist = async (userType, touristId, eventType, eventId) => {
+  if (!tourist) {
+      throw new Error('Tourist not found');
+  }
+
+  return {
+     
+      itineraries: tourist.itineraryId.map(itinerary => ({
+          ...itinerary._doc,
+          timeline: itinerary.timeline.map(item => item.toString()) 
+      })),
+      activities: tourist.activityId,
+      historicalPlaces: tourist.historicalplaceId
+  };
+};
+
+
+
+
+const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,itineraryPrice) => {
   
-  return await eventRepository.bookEvent(touristId, eventType, eventId);
+  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,itineraryPrice);
 };
 
 const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
@@ -116,27 +136,27 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
 
 
   const sendEventEmail = async (touristId, receiverEmail, eventDetails) => {
-    // Get the tourist's email
+    
     const touristEmail = await eventRepository.getTouristEmailById(touristId);
     if (!touristEmail) {
       throw new Error('Tourist not found');
     }
   
-    // Configure the email transporter (adjust the credentials as necessary)
+    
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // or another service
+      service: 'gmail', 
       auth: {
-        user: "aclproject7@gmail.com", // Sender's email credentials
-        pass: "qodo imkr adxs jred", // App-specific password
+        user: "aclproject7@gmail.com", 
+        pass: "qodo imkr adxs jred", 
       },
     });
   
-    // Format the event details in a clean style
+    
     const formattedDetails = Object.entries(eventDetails)
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
   
-    // Email options
+    
     const mailOptions = {
       from: touristEmail,
       to: receiverEmail,
@@ -144,7 +164,7 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
       text: `Hello!\nYour friend sent you an event!!\nHere are the event details:\n\n${formattedDetails}`, // Use the formatted details
     };
   
-    // Send the email
+    
     await transporter.sendMail(mailOptions);
     return { message: 'Email sent successfully' };
   };
@@ -152,30 +172,15 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
 
 
 
-  const searchCityAndAirport = async (parameter) => {
-    try {
-        const result = await eventRepository.cityAndAirportSearch(parameter);
-        return result;
-    } catch (error) {
-        throw new Error('Error fetching city and airport data: ' + error.message);
-    }
-};
 
 
-const searchFlights = async ({ originCode, destinationCode, dateOfDeparture }) => {
-    try {
-        const result = await eventRepository.flightSearch({ originCode, destinationCode, dateOfDeparture });
-        return result;
-    } catch (error) {
-        throw new Error('Error fetching flights: ' + error.message);
-    }
-};
+
 
 
 const Amadeus = require('amadeus');
 
 const amadeus = new Amadeus({
-    clientId: process.env.AMADEUS_CLIENT_ID2, // Store your API keys in environment variables
+    clientId: process.env.AMADEUS_CLIENT_ID2, 
     clientSecret: process.env.AMADEUS_CLIENT_SECRET2,
 });
 
@@ -198,6 +203,94 @@ const fetchCityCode = async (city) => {
       throw new Error(`Error fetching city code: ${error.message}`);
   }
 };
+
+
+const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) => {
+  try {
+      
+      const requestBody = {
+          currencyCode: 'USD', 
+          originDestinations: [
+              {
+                  id: '1',
+                  originLocationCode: originCode,
+                  destinationLocationCode: destinationCode,
+                  departureDateTimeRange: {
+                      date: dateOfDeparture, 
+                      time: '10:00:00' 
+                  }
+              }
+          ],
+          travelers: [
+              {
+                  id: '1',
+                  travelerType: 'ADULT'
+              }
+          ],
+          sources: ['GDS'],
+          searchCriteria: {
+              maxFlightOffers: 5,
+              flightFilters: {
+                  cabinRestrictions: [
+                      {
+                          cabin: 'BUSINESS',
+                          coverage: 'MOST_SEGMENTS',
+                          originDestinationIds: ['1']
+                      }
+                  ]
+              }
+          }
+      };
+
+      
+      const response = await amadeus.shopping.flightOffersSearch.post(requestBody);
+
+      
+      if (Object.keys(response.data).length === 0) {
+          throw new Error("No flights available");
+      }
+
+      
+      const formattedFlights = response.data.map(flightOffer => ({
+          id: flightOffer.id,
+          price: flightOffer.price.total,
+          currency: flightOffer.price.currency,
+          departure: flightOffer.itineraries[0].segments[0].departure,
+          arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
+          carrierCode: flightOffer.validatingAirlineCodes[0],
+          segments: flightOffer.itineraries[0].segments.map(segment => ({
+              carrierCode: segment.carrierCode,
+              departure: segment.departure,
+              arrival: segment.arrival,
+              duration: segment.duration,
+          })),
+      }));
+
+      return formattedFlights; 
+  } catch (error) {
+     
+      if (error.message === "Error fetching flights: undefined") {
+          throw new Error("Server busy, try again");
+      } else if (error.message === "No flights available") {
+          throw new Error("No flights available");
+      } else {
+          
+         
+          throw new Error("Server busy, try again");
+      }
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Fetch hotels by city code (returns only iata code, name, and hotel id)
@@ -275,6 +368,7 @@ const bookTransfer = async (offerId, bookingData) => {
 
 
 
+
   
 module.exports = {
   getUserEvents,
@@ -291,13 +385,13 @@ module.exports = {
   addEventToTourist,
   cancelEventToTourist,
   sendEventEmail,
-  searchCityAndAirport,
-  searchFlights,
   fetchCityCode,
   fetchHotelsByCityCode,
   fetchOffersByHotelId,
   searchTransferOffers,
-  bookTransfer
+  bookTransfer,
+  bookedEvents,
+  flightOffers
 
 };
 

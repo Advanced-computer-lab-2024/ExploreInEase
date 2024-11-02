@@ -192,27 +192,59 @@ const updateEventFlagController = async (req, res) => {
   }
 };
 
+
+const bookedEvents = async (req, res) => {
+  try {
+      const { touristId } = req.body;
+
+      
+      if (!touristId) {
+          return res.status(400).json({ error: "touristId is required in the request body" });
+      }
+
+     
+      const result = await eventService.bookedEvents(touristId);
+      return res.status(200).json(result);
+  } catch (error) {
+      return res.status(500).json({ error: error.message });
+  }
+};
+
+
+
 const bookEvent = async (req, res) => {
-  const { userType, touristId, eventType, eventID } = req.body;
+  const { userType, touristId, eventType, eventID, ticketType, currency, itineraryPrice } = req.body;
 
   try {
     if (userType !== 'tourist') {
       throw new Error('User type must be tourist');
-     }
+    }
+    if (!touristId || !userType || !eventType || !eventID) {
+      return res.status(400).json({ error: "All attributes are required in the request body" });
+    }
 
-      const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID);
-      return res.status(200).json({
-          success: true,
-          message: 'Event updated successfully',
-          data: updatedTourist,
-      });
+    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, itineraryPrice);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event booked successfully',
+      data: updatedTourist,
+    });
   } catch (error) {
-      return res.status(400).json({
-          success: false,
-          message: error.message,
+    if (error.message.includes('already been booked')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message,
       });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
+
 
 
 const cancelBookingEvent = async (req, res) => {
@@ -251,25 +283,8 @@ const sendEventEmail = async (req, res) => {
 
 
 
-const cityAndAirportSearch = async (req, res) => {
-    const parameter = req.params.parameter;
-    try {
-        const result = await eventService.searchCityAndAirport(parameter);
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
 
-const flightSearch = async (req, res) => {
-    const { originCode, destinationCode, dateOfDeparture } = req.body;
-    try {
-        const result = await eventService.searchFlights({ originCode, destinationCode, dateOfDeparture });
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+
 
 
 
@@ -283,6 +298,34 @@ const getCityCode = async (req, res) => {
       res.status(500).json({ error: error.message });
   }
 };
+
+const flightOffers = async (req, res) => {
+  const { originCode, destinationCode, dateOfDeparture } = req.body;
+
+  // Validate request parameters
+  if (!originCode || !destinationCode || !dateOfDeparture) {
+      return res.status(400).json({ message: "Origin, destination, and departure date are required." });
+  }
+
+  try {
+      
+      const flights = await eventService.flightOffers({ originCode, destinationCode, dateOfDeparture });
+      return res.status(200).json(flights);
+  } catch (error) {
+      console.error('Error searching flights:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
 
 // Controller to get hotel IDs by city code (returns full Amadeus response)
 const getHotelsByCityCode = async (req, res) => {
@@ -332,6 +375,10 @@ const bookTransfer = async (req, res) => {
 };
 
 
+
+
+
+
 module.exports = {
     getUserEvents,
     createCategory,
@@ -347,13 +394,13 @@ module.exports = {
     bookEvent,
     cancelBookingEvent,
     sendEventEmail,
-    cityAndAirportSearch,
-    flightSearch,
     getCityCode,
     getHotelsByCityCode,
     getOffersByHotelId,
     searchTransferOffers,
-    bookTransfer
+    bookTransfer,
+    bookedEvents,
+    flightOffers
 
   };
   

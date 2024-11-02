@@ -20,10 +20,11 @@ const itinerarySchema = new Schema({
     type: [String], // An array of strings for location names
     required: true,
   },
-  timeline: [{
-    activity_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Activity', required: true }, // Activity reference
-    dateAndTime: { type: Date, required: true }, // Date and time for the activity
-  }],
+  timeline: {
+    type: [String], // An array of strings representing the timeline for each activity
+    required: true,
+  },
+
   directions: {
     type: String, // Directions to follow during the itinerary
     required: true,

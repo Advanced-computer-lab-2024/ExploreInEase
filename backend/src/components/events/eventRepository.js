@@ -115,29 +115,53 @@ const setFlagToZeroForActivity = async (_id) => {
 };
 
 
-const bookEvent = async (touristId, eventType, eventId) => {
-  // Retrieve the tourist's wallet balance
+
+
+
+const bookedEvents =  async ({touristId}) =>{
+  return await Tourist.findById(touristId)
+      .populate('itineraryId')
+      .populate('activityId')
+      .populate('historicalplaceId')
+      .exec();
+};
+
+
+const bookEvent = async (touristId, eventType, eventId, ticketType, currency, itineraryPrice) => {
   const tourist = await Tourist.findById(touristId);
   if (!tourist) {
     throw new Error('Tourist not found');
   }
-  
+
   let eventPrice = 0;
 
-  // Retrieve the price based on event type
   switch (eventType) {
     case 'itinerary':
-      const itinerary = await Itinerary.findById(eventId);
-      if (!itinerary) {
-        throw new Error('Itinerary not found');
+      if (tourist.itineraryId && tourist.itineraryId.includes(eventId)) {
+        throw new Error('This itinerary has already been booked.');
       }
-      eventPrice = itinerary.price;
+      switch (currency) {
+        case 'euro':
+          eventPrice = (itineraryPrice / 55).toFixed(2);
+          break;
+        case 'dollar':
+          eventPrice = (itineraryPrice / 50).toFixed(2);
+          break;
+        case 'EGP':
+          eventPrice = (itineraryPrice / 1).toFixed(2);
+          break;
+        default:
+          throw new Error('Invalid currency');
+      }
       break;
-      
+
     case 'activity':
       const activity = await Activity.findById(eventId);
       if (!activity) {
         throw new Error('Activity not found');
+      }
+      if (tourist.activityId && tourist.activityId.includes(eventId)) {
+        throw new Error('This activity has already been booked.');
       }
       eventPrice = activity.price;
       break;
@@ -147,37 +171,41 @@ const bookEvent = async (touristId, eventType, eventId) => {
       if (!historicalPlace) {
         throw new Error('Historical place not found');
       }
-      eventPrice = historicalPlace.ticketPrice.native; // Use native, student, or foreign based on logic
+      if (tourist.historicalplaceId && tourist.historicalplaceId.includes(eventId)) {
+        throw new Error('This historical place has already been booked.');
+      }
+      eventPrice = ticketType === "student" ? historicalPlace.ticketPrice.student :
+                   ticketType === "native" ? historicalPlace.ticketPrice.native :
+                   historicalPlace.ticketPrice.foreign;
       break;
 
     default:
       throw new Error('Invalid event type');
   }
 
-  // Check if the tourist has enough funds in their wallet
+ 
   if (tourist.wallet < eventPrice) {
     throw new Error('Insufficient funds to book this event');
   }
 
-  // Deduct the event price from the tourist's wallet
+  
   tourist.wallet -= eventPrice;
-  await tourist.save(); // Save the updated wallet balance
+  await tourist.save();
 
-  // Update the tourist's event list
+  
   const updateData = {};
   switch (eventType) {
     case 'itinerary':
-      updateData.$addToSet = { itineraryId: eventId }; // Avoid duplicates
+      updateData.$addToSet = { itineraryId: eventId };
       break;
     case 'activity':
-      updateData.$addToSet = { activityId: eventId }; // Avoid duplicates
+      updateData.$addToSet = { activityId: eventId };
       break;
     case 'historicalPlace':
-      updateData.$addToSet = { historicalplaceId: eventId }; // Avoid duplicates
+      updateData.$addToSet = { historicalplaceId: eventId };
       break;
   }
 
-  // Update the tourist's events
   return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
 };
 
@@ -185,58 +213,58 @@ const bookEvent = async (touristId, eventType, eventId) => {
 
 const cancelEvent = async (touristId, eventType, eventId) => {
   const currentTime = new Date();
-  const fortyEightHoursInMs = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+  const fortyEightHoursInMs = 48 * 60 * 60 * 1000; 
 
-  // Define the update data
+  
   const updateData = {};
 
-  // Initialize variable for event price
+ 
   let eventPrice = 0;
 
-  // Check event type and validate cancellation eligibility
+  
   let startDate;
 
   switch (eventType) {
     case 'itinerary':
-      // Retrieve the itinerary and its start date
+     
       const itinerary = await Itinerary.findById(eventId);
       if (!itinerary) throw new Error('Itinerary not found');
       
-      // Check the soonest available date in dateTimeAvailable
+      
       startDate = itinerary.dateTimeAvailable.sort((a, b) => a - b)[0];
       if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
         throw new Error('Cancellations must be made at least 48 hours before the itinerary start date.');
       }
 
-      // Get itinerary price to refund
+      
       eventPrice = itinerary.price;
 
       updateData.$pull = { itineraryId: eventId };
       break;
 
     case 'activity':
-      // Retrieve the activity and its start date
+      
       const activity = await Activity.findById(eventId);
       if (!activity) throw new Error('Activity not found');
       
-      // Check activity date
+      
       startDate = activity.date;
       if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
         throw new Error('Cancellations must be made at least 48 hours before the activity start date.');
       }
 
-      // Get activity price to refund
+     
       eventPrice = activity.price;
 
       updateData.$pull = { activityId: eventId };
       break;
 
     case 'historicalPlace':
-      // Retrieve the historical place event price
+     
       const historicalPlace = await HistoricalPlace.findById(eventId);
       if (!historicalPlace) throw new Error('Historical place event not found');
       
-      // Get historical place event price to refund
+     
       eventPrice = historicalPlace.price;
 
       updateData.$pull = { historicalplaceId: eventId };
@@ -246,14 +274,14 @@ const cancelEvent = async (touristId, eventType, eventId) => {
       throw new Error('Invalid event type');
   }
 
-  // Update the Tourist's record to remove the event
+ 
   const updatedTourist = await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
 
   if (updatedTourist) {
-    // Refund the event price to the tourist's wallet
+    
     updatedTourist.wallet += eventPrice;
 
-    // Save the updated wallet balance
+    
     await updatedTourist.save();
   }
 
@@ -283,27 +311,6 @@ const amadeus = new Amadeus({
     clientSecret: process.env.AMADEUS_CLIENT_SECRET2,
 });
 
-// City and Airport search
-const cityAndAirportSearch = async (parameter) => {
-  try {
-      const response = await amadeus.referenceData.locations.get({
-          keyword: parameter,
-          subType: Amadeus.location.any,
-      });
-      
-      // Filter to get only airports and map to desired format
-      const airports = response.data
-          .filter(location => location.subType === "AIRPORT") // Get only locations with subType "AIRPORT"
-          .map(airport => ({
-              name: airport.name,
-              iataCode: airport.iataCode
-          }));
-      
-      return airports; // Return the filtered list of airport names and IATA codes
-  } catch (error) {
-      throw new Error(error.response ? error.response.body : error.message);
-  }
-};
 
 
 // Flight search
@@ -348,6 +355,14 @@ const flightSearch = async ({ originCode, destinationCode, dateOfDeparture }) =>
   }
 };
 
+
+
+
+
+
+
+
+
 module.exports = {
   createCategory,
   getAllCategories,
@@ -366,8 +381,8 @@ module.exports = {
   bookEvent,
   cancelEvent,
   getTouristEmailById,
-  cityAndAirportSearch,
-  flightSearch
+  flightSearch,
+  bookedEvents
  
 };
 

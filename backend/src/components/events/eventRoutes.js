@@ -275,15 +275,13 @@ router.delete('/deleteTagById/:id', eventController.deleteTagById);
 router.put('/updateItineraryActivation', eventController.updateItineraryActivation);
 
 router.put('/inappropriate', eventController.updateEventFlagController);
+router.get('/bookedEvents', eventController.bookedEvents)
 router.put('/bookEvent', eventController.bookEvent);
 router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
 router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEventEmail);
 
-// City and Airport search route
-router.get('/city-and-airport-search/:parameter', eventController.cityAndAirportSearch);
 
-// Flight search route
-router.get('/flight-search', eventController.flightSearch);
+
 
 // Route to get city code by city name
 router.get('/city/:city', eventController.getCityCode);
@@ -302,7 +300,7 @@ router.get('/transfer', eventController.searchTransferOffers);
 router.post('/transfer/book/:offerId', eventController.bookTransfer);
 
 
-
+router.post('/flightOffers', eventController.flightOffers);
 
 
 module.exports = router;
