@@ -213,7 +213,7 @@ const bookedEvents = async (req, res) => {
 
 
 const bookEvent = async (req, res) => {
-  const { userType, touristId, eventType, eventID, ticketType, currency, itineraryPrice } = req.body;
+  const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice } = req.body;
 
   try {
     if (userType !== 'tourist') {
@@ -223,7 +223,7 @@ const bookEvent = async (req, res) => {
       return res.status(400).json({ error: "All attributes are required in the request body" });
     }
 
-    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, itineraryPrice);
+    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice);
 
     return res.status(200).json({
       success: true,
@@ -318,6 +318,24 @@ const flightOffers = async (req, res) => {
 };
 
 
+const bookFlight = async (req, res) => {
+  const { bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode } = req.body;
+
+  
+  if (!bookedBy || !price || !departureTime || !arrivalTime || !personCount || !currency || !originCode || !destinationCode) {
+      return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+      const newBooking = await eventService.createBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency ,originCode,destinationCode });
+      return res.status(201).json(newBooking);
+  } catch (error) {
+      console.error('Error booking flight:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 
 
@@ -338,6 +356,23 @@ const getHotelsByCityCode = async (req, res) => {
       res.status(200).json(response); 
   } catch (error) {
       res.status(500).json({ error: error.message });
+  }
+};
+
+const bookHotel = async (req, res) => {
+  const { bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency } = req.body;
+
+  
+  if (!bookedBy || !price || !iataCode || !hotelName || !hotelId || !startDate || !endDate || !personCount || !currency) {
+      return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+      const newBooking = await eventService.bookingHotel({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency });
+      return res.status(201).json(newBooking);
+  } catch (error) {
+      console.error('Error booking hotel:', error.message);
+      return res.status(500).json({ message: error.message });
   }
 };
 
@@ -393,7 +428,9 @@ module.exports = {
     getOffersByHotelId,
     searchTransferOffers,
     bookedEvents,
-    flightOffers
+    flightOffers,
+    bookFlight,
+    bookHotel
 
   };
   

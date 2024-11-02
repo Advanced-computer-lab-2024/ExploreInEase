@@ -4,6 +4,8 @@ const Activity = require('../../models/activity');
 const ActivityCategory = require('../../models/activityCategory'); 
 const PreferenceTags = require('../../models/preferenceTags'); 
 const Tourist = require('../../models/tourist');
+const BookedFlight = require('../../models/bookedFlights');
+const BookedHotel = require('../../models/bookedHotels');
 
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
@@ -127,7 +129,7 @@ const bookedEvents =  async ({touristId}) =>{
 };
 
 
-const bookEvent = async (touristId, eventType, eventId, ticketType, currency, itineraryPrice) => {
+const bookEvent = async (touristId, eventType, eventId, ticketType, currency, activityPrice) => {
   const tourist = await Tourist.findById(touristId);
   if (!tourist) {
     throw new Error('Tourist not found');
@@ -137,34 +139,37 @@ const bookEvent = async (touristId, eventType, eventId, ticketType, currency, it
 
   switch (eventType) {
     case 'itinerary':
+      const itinerary = await Itinerary.findById(eventId);
+      if (!itinerary) {
+        throw new Error('Itinerary not found');
+      }
       if (tourist.itineraryId && tourist.itineraryId.includes(eventId)) {
         throw new Error('This itinerary has already been booked.');
       }
+      eventPrice = itinerary.price;
+
+    case 'activity':
+      
+      
+      if (tourist.activityId && tourist.activityId.includes(eventId)) {
+        throw new Error('This activity has already been booked.');
+      }
       switch (currency) {
         case 'euro':
-          eventPrice = (itineraryPrice / 55).toFixed(2);
+          eventPrice = (activityPrice * 55).toFixed(2);
           break;
         case 'dollar':
-          eventPrice = (itineraryPrice / 50).toFixed(2);
+          eventPrice = (activityPrice * 50).toFixed(2);
           break;
         case 'EGP':
-          eventPrice = (itineraryPrice / 1).toFixed(2);
+          eventPrice = (activityPrice * 1).toFixed(2);
           break;
         default:
           throw new Error('Invalid currency');
       }
       break;
-
-    case 'activity':
-      const activity = await Activity.findById(eventId);
-      if (!activity) {
-        throw new Error('Activity not found');
-      }
-      if (tourist.activityId && tourist.activityId.includes(eventId)) {
-        throw new Error('This activity has already been booked.');
-      }
-      eventPrice = activity.price;
-      break;
+     
+      
 
     case 'historicalPlace':
       const historicalPlace = await HistoricalPlace.findById(eventId);
@@ -303,7 +308,119 @@ const getTouristEmailById = async (touristId) => {
 
 
 
+const createBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
+  try {
 
+    switch (currency) {
+      case 'euro':
+          price = (price * 55).toFixed(2); 
+          break;
+      case 'dollar':
+          price = (price * 50).toFixed(2); 
+          break;
+      case 'EGP':
+          price = price.toFixed(2); 
+          break;
+      default:
+          throw new Error('Invalid currency'); 
+    }
+
+
+
+      const tourist = await Tourist.findById(bookedBy);
+      if (!tourist) {
+        throw new Error('Tourist not found');
+      }
+
+      if (tourist.wallet < price) {
+        throw new Error('Insufficient funds to book this Flight by Wallet');
+      }
+
+
+      tourist.wallet -= price;
+      await tourist.save();
+
+
+      const newBooking = new BookedFlight({
+          bookedBy,
+          price,
+          departureTime,
+          arrivalTime,
+          personCount,
+          originCode,
+          destinationCode
+      });
+
+      
+      await newBooking.save();
+      return {
+        message: 'Booking has been made successfully',
+        booking: newBooking,
+      };
+  } catch (error) {
+      console.error('Error saving booking:', error);
+      throw new Error("Unable to create booking");
+  }
+};
+
+
+const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId, startDate, endDate, personCount, currency }) => {
+  try {
+    
+    switch (currency) {
+      case 'euro':
+        price = (price * 55).toFixed(2);
+        break;
+      case 'dollar':
+        price = (price * 50).toFixed(2);
+        break;
+      case 'EGP':
+        price = price.toFixed(2);
+        break;
+      default:
+        throw new Error('Invalid currency');
+    }
+
+    
+    const tourist = await Tourist.findById(bookedBy);
+    if (!tourist) {
+      throw new Error('Tourist not found');
+    }
+
+    
+    if (tourist.wallet < price) {
+      throw new Error('Insufficient funds to book this hotel');
+    }
+
+    tourist.wallet -= price;
+    await tourist.save();
+
+    
+    const newBooking = new BookedHotel({
+      bookedBy,
+      price,
+      iataCode,
+      hotelName,
+      hotelId,
+      startDate,
+      endDate,
+      personCount,
+      currency,
+    });
+
+    
+    await newBooking.save();
+
+   
+    return {
+      message: 'Booking has been made successfully',
+      booking: newBooking,
+    };
+  } catch (error) {
+    console.error('Error saving booking:', error);
+    throw new Error("Unable to create booking");
+  }
+};
 
 
 
@@ -326,7 +443,9 @@ module.exports = {
   bookEvent,
   cancelEvent,
   getTouristEmailById,
-  bookedEvents
+  bookedEvents,
+  createBooking,
+  bookingHotel
  
 };
 

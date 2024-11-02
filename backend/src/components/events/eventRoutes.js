@@ -289,9 +289,13 @@ router.get('/city/:city', eventController.getCityCode);
 // Route to get hotel IDs by city code
 router.get('/hotels/:cityCode', eventController.getHotelsByCityCode);
 
+//define the route to book hotels 
+router.post('/bookHotel', eventController.bookHotel);
+
 // Route to get Flight Offers
 router.post('/flightOffers', eventController.flightOffers);
-
+// Define the route to book a flight
+router.post('/bookFlight', eventController.bookFlight);
 
 // Route to search for transfer offers
 router.get('/transfer', eventController.searchTransferOffers);

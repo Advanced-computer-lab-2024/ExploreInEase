@@ -122,9 +122,9 @@ const bookedEvents = async (touristId) => {
 
 
 
-const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,itineraryPrice) => {
+const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {
   
-  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,itineraryPrice);
+  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice);
 };
 
 const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
@@ -289,6 +289,11 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture, curr
 
 
 
+const createBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
+  
+  return await eventRepository.createBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode });
+};
+
 
 
 // Fetch hotels by city code with start date, end date, currency adjustments, and person count
@@ -330,7 +335,10 @@ const fetchHotelsByCityCode = async (cityCode, startDate, endDate, currency, per
 };
 
 
-
+const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency }) => {
+  
+  return await eventRepository.bookingHotel({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency });
+};
 
 
 // Service method to search for transfer offers
@@ -368,7 +376,8 @@ module.exports = {
   fetchHotelsByCityCode,
   searchTransferOffers,
   bookedEvents,
-  flightOffers
-
+  flightOffers,
+  createBooking,
+  bookingHotel
 };
 
