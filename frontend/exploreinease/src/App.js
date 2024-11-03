@@ -32,6 +32,8 @@ const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar
 const SignIn = React.lazy(() => import("./Login/login"));
 const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"))
 const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"))
+const Complaints = React.lazy(() => import('./Tourist/Complaints'));
+
 
 const App = () => {
 
@@ -70,6 +72,8 @@ const App = () => {
           <Route path="/AdminHomePage" element={<AdminHomePage />} />
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
+          <Route path="/Complaints" element={<Complaints />} />
+
         </Routes>
       </Suspense>
     </Router>
