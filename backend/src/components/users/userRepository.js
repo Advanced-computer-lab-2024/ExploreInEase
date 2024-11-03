@@ -200,6 +200,19 @@ const getAllUsersForDeletion = async () => {
 
 
 
-module.exports = { deleteTourist,addGovernorOrAdmin,fetchAllUsers, fetchAllTourists,deleteTouristById,deleteUserById,findUserById,updateTermsAndConditions
-,checkTouristDeletionCriteria,updateRequestDeletion,checkTourGuideItineraryDates,checkSellerProductStatus,checkAdvertiserActivityStatus,getAllUsersForDeletion
+module.exports = { 
+    deleteTourist,
+    addGovernorOrAdmin,
+    fetchAllUsers, 
+    fetchAllTourists,
+    deleteTouristById,
+    deleteUserById,
+    findUserById,
+    updateTermsAndConditions,
+    checkTouristDeletionCriteria,
+    updateRequestDeletion,
+    checkTourGuideItineraryDates,
+    checkSellerProductStatus,
+    checkAdvertiserActivityStatus,
+    getAllUsersForDeletion
 };

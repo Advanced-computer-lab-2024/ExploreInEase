@@ -100,12 +100,12 @@ const deleteTagById = async (id) => {
 //New Codeee
 const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
   const updatedItinerary = await Itinerary.findOneAndUpdate(
-      { _id: itineraryId, created_by: userId }, // Ensure the itinerary is created by the user
+      { _id: itineraryId, created_by: userId }, 
       { isActivated: isActivated },
-      { new: true } // Return the updated document
+      { new: true } 
   );
 
-  return updatedItinerary; // Return the updated itinerary
+  return updatedItinerary; 
 };
 
 const setFlagToZeroForItinerary = async (_id) => {
