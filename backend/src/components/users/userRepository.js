@@ -179,21 +179,27 @@ const login = async (username, password) => {
 }
 
 // Check if the itinerary was completed by the tourist (after date passed and booked)
-const hasCompletedItinerary = async (touristId, itineraryId, guideId) => {
+const hasCompletedItinerary = async (touristId, ItineraryId, guideId) => {
     try {
         // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourGuide
-        const itinerary = await Itinerary.findOne({ _id: itineraryId, created_by: guideId });
-        if (!itinerary) throw new Error("Itinerary not found or does not belong to the specified tourist");
-
-        // Check if any of the itinerary dates have passed
-        const now = new Date();
-        const hasDatePassed = itinerary.dateTimeAvailable.some(date => date < now);
-        if (!hasDatePassed) {
-            // If no dates have passed, the itinerary isn't considered completed
-            return false;
+        const tourist = await Tourist.findOne({ _id: touristId, itineraryId: ItineraryId });
+        const itinerary = await Itinerary.findOne ({ _id: ItineraryId, created_by: guideId });
+        if (!tourist){
+            throw new Error("Itinerary does not belong to the specified tourist");
         }
-
-        return true;
+        else if(!itinerary) {
+            throw new Error("Itinerary is not found or does not belong to the specified tour guide");
+        }
+        else{
+            // Check if any of the itinerary dates have passed
+            const now = new Date();
+            const hasDatePassed = itinerary.dateTimeAvailable.some(date => date < now);
+            if (!hasDatePassed) {
+                // If no dates have passed, the itinerary isn't considered completed
+                return false;
+            }
+            return true;
+        }        
 
     } catch (error) {
         console.error("Error checking itinerary completion:", error);
@@ -242,22 +248,25 @@ const updateTourGuideRatings = async (tourGuideId, updatedFields) => {
 };
 
 // Check if the activty was completed by the tourist (after date passed and booked)
-const hasAttendedActivity = async (touristId, activityId) => {
+const hasAttendedActivity = async (touristId, ActivityId) => {
     try {
         // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourGuide
-        const activity = await Activity.findOne({ _id: activityId });
-        if (!activity) throw new Error("Activity not found");
-
-        // Check if any of the itinerary dates have passed
-        const now = new Date();
-        const hasDatePassed = activity.date < now;
-        console.log(hasDatePassed);
-        if (!hasDatePassed) {
-            // If no dates have passed, the itinerary isn't considered completed
-            return false;
+        const tourist = await Tourist.findOne({ _id: touristId, activityId: ActivityId });
+        if (!tourist) {
+            throw new Error("No such activity exists or the tourist did not sign up for this activity");
         }
-
-        return true;
+        else{
+            const activity = await Activity.findOne({ _id: ActivityId });
+            // Check if any of the itinerary dates have passed
+            const now = new Date();
+            const hasDatePassed = activity.date < now;
+            console.log(hasDatePassed);
+            if (!hasDatePassed) {
+                // If no dates have passed, the itinerary isn't considered completed
+                return false;
+            }
+            return true;
+        }
 
     } catch (error) {
         console.error("Error checking Activity completion:", error);
