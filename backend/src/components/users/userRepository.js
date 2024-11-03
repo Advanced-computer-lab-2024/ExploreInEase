@@ -179,12 +179,20 @@ const login = async (username, password) => {
 
 // Check if the itinerary was completed by the tourist (after date passed and booked)
 const checkTourCompletion = async (touristId, itineraryId) => {
+    // Fetch the itinerary to check for the tourist and if the date has passed
     const itinerary = await Itinerary.findOne({
         _id: itineraryId,
-        tourists: touristId,
-        date: { $lt: new Date() }
+        tourists: touristId
     });
-    return itinerary !== null;
+
+    // If the itinerary is found, check if any of the dateTimeAvailable dates have passed
+    if (itinerary) {
+        const currentDate = new Date();
+        const hasCompleted = itinerary.dateTimeAvailable.some(date => date < currentDate);
+        return hasCompleted; // Return true if at least one date has passed
+    }
+    
+    return false; // If the itinerary is not found or no dates have passed
 };
 
 // Update tour guide data with a new rating

@@ -219,24 +219,21 @@ const registerUser = async (type, email, username, password) => {
 };
 
 const rateTourGuide = async (tourGuideId, touristId, itineraryId, rating) => {
-    // Fetch itinerary to verify tour guide and tourist completion
-    const itinerary = await userRepository.findUserById(itineraryId).populate('created_by');
-    
-    if (!itinerary) throw new Error("Itinerary not found.");
-    if (itinerary.created_by._id.toString() !== tourGuideId) throw new Error("This tour guide did not create the itinerary.");
+    // Fetch the tour guide directly using the itinerary ID
+    const tourGuide = await userRepository.findTourGuideByItineraryId(itineraryId);
+
+    if (!tourGuide) throw new Error("Tour guide not found for the given itinerary.");
+    if (tourGuide._id.toString() !== tourGuideId) throw new Error("This tour guide did not create the itinerary.");
 
     const completedTour = await userRepository.checkTourCompletion(touristId, itineraryId);
     if (!completedTour) throw new Error("You cannot rate this tour guide because you haven't completed this itinerary.");
 
     if (rating < 1 || rating > 5) throw new Error("Rating must be between 1 and 5.");
 
-    const tourGuide = await userRepository.findUserById(tourGuideId);
-    if (!tourGuide || tourGuide.type !== 'tourGuide') throw new Error("Tour guide not found.");
-
+    // Assuming the tour guide has a 'rating' field that is an array
     tourGuide.rating.push(rating);
     return await userRepository.updateTourGuideRating(tourGuideId, { rating: tourGuide.rating });
 };
-
 
 
 module.exports = {

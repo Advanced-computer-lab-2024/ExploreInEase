@@ -398,7 +398,6 @@ const rateTourGuide = async (req, res) => {
     }
 }
 
-
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
