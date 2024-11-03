@@ -1,3 +1,4 @@
+const Activity = require('../../models/activity');
 const Users = require('../../models/user');
 const userRepository = require('../users/userRepository');
 //const Itinerary = require('../models/Itinerary'); // Assuming you have an Itinerary model
@@ -280,6 +281,47 @@ const commentOnTourGuide = async (touristId, tourGuideId, itineraryId, commentTe
     }
 };
 
+const rateActivity = async (touristId, activityId, rating) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasAttended = await userRepository.hasAttendedActivity(touristId, activityId);
+        
+        if (!hasAttended) {
+            throw new Error("You cannot rate this activity because you havent attended this activity yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const activity = await Activity.findOne({ _id: activityId });
+        if (!activity) {
+            throw new Error("activity not found.");
+        }
+
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        // Update the rating sum and count
+        activity.ratingSum += rating; // Add the new rating to the sum
+        activity.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        activity.rating = activity.ratingSum / activity.ratingCount; // Update the average rating
+
+        // Update the activity with the new rating values
+        await userRepository.updateActivityRatings(activityId, {
+            rating: activity.rating,
+            ratingSum: activity.ratingSum,
+            ratingCount: activity.ratingCount,
+        });
+
+        return { message: "Rating added successfully", updatedActivity: activity };
+    } catch (error) {
+        console.error("Error adding rating to activity:", error);
+        throw error;
+    }
+};
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -302,6 +344,7 @@ module.exports = {
   registerUser,
   login,
   rateTourGuide,
-  commentOnTourGuide
+  commentOnTourGuide,
+  rateActivity
 };
 

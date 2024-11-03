@@ -399,7 +399,7 @@ const rateTourGuide = async (req, res) => {
     }
 }
 
-const addComment = async (req, res) => {
+const commentOnTourGuide = async (req, res) => {
     const { touristId } = req.params; // Get the userId from the route
     const { tourGuideId, itineraryId, commentText } = req.body;
 
@@ -410,6 +410,18 @@ const addComment = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 };
+
+const rateActivity = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { activityId, rating } = req.body;
+
+    try {
+        const result = await userService.rateActivity(touristId,activityId,rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
 
 module.exports = {
   deleteUserByIdAndType,
@@ -430,5 +442,6 @@ module.exports = {
   registerUser,
   login,
   rateTourGuide,
-  addComment
+  commentOnTourGuide,
+  rateActivity
 };

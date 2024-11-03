@@ -1,6 +1,7 @@
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
-const Itinerary = require('../../models/itinerary')
+const Itinerary = require('../../models/itinerary');
+const Activity = require('../../models/activity');
 // Find user by ID
 const findUserById = async (_id) => {
     try {
@@ -240,6 +241,49 @@ const updateTourGuideRatings = async (tourGuideId, updatedFields) => {
     }
 };
 
+// Check if the activty was completed by the tourist (after date passed and booked)
+const hasAttendedActivity = async (touristId, activityId) => {
+    try {
+        // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourGuide
+        const activity = await Activity.findOne({ _id: activityId });
+        if (!activity) throw new Error("Activity not found");
+
+        // Check if any of the itinerary dates have passed
+        const now = new Date();
+        const hasDatePassed = activity.date < now;
+        console.log(hasDatePassed);
+        if (!hasDatePassed) {
+            // If no dates have passed, the itinerary isn't considered completed
+            return false;
+        }
+
+        return true;
+
+    } catch (error) {
+        console.error("Error checking Activity completion:", error);
+        throw error;
+    }
+};
+
+const updateActivityRatings = async (activityId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedActivity = await Activity.findByIdAndUpdate(
+            activityId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedActivity) {
+            throw new Error("Activity not found or could not be updated.");
+        }
+
+        return updatedActivity;
+    } catch (error) {
+        console.error("Error updating Activity ratings:", error);
+        throw error;
+    }
+};
 
 module.exports = {
     addGovernorOrAdmin,
@@ -260,5 +304,7 @@ module.exports = {
     login,
     hasCompletedItinerary,
     updateTourGuideRatings,
-    updateTourGuideComments
+    updateTourGuideComments,
+    hasAttendedActivity,
+    updateActivityRatings
 };
