@@ -292,7 +292,6 @@ import {
             )}
             {selectedItem.type === 'Itinerary' && (
               <>
-                <Typography>Activities: {selectedItem.activities.join(', ')}</Typography>
                 {/* Add more Itinerary-specific fields here */}
               </>
             )}
