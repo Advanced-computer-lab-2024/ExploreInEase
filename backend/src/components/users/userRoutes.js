@@ -1146,8 +1146,8 @@ router.post('/login', userController.login);
 
 
 
-router.post('/rateTourGuide', userController.rateTourGuide);
+router.post('/rateTourGuide/:touristId', userController.rateTourGuide);
 
-router.post('/comment/:userId', userController.addComment);
+router.post('/comment/:touristId', userController.addComment);
 
 module.exports = router;

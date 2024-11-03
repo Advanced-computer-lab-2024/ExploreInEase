@@ -388,22 +388,23 @@ const login = async (req, res) => {
 }
 
 const rateTourGuide = async (req, res) => {
-    const { tourGuideId, touristId, itineraryId, rating } = req.body;
+    const { touristId } = req.params; // Get the userId from the route
+    const { tourGuideId, itineraryId, commentText } = req.body;
 
     try {
-        const result = await userService.rateTourGuide(tourGuideId, touristId, itineraryId, rating);
-        res.status(200).json({ message: "Rating submitted successfully", tourGuide: result });
+        const result = await userService.rateTourGuide(touristId, tourGuideId, itineraryId, commentText);
+        return res.status(200).json(result);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return res.status(400).json({ message: error.message });
     }
 }
 
 const addComment = async (req, res) => {
-    const { userId } = req.params; // Get the userId from the route
+    const { touristId } = req.params; // Get the userId from the route
     const { tourGuideId, itineraryId, commentText } = req.body;
 
     try {
-        const result = await userService.commentOnTourGuide(userId, tourGuideId, itineraryId, commentText);
+        const result = await userService.commentOnTourGuide(touristId, tourGuideId, itineraryId, commentText);
         return res.status(200).json(result);
     } catch (error) {
         return res.status(400).json({ message: error.message });

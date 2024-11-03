@@ -1,6 +1,6 @@
+const Users = require('../../models/user');
 const userRepository = require('../users/userRepository');
 //const Itinerary = require('../models/Itinerary'); // Assuming you have an Itinerary model
-
 const bcrypt = require('bcrypt');
 const getUserById = async (id) => {
     // Retrieve the user from the Users table based on id
@@ -236,10 +236,10 @@ const rateTourGuide = async (tourGuideId, touristId, itineraryId, rating) => {
 };
 
 
-const commentOnTourGuide = async (userId, tourGuideId, itineraryId, commentText) => {
+const commentOnTourGuide = async (touristId, tourGuideId, itineraryId, commentText) => {
     try {
         // Check if the tourist has completed the itinerary with the specified tour guide
-        const hasCompleted = await userRepository.hasCompletedItinerary(userId, itineraryId, tourGuideId);
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
         
         if (!hasCompleted) {
             throw new Error("You cannot comment on this tour guide because you haven't completed this itinerary with them.");
