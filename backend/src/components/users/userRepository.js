@@ -178,26 +178,68 @@ const login = async (username, password) => {
 }
 
 // Check if the itinerary was completed by the tourist (after date passed and booked)
-const checkTourCompletion = async (touristId, itineraryId) => {
-    // Fetch the itinerary to check for the tourist and if the date has passed
-    const itinerary = await Itinerary.findOne({
-        _id: itineraryId,
-        tourists: touristId
-    });
+const hasCompletedItinerary = async (touristId, itineraryId, guideId) => {
+    try {
+        // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourist
+        const itinerary = await Itinerary.findOne({ _id: itineraryId, created_by: touristId });
+        if (!itinerary) throw new Error("Itinerary not found or does not belong to the specified tourist");
 
-    // If the itinerary is found, check if any of the dateTimeAvailable dates have passed
-    if (itinerary) {
-        const currentDate = new Date();
-        const hasCompleted = itinerary.dateTimeAvailable.some(date => date < currentDate);
-        return hasCompleted; // Return true if at least one date has passed
+        // Check if any of the itinerary dates have passed
+        const now = new Date();
+        const hasDatePassed = itinerary.dateTimeAvailable.some(date => date < now);
+
+        if (!hasDatePassed) {
+            // If no dates have passed, the itinerary isn't considered completed
+            return false;
+        }
+
+        // Step 2: Check if the itinerary was organized by the given tour guide
+        const isGuideMatch = await Itinerary.exists({ _id: itineraryId, guideId });
+        if (!isGuideMatch) {
+            return false; // Guide doesn't match, so it's not completed with the specified guide
+        }
+
+        // If both conditions are met, return true
+        return true;
+
+    } catch (error) {
+        console.error("Error checking itinerary completion:", error);
+        throw error;
     }
-    
-    return false; // If the itinerary is not found or no dates have passed
+};
+
+const updateTourGuideComments = async (tourGuideId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedTourGuide = await Users.findByIdAndUpdate(
+            tourGuideId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedTourGuide) {
+            throw new Error("Tour guide not found or could not be updated.");
+        }
+
+        return updatedTourGuide;
+    } catch (error) {
+        console.error("Error updating tour guide comments:", error);
+        throw error;
+    }
 };
 
 // Update tour guide data with a new rating
 const updateTourGuideRating = async (tourGuideId, updatedData) => {
     return await Users.findByIdAndUpdate(tourGuideId, updatedData, { new: true });
+};
+
+// Add comment to a tour guide
+const addCommentToTourGuide = async (tourGuideId, commentText) => {
+    return await Users.findByIdAndUpdate(
+        tourGuideId,
+        { $push: { comment: commentText } }, // Push the new comment into the comment array
+        { new: true } // Return the updated document
+    );
 };
 
 module.exports = {
@@ -217,6 +259,8 @@ module.exports = {
     checkUserExists,
     checkUserExistsByEmail,
     login,
-    checkTourCompletion,
-    updateTourGuideRating
+    hasCompletedItinerary,
+    updateTourGuideRating,
+    addCommentToTourGuide,
+    updateTourGuideComments
 };

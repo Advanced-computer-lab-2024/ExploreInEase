@@ -1,5 +1,5 @@
 const userRepository = require('../users/userRepository');
-const Itinerary = require('../models/Itinerary'); // Assuming you have an Itinerary model
+//const Itinerary = require('../models/Itinerary'); // Assuming you have an Itinerary model
 
 const bcrypt = require('bcrypt');
 const getUserById = async (id) => {
@@ -236,6 +236,33 @@ const rateTourGuide = async (tourGuideId, touristId, itineraryId, rating) => {
 };
 
 
+const commentOnTourGuide = async (userId, tourGuideId, itineraryId, commentText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(userId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot comment on this tour guide because you haven't completed this itinerary with them.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const tourGuide = await Users.findOne({ _id: tourGuideId, type: 'tourGuide' });
+        if (!tourGuide) {
+            throw new Error("Tour guide not found.");
+        }   
+        // Add the comment to the tour guide's comments array
+        tourGuide.comment.push(commentText);    
+
+        // Update the tour guide with the new comment
+        await userRepository.updateTourGuideComments(tourGuideId, { comment: tourGuide.comment });
+
+        return { message: "Comment added successfully", updatedTourGuide: tourGuide };
+    } catch (error) {
+        console.error("Error adding comment to tour guide:", error);
+        throw error;
+    }
+};
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -257,6 +284,7 @@ module.exports = {
   registerTourist,
   registerUser,
   login,
-  rateTourGuide
+  rateTourGuide,
+  commentOnTourGuide
 };
 
