@@ -1148,8 +1148,10 @@ router.post('/login', userController.login);
 
 router.post('/rateTourGuide/:touristId', userController.rateTourGuide);
 
-router.post('/comment/:touristId', userController.commentOnTourGuide);
+router.post('/commentTourGuide/:touristId', userController.commentOnTourGuide);
 
 router.post('/rateActivity/:touristId', userController.rateActivity);
+
+router.post('/commentActivity/:touristId', userController.commentOnActivity);
 
 module.exports = router;

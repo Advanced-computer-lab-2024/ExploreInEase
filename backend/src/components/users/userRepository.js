@@ -285,6 +285,27 @@ const updateActivityRatings = async (activityId, updatedFields) => {
     }
 };
 
+const updateActivityComments = async (activityId, updateOperation) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to apply the update operation (like $push for comments)
+        const updatedActivity = await Activity.findByIdAndUpdate(
+            activityId,
+            updateOperation,
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedActivity) {
+            throw new Error("Activity not found or could not be updated.");
+        }
+
+        return updatedActivity;
+    } catch (error) {
+        console.error("Error updating Activity comments:", error);
+        throw error;
+    }
+};
+
+
 module.exports = {
     addGovernorOrAdmin,
     fetchAllUsers,
@@ -306,5 +327,6 @@ module.exports = {
     updateTourGuideRatings,
     updateTourGuideComments,
     hasAttendedActivity,
-    updateActivityRatings
+    updateActivityRatings,
+    updateActivityComments
 };

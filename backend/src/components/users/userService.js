@@ -322,6 +322,38 @@ const rateActivity = async (touristId, activityId, rating) => {
     }
 };
 
+const commentOnActivity = async (touristId, activityId, commentText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasAttended = await userRepository.hasAttendedActivity(touristId, activityId);
+        
+        if (!hasAttended) {
+            throw new Error("You cannot comment on this Activity because you haven't attended this activity yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const activity = await Activity.findOne({ _id: activityId});
+        if (!activity) {
+            throw new Error("activity not found.");
+        }   
+        // Create the new comment
+        const newComment = {
+            user: touristId,
+            text: commentText,
+            date: new Date(),
+        };
+
+        // Use the repository method to push the new comment to the comments array
+        const updatedActivity = await userRepository.updateActivityComments(activityId, { $push: { comments: newComment } });
+
+
+        return { message: "Comment added successfully", updatedActivity };
+    } catch (error) {
+        console.error("Error adding comment to activity:", error);
+        throw error;
+    }
+};
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -345,6 +377,7 @@ module.exports = {
   login,
   rateTourGuide,
   commentOnTourGuide,
-  rateActivity
+  rateActivity,
+  commentOnActivity
 };
 
