@@ -169,8 +169,6 @@ const updateTourist = async (_id, updateData) => {
     return await userRepository.updateTourist(_id, updateData);
 };
 
-
-
 const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession) => {
     const touristExists = await userRepository.checkTouristExists(username);
     if (touristExists) {

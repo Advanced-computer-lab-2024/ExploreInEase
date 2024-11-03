@@ -31,60 +31,69 @@ const GuideAdvertiserSignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); // Set loading state
-    const registrationData = new FormData();
-    registrationData.append('email', formData.email);
-    registrationData.append('username', formData.username);
-    registrationData.append('password', formData.password);
-    registrationData.append('type', formData.type);
-
-    // Append files only if they exist
-    if (formData.type === 'tourGuide') {
-      registrationData.append('id', formData.id);
-      registrationData.append('certificates', formData.certificates);
-    } else {
-      registrationData.append('id', formData.id);
-      registrationData.append('taxRegistry', formData.taxRegistry);
-    }
+    console.log(formData);
 
     try {
-      // Step 1: Register user
-      const options = {
-        apiPath: '/register/{type}',
-        body: registrationData,
-        urlParam: { type: formData.type },
-      };
-      const registerResponse = await NetworkService.post(options);
-      const userId = registerResponse.data.User._id; // Assuming your API returns the user ID after registration
+        // Step 1: Prepare registration data as an object
+        const registrationData = {
+            email: formData.email,
+            username: formData.username,
+            password: formData.password,
+            type: formData.type,
+        };
 
-      // Step 2: Prepare the document upload
-      const formDataForUpload = new FormData();
-      formDataForUpload.append('file', formData.type === 'tourGuide' ? formData.certificates : formData.taxRegistry); // Upload the relevant document
-      formDataForUpload.append('docType', formData.type === 'tourGuide' ? 'certificate' : 'taxRegistry'); // Append docType to formData
+        // Step 2: Register user
+        const options = {
+            apiPath: `/register/${formData.type}`,
+            body: registrationData, // Pass the object directly
+        };
 
-      const optionsForUpload = {
-        apiPath: `/uploadDocument/${userId}`,
-        body: formDataForUpload,
-      };
-      // Step 3: Upload the document
-      const uploadResponse = await axios.post(optionsForUpload);
-      setSuccess(uploadResponse.data.message);
+        const registerResponse = await NetworkService.post(options);
+        console.log(registerResponse);
+        const userId = registerResponse.User._id;
+        console.log("User ID:", userId);
 
-      // Check if the upload was successful
-      if (uploadResponse.data.message === 'File uploaded successfully') {
-        console.log('File ID:', uploadResponse.data.fileId); // Log the file ID
-        const user = registerResponse.data.User;
-        navigate(`/${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}HomePage`, { state: { user } });
-      }
+        // Step 3: Prepare document upload data as objects for each file
+        const uploadFiles = [
+            { file: formData.id, docType: 'nationalId' },
+            formData.type === 'tourGuide' && { file: formData.certificates, docType: 'certificate' },
+            (formData.type === 'advertiser' || formData.type === 'seller') && { file: formData.taxRegistry, docType: 'taxRegistry' }
+        ].filter(Boolean); // Remove any false entries
+
+        // Step 4: Upload each document separately
+        for (const uploadFile of uploadFiles) {
+            const uploadData = {
+                file: uploadFile.file, // File to upload
+                docType: uploadFile.docType, // Document type
+            };
+
+            console.log("uploadData:", uploadData);
+
+            const optionsForUpload = {
+                apiPath: `/uploadDocument/${userId}`,
+                body: {uploadData: uploadData}, // Pass the object directly
+            };
+
+            // Upload the document
+            const uploadResponse = await NetworkService.post(optionsForUpload);
+            console.log(`${uploadFile.docType} uploaded:`, uploadResponse.message);
+        }
+
+        // Step 5: Success handling
+        setSuccess('Files uploaded successfully');
+        navigate(`/${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}HomePage`, { state: { User: registerResponse.User } });
     } catch (err) {
-      if (err.response) {
-        setError(err.response.data.message);
-      } else {
-        setError('An unexpected error occurred.');
-      }
+        if (err.response) {
+            setError(err.response.data.message);
+        } else {
+            setError('An unexpected error occurred.');
+        }
     } finally {
-      setLoading(false); // Reset loading state
+        setLoading(false); // Reset loading state
     }
-  };
+};
+
+  
 
   return (
     <form onSubmit={handleSubmit}>

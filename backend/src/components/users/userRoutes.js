@@ -2,7 +2,16 @@ const express = require('express')
 const mongoose = require('mongoose')
 const router = express.Router()
 const userController = require('../users/userController');
+const multer = require('multer');
+const { bucket } = require('../../../main'); // Import bucket directly from main.js
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
+let db;
+
+const setDBConnection = (database) => {
+    db = database;
+};
 /**
  * @swagger
  * /deleteUserByIdAndType:
@@ -1144,4 +1153,7 @@ router.post('/register/:type', userController.registerUser);
  */
 router.post('/login', userController.login);
 
-module.exports = router;
+module.exports = {
+    setDBConnection,
+    router,
+};

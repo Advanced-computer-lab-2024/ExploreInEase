@@ -324,7 +324,7 @@ const registerUser = async (req, res) => {
     if (usernameExists) {
         return res.status(409).json({ message: "Username already exists" });
     }
-
+    console.log(email);
     const emailExists = await userRepository.checkUserExistsByEmail(email);
     if (emailExists) {
         return res.status(409).json({ message: "Email already exists" });
