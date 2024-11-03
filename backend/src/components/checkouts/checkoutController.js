@@ -1,24 +1,19 @@
 const checkoutService = require('../checkouts/checkoutService');
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const addProduct = async (req, res) => {
-    const { productId, picture, price, description, sellerId, originalQuantity, name } = req.body;
+    const { productId, price, description, originalQuantity, name } = req.body;
+    console.log(req.body)
     const {userId} = req.params;
-    // Basic validation
-    if (!productId || !price || !originalQuantity || !name || !description || !sellerId || !picture) {
+
+    if (!price || !originalQuantity || !name || !description) {
         return res.status(400).json({ message: "ProductId, price, picture, original quantity, description, sellerId and name are required." });
-    }
-    const user = await checkoutRepository.findUserById(userId);
-    if (user.type !== 'admin' && user.type !== 'seller') 
-    {
-        return res.status(400).json({ message: 'Invalid type' });
     }
 
     const productData = {
         productId,
-        picture,
+        sellerId: userId,
         price,
         description,
-        sellerId,
         originalQuantity,
         name
     };
@@ -30,7 +25,6 @@ const addProduct = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
 const getAvailableProducts = async (req, res) => {
     const {userId} = req.params;
     const user = await checkoutRepository.findUserById(userId);
@@ -76,11 +70,11 @@ const getProductsByPriceRange = async (req, res) => {
 const updateProduct = async (req, res) => {
     const { userId, productId } = req.params; // Extract both parameters
     const updatedProductData = req.body;
-
+    console.log(req.params, req.body);
     // Basic validation
-    if (!productId || !updatedProductData) {
-        return res.status(400).json({ message: "Product ID and updated data are required." });
-    }
+    // if (!productId || !updatedProductData) {
+    //     return res.status(400).json({ message: "Product ID and updated data are required." });
+    // }
 
     // Fetch the user's type (admin or seller)
     const user = await checkoutRepository.findUserById(userId);
@@ -96,17 +90,16 @@ const updateProduct = async (req, res) => {
         if (!currentProduct) {
             return res.status(404).json({ message: "Product not found" });
         }
-
         // Check if sellerId is being changed
-        if (updatedProductData.sellerId && updatedProductData.sellerId !== currentProduct.sellerId.toString()) {
-            return res.status(403).json({ message: "You cannot change the sellerId of a product." });
-        }
+        // if (updatedProductData.sellerId && updatedProductData.sellerId !== currentProduct.sellerId.toString()) {
+        //     return res.status(403).json({ message: "You cannot change the sellerId of a product." });
+        // }
 
         // Remove sellerId from the updated data if it exists
         delete updatedProductData.sellerId;
 
         const updatedProduct = await checkoutService.updateProduct(productId, updatedProductData);
-        
+        console.log("hello")
         if (updatedProduct) {
             return res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
         } else {

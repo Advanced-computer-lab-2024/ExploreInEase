@@ -13,24 +13,32 @@ const addProduct = async (productData) => {
 
 const getAllAvailableProducts = async () => {
     try {
+        // Step 1: Find all available products where takenQuantity is less than originalQuantity
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
         })
-        .select('picture price description ratings reviews name originalQuantity')
+        .select('picture price description ratings reviews name originalQuantity sellerId') // Include sellerId for population
         .populate({
             path: 'sellerId',
-            select: 'sellerType' // Only select sellerType
+            select: 'type' // Only select the 'type' field from the User (seller)
         });
 
-        const productsWithSellerType = availableProducts.map(product => ({
-            ...product.toObject(),
-            sellerType: product.sellerId.sellerType, // Add sellerType directly
-            sellerId: undefined // Optionally, remove sellerId from the response
-        }));
+        // Step 2: Map over the available products and add the sellerType directly
+        const productsWithSellerType = availableProducts.map(product => {
+            const productObj = product.toObject(); // Convert the product document to a plain object
+            const sellerType = product.sellerId?.type || ''; // Retrieve the seller type, fallback to an empty string if not found
 
+            return {
+                ...productObj,
+                sellerType, // Add sellerType directly from the populated field
+                sellerId: undefined // Optionally remove sellerId from the response
+            };
+        });
+
+        // Return the processed products array with the added sellerType
         return productsWithSellerType;
     } catch (error) {
-        throw new Error(`Error retrieving available products:${error.message}`);
+        throw new Error(`Error retrieving product: ${error.message}`);
     }
 };
 
@@ -54,7 +62,8 @@ const getProductsByPriceRange = async (minPrice, maxPrice) => {
 
 const getProductById = async (productId) => {
     try {
-        const product = await Product.findOne({ productId }).populate('sellerId', 'username sellerType');
+        console.log("id: ", productId)
+        const product = await Product.findOne({ _id: productId })
         return product;
     } catch (error) {
         throw new Error(`Error fetching product by ID: ${error.message}`);

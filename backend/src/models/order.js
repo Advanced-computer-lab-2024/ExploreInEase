@@ -1,6 +1,6 @@
-const mangoose = require("mangoose");
+const mongoose = require("mongoose");
 const Tourist = require("./tourist");
-const Schema = mangoose.Schema;
+const Schema = mongoose.Schema;
 
 const orderSchema = new Schema(
   {

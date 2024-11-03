@@ -115,7 +115,7 @@ const UsersSchema = new Schema({
         type: String,
         enum: ['VTP', 'External',''], // Seller types
         default: function() {
-            return this.sellerType === 'seller' ? 'External' : '';
+            return this.type === 'seller' ? 'External' : '';
         }
     },
     docStatus: {
@@ -133,6 +133,14 @@ const UsersSchema = new Schema({
         type: Boolean,
         default: false
     },
+    status: {
+        type: Boolean,
+        default: false
+    },
+    requestDeletion: {
+        type: Boolean,
+        default: false
+    },
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

@@ -42,18 +42,18 @@ const TouristSchema = new Schema({
         required: [true,'Profession is required'],
         required: true
     },
-    itineraryId: {
+    itineraryId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Itinerary', // Foreign key reference to Itinerary schema
-    },
-    activityId: {
+    }],
+    activityId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Activity', // Foreign key reference to Activity schema
-    },
-    historicalplaceId: {
+    }],
+    historicalplaceId: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
-    },
+        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
+    }],
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
         default: ''
@@ -76,6 +76,11 @@ const TouristSchema = new Schema({
         default: 0,
         min: 0 // Ensures points cannot go below zero
     },
+    redeemedPoints: {
+        type: Number,
+        default: 0,
+        min: 0 // Ensures points cannot go below zero
+    },
     wishlists: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product', // Assuming you have a Product schema for products in the wishlist
@@ -89,7 +94,11 @@ const TouristSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         default: null
-    }]    
+    }],
+    requestDeletion: {
+        type: Boolean,
+        default: false
+    },
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"

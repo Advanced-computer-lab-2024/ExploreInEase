@@ -1063,7 +1063,6 @@ router.put('/updateTourist/:_id', userController.updateTourist);
  *                   type: string
  *                   example: "Error message here"
  */
-
 router.post('/register/:type', userController.registerUser);
 
 /**

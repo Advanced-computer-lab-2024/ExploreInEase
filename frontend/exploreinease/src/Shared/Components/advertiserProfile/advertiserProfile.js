@@ -65,7 +65,7 @@ const AdvertiserProfile = (props) => {
     });
     const [showPassword, setShowPassword] = useState(false);
 
-    const toggleEditMode = (field) => {
+    const toggleEditMode = (field) => { 
       setIsEditable((prev) => ({
         ...prev,
         [field]: !prev[field]
@@ -184,7 +184,18 @@ const AdvertiserProfile = (props) => {
                 <Typography>{formValues.email}</Typography>
               )}
                  <div>
-              <IconButton onClick={() => toggleEditMode('email')} aria-label={isEditable.email ? 'save' : 'edit'}>
+              <IconButton 
+              //onClick={() => toggleEditMode('email')}
+              onClick={() => {
+                if (isEditable.email) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('email');
+                }
+              }}
+              aria-label={isEditable.email ? 'save' : 'edit'}>
                 {isEditable.email ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -218,7 +229,18 @@ const AdvertiserProfile = (props) => {
                 <Typography>{formValues.password}</Typography>
               )}
                  <div>
-              <IconButton onClick={() => toggleEditMode('password')} aria-label={isEditable.password ? 'save' : 'edit'}>
+              <IconButton 
+              //onClick={() => toggleEditMode('password')} 
+              onClick={() => {
+                if (isEditable.password) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('password');
+                }
+              }}
+              aria-label={isEditable.password ? 'save' : 'edit'}>
                 {isEditable.password ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -242,7 +264,18 @@ const AdvertiserProfile = (props) => {
                 <Typography>{formValues.hotline}</Typography>
               )}
                 <div>
-              <IconButton onClick={() => toggleEditMode('hotline') } aria-label={isEditable.hotline ? "save" : "edit"}>
+              <IconButton 
+              //onClick={() => toggleEditMode('hotline') }
+              onClick={() => {
+                if (isEditable.hotline) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('hotline');
+                }
+              }}
+              aria-label={isEditable.hotline ? "save" : "edit"}>
                 {isEditable.hotline ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -266,7 +299,18 @@ const AdvertiserProfile = (props) => {
               )}
                <div>
 
-              <IconButton onClick={() => toggleEditMode('linkWebsite')} aria-label={isEditable.linkWebsite ? "save" : "edit"}>
+              <IconButton 
+              //onClick={() => toggleEditMode('linkWebsite')}
+              onClick={() => {
+                if (isEditable.linkWebsite) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('linkWebsite');
+                }
+              }}
+              aria-label={isEditable.linkWebsite ? "save" : "edit"}>
                 {isEditable.linkWebsite ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -289,7 +333,18 @@ const AdvertiserProfile = (props) => {
                 <Typography>{formValues.linkedInLink}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('linkedInLink')} aria-label={isEditable.linkedInLink ? "save" : "edit"}>
+              <IconButton 
+              //onClick={() => toggleEditMode('linkedInLink')}
+              onClick={() => {
+                if (isEditable.linkedInLink) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('linkedInLink');
+                }
+              }}
+              aria-label={isEditable.linkedInLink ? "save" : "edit"}>
                 {isEditable.linkedInLink ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -313,7 +368,18 @@ const AdvertiserProfile = (props) => {
                 <Typography>{formValues.industry}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('industry')} aria-label={isEditable.industry ? "save" : "edit"}>
+              <IconButton 
+              //onClick={() => toggleEditMode('industry')}
+              onClick={() => {
+                if (isEditable.industry) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('industry');
+                }
+              }}
+              aria-label={isEditable.industry ? "save" : "edit"}>
                 {isEditable.industry ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -336,7 +402,18 @@ const AdvertiserProfile = (props) => {
                 <Typography>{formValues.noEmployees}</Typography>
               )}
               <div>
-              <IconButton onClick={() => toggleEditMode('noEmployees')} aria-label={isEditable.noEmployees ? "save" : "edit"}>
+              <IconButton 
+              //onClick={() => toggleEditMode('noEmployees')}
+              onClick={() => {
+                if (isEditable.noEmployees) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('noEmployees');
+                }
+              }}
+              aria-label={isEditable.noEmployees ? "save" : "edit"}>
                 {isEditable.noEmployees ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>
@@ -359,7 +436,18 @@ const AdvertiserProfile = (props) => {
                 <Typography>{formValues.founded}</Typography>
               )}
               <div>
-              <IconButton onClick={() =>toggleEditMode('founded')} aria-label={isEditable.founded ? "save" : "edit"}>
+              <IconButton 
+              // onClick={() =>toggleEditMode('founded')} 
+              onClick={() => {
+                if (isEditable.founded) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('founded');
+                }
+              }}
+              aria-label={isEditable.founded ? "save" : "edit"}>
                 {isEditable.founded ? <SaveIcon /> : <EditIcon />}
               </IconButton>
               </div>

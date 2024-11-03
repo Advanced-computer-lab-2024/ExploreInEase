@@ -29,12 +29,12 @@ const getProductById = async (productId) => {
 
 const updateProduct = async (productId, updatedProductData) => {
     try {
+        console.log(updatedProductData);
         const updatedProduct = await Product.findOneAndUpdate(
-            { productId: productId },  // Keep this to search by productId
+            { _id: productId },  // Keep this to search by productId
             { $set: updatedProductData },
             { new: true, runValidators: true }
         );
-        
         return updatedProduct;
     } catch (error) {
         throw new Error(`Error updating product: ${error.message}`);

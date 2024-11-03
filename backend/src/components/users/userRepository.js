@@ -4,11 +4,9 @@ const Itinerary = require('../../models/itinerary')
 // Find user by ID
 const findUserById = async (_id) => {
     try {
-        const existsUser = await Users.findOne({ _id });
-        if (existsUser) return existsUser;
-
-        const existsTourist = await Tourist.findOne({ _id });
-        return existsTourist ? {tourist: existsTourist, type: "tourist"} : false;
+        const user = await Users.findById(id);
+        
+        return user ? user : null;
     } catch (error) {
         console.error(`Error checking if user exists: ${error.message}`);
         return false;
