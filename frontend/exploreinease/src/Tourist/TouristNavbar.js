@@ -55,6 +55,25 @@ const TouristNavbar = () => {
             }
           }
       }
+      else if(title =="View Booked items") {
+        try {
+          const options = {
+            apiPath: `/upcomingEvents`,
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const events=response;
+          navigate(`/ViewListofBooked`,{state:{events}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
+      }
       else {
         try {
             const options = {
@@ -73,7 +92,6 @@ const TouristNavbar = () => {
               setError('An unexpected error occurred.'); // Generic error message
             }
           }
-        // navigate('/explore');
       }
       }
   return (

@@ -30,9 +30,9 @@ const TourGuideNavbar = React.lazy(() => import("./TourGuide/TourGuideNavbar"));
 const Product = React.lazy(() => import("./Shared/Components/Product/Product"));
 const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar"));
 const SignIn = React.lazy(() => import("./Login/login"));
-const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"))
-const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"))
-
+const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"));
+const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"));
+const Booked=React.lazy(()=>import("./Tourist/booked"));
 const App = () => {
 
   return (
@@ -70,6 +70,8 @@ const App = () => {
           <Route path="/AdminHomePage" element={<AdminHomePage />} />
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
+          <Route path="/ViewListofBooked" element={<Booked />} />
+
         </Routes>
       </Suspense>
     </Router>
