@@ -218,22 +218,39 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
-const rateTourGuide = async (tourGuideId, touristId, itineraryId, rating) => {
-    // Fetch the tour guide directly using the itinerary ID
-    const tourGuide = await userRepository.findTourGuideByItineraryId(itineraryId);
+const rateTourGuide = async (touristId, tourGuideId, itineraryId, rating) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot rate this tour guide because you haven't completed this itinerary with them.");
+        }
 
-    if (!tourGuide) throw new Error("Tour guide not found for the given itinerary.");
-    if (tourGuide._id.toString() !== tourGuideId) throw new Error("This tour guide did not create the itinerary.");
+        // Retrieve the tour guide directly by querying the user repository
+        const tourGuide = await Users.findOne({ _id: tourGuideId, type: 'tourGuide' });
+        if (!tourGuide) {
+            throw new Error("Tour guide not found.");
+        }
 
-    const completedTour = await userRepository.checkTourCompletion(touristId, itineraryId);
-    if (!completedTour) throw new Error("You cannot rate this tour guide because you haven't completed this itinerary.");
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
 
-    if (rating < 1 || rating > 5) throw new Error("Rating must be between 1 and 5.");
+        // Add the rating to the tour guide's rating array
+        tourGuide.rating.push(rating);
 
-    // Assuming the tour guide has a 'rating' field that is an array
-    tourGuide.rating.push(rating);
-    return await userRepository.updateTourGuideRating(tourGuideId, { rating: tourGuide.rating });
+        // Update the tour guide with the new rating
+        await userRepository.updateTourGuideRatings(tourGuideId, { rating: tourGuide.rating });
+
+        return { message: "Rating added successfully", updatedTourGuide: tourGuide };
+    } catch (error) {
+        console.error("Error adding rating to tour guide:", error);
+        throw error;
+    }
 };
+
 
 
 const commentOnTourGuide = async (touristId, tourGuideId, itineraryId, commentText) => {

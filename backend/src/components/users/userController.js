@@ -389,10 +389,10 @@ const login = async (req, res) => {
 
 const rateTourGuide = async (req, res) => {
     const { touristId } = req.params; // Get the userId from the route
-    const { tourGuideId, itineraryId, commentText } = req.body;
+    const { tourGuideId, itineraryId, rating } = req.body;
 
     try {
-        const result = await userService.rateTourGuide(touristId, tourGuideId, itineraryId, commentText);
+        const result = await userService.rateTourGuide(touristId, tourGuideId, itineraryId, rating);
         return res.status(200).json(result);
     } catch (error) {
         return res.status(400).json({ message: error.message });

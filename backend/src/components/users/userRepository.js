@@ -220,7 +220,7 @@ const updateTourGuideComments = async (tourGuideId, updatedFields) => {
     }
 };
 
-const updateTourGuideRating = async (tourGuideId, updatedFields) => {
+const updateTourGuideRatings = async (tourGuideId, updatedFields) => {
     try {
         // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
         const updatedTourGuide = await Users.findByIdAndUpdate(
@@ -235,7 +235,7 @@ const updateTourGuideRating = async (tourGuideId, updatedFields) => {
 
         return updatedTourGuide;
     } catch (error) {
-        console.error("Error updating tour guide comments:", error);
+        console.error("Error updating tour guide ratings:", error);
         throw error;
     }
 };
@@ -259,6 +259,6 @@ module.exports = {
     checkUserExistsByEmail,
     login,
     hasCompletedItinerary,
-    updateTourGuideRating,
+    updateTourGuideRatings,
     updateTourGuideComments
 };
