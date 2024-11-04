@@ -85,10 +85,10 @@ const Complaints = () => {
     const handleComplaintSubmit = () => {
         // Handle submission logic here
         console.log('Submitting complaint:', complaintData);
-        setIsComplaintModalOpen(false);
+        setOpenCreate(false);
         setComplaintData({
-            title: '',
-            body: '',
+            title: complaintData.title,
+            body: complaintData.body,
             date: new Date().toISOString().split('T')[0]
         });
     };
@@ -174,7 +174,7 @@ const Complaints = () => {
                     <Button onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmitCreate} color="primary">
+                    <Button onClick={handleComplaintSubmit} color="primary">
                         Confirm
                     </Button>
                 </DialogActions>

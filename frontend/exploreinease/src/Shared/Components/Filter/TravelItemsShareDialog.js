@@ -1,0 +1,105 @@
+import React, { useState } from 'react';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import MailIcon from '@mui/icons-material/Mail';
+import LinkIcon from '@mui/icons-material/Link';
+const TravelItemsShareDialog = ({ item, onClose }) => {
+  const [shareMethod, setShareMethod] = useState('email');
+  const [emailAddress, setEmailAddress] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleShareMethodChange = (e) => {
+    setShareMethod(e.target.value);
+  };
+
+  const handleEmailChange = (e) => {
+    setEmailAddress(e.target.value);
+  };
+
+  const handleShareByEmail = () => {
+
+    // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
+
+    // Implement email sharing logic here
+    console.log('Sharing by email:', emailAddress, item);
+    onClose();
+  };
+
+  const handleShareByLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 3000);
+    onClose();
+  };
+
+  return (
+    <Dialog open onClose={onClose} style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
+      <DialogTitle>Share Travel Item</DialogTitle>
+      <DialogContent>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <label htmlFor="share-method">Share Method:</label>
+            <div className="flex items-center gap-2">
+              <input
+                id="share-method"
+                type="radio"
+                name="share-method"
+                value="email"
+                checked={shareMethod === 'email'}
+                onChange={handleShareMethodChange}
+              />
+              <label htmlFor="share-method-email">Email</label>
+              <input
+                id="share-method-link"
+                type="radio"
+                name="share-method"
+                value="link"
+                checked={shareMethod === 'link'}
+                onChange={handleShareMethodChange}
+              />
+              <label htmlFor="share-method-link">Copy Link</label>
+            </div>
+          </div>
+          {shareMethod === 'email' && (
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email-address">Email Address:</label>
+              <TextField
+                id="email-address"
+                type="email"
+                value={emailAddress}
+                onChange={handleEmailChange}
+                placeholder="Enter email address"
+              />
+            </div>
+          )}
+          {shareMethod === 'link' && (
+            <div className="flex items-center gap-2">
+              <LinkIcon size={24} />
+              <span>{window.location.href}</span>
+              {copySuccess && (
+                <span className="text-green-500">Link copied to clipboard!</span>
+              )}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+      <DialogActions>
+        <Button variant="outlined" onClick={onClose}>
+          Cancel
+        </Button>
+        {shareMethod === 'email' ? (
+        <Button variant="contained" onClick={handleShareByEmail}>
+          <MailIcon className="mr-2" />
+          Share by Email
+        </Button>
+      ) : (
+        <Button variant="contained" onClick={handleShareByLink}>
+          <LinkIcon className="mr-2" />
+          Copy Link
+        </Button>
+      )}
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export default TravelItemsShareDialog;

@@ -17,6 +17,8 @@ import {
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
+import TravelItemsShareDialog from './TravelItemsShareDialog';
+
 
 // Sample data with 'type' field added
 const itemList = [];
@@ -52,6 +54,18 @@ const Filter = () => {
   const [role, setRole] = useState('Activities'); // Default to Main to show all
   const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
   const [addressCache, setAddressCache] = useState({});
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+
+  const handleShareClick = (item) => {
+    setSelectedItem(item);
+    setShareDialogOpen(true);
+  };
+
+  const handleShareDialogClose = () => {
+    setShareDialogOpen(false);
+  };
 
   const getAddressFromCoordinates = async (coordinates) => {
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
@@ -59,7 +73,7 @@ const Filter = () => {
     }
 
     const [longitude, latitude] = coordinates;
-    
+
     // Check cache first
     const cacheKey = `${latitude},${longitude}`;
     if (addressCache[cacheKey]) {
@@ -75,16 +89,16 @@ const Filter = () => {
           },
         }
       );
-      
+
       if (!response.ok) {
         throw new Error('Geocoding failed');
       }
 
       const data = await response.json();
-      
+
       // Create a readable address from the response
       const address = data.display_name.split(',').slice(0, 3).join(',');
-      
+
       // Cache the result
       setAddressCache(prev => ({
         ...prev,
@@ -114,9 +128,9 @@ const Filter = () => {
         {address}
         <Button
           size="small"
-          onClick= 
+          onClick=
           {() => {
-            const [longitude,latitude] = coordinates;
+            const [longitude, latitude] = coordinates;
             window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
           }}
           style={{ minWidth: 'auto', padding: '4px' }}
@@ -127,7 +141,7 @@ const Filter = () => {
     );
   };
 
-  
+
   useEffect(() => {
     const initialData = itemList.filter(item =>
       (role === 'Activities' && item.type === 'Activity') ||
@@ -395,10 +409,10 @@ const Filter = () => {
         <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
           {filteredData.map((item) => (
             <Grid item xs={12} sm={6} md={4} key={item.id}>
-              <Card    
-               style={{
-                 width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
-                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '350px',
+              <Card
+                style={{
+                  width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
+                  height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '350px',
                 }}>
                 <CardContent>
                   <Typography variant="h5" component="div">
@@ -409,16 +423,16 @@ const Filter = () => {
                       <Typography color="text.secondary">Budget: {item.budget}</Typography>
                       <Typography color="text.secondary">Date: {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
                       <Typography color="text.secondary">Category: {item.category}</Typography>
-                      <Typography color="text.secondary">  
-                        Locations: {Array.isArray(item.location[0]) ? 
-                        item.location.map((loc, index) => (
-                          <span key={index}>
-                            <LocationDisplay coordinates={loc} />
-                            {index < item.location.length - 1 ? ', ' : ''}
-                          </span>
-                        )) : 
-                        <LocationDisplay coordinates={item.location} />}
-                        </Typography>
+                      <Typography color="text.secondary">
+                        Locations: {Array.isArray(item.location[0]) ?
+                          item.location.map((loc, index) => (
+                            <span key={index}>
+                              <LocationDisplay coordinates={loc} />
+                              {index < item.location.length - 1 ? ', ' : ''}
+                            </span>
+                          )) :
+                          <LocationDisplay coordinates={item.location} />}
+                      </Typography>
                       <Typography color="text.secondary">Tags: {item.tags}</Typography>
                       {item.specialDiscount && (
                         <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
@@ -430,14 +444,14 @@ const Filter = () => {
                       <Typography color="text.secondary">Activities: {item.activities.join(', ')}</Typography>
                       <Typography color="text.secondary">Locations: {item.locations.join(', ')}</Typography>
                       <Typography color="text.secondary">
-                            Date Available: {item.dateAvailable.length > 0 ? (
-                              item.dateAvailable.map(date => format(parseISO(date), 'dd/MM/yyyy')).join('-')
-                            ) : (
-                              'No dates available'
-                            )}
-                       </Typography>  
+                        Date Available: {item.dateAvailable.length > 0 ? (
+                          item.dateAvailable.map(date => format(parseISO(date), 'dd/MM/yyyy')).join('-')
+                        ) : (
+                          'No dates available'
+                        )}
+                      </Typography>
                       <Typography color="text.secondary">Price: {item.price}</Typography>
-                      <Typography color="text.secondary">Rating: {item.rating.length ==0 ?0:item.rating}</Typography>
+                      <Typography color="text.secondary">Rating: {item.rating.length == 0 ? 0 : item.rating}</Typography>
                       <Typography color="text.secondary">Language: {item.language}</Typography>
                       <Typography color="text.secondary">Dropoff location: {item.dropoffLocation}</Typography>
                       <Typography color="text.secondary">Pickup location: {item.pickupLocation}</Typography>
@@ -456,13 +470,28 @@ const Filter = () => {
                       <Typography color="text.secondary">Tags: {item.tags}</Typography>
                     </>
                   )}
-                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                 <Button variant="contained" color="primary" >
-                    Book a ticket 
-                  </Button> 
-            </div>
-           </CardContent>
-            </Card>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                    <Button variant="contained" color="primary">
+                      Book a ticket
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleShareClick(item)}
+                      style={{ marginLeft: '10px' }}
+                    >
+                      Share
+                    </Button>
+                  </div>
+
+                 
+
+                  {shareDialogOpen && (
+                    <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
+                  )}
+
+                </CardContent>
+              </Card>
             </Grid>
           ))}
         </Grid>
