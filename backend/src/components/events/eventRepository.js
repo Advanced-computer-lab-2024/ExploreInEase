@@ -504,28 +504,30 @@ const bookTransportation = async (touristId, transportationId) => {
   
   const transportation = await Transportation.findById(transportationId);
   if (!transportation) {
-      throw new Error('Transportation not found');
+    throw new Error('Transportation not found');
   }
 
   const price = transportation.price;
 
-  
   const tourist = await Tourist.findById(touristId);
   if (!tourist) {
-      throw new Error('Tourist not found');
+    throw new Error('Tourist not found');
+  }
+
+  // Check if transportationId already exists in tourist's transportationId array
+  const alreadyBooked = tourist.transportationId.some(entry => entry.id.equals(transportationId));
+  if (alreadyBooked) {
+    throw new Error('Transportation already booked');
   }
 
   if (tourist.wallet < price) {
-      throw new Error('Insufficient funds to book this transportation');
+    throw new Error('Insufficient funds to book this transportation');
   }
 
-  
+  // Deduct the price from the tourist's wallet
   tourist.wallet -= price;
 
-  
-  await tourist.save();
-
- 
+  // Add the transportation to the tourist's transportationId array
   tourist.transportationId.push({ id: transportationId, pricePaid: price });
   await tourist.save();
 
