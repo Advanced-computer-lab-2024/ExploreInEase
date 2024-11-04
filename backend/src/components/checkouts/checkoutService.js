@@ -1,4 +1,5 @@
 // checkoutService.js
+//All New Codeeee
 const checkoutRepository = require('../checkouts/checkoutRepository');
 
 // Function to calculate sales and available quantity based on userType, productId, and currency
@@ -8,14 +9,14 @@ const calculateSalesAndAvailability = async (userType, productId, currency) => {
     
 
     if (!product) {
-        throw new Error('Product not found'); // Handle product not found
+        throw new Error('Product not found'); 
     }
 
     const { price, originalQuantity, takenQuantity } = product;
-    const availableQuantity = originalQuantity - takenQuantity; // Calculate available quantity
+    const availableQuantity = originalQuantity - takenQuantity; 
 
-    // Calculate sales
-    let sales = price * availableQuantity;
+    
+    let sales = price * takenQuantity;
 
     switch (currency) {
         case 'euro':
@@ -31,7 +32,7 @@ const calculateSalesAndAvailability = async (userType, productId, currency) => {
             throw new Error('Invalid currency'); // Handle invalid currency
     }
     
-    // Convert to a number type
+    
     sales = parseFloat(sales);
 
     return {
