@@ -192,24 +192,29 @@ const amadeus = new Amadeus({
 });
 
 
-
 const fetchCityCode = async (city) => {
   try {
-      const response = await amadeus.referenceData.locations.cities.get({ keyword: city });
-      
-    
-      const simplifiedResponse = response.data
-        .filter(location => location.iataCode) 
-        .map(location => ({
-            name: location.name,
-            iataCode: location.iataCode
-        }));
-      
-      return simplifiedResponse;
+    const response = await amadeus.referenceData.locations.cities.get({ keyword: city });
+
+    const simplifiedResponse = response.data
+      .filter(location => location.iataCode)
+      .map(location => ({
+        name: location.name,
+        iataCode: location.iataCode
+      }));
+
+    if (simplifiedResponse.length === 0) {
+      throw new Error("No city found with the specified name. Please try again.");
+    }
+
+    return simplifiedResponse;
   } catch (error) {
-      throw new Error(`Error fetching city code: ${error.message}`);
+    throw new Error(error.message); // Throw the error message without adding any prefix
   }
 };
+
+
+
 
 
 const flightOffers = async (originCode, destinationCode, dateOfDeparture, currency, personCount) => {
