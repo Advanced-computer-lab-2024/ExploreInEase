@@ -43,17 +43,23 @@ const TouristSchema = new Schema({
         required: true
     },
     itineraryId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Itinerary', // Foreign key reference to Itinerary schema
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary', required: true }, // Reference to Itinerary schema
+        pricePaid: { type: Number, required: true, min: 0 } // Ensure price is not negative
     }],
+
     activityId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity', // Foreign key reference to Activity schema
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'Activity'}, // Reference to Activity schema
+        pricePaid: { type: Number,min: 0 }
     }],
+
     historicalplaceId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
-    }],
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'HistoricalPlace' }, // Reference to HistoricalPlace schema
+        pricePaid: { type: Number,  min: 0 }
+    }],
+    transportationId: [{    
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'Transportation' }, // Reference to Transportation schema
+        pricePaid: { type: Number,min: 0 }
+    }],
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
         default: ''

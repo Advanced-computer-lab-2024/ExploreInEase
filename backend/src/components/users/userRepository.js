@@ -182,7 +182,11 @@ const login = async (username, password) => {
 const hasCompletedItinerary = async (touristId, ItineraryId, guideId) => {
     try {
         // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourGuide
-        const tourist = await Tourist.findOne({ _id: touristId, itineraryId: ItineraryId });
+        const tourist = await Tourist.findOne({
+            _id: touristId,
+            itineraryId: { $elemMatch: { id: ItineraryId } }
+        });
+
         const itinerary = await Itinerary.findOne ({ _id: ItineraryId, created_by: guideId });
         if (!tourist){
             throw new Error("Itinerary does not belong to the specified tourist");
@@ -251,7 +255,10 @@ const updateTourGuideRatings = async (tourGuideId, updatedFields) => {
 const hasAttendedActivity = async (touristId, ActivityId) => {
     try {
         // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourGuide
-        const tourist = await Tourist.findOne({ _id: touristId, activityId: ActivityId });
+        const tourist = await Tourist.findOne({
+            _id: touristId,
+            activityId: { $elemMatch: { id: ActivityId } }
+        });        
         if (!tourist) {
             throw new Error("No such activity exists or the tourist did not sign up for this activity");
         }
