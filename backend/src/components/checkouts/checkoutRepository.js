@@ -158,6 +158,27 @@ const updateProductRating = async (productId, updatedFields) => {
         throw error;
     }
 }
+
+const updateProductReviews = async (productId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedProduct = await Products.findByIdAndUpdate(
+            productId,
+            updatedFields,
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+        
+        if (!updatedProduct) {
+            throw new Error("Product not found or could not be updated.");
+        }
+
+        return updatedProduct;
+    } catch (error) {
+        console.error("Error updating product comments:", error);
+        throw error;
+    }
+};
+
 module.exports = {
     addProduct,
     getAllAvailableProducts,
@@ -168,5 +189,6 @@ module.exports = {
     searchByName,
     findUserById,
     isPurchased,
-    updateProductRating
+    updateProductRating,
+    updateProductReviews
 };

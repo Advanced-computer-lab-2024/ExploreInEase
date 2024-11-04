@@ -90,6 +90,38 @@ const rateProduct = async (touristId, productId, rating) => {
     }
 };
 
+const reviewProduct = async (touristId, productId, reviewText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const purchased = await checkoutRepository.isPurchased(touristId, productId);
+        
+        if (!purchased) {
+            throw new Error("You cannot review this product because you didnt purchase it yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const product = await Product.findOne({ _id: productId});
+        if (!product) {
+            throw new Error("product not found.");
+        }   
+        // Create the new comment
+        const newReview = {
+            userId: touristId,
+            comment: reviewText,
+            createdAt: new Date(),
+        };
+
+        // Use the repository method to push the new comment to the comments array
+        const updatedProduct = await checkoutRepository.updateProductReviews(productId, { $push: { reviews: newReview } });
+
+
+        return { message: "Comment added successfully", updatedProduct };
+    } catch (error) {
+        console.error("Error adding review to product:", error);
+        throw error;
+    }
+};
+
 module.exports = {
     addProduct,
     getAvailableProducts,
@@ -98,5 +130,6 @@ module.exports = {
     updateProduct,
     getAvailableProductsSortedByRatings,
     searchProductByName,
-    rateProduct
+    rateProduct,
+    reviewProduct
 };

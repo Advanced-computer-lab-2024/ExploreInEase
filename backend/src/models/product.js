@@ -52,12 +52,6 @@ const ProductsSchema = new Schema({
             required: [true, 'Review comment is required'],
             minlength: 1
         },
-        rating: {
-            type: Number,
-            min: 0,
-            max: 5,
-            required: true
-        },
         createdAt: {
             type: Date,
             default: Date.now       // Timestamp for when the review was created

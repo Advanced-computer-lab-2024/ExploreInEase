@@ -69,7 +69,7 @@ const activitySchema = new Schema({
     default: 0
   },
   comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist', require: true },
     text: { type: String, required: true },
     date: { type: Date, default: Date.now }
   }],
