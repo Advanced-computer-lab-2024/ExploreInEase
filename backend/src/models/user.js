@@ -74,11 +74,11 @@ const UsersSchema = new Schema({
     photo: {
         selfPicture: {
             type: String,
-            
+            default: ""
         },
         logo: {
             type: String,
-            
+            default: ""
         }
     },
     comment: {

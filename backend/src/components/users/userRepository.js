@@ -1,5 +1,7 @@
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const fs = require('fs');
+const path = require('path');
 
 // Find user by ID
 const findUserById = async (id) => {
@@ -150,6 +152,7 @@ const checkUserExistsByEmail = async (email) => {
 const login = async (username, password) => {
     try {
         const user = await Users.findOne({ username });
+        console.log(user);
         const tourist = await Tourist.findOne({ username });
         if (user !== null) {
             const isMatch = await password === user.password;
@@ -186,7 +189,69 @@ const updateUserPassword = async (user, password) => {
         throw new Error(`Error updating user password: ${error.message}`);
     }
 }
+
+const uploadImage = async (userId, fileName, fileBuffer) => {
+    try {
+        const imagesDir = path.join(__dirname, '../images');
+        
+        // Check if the 'images' directory exists, and create it if it doesn't
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
+        const filePath = path.join(imagesDir, fileName);
+        
+        // Write the file to the filesystem
+        await fs.promises.writeFile(filePath, fileBuffer);
+
+        return { message: 'Image uploaded successfully', fileName: fileName };
+    } catch (error) {
+        throw new Error(`Error uploading image: ${error.message}`);
+    }
+};
+
+
+const updateUserProfilePicture = async (userId, fileName) => {
+    try {
+        const user = await findUserById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if(user.type === 'tourGuide'){
+            user.photo.selfPicture = fileName;
+        }
+        else if(user.type === 'advertiser' || user.type === 'seller'){
+            user.photo.logo = fileName;
+        }
+        await user.save();
+    } catch (error) {
+        throw new Error(`Error updating profile picture: ${error.message}`);
+    }
+};
+
+const getUserProfilePicture = async (userId) => {
+    try {
+        const user = await findUserById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if(user.type === 'tourGuide'){
+            return user.photo.selfPicture;
+        }
+        else if(user.type === 'advertiser' || user.type === 'seller'){
+            return user.photo.logo;
+        }
+        else{
+            return null;
+        }
+    } catch (error) {
+        throw new Error(`Error getting profile picture: ${error.message}`);
+    }
+}
 module.exports = {
+    getUserProfilePicture,
+    uploadImage,
+    updateUserProfilePicture,
     updateUserPassword,
     addGovernorOrAdmin,
     fetchAllUsers,

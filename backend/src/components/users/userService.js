@@ -1,5 +1,7 @@
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
+const path = require('path');
+
 const getUserById = async (id) => {
     // Retrieve the user from the Users table based on id
     return await userRepository.findUserById(id);
@@ -228,7 +230,30 @@ const changePassword = async (userId, oldPassword, newPassword) => {
     return {status: 200, response: { message: "Password updated successfully", user: newUser } };
 };
 
+const uploadImage = async (userId, file) => {
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+        throw new Error('Only image files are allowed (jpg, jpeg, png).');
+    }
+
+    const fileName = `${userId}-${Date.now()}${fileExtension}`;
+    const fileBuffer = file.buffer;
+
+    await userRepository.uploadImage(userId, fileName, fileBuffer); 
+    const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+    await userRepository.updateUserProfilePicture(userId, fileName);
+
+    return { message: 'Image uploaded successfully', imageUrl: imageUrl };
+};
+
+
+
+
 module.exports = {
+    uploadImage,
     changePassword,
   deleteUserByIdAndType,
   addGovernorOrAdmin,

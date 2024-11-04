@@ -55,6 +55,7 @@ const TouristSignUp = () => {
           profession: formData.jobOrStudent
         }
       };
+      console.log(options);
       
       const response = await NetworkService.post(options);
       const tourist = response.tourist;

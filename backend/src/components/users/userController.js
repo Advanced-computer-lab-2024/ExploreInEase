@@ -313,6 +313,7 @@ const checkUsername = (username) => {
 const registerUser = async (req, res) => {
     const { type } = req.params;
     const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
+    console.log(email);
     if (!type) {
         return res.status(400).json({ message: "User type is required" });
     }
@@ -381,7 +382,8 @@ const login = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'Invalid username or password' });
         }
-        return res.status(200).json({message: "Logged in Successfully", user: user});
+        const imageUrl = await userRepository.getUserProfilePicture(user._id);
+        return res.status(200).json({message: "Logged in Successfully", user: user, imageUrl: imageUrl});
     }catch(error){
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
@@ -408,7 +410,34 @@ const changePassword = async (req, res) => {
     }
 };
 
+const uploadImage = async (req, res) => {
+    const { userId } = req.params;
+    const file = req.file;
+
+    try {
+        if (!file) {
+            return res.status(400).send('No file uploaded.');
+        }
+
+        // Call service to upload image
+        const result = await userService.uploadImage(userId, file);
+
+        // Return the image URL in the response
+        return res.status(200).send({
+            message: result.message,
+            imageUrl: result.imageUrl // Send back the image URL
+        });
+
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return res.status(500).send({ error: 'Error uploading image.' });
+    }
+};
+
+
+
 module.exports = {
+    uploadImage,
     changePassword ,
   deleteUserByIdAndType,
   addGovernorOrAdmin,

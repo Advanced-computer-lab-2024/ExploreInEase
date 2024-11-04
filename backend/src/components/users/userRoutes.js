@@ -3,6 +3,17 @@ const mongoose = require('mongoose')
 const router = express.Router()
 const userController = require('../users/userController');
 
+const multer = require('multer');
+const { bucket } = require('../../../main'); // Import bucket directly from main.js
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+let db;
+
+const setDBConnection = (database) => {
+    db = database;
+};
+
 /**
  * @swagger
  * /deleteUserByIdAndType:
@@ -1146,5 +1157,11 @@ router.post('/login', userController.login);
 
 router.put('/changePassword/:userId', userController.changePassword);
 
+router.post('/uploadImage/:userId', upload.single('image'), userController.uploadImage);
 
-module.exports = router;
+
+
+module.exports = {
+    setDBConnection,
+    router,
+};

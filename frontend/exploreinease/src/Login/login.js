@@ -45,7 +45,7 @@ const Login = () => {
       if (response.message === 'Logged in Successfully') {
         console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-        navigateToHomePage(response.user);
+        navigateToHomePage(response.user, response.imageUrl);
       }
     } catch (error) {
       setError(
@@ -56,7 +56,7 @@ const Login = () => {
     }
   };
 
-  const navigateToHomePage = (user) => {
+  const navigateToHomePage = (user, imageUrl) => {
     switch (formData.role) {
       case 'admin':
         navigate('/AdminHomePage', { state: { tourist: user } });
@@ -65,13 +65,13 @@ const Login = () => {
         navigate('/TouristGovernorHP', { state: { tourist: user } });
         break;
       case 'seller':
-        navigate('/SellerHomePage', { state: { User: user } });
+        navigate('/SellerHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'tourGuide':
-        navigate('/TourGuideHomePage', { state: { User: user } });
+        navigate('/TourGuideHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'advertiser':
-        navigate('/AdvertiserHomePage', { state: { User: user } });
+        navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
         navigate('/TouristHomePage', { state: { User: user } });
