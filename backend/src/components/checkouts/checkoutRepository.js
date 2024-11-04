@@ -124,7 +124,6 @@ const isPurchased = async (TouristId, ProductId) => {
             productIds: { $in: [ProductId]} // Checks if ProductId exists in the productIds array
         });
 
-        console.log(order);
         if (!order) {
             throw new Error("No such product exists or the tourist did not order this product");
         }
