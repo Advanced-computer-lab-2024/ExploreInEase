@@ -10,13 +10,17 @@ const TransportationSchema = new Schema({
     },
     pickupLocation: {
         type: String,
-
     },
     dropoffLocation: {
         type: String,
     },
-    datetimeAvailable: {
+    dateAvailable: {
         type: Date,
+        required: true,
+    },
+    timeAvailable: {
+        type: String, 
+        required: true,
     },
     price: {
         type: Number,

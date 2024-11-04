@@ -130,6 +130,7 @@ const bookedEvents = async ({ touristId }) => {
       .populate('itineraryId.id')  
       .populate('activityId.id')    
       .populate('historicalplaceId.id') 
+      .populate('transportationId.id')
       .exec();
 };
 
@@ -448,13 +449,14 @@ const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId, sta
   }
 };
 
-const createTransportation = async (advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType) => {
+const createTransportation = async (advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType) => {
   
   const transportation = new Transportation({
     advertiserId,
     pickupLocation,
     dropoffLocation,
-    datetimeAvailable,
+    dateAvailable,
+    timeAvailable,
     price,
     transportationType,
     

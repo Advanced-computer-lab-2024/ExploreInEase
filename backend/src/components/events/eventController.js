@@ -379,13 +379,13 @@ const bookHotel = async (req, res) => {
 
 const createTransportation = async (req, res) => {
   try {
-    const { advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType } = req.body; 
+    const { advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType } = req.body; 
 
-    if (!advertiserId || !pickupLocation || !dropoffLocation || !datetimeAvailable || !price || !transportationType ) {
+    if (!advertiserId || !pickupLocation || !dropoffLocation || !dateAvailable || !timeAvailable || !price || !transportationType ) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const newTransportation = await eventService.createTransportation(advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType);
+    const newTransportation = await eventService.createTransportation(advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType);
     return res.status(201).json({
       success: true,
       message: 'Transportation created successfully.',
