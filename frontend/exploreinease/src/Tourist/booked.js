@@ -22,6 +22,7 @@ import {
   import { useLocation } from "react-router-dom";
   import { format, parseISO } from 'date-fns';
   import React, { useState, useEffect } from "react";
+  import { differenceInHours } from 'date-fns'; // Use date-fns or a similar library
   import axios from "axios";
   
   // Sample data with 'type' field added
@@ -317,8 +318,12 @@ import {
     };
     const handleRatingValuesChange=(event)=>{
         setRating(event.target.value);
-
     }
+    const canCancelBooking = (startDate) => {
+        const now = new Date();
+        const hoursDifference = differenceInHours(new Date(startDate), now);
+        return hoursDifference >= 48;
+      };
     // useEffect(() => {
     //   filteredData.forEach((item) => {
     //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
@@ -412,9 +417,25 @@ import {
                         </>
                     )}
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                      <Button style={{height:"50px",width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpenCancelation(item)} >
-                        Cancel Booking
-                      </Button> 
+                    {canCancelBooking(item.startDate) ? (
+                            <Button
+                            style={{ height: "50px", width: "80px", marginRight: '7px' }}
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleClickOpenCancelation(item)}
+                            >
+                            Cancel Booking
+                            </Button>
+                        ) : (
+                            <Button
+                            style={{ height: "50px", width: "80px", marginRight: '7px' }}
+                            variant="contained"
+                            color="primary"
+                            disabled
+                            >
+                            Cancel Booking
+                            </Button>
+                        )}
                      <Button style={{width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpenComment(item)}>
                         Comment 
                      </Button> 
