@@ -297,9 +297,14 @@ router.post('/flightOffers', eventController.flightOffers);
 // Define the route to book a flight
 router.post('/bookFlight', eventController.bookFlight);
 
-// Route to search for transfer offers
-router.get('/transfer', eventController.searchTransferOffers);
+// Create Transportation Route
+router.post('/createTransportation', eventController.createTransportation);
 
+// Get Transportation Route
+router.get('/getTransportations', eventController.getTransportations);
+
+// Route to book transportation
+router.post('/bookTransportation', eventController.bookTransportation);
 
 
 module.exports = router;

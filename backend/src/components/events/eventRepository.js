@@ -6,6 +6,7 @@ const PreferenceTags = require('../../models/preferenceTags');
 const Tourist = require('../../models/tourist');
 const BookedFlight = require('../../models/bookedFlights');
 const BookedHotel = require('../../models/bookedHotels');
+const Transportation = require('../../models/transportation');
 
 
 const getActivitiesByUserId = async (userId) => {
@@ -332,7 +333,7 @@ const getTouristEmailById = async (touristId) => {
 
 
 
-const createBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
+const flightBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
   try {
 
     switch (currency) {
@@ -446,6 +447,60 @@ const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId, sta
   }
 };
 
+const createTransportation = async (advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType) => {
+  
+  const transportation = new Transportation({
+    advertiserId,
+    pickupLocation,
+    dropoffLocation,
+    datetimeAvailable,
+    price,
+    transportationType,
+    
+  });
+
+  await transportation.save(); 
+  return transportation; 
+};
+
+
+const getTransportations = async () => {  
+  return await Transportation.find();
+}
+
+
+
+const bookTransportation = async (touristId, transportationId) => {
+  
+  const transportation = await Transportation.findById(transportationId);
+  if (!transportation) {
+      throw new Error('Transportation not found');
+  }
+
+  const price = transportation.price;
+
+  
+  const tourist = await Tourist.findById(touristId);
+  if (!tourist) {
+      throw new Error('Tourist not found');
+  }
+
+  if (tourist.wallet < price) {
+      throw new Error('Insufficient funds to book this transportation');
+  }
+
+  
+  tourist.wallet -= price;
+
+  
+  await tourist.save();
+
+ 
+  tourist.transportationId.push({ id: transportationId, pricePaid: price });
+  await tourist.save();
+
+  return { message: 'Transportation booked successfully', tourist };
+};
 
 
 
@@ -468,8 +523,12 @@ module.exports = {
   cancelEvent,
   getTouristEmailById,
   bookedEvents,
-  createBooking,
-  bookingHotel
+  flightBooking,
+  bookingHotel,
+  createTransportation,
+  getTransportations,
+  bookTransportation
+
  
 };
 

@@ -327,7 +327,7 @@ const bookFlight = async (req, res) => {
   }
 
   try {
-      const newBooking = await eventService.createBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency ,originCode,destinationCode });
+      const newBooking = await eventService.flightBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency ,originCode,destinationCode });
       return res.status(201).json(newBooking);
   } catch (error) {
       console.error('Error booking flight:', error.message);
@@ -388,24 +388,53 @@ const getOffersByHotelId = async (req, res) => {
 };
 
 
-
-// Controller method to search for transfer offers
-const searchTransferOffers = async (req, res) => {
+const createTransportation = async (req, res) => {
   try {
-      const transferData = req.body; 
-      const offers = await eventService.searchTransferOffers(transferData);
-      res.status(200).json(offers);
+    const { advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType } = req.body; 
+
+    if (!advertiserId || !pickupLocation || !dropoffLocation || !datetimeAvailable || !price || !transportationType ) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const newTransportation = await eventService.createTransportation(advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType);
+    return res.status(201).json({
+      success: true,
+      message: 'Transportation created successfully.',
+      data: newTransportation,
+    });
   } catch (error) {
-      console.error('Error fetching transfer offers:', error);
-      res.status(500).json({ message: error.message });
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
 
 
+const getTransportations = async (req, res) => {
+  try {
+    const transportation = await eventService.getTransportations();
+    return res.status(200).json(transportation);
+  } catch (error) {
+    console.error('Error fetching transportation:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+}
 
 
 
+const bookTransportation = async (req, res) => {
+  const { touristId, transportationId } = req.body;
+
+  try {
+      const result = await eventService.bookTransportation(touristId, transportationId);
+      return res.status(200).json(result);
+  } catch (error) {
+      console.error('Error in booking transportation:', error.message);
+      return res.status(400).json({ message: error.message });
+  }
+};
 
 
 module.exports = {
@@ -426,7 +455,9 @@ module.exports = {
     getCityCode,
     getHotelsByCityCode,
     getOffersByHotelId,
-    searchTransferOffers,
+    createTransportation,
+    getTransportations,
+    bookTransportation,
     bookedEvents,
     flightOffers,
     bookFlight,

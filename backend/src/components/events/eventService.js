@@ -1,6 +1,7 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const nodemailer = require('nodemailer');
+
 require('dotenv').config();
 
 
@@ -276,9 +277,9 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) =>
 
 
 
-const createBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
+const flightBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
   
-  return await eventRepository.createBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode });
+  return await eventRepository.flightBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode });
 };
 
 
@@ -328,19 +329,17 @@ const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId,star
 };
 
 
-// Service method to search for transfer offers
-const searchTransferOffers = async (transferData) => {
-  try {
-      const response = await amadeus.shopping.transferOffers.post(transferData);
-      return response.data; // Return the response data
-  } catch (error) {
-      throw new Error(`Error fetching transfer offers: ${error.message}`);
-  }
+const createTransportation = async (advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType) => {
+  return await eventRepository.createTransportation(advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType);
 };
 
+const getTransportations = async () => {
+  return await eventRepository.getTransportations();
+}
 
-
-
+const bookTransportation = async (touristId, transportationId) => {
+  return await eventRepository.bookTransportation(touristId, transportationId);
+};
 
 
   
@@ -361,10 +360,12 @@ module.exports = {
   sendEventEmail,
   fetchCityCode,
   fetchHotelsByCityCode,
-  searchTransferOffers,
+  createTransportation,
+  getTransportations,
+  bookTransportation,
   bookedEvents,
   flightOffers,
-  createBooking,
+  flightBooking,
   bookingHotel
 };
 
