@@ -40,15 +40,35 @@ import {
     const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
     console.log(events);
     console.log(itemList);
-
+  
+    const [filters, setFilters] = useState({
+      budget: '',
+      price: '',
+      date: '',
+      rating: 0,
+      category: '',
+      language: '',
+      preferences: '',
+      Tag: '',
+      search: '',
+      sortBy: '',
+    });
+    const [filteredData, setFilteredData] = useState([]);
     const [role, setRole] = useState('Activities'); // Default to Main to show all
+    const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
     const [addressCache, setAddressCache] = useState({});
     const [historicalTags, setHistoricalTags] = useState({});
-    const [open, setOpen] = React.useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [type, setType] = useState(''); // State to store the selected item
+    const [openCancelation, setOpenCancelation] = React.useState(false);
+    const [openComment, setOpenComment] = React.useState(false);
+    const [openRate, setOpenRate] = React.useState(false);
+    const [selectedItem, setSelectedItem] = useState('');
+    const [rateType, setRateType] = useState(''); 
+    const [rating, setRating] = useState(''); 
+    const [commentType, setCommentType] = useState(''); 
+    const [comment, setComment] = useState(''); 
     const [budget, setBudget] = useState('');
   
+
     const getAddressFromCoordinates = async (coordinates) => {
       if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
         return 'Location not available';
@@ -129,17 +149,125 @@ import {
         (role === 'Itineraries' && item.type === 'Itinerary') ||
         (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
       );
+      setFilteredData(initialData);
     }, []);
   
+    // Handle Input Change
+    const handleFilterChange = (e) => {
+      setFilters({
+        ...filters,
+        [e.target.name]: e.target.value,
+      });
+    };
+  
+    // Handle Rating Change
+    const handleRatingChange = (event, newRating) => {
+      setFilters({
+        ...filters,
+        rating: newRating,
+      });
+    };
+  
+    const handleRoleChange = (event, newValue) => {
+      setRole(newValue);
+      applyFilters(newValue); // Apply filters immediately when changing tabs
+    };
+  
+    // Apply Filters
+    const applyFilters = (roleToFilter = role) => {
+      let data = itemList;
+  
+      // Filter by role-specific type
+      if (roleToFilter === 'Activities') {
+        data = data.filter((item) => item.type === 'Activity');
+      } else if (roleToFilter === 'Itineraries') {
+        data = data.filter((item) => item.type === 'Itinerary');
+      } else if (roleToFilter === 'HistoricalPlaces') {
+        data = data.filter((item) => item.type === 'HistoricalPlace');
+      }
+  
+      // Apply other filters
+      if (filters.budget) {
+        data = data.filter((item) => item.budget <= parseFloat(filters.budget));
+      }
+  
+      if (filters.price) {
+        data = data.filter((item) => item.price.toString() === filters.price);
+      }
+  
+      if (filters.date) {
+        data = data.filter((item) => item.date === filters.date);
+      }
+  
+      if (filters.rating) {
+        data = data.filter((item) => item.rating >= filters.rating && item.rating <= 5);
+      }
+  
+      if (filters.category) {
+        data = data.filter((item) => item.category === filters.category);
+      }
+  
+      if (filters.language) {
+        data = data.filter((item) => item.language === filters.language);
+      }
+  
+      if (filters.preferences) {
+        data = data.filter((item) => item.preferences === filters.preferences);
+      }
+  
+      if (filters.Tag) {
+        data = data.filter((item) => item.Tag === filters.Tag);
+      }
+  
+      // Search by name
+      if (filters.search) {
+        data = data.filter((item) =>
+          item.name.toLowerCase().includes(filters.search.toLowerCase())
+        );
+      }
+  
+      // Sort logic
+      if (filters.sortBy === 'price') {
+        data.sort((a, b) => b.price - a.price);
+      } else if (filters.sortBy === 'rating') {
+        data.sort((a, b) => b.rating - a.rating);
+      }
+  
+      setFilteredData(data);
+    };
+  
+  
+    // Reset Filters
+    const resetFilters = () => {
+      setFilters({
+        budget: '',
+        price: '',
+        date: '',
+        rating: 0,
+        category: '',
+        language: '',
+        preferences: '',
+        Tag: '',
+        search: '',
+        sortBy: '',
+      });
+  
+      // Filter items based on the current role
+      const resetData = itemList.filter(item => {
+        if (role === 'Activities') return item.type === 'Activity';
+        if (role === 'Itineraries') return item.type === 'Itinerary';
+        if (role === 'HistoricalPlaces') return item.type === 'HistoricalPlace';
+        return false;
+      });
+  
+      setFilteredData(resetData);
+    };
   
     // Helper function to check if a field should be displayed for the current role
     const shouldDisplayField = (field) => {
       return roleFields[role]?.includes(field);
     };
-    const handleRoleChange = (event, newValue) => {
-        setRole(newValue);
-      };
-
+  
     const getHistoricalTags = async (tagId) => {
       try {
         const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
@@ -149,25 +277,56 @@ import {
       } catch (err) {
         console.log(err.response ? err.message : 'An unexpected error occurred.');
       }
-    }; 
-    const handleClickOpen = (item) => {
-       setSelectedItem(item);   
-      setOpen(true);
     };
-    const handleTypeChange = (event) => {
-      setType(event.target.value);
+    const handleClose = () => {
+      setOpenCancelation(false);
+      setOpenComment(false);
+      setOpenRate(false);
+       setSelectedItem(null); 
+      setRateType(null);
+      setRating(null);
+      setComment(null);
+      setCommentType(null);
+
     };
+  
+    const handleClickOpenCancelation = (item) => {
+      setOpenCancelation(true);
+      setSelectedItem(item);
+    };
+    const handleClickOpenRate = (item) => {
+        setOpenRate(true);
+        setSelectedItem(item);
+
+      };
+      const handleClickOpenComment = (item) => {
+        setOpenComment(true);
+        setSelectedItem(item);
+      };
+    const handleChange = (event) => {
+      setRateType(event.target.value);
+    };
+    const handleCommentChange = (event) => {
+        setCommentType(event.target.value);
+      };
+      const handleCommentValuesChange = (event) => {
+        setComment(event.target.value);
+      };
     const handleBudgetChange = (event) => {
       setBudget(event.target.value);
     };
-    const handleClose = () => {
-        setOpen(false);
-        setType(null);
-        setBudget(null);
-         setSelectedItem(null); 
-        
-      };
+    const handleRatingValuesChange=(event)=>{
+        setRating(event.target.value);
 
+    }
+    // useEffect(() => {
+    //   filteredData.forEach((item) => {
+    //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
+    //       getHistoricalTags(item.tags);
+    //     }
+    //   });
+    // }, [filteredData, historicalTags]);
+  // getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
     return (
       <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
@@ -180,7 +339,7 @@ import {
   
         <div style={{ display: 'flex', flex: 1 }}>
           <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
-            {itemList.map((item) => (
+            {filteredData.map((item) => (
               <Grid item xs={12} sm={6} md={4} key={item.id}>
                 <Card    
                  style={{
@@ -252,85 +411,295 @@ import {
                         Tags: {historicalTags[item.tags] ? historicalTags[item.tags].join(', ') : 'No tag selected'}
                         </>
                     )}
-                   <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                   <Button style={{height:"50px",width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpen(item)} >
-                   Cancel Booking
-                    </Button> 
-                    <Button style={{width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
-                    Comment 
-                    </Button> 
-                    <Button style={{width:"20px"}}  variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
-                    Rate 
-                    </Button> 
-                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                      <Button style={{height:"50px",width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpenCancelation(item)} >
+                        Cancel Booking
+                      </Button> 
+                     <Button style={{width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpenComment(item)}>
+                        Comment 
+                     </Button> 
+                     <Button style={{width:"20px"}}  variant="contained" color="primary" onClick={() => handleClickOpenRate(item)}>
+                       Rate 
+                         </Button> 
+                        </div>
                     </CardContent>
                     </Card>    
                   </Grid>
                     ))}
                   </Grid>
                   <Dialog
-                    open={open}
+                    open={openCancelation}
                     onClose={handleClose}
-                    disableBackdropClick
-                    disableEscapeKeyDown
                  >
                   <DialogTitle id="alert-dialog-title">
-                  {'Book a Ticket for '} {selectedItem?.name}
+                  {'Cancel Booking a Ticket for '} {selectedItem?.name}
                   </DialogTitle>
                   <DialogContent>
-                  {selectedItem && (
-          <>
-            {selectedItem.type === 'Activity' && (
-              <>
-                <Typography>Budget for Activity: {selectedItem.budget}</Typography>
-                <div  style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-                      <span style={{ marginRight: '8px',marginTop:'10px' }}>Write your Budget for the Activity:</span>
-                       <TextField id="standard-basic" label="budget" type="number" variant="standard" style={{ width: '150px' }}
-                         required value={budget} onChange={handleBudgetChange}  />  
-                      </div>
-              </>
-            )}
-            {selectedItem.type === 'Itinerary' && (
-              <>
-                {/* Add more Itinerary-specific fields here */}
-              </>
-            )}
-            {selectedItem.type === 'HistoricalPlace' && (
-              <>
-                       <div style={{ display: 'flex', alignItems: 'center',  }}>
-                      <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
-                      <FormControl variant="standard" style={{ minWidth: '165px',}}>
-                     <InputLabel id="demo-simple-select-label">Type</InputLabel>
-                          <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={type}
-                            label="Type"
-                            onChange={handleTypeChange}
-                            required
-                          >
-                            <MenuItem value={'native'}>Native</MenuItem>
-                            <MenuItem value={'student'}>Student</MenuItem>
-                            <MenuItem value={'foreigner'}>Foreigner</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </div>
-              </>
-            )}
-          </>
-        )}
                       <div>
-                      <strong>Important Note:</strong>
-                      <p>*Please note that you must bring a Student ID/Passport/National ID to the location*</p>
+                      <strong>Are you sure you want to cancel booking ?</strong>
                       </div>
                   </DialogContent>
                   <DialogActions>
                   <Button onClick={handleClose} autoFocus>
-                      Book
+                      Confirm
                     </Button>
                     <Button onClick={handleClose}>Close</Button>
                   </DialogActions>
                 </Dialog>
+
+
+                <Dialog
+                  open={openRate}
+                  onClose={handleClose}
+               >
+                <DialogTitle id="alert-dialog-title">
+                {'Rating '}
+                </DialogTitle>
+                <DialogContent>
+                {selectedItem && (
+        <>
+          {selectedItem.type === 'Activity' && (
+            <>
+                     <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label"><strong>what to Rate?</strong> </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={rateType}
+                          label="Rate"
+                          onChange={handleChange}
+                          required
+                        >
+                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
+                          <MenuItem value={'activity'}>Activity</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                    {(rateType === 'tourGuide' || rateType === 'activity') && (
+            <div style={{ marginTop: '16px' }}>
+              <Typography variant="body1">Enter rating for {rateType === 'tourGuide' ? 'Tour Guide' : 'Activity'} (out of 5):</Typography>
+              <TextField
+              label="Rate"
+              type="number"
+                inputProps={{ min: 1, max: 5 }}
+                variant="standard"
+                value={rating}
+                onChange={handleRatingValuesChange}
+                style={{ width: '100px', marginTop: '8px' }}
+                required
+              />
+            </div>
+          )}
+            </>
+          )}
+          {selectedItem.type === 'Itinerary' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label"><strong>what to Rate?</strong> </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={rateType}
+                          label="Rate"
+                          onChange={handleChange}
+                          required
+                        >
+                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
+                          <MenuItem value={'Itinerary'}>Itinerary</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                    {(rateType === 'tourGuide' || rateType === 'Itinerary') && (
+            <div style={{ marginTop: '16px' }}>
+              <Typography variant="body1">Enter rating for {rateType === 'tourGuide' ? 'Tour Guide' : 'Itinerary'} (out of 5):</Typography>
+              <TextField
+              label="Rate"
+              type="number"
+                inputProps={{ min: 1, max: 5 }}
+                variant="standard"
+                value={rating}
+                onChange={handleRatingValuesChange}
+                style={{ width: '100px', marginTop: '8px' }}
+                required
+              />
+            </div>
+          )}
+            </>
+          )}
+          {selectedItem.type === 'HistoricalPlace' && (
+            <>
+                             <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label"><strong>what to Rate?</strong> </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={rateType}
+                          label="Rate"
+                          onChange={handleChange}
+                          required
+                        >
+                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
+                          <MenuItem value={'event'}>Event</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                    {(rateType === 'tourGuide' || rateType === 'event') && (
+            <div style={{ marginTop: '16px' }}>
+              <Typography variant="body1">Enter rating for {rateType === 'tourGuide' ? 'Tour Guide' : 'Event'} (out of 5):</Typography>
+              <TextField
+              label="Rate"
+              type="number"
+                inputProps={{ min: 1, max: 5 }}
+                variant="standard"
+                value={rating}
+                onChange={handleRatingValuesChange}
+                style={{ width: '100px', marginTop: '8px' }}
+                required
+              />
+            </div>
+          )}  
+            </>
+          )}
+        </>
+      )}
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleClose} autoFocus>
+                    Save
+                  </Button>
+                  <Button onClick={handleClose}>Close</Button>
+                </DialogActions>
+              </Dialog>
+
+              <Dialog
+                  open={openComment}
+                  onClose={handleClose}
+               >
+                <DialogTitle id="alert-dialog-title">
+                {'Comments'}
+                </DialogTitle>
+                <DialogContent>
+                {selectedItem && (
+        <>
+          {selectedItem.type === 'Activity' && (
+            <>
+                     <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label"><strong>Comment on</strong> </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={commentType}
+                          label="Comment on"
+                          onChange={handleCommentChange}
+                          required
+                        >
+                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
+                          <MenuItem value={'activity'}>Activity</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                    {(commentType === 'tourGuide' || commentType === 'activity') && (
+            <div style={{ marginTop: '16px' }}>
+              <Typography variant="body1">Enter a Comment for {commentType === 'tourGuide' ? 'Tour Guide' : 'Activity'} </Typography>
+              <TextField
+              label="Comment"
+                variant="standard"
+                value={comment}
+                onChange={handleCommentValuesChange}
+                style={{ minWidth: '160px', marginTop: '8px' }}
+                required
+              />
+            </div>
+          )}
+            </>
+          )}
+          {selectedItem.type === 'Itinerary' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label"><strong>Comment on</strong> </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={commentType}
+                          label="Comment on "
+                          onChange={handleCommentChange}
+                          required
+                        >
+                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
+                          <MenuItem value={'Itinerary'}>Itinerary</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                    {(commentType === 'tourGuide' || commentType === 'Itinerary') && (
+            <div style={{ marginTop: '16px' }}>
+              <Typography variant="body1">Enter a Comment for {commentType === 'tourGuide' ? 'Tour Guide' : 'Itinerary'}</Typography>
+              <TextField
+              label="comment"
+                variant="standard"
+                value={comment}
+                onChange={handleCommentValuesChange}
+                style={{ minWidth: '100px', marginTop: '8px' }}
+                required
+              />
+            </div>
+          )}
+            </>
+          )}
+          {selectedItem.type === 'HistoricalPlace' && (
+            <>
+                             <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label"><strong>Comment on</strong> </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={commentType}
+                          label="Comment"
+                          onChange={handleCommentChange}
+                          required
+                        >
+                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
+                          <MenuItem value={'event'}>Event</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                    {(commentType === 'tourGuide' || commentType === 'event') && (
+            <div style={{ marginTop: '16px' }}>
+              <Typography variant="body1">Enter a Comment for {commentType === 'tourGuide' ? 'Tour Guide' : 'Event'} </Typography>
+              <TextField
+              label="Comment"
+                variant="standard"
+                value={comment}
+                onChange={handleCommentValuesChange}
+                style={{ minWidth: '100px', marginTop: '8px' }}
+                required
+              />
+            </div>
+          )}  
+            </>
+          )}
+        </>
+      )}
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleClose} autoFocus>
+                    Save
+                  </Button>
+                  <Button onClick={handleClose}>Close</Button>
+                </DialogActions>
+              </Dialog>
+
                 </div>
               </div>
             );
