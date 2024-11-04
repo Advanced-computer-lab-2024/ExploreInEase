@@ -4,6 +4,7 @@ import React, { Suspense } from 'react';
 import Signup from './SignUp/Signup';
   
 // Lazy load components
+const ChangePassword=React.lazy(()=>import("./TouristGovernor/changePassword"))
 const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
 const TourGuideProfile = React.lazy(() => import('./Shared/Components/TourGuideProfile/TourGuideProfile'));
 const AdvertiserProfile = React.lazy(() => import('./Shared/Components/advertiserProfile/advertiserProfile'));
@@ -71,6 +72,7 @@ const App = () => {
           <Route path="/AdminHomePage" element={<AdminHomePage />} />
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
+          <Route path="/change-password" element={<ChangePassword />} />
         </Routes>
       </Suspense>
     </Router>

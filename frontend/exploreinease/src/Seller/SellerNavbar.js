@@ -2,6 +2,13 @@ import React,{ useState } from 'react';
 import HomePageLogo from '../HomePageLogo.png';
 import '../Guest/GuestHP.css';
 import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import LockIcon from '@mui/icons-material/Lock';
+import LogoutIcon from '@mui/icons-material/Logout';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
@@ -12,9 +19,29 @@ const HomePage = () => {
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const { User } = location.state || {};
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
     const initialUsername = User?.username;
     const userId=User._id;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+   
+    const handleMenuOpen = (event) => {
+      setAnchorEl(event.currentTarget);
+   };
+
+   const handleMenuClose = () => {
+      setAnchorEl(null);
+   };
+
+   const handleMenuClick = (action) => {
+      handleMenuClose();
+      if (action === 'changePassword') {
+         navigate('/change-password', { state: { userId: userId } });;
+      } else if (action === 'logout') {
+         navigate('/login');
+      }
+   };
+   
     async function handleClick(title) {
        if (title=="My Profile"){
         try {
@@ -91,19 +118,46 @@ const HomePage = () => {
         </div>
         </div>
         <div className="avatar-container">
-        <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
-        </div>
+               <Avatar
+                  sx={{ bgcolor: 'darkblue', color: 'white', width: 48, height: 48, fontSize: 20, cursor: 'pointer' }}
+                  onClick={handleMenuOpen}
+               >
+                  {firstInitial}
+               </Avatar> 
+               <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  PaperProps={{
+                     elevation: 3,
+                     sx: {
+                        mt: 1.5,
+                        minWidth: 180,
+                        borderRadius: 2,
+                        boxShadow: '0px 4px 10px rgba(0,0,0,0.1)',
+                     },
+                  }}
+               >
+                  <Typography variant="h6" sx={{ padding: '8px 16px', fontWeight: 600 }}>
+                     Account
+                  </Typography>
+                  <Divider />
+                  <MenuItem onClick={() => handleMenuClick('changePassword')}>
+                     <ListItemIcon>
+                        <LockIcon fontSize="small" />
+                     </ListItemIcon>
+                     Change Password
+                  </MenuItem>
+                  <MenuItem onClick={() => handleMenuClick('logout')}>
+                     <ListItemIcon>
+                        <LogoutIcon fontSize="small" />
+                     </ListItemIcon>
+                     Logout
+                  </MenuItem>
+               </Menu>
+            </div>
       </nav>
       {/* Other homepage content goes here */}
     </div>

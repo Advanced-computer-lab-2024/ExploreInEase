@@ -386,7 +386,30 @@ const login = async (req, res) => {
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
 }
+
+const changePassword = async (req, res) => {
+    const { userId } = req.params;
+    const { oldPassword, newPassword } = req.body;
+    console.log(userId);
+    console.log(oldPassword, newPassword);
+
+    if (!userId) {
+        return res.status(400).json({ message: "Missing userId" });
+    }
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: "Missing Input" });
+    }
+
+    try {
+        const result = await userService.changePassword(userId, oldPassword, newPassword);
+        res.status(result.status).json(result.response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
+    changePassword ,
   deleteUserByIdAndType,
   addGovernorOrAdmin,
   fetchAllUsersAndTourists,

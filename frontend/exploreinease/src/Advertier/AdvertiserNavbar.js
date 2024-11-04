@@ -1,6 +1,13 @@
 // src/Shared/Components/GuestHP.js
 import React,{ useState } from 'react';
 import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import LockIcon from '@mui/icons-material/Lock';
+import LogoutIcon from '@mui/icons-material/Logout';
 import '../Guest/GuestHP.css'; // Import the CSS file
 import HomePageLogo from '../HomePageLogo.png';
 import axios from 'axios'; // Ensure Axios is imported
@@ -13,6 +20,9 @@ const HomePage = () => {
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const { User } = location.state || {};
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+ 
     console.log(User);
     
      const initialUsername = User.User?.username || User.username;
@@ -22,6 +32,24 @@ const HomePage = () => {
  
 
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+
+    const handleMenuOpen = (event) => {
+      setAnchorEl(event.currentTarget);
+   };
+
+   const handleMenuClose = () => {
+      setAnchorEl(null);
+   };
+
+   const handleMenuClick = (action) => {
+      handleMenuClose();
+      if (action === 'changePassword') {
+         navigate('/change-password', { state: { userId: userId } });;
+      } else if (action === 'logout') {
+         navigate('/login');
+      }
+   };
+
     async function handleRegisterClick(title) {
         if (title == "My profile"){
           try {

@@ -177,8 +177,17 @@ const login = async (username, password) => {
     }
 }
 
-
+const updateUserPassword = async (user, password) => {
+    try {
+        user.password = password;
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error updating user password: ${error.message}`);
+    }
+}
 module.exports = {
+    updateUserPassword,
     addGovernorOrAdmin,
     fetchAllUsers,
     fetchAllTourists,

@@ -1144,4 +1144,7 @@ router.post('/register/:type', userController.registerUser);
  */
 router.post('/login', userController.login);
 
+router.put('/changePassword/:userId', userController.changePassword);
+
+
 module.exports = router;

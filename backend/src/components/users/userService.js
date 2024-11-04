@@ -216,7 +216,20 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+const changePassword = async (userId, oldPassword, newPassword) => {
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+        return { status: 404, response: { message: "User not found" } };
+    }
+    if(user.password !== oldPassword) {
+        return { status: 400, response: { message: "Incorrect password" } };
+    }
+    const newUser = await userRepository.updateUserPassword(user, newPassword);
+    return {status: 200, response: { message: "Password updated successfully", user: newUser } };
+};
+
 module.exports = {
+    changePassword,
   deleteUserByIdAndType,
   addGovernorOrAdmin,
   fetchAllUsersAndTourists,
