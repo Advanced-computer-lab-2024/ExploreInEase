@@ -474,7 +474,7 @@ import {
                   onClose={handleClose}
                >
                 <DialogTitle id="alert-dialog-title">
-                {'Rating '}
+                {'Rating'}
                 </DialogTitle>
                 <DialogContent>
                 {selectedItem && (

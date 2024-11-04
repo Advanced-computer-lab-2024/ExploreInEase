@@ -74,6 +74,50 @@ const TouristNavbar = () => {
           }
         }
       }
+      else if(title =="View/Rate Purchased Product") {
+        try {
+          const options = {
+            apiPath: `/getAvailableProducts/${userId}`,
+          };
+          
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const Product=response.Products;
+          const Type='tourist';
+          navigate(`/ViewPurchasedProduct`,{ state: { Product, Type ,User:User} });          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
+      }
+      else if(title =="Book transportation") {
+        // try {
+        //   const options = {
+        //     apiPath: `/getAvailableProducts/${userId}`,
+        //   };
+          
+        //   const response = await NetworkService.get(options);
+        //   setSuccess(response.message); // Set success message
+        //   console.log(response);
+        //   const Product=response.Products;
+        //   const Type='tourist';
+        //   navigate(`/ViewPurchasedProduct`,{ state: { Product, Type ,User:User} });          
+        // } catch (err) {
+        //   if (err.response) {
+        //       console.log(err.message);
+        //     setError(err.response.data.message); // Set error message from server response if exists
+        //   } else {
+        //     setError('An unexpected error occurred.'); // Generic error message
+        //   }
+        // }
+                 navigate(`/BookTransportation`);          
+
+      }
       else {
         try {
             const options = {
@@ -111,11 +155,17 @@ const TouristNavbar = () => {
           <button onClick={() => handleRegisterClick("View Products")}
               className="small-button">View Products</button>
           <button 
-          onClick={() => handleRegisterClick("My Profile")}
-          className="small-button">My Profile</button>
+          onClick={() => handleRegisterClick("Book transportation")}
+          className="small-button">Book transportation</button>
           <button 
           onClick={() => handleRegisterClick("View Booked items")}
           className="small-button">View Booked items</button>
+          <button 
+          onClick={() => handleRegisterClick("View/Rate Purchased Product")}
+          className="small-button">View/Rate Purchased Product</button>
+           <button 
+          onClick={() => handleRegisterClick("My Profile")}
+          className="small-button">My Profile</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

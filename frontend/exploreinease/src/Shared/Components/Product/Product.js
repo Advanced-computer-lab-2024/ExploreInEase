@@ -28,7 +28,7 @@ import {
 const ProductCard = () => {
   const location = useLocation();
   const { Product,Type, User } = location.state || {};
-  console.log(User);
+  console.log("User:",User);
   const userId = User._id;
   console.log("admin id",userId);
   
@@ -309,11 +309,6 @@ const handleSubmitUpdate = async () => {
                     <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
                     </Button>
-
-
-
-
-
                   <Button
                     variant="contained"
                     color="primary"
@@ -382,6 +377,7 @@ const handleSubmitUpdate = async () => {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
+
           <Button onClick={handleSubmitCreate} color="primary">
             Create
           </Button>

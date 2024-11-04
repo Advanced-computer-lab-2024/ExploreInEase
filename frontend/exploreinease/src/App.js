@@ -33,6 +33,10 @@ const SignIn = React.lazy(() => import("./Login/login"));
 const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"));
 const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"));
 const Booked=React.lazy(()=>import("./Tourist/booked"));
+const ProductPurchased= React.lazy(() => import("./Shared/Components/Product/PurchaseProduct"));
+const Transportion= React.lazy(() => import("./Advertier/transportation"));
+const BookTransportation= React.lazy(() => import("./Tourist/bookTransportation"));
+
 const App = () => {
 
   return (
@@ -71,7 +75,10 @@ const App = () => {
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
           <Route path="/ViewListofBooked" element={<Booked />} />
-
+          <Route path="/ViewPurchasedProduct" element={<ProductPurchased/>} />
+          <Route path="/transportion" element={<Transportion/>} />
+          <Route path="/BookTransportation" element={<BookTransportation/>} />
+                    
         </Routes>
       </Suspense>
     </Router>

@@ -53,7 +53,7 @@ const HomePage = () => {
             console.log('API Response:', response);
         
             // Pass the fetched activities to the Activities page
-            navigate(`/Activities`, { state: { allActivity: response.data ,id:userId} });
+            navigate(`/transportion`, { state: { allActivity: response.data ,id:userId} });
             
           } catch (err) {
             // Check if there is a response from the server and handle error
@@ -81,9 +81,10 @@ const HomePage = () => {
         <div className="nav-links">
           <button  onClick={() => handleRegisterClick("Activities")}
               style={{width:160}}>CRUD Activities</button>
-          <button  onClick={() => handleRegisterClick("My profile")}
+           <button  onClick={() => handleRegisterClick("Transportation")}
+               style={{width:160}}>Create transportation</button>
+           <button  onClick={() => handleRegisterClick("My profile")}
                style={{width:160}}>My profile</button>
- 
         <div style={{marginRight:5,marginTop:30,marginLeft:30}}>
           <span className="currency-symbol"></span>
           <select>
