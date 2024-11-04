@@ -28,7 +28,7 @@ import {
 const ProductCard = () => {
   const location = useLocation();
   const { Product,Type, User } = location.state || {};
-  console.log(User);
+  console.log("admin",User);
   const userId = User._id;
   console.log("admin id",userId);
   
