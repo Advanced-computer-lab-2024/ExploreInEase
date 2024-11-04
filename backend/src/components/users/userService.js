@@ -1,4 +1,5 @@
 const Activity = require('../../models/activity');
+const Itinerary = require('../../models/itinerary');
 const Users = require('../../models/user');
 const userRepository = require('../users/userRepository');
 //const Itinerary = require('../models/Itinerary'); // Assuming you have an Itinerary model
@@ -225,7 +226,7 @@ const rateTourGuide = async (touristId, tourGuideId, itineraryId, rating) => {
         const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
         
         if (!hasCompleted) {
-            throw new Error("You cannot rate this tour guide because you haven't completed this itinerary with them.");
+            throw new Error("You cannot rate this tour guide because you havent attended an itinerary with them yet.");
         }
 
         // Retrieve the tour guide directly by querying the user repository
@@ -239,11 +240,19 @@ const rateTourGuide = async (touristId, tourGuideId, itineraryId, rating) => {
             throw new Error("Rating must be between 1 and 5 inclusive.");
         }
 
-        // Add the rating to the tour guide's rating array
-        tourGuide.rating.push(rating);
+        // Update the rating sum and count
+        tourGuide.ratingSum += rating; // Add the new rating to the sum
+        tourGuide.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        tourGuide.rating = tourGuide.ratingSum / tourGuide.ratingCount; // Update the average rating
 
-        // Update the tour guide with the new rating
-        await userRepository.updateTourGuideRatings(tourGuideId, { rating: tourGuide.rating });
+        // Update the activity with the new rating values
+        await userRepository.updateTourGuideRatings(tourGuideId, {
+            rating: tourGuide.rating,
+            ratingSum: tourGuide.ratingSum,
+            ratingCount: tourGuide.ratingCount,
+        });
 
         return { message: "Rating added successfully", updatedTourGuide: tourGuide };
     } catch (error) {
@@ -277,6 +286,78 @@ const commentOnTourGuide = async (touristId, tourGuideId, itineraryId, commentTe
         return { message: "Comment added successfully", updatedTourGuide: tourGuide };
     } catch (error) {
         console.error("Error adding comment to tour guide:", error);
+        throw error;
+    }
+};
+
+const commentOnItinerary = async (touristId, tourGuideId, itineraryId, commentText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot comment on this itinerary because you haven't completed this itinerary yet.");
+        }
+
+        const itinerary = await Itinerary.findOne({ _id: itineraryId});
+        if (!itinerary) {
+            throw new Error("itinerary not found.");
+        }   
+        // Create the new comment
+        const newComment = {
+            user: touristId,
+            text: commentText,
+            date: new Date()
+        };
+
+        // Use the repository method to push the new comment to the comments array
+        const updatedItinerary = await userRepository.updateItineraryComments(itineraryId, { $push: { comments: newComment } });
+
+
+        return { message: "Comment added successfully", updatedItinerary };
+    } catch (error) {
+        console.error("Error adding comment to itinerary:", error);
+        throw error;
+    }
+};
+
+const rateItinerary = async (touristId, tourGuideId, itineraryId, rating) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot rate this itinerary because you havent attended it yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const itinerary = await Itinerary.findOne({ _id: itineraryId });
+        if (!itinerary) {
+            throw new Error("Itinerary not found.");
+        }
+
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        // Update the rating sum and count
+        itinerary.ratingSum += rating; // Add the new rating to the sum
+        itinerary.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        itinerary.rating = itinerary.ratingSum / itinerary.ratingCount; // Update the average rating
+
+        // Update the activity with the new rating values
+        await userRepository.updateItineraryRatings(itineraryId, {
+            rating: itinerary.rating,
+            ratingSum: itinerary.ratingSum,
+            ratingCount: itinerary.ratingCount,
+        });
+
+        return { message: "Rating added successfully", updatedItinerary: itinerary };
+    } catch (error) {
+        console.error("Error adding rating to itinerary:", error);
         throw error;
     }
 };
@@ -377,6 +458,8 @@ module.exports = {
   login,
   rateTourGuide,
   commentOnTourGuide,
+  rateItinerary,
+  commentOnItinerary,
   rateActivity,
   commentOnActivity
 };

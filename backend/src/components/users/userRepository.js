@@ -251,6 +251,45 @@ const updateTourGuideRatings = async (tourGuideId, updatedFields) => {
     }
 };
 
+const updateItineraryComments = async (itineraryId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedItinerary = await Itinerary.findByIdAndUpdate(
+            itineraryId,
+            updatedFields,
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+        
+        if (!updatedItinerary) {
+            throw new Error("Itinerary not found or could not be updated.");
+        }
+
+        return updatedItinerary;
+    } catch (error) {
+        console.error("Error updating itinerary comments:", error);
+        throw error;
+    }
+};
+
+const updateItineraryRatings = async (itineraryId, updatedFields) => {
+    try {
+        const updatedItinerary = await Itinerary.findByIdAndUpdate(
+            itineraryId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedItinerary) {
+            throw new Error("Itinerary not found or could not be updated.");
+        }
+
+        return updatedItinerary;
+    } catch (error) {
+        console.error("Error updating itinerary ratings:", error);
+        throw error;
+    }
+};
+
 // Check if the activty was completed by the tourist (after date passed and booked)
 const hasAttendedActivity = async (touristId, ActivityId) => {
     try {
@@ -342,6 +381,8 @@ module.exports = {
     hasCompletedItinerary,
     updateTourGuideRatings,
     updateTourGuideComments,
+    updateItineraryComments,
+    updateItineraryRatings,
     hasAttendedActivity,
     updateActivityRatings,
     updateActivityComments

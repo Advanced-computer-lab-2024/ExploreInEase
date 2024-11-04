@@ -86,10 +86,17 @@ const UsersSchema = new Schema({
         
     },
     rating: {
-        type: [Number],
+        type: Number,
         min: 0,
         max: 5,
-        
+      },
+      ratingSum: {
+        type: Number,
+        default: 0
+      },
+      ratingCount: {
+        type: Number,
+        default: 0
     },
     founded: {
         type: Number,
