@@ -100,6 +100,8 @@ const deleteTagById = async (id) => {
 
 
 //New Codeee
+
+
 const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
   const updatedItinerary = await Itinerary.findOneAndUpdate(
       { _id: itineraryId, created_by: userId }, 
@@ -125,9 +127,9 @@ const setFlagToZeroForActivity = async (_id) => {
 
 const bookedEvents = async ({ touristId }) => {
   return await Tourist.findById(touristId)
-      .populate('itineraryId.id')  // Populate the 'id' field within itineraryId
-      .populate('activityId.id')    // Populate the 'id' field within activityId
-      .populate('historicalplaceId.id') // Populate the 'id' field within historicalplaceId
+      .populate('itineraryId.id')  
+      .populate('activityId.id')    
+      .populate('historicalplaceId.id') 
       .exec();
 };
 
@@ -192,10 +194,9 @@ const bookEvent = async (touristId, eventType, eventId, ticketType, currency, ac
     throw new Error('Insufficient funds to book this event');
   }
 
-  // Deduct event price from wallet
+  
   tourist.wallet -= eventPrice;
 
-  // Prepare the update data for adding event details
   const eventData = { id: eventId, pricePaid: eventPrice };
   switch (eventType) {
     case 'itinerary':
@@ -209,7 +210,7 @@ const bookEvent = async (touristId, eventType, eventId, ticketType, currency, ac
       break;
   }
 
-  // Save the tourist with the updated data
+ 
   await tourist.save();
 
   return tourist;
@@ -225,8 +226,8 @@ const cancelEvent = async (touristId, eventType, eventId) => {
   let eventPrice = 0;
   let startDate;
 
-  // Ensure eventId is a valid ObjectId
-  const eventObjectId = new mongoose.Types.ObjectId(eventId); // Use 'new' keyword
+  
+  const eventObjectId = new mongoose.Types.ObjectId(eventId); 
 
   switch (eventType) {
     case 'itinerary':
@@ -238,20 +239,20 @@ const cancelEvent = async (touristId, eventType, eventId) => {
         throw new Error('Cancellations must be made at least 48 hours before the itinerary start date.');
       }
 
-      // Retrieve the tourist's itinerary
+      
       const touristItinerary = await Tourist.findById(touristId).select('itineraryId');
 
-      // Find the itinerary item using .equals() for ObjectId comparison
+      
       const itineraryItem = touristItinerary.itineraryId.find(item => {
-        console.log('Comparing item id:', item.id, 'with eventObjectId:', eventObjectId); // Debug log
+         
         return item.id.equals(eventObjectId);
       });
 
       if (!itineraryItem) throw new Error('Itinerary not found in tourist data');
 
-      eventPrice = itineraryItem.pricePaid; // Use pricePaid
+      eventPrice = itineraryItem.pricePaid;
 
-      // Remove the whole object from the itineraryId array based on the id
+      
       updateData.$pull = { itineraryId: { id: eventObjectId } };
       break;
 
@@ -264,19 +265,19 @@ const cancelEvent = async (touristId, eventType, eventId) => {
         throw new Error('Cancellations must be made at least 48 hours before the activity start date.');
       }
 
-      // Retrieve the tourist's activity
+      
       const touristActivity = await Tourist.findById(touristId).select('activityId');
 
-      // Find the activity item using .equals() for ObjectId comparison
+      
       const activityItem = touristActivity.activityId.find(item => {
         return item.id.equals(eventObjectId);
       });
 
       if (!activityItem) throw new Error('Activity not found in tourist data');
 
-      eventPrice = activityItem.pricePaid; // Use pricePaid
+      eventPrice = activityItem.pricePaid; 
 
-      // Remove the whole object from the activityId array based on the id
+      
       updateData.$pull = { activityId: { id: eventObjectId } };
       break;
 
@@ -284,19 +285,19 @@ const cancelEvent = async (touristId, eventType, eventId) => {
       const historicalPlace = await HistoricalPlace.findById(eventObjectId);
       if (!historicalPlace) throw new Error('Historical place event not found');
 
-      // Retrieve the tourist's historical place events
+      
       const touristHistoricalPlace = await Tourist.findById(touristId).select('historicalplaceId');
 
-      // Find the historical place item using .equals() for ObjectId comparison
+      
       const historicalPlaceItem = touristHistoricalPlace.historicalplaceId.find(item => {
         return item.id.equals(eventObjectId);
       });
 
       if (!historicalPlaceItem) throw new Error('Historical place event not found in tourist data');
 
-      eventPrice = historicalPlaceItem.pricePaid; // Use pricePaid
+      eventPrice = historicalPlaceItem.pricePaid; 
 
-      // Remove the whole object from the historicalplaceId array based on the id
+      
       updateData.$pull = { historicalplaceId: { id: eventObjectId } };
       break;
 
@@ -304,7 +305,7 @@ const cancelEvent = async (touristId, eventType, eventId) => {
       throw new Error('Invalid event type');
   }
 
-  // Increment the wallet by the event price
+  
   updateData.$inc = { wallet: eventPrice };
 
   const updatedTourist = await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
@@ -464,9 +465,36 @@ const createTransportation = async (advertiserId, pickupLocation, dropoffLocatio
 };
 
 
-const getTransportations = async () => {  
-  return await Transportation.find();
-}
+const getTransportations = async (currency) => { 
+  const transportations = await Transportation.find();
+
+  
+  const convertedTransportations = transportations.map(transportation => {
+      let convertedPrice;
+      
+      switch (currency) {
+          case 'euro':
+              convertedPrice = (transportation.price / 55).toFixed(2);
+              break;
+          case 'dollar':
+              convertedPrice = (transportation.price / 55).toFixed(2);
+              break;
+          case 'EGP':
+              convertedPrice = (transportation.price).toFixed(2); 
+              break;
+          default:
+              convertedPrice = transportation.price; 
+      }
+
+      
+      return {
+          ...transportation.toObject(), 
+          price: convertedPrice
+      };
+  });
+
+  return convertedTransportations;
+};
 
 
 

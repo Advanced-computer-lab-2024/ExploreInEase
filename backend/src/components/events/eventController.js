@@ -149,7 +149,7 @@ const updateItineraryActivation = async (req, res) => {
   const { itineraryId, isActivated, userId, userType } = req.body;
 
 
-  // Validate input
+  
   if (!itineraryId || isActivated === undefined || !userId || !userType) {
       return res.status(400).json({ message: "Itinerary ID, activation status, user ID, and userType are required." });
   }
@@ -287,29 +287,25 @@ const sendEventEmail = async (req, res) => {
 
 
 
-
-
-// Controller to get city code by city name (returns full Amadeus response)
 const getCityCode = async (req, res) => {
   try {
       const response = await eventService.fetchCityCode(req.params.city);
-      res.status(200).json(response);  // Return full response
+      res.status(200).json(response);  
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 };
 
 const flightOffers = async (req, res) => {
-  const { originCode, destinationCode, dateOfDeparture } = req.body;
+  const { originCode, destinationCode, dateOfDeparture,currency,personCount } = req.body;
 
-  
-  if (!originCode || !destinationCode || !dateOfDeparture ) {
+  if (!originCode || !destinationCode || !dateOfDeparture  || !currency || !personCount) {
       return res.status(400).json({ message: "Origin, destination, and departure date are required." });
   }
 
   try {
       
-      const flights = await eventService.flightOffers( originCode, destinationCode, dateOfDeparture);
+      const flights = await eventService.flightOffers( originCode, destinationCode, dateOfDeparture,currency,personCount);
       return res.status(200).json(flights);
   } catch (error) {
       console.error('Error searching flights:', error.message);
@@ -377,15 +373,8 @@ const bookHotel = async (req, res) => {
 };
 
 
-// Controller to get offers by hotel ID (returns full Amadeus response)
-const getOffersByHotelId = async (req, res) => {
-  try {
-      const response = await eventService.fetchOffersByHotelId(req.params.hotelId);
-      res.status(200).json(response);  // Return full response
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-};
+
+
 
 
 const createTransportation = async (req, res) => {
@@ -414,7 +403,8 @@ const createTransportation = async (req, res) => {
 
 const getTransportations = async (req, res) => {
   try {
-    const transportation = await eventService.getTransportations();
+    const{currency} = req.body;
+    const transportation = await eventService.getTransportations(currency);
     return res.status(200).json(transportation);
   } catch (error) {
     console.error('Error fetching transportation:', error.message);
@@ -454,7 +444,6 @@ module.exports = {
     sendEventEmail,
     getCityCode,
     getHotelsByCityCode,
-    getOffersByHotelId,
     createTransportation,
     getTransportations,
     bookTransportation,

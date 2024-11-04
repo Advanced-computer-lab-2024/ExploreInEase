@@ -185,19 +185,19 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
 const Amadeus = require('amadeus');
 
 const amadeus = new Amadeus({
-    clientId: process.env.AMADEUS_CLIENT_ID, 
-    clientSecret: process.env.AMADEUS_CLIENT_SECRET,
+    clientId: process.env.AMADEUS_CLIENT_ID3, 
+    clientSecret: process.env.AMADEUS_CLIENT_SECRET3,
 });
 
 
-// Fetch city code by city name (returns city name and IATA code only)
+
 const fetchCityCode = async (city) => {
   try {
       const response = await amadeus.referenceData.locations.cities.get({ keyword: city });
       
-      // Extract and return only the city name and IATA code, excluding those without an IATA code
+    
       const simplifiedResponse = response.data
-        .filter(location => location.iataCode) // Exclude locations without an IATA code
+        .filter(location => location.iataCode) 
         .map(location => ({
             name: location.name,
             iataCode: location.iataCode
@@ -210,19 +210,32 @@ const fetchCityCode = async (city) => {
 };
 
 
-const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) => {
+const flightOffers = async (originCode, destinationCode, dateOfDeparture, currency, personCount) => {
   try {
-      // Prepare the request body as per Amadeus API requirements
+      switch (currency) {
+        case 'euro':
+          currency = "EUR";
+          break;
+        case 'dollar':
+          currency = "USD";
+          break;
+        case 'EGP':
+          currency = "EGP";
+          break;
+        default:
+          throw new Error('Invalid currency');
+      }
+     
       const requestBody = {
-          currencyCode: 'USD', // or any other currency you want to use
+          currencyCode: currency,
           originDestinations: [
               {
                   id: '1',
                   originLocationCode: originCode,
                   destinationLocationCode: destinationCode,
                   departureDateTimeRange: {
-                      date: dateOfDeparture, // YYYY-MM-DD format
-                      time: '10:00:00' // adjust as needed
+                      date: dateOfDeparture,
+                      time: '10:00:00'
                   }
               }
           ],
@@ -234,7 +247,7 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) =>
           ],
           sources: ['GDS'],
           searchCriteria: {
-              maxFlightOffers: 2,
+              maxFlightOffers: 8,
               flightFilters: {
                   cabinRestrictions: [
                       {
@@ -247,13 +260,11 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) =>
           }
       };
 
-      // Use Amadeus API to search for flights
       const response = await amadeus.shopping.flightOffersSearch.post(requestBody);
 
-      // Check response and handle accordingly
       const formattedFlights = response.data.map(flightOffer => ({
           id: flightOffer.id,
-          price: flightOffer.price.total,
+          price: (flightOffer.price.total) * personCount,
           currency: flightOffer.price.currency,
           departure: flightOffer.itineraries[0].segments[0].departure,
           arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
@@ -266,13 +277,26 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) =>
           })),
       }));
 
-      return formattedFlights; // Return the formatted flight data
+      return formattedFlights;
   } catch (error) {
-      // Check if error response contains a message and handle it
-      const errorMessage = error.response ? error.response.data : error.message;
-      throw new Error(`Error fetching flights: ${errorMessage}`);
+      let errorMessage;
+
+      if (error.response && error.response.data) {
+          errorMessage = error.response.data;
+          console.error(`API response error: ${errorMessage}`);
+      } else if (error.message) {
+          errorMessage = error.message;
+          console.error(`Network error: ${errorMessage}`);
+      } else {
+          errorMessage = "Server busy, try again please";
+          console.error(errorMessage);
+      }
+
+      throw new Error(errorMessage);
   }
 };
+
+
 
 
 
@@ -284,7 +308,6 @@ const flightBooking = async ({ bookedBy, price, departureTime, arrivalTime, pers
 
 
 
-// Fetch hotels by city code with start date, end date, currency adjustments, and person count
 const fetchHotelsByCityCode = async (cityCode, startDate, endDate, currency, personCount) => {
   try {
       const response = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
@@ -333,8 +356,8 @@ const createTransportation = async (advertiserId, pickupLocation, dropoffLocatio
   return await eventRepository.createTransportation(advertiserId, pickupLocation, dropoffLocation, datetimeAvailable, price, transportationType);
 };
 
-const getTransportations = async () => {
-  return await eventRepository.getTransportations();
+const getTransportations = async (currency) => {
+  return await eventRepository.getTransportations(currency);
 }
 
 const bookTransportation = async (touristId, transportationId) => {

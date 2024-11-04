@@ -272,6 +272,8 @@ router.delete('/deleteTagById/:id', eventController.deleteTagById);
 
 
 //New Codeeee
+
+
 router.put('/updateItineraryActivation', eventController.updateItineraryActivation);
 
 router.put('/inappropriate', eventController.updateEventFlagController);
