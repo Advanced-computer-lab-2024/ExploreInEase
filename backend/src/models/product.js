@@ -33,6 +33,14 @@ const ProductsSchema = new Schema({
         max: 5,
         default: 0                 // Default rating
     },
+    ratingSum: {
+        type: Number,
+        default: 0
+    },
+      ratingCount: {
+        type: Number,
+        default: 0
+    },
     reviews: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,

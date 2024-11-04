@@ -538,6 +538,7 @@ router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange
 router.put('/editProducts/:userId/:productId', checkoutController.updateProduct);
 router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSortedByRatings);
 router.get('/searchProductByName/:userId', checkoutController.searchProductByName);
+router.post('/rateProduct/:touristId', checkoutController.rateProduct);
 
 
 module.exports = router;

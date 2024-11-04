@@ -1,6 +1,8 @@
 const Product = require('../../models/product'); 
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const Order = require('../../models/order');
+const Products = require('../../models/product');
 
 const addProduct = async (productData) => {
     try {
@@ -115,6 +117,48 @@ const findUserById = async (_id) => {
     }
 };
 
+const isPurchased = async (TouristId, ProductId) => {
+    try {
+        const order = await Order.findOne({ 
+            touristId: TouristId, 
+            productIds: { $in: [ProductId]} // Checks if ProductId exists in the productIds array
+        });
+
+        console.log(order);
+        if (!order) {
+            throw new Error("No such product exists or the tourist did not order this product");
+        }
+        else{
+            if(order.status == "delivered"){
+                return true;
+            }
+        }
+
+    } catch (error) {
+        console.error("Error checking product purchase:", error);
+        throw error;
+    }
+}
+
+const updateProductRating = async (productId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedProduct = await Products.findByIdAndUpdate(
+            productId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedProduct) {
+            throw new Error("Product not found or could not be updated.");
+        }
+
+        return updatedProduct;
+    } catch (error) {
+        console.error("Error updating product ratings:", error);
+        throw error;
+    }
+}
 module.exports = {
     addProduct,
     getAllAvailableProducts,
@@ -123,5 +167,7 @@ module.exports = {
     updateProduct,
     getAvailableProductsSortedByRatings,
     searchByName,
-    findUserById
+    findUserById,
+    isPurchased,
+    updateProductRating
 };

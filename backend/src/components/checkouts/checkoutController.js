@@ -145,7 +145,17 @@ const searchProductByName = async (req, res) => {
     }
 };
 
+const rateProduct = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { productId, rating } = req.body;
 
+    try {
+        const result = await checkoutService.rateProduct(touristId,productId,rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
 
 module.exports = {
     addProduct,
@@ -153,5 +163,6 @@ module.exports = {
     getProductsByPriceRange,
     updateProduct,
     getAvailableProductsSortedByRatings,
-    searchProductByName
+    searchProductByName,
+    rateProduct
 };

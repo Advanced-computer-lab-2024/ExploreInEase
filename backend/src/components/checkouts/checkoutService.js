@@ -50,6 +50,46 @@ const searchProductByName = async (name) => {
     return await checkoutRepository.searchByName(name);
 };
 
+const rateProduct = async (touristId, productId, rating) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const purchased = await checkoutRepository.isPurchased(touristId, productId);
+        
+        if (!purchased) {
+            throw new Error("You cannot rate this product because you didnt purchase it yet.");
+        }
+
+        const product = await Product.findOne({ _id: productId });
+        if (!product) {
+            throw new Error("activity not found.");
+        }
+
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        // Update the rating sum and count
+        product.ratingSum += rating; // Add the new rating to the sum
+        product.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        product.ratings = product.ratingSum / product.ratingCount; // Update the average rating
+
+        // Update the activity with the new rating values
+        await checkoutRepository.updateProductRating(productId, {
+            ratings: product.ratings,
+            ratingSum: product.ratingSum,
+            ratingCount: product.ratingCount
+        });
+
+        return { message: "Rating added successfully", updatedProduct: product };
+    } catch (error) {
+        console.error("Error adding rating to product:", error);
+        throw error;
+    }
+};
+
 module.exports = {
     addProduct,
     getAvailableProducts,
@@ -57,5 +97,6 @@ module.exports = {
     getProductById, // Export the new function
     updateProduct,
     getAvailableProductsSortedByRatings,
-    searchProductByName
+    searchProductByName,
+    rateProduct
 };
