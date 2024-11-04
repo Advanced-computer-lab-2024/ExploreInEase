@@ -1,5 +1,6 @@
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const Product = require('../../models/product'); 
+const Order = require('../../models/order');
 
 const addProduct = async (productData) => {
     return await checkoutRepository.addProduct(productData);
@@ -122,6 +123,33 @@ const reviewProduct = async (touristId, productId, reviewText) => {
     }
 };
 
+const addOrder = async (orderData) => {
+    return await checkoutRepository.addOrder(orderData);
+};
+
+const getAllOrders = async () => {
+    return await checkoutRepository.getAllOrders();
+}
+
+const getOrdersByTouristId = async (touristId) => {
+    return await checkoutRepository.getOrdersByTouristId(touristId);
+}
+
+const updateOrder = async (orderId, updatedOrderData) => {
+    try {
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId }, // Find by orderId
+            { $set: updatedOrderData }, // Apply the updates
+            { new: true, runValidators: true } // Return the updated document and run validators
+        );
+
+        return updatedOrder;
+    } catch (error) {
+        throw new Error(`Error updating order: ${error.message}`);
+    }
+};
+
+
 module.exports = {
     addProduct,
     getAvailableProducts,
@@ -131,5 +159,9 @@ module.exports = {
     getAvailableProductsSortedByRatings,
     searchProductByName,
     rateProduct,
-    reviewProduct
+    reviewProduct,
+    addOrder,
+    getAllOrders,
+    getOrdersByTouristId,
+    updateOrder
 };
