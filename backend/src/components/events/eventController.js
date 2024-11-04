@@ -300,16 +300,16 @@ const getCityCode = async (req, res) => {
 };
 
 const flightOffers = async (req, res) => {
-  const { originCode, destinationCode, dateOfDeparture,currency,personCount } = req.body;
+  const { originCode, destinationCode, dateOfDeparture } = req.body;
 
   
-  if (!originCode || !destinationCode || !dateOfDeparture || !currency || !personCount) {
+  if (!originCode || !destinationCode || !dateOfDeparture ) {
       return res.status(400).json({ message: "Origin, destination, and departure date are required." });
   }
 
   try {
       
-      const flights = await eventService.flightOffers( originCode, destinationCode, dateOfDeparture,currency,parseInt(personCount) || 1 );
+      const flights = await eventService.flightOffers( originCode, destinationCode, dateOfDeparture);
       return res.status(200).json(flights);
   } catch (error) {
       console.error('Error searching flights:', error.message);

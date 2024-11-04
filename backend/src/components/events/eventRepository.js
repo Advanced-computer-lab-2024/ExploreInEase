@@ -7,6 +7,7 @@ const Tourist = require('../../models/tourist');
 const BookedFlight = require('../../models/bookedFlights');
 const BookedHotel = require('../../models/bookedHotels');
 
+
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
     .populate('category', 'categoryName') // Get categoryName from ActivityCategory
@@ -120,11 +121,12 @@ const setFlagToZeroForActivity = async (_id) => {
 
 
 
-const bookedEvents =  async ({touristId}) =>{
+
+const bookedEvents = async ({ touristId }) => {
   return await Tourist.findById(touristId)
-      .populate('itineraryId')
-      .populate('activityId')
-      .populate('historicalplaceId')
+      .populate('itineraryId.id')  // Populate the 'id' field within itineraryId
+      .populate('activityId.id')    // Populate the 'id' field within activityId
+      .populate('historicalplaceId.id') // Populate the 'id' field within historicalplaceId
       .exec();
 };
 
@@ -143,15 +145,14 @@ const bookEvent = async (touristId, eventType, eventId, ticketType, currency, ac
       if (!itinerary) {
         throw new Error('Itinerary not found');
       }
-      if (tourist.itineraryId && tourist.itineraryId.includes(eventId)) {
+      if (tourist.itineraryId.some(event => event.id.toString() === eventId)) {
         throw new Error('This itinerary has already been booked.');
       }
       eventPrice = itinerary.price;
+      break;
 
     case 'activity':
-      
-      
-      if (tourist.activityId && tourist.activityId.includes(eventId)) {
+      if (tourist.activityId.some(event => event.id.toString() === eventId)) {
         throw new Error('This activity has already been booked.');
       }
       switch (currency) {
@@ -168,15 +169,13 @@ const bookEvent = async (touristId, eventType, eventId, ticketType, currency, ac
           throw new Error('Invalid currency');
       }
       break;
-     
-      
 
     case 'historicalPlace':
       const historicalPlace = await HistoricalPlace.findById(eventId);
       if (!historicalPlace) {
         throw new Error('Historical place not found');
       }
-      if (tourist.historicalplaceId && tourist.historicalplaceId.includes(eventId)) {
+      if (tourist.historicalplaceId.some(event => event.id.toString() === eventId)) {
         throw new Error('This historical place has already been booked.');
       }
       eventPrice = ticketType === "student" ? historicalPlace.ticketPrice.student :
@@ -188,109 +187,134 @@ const bookEvent = async (touristId, eventType, eventId, ticketType, currency, ac
       throw new Error('Invalid event type');
   }
 
- 
   if (tourist.wallet < eventPrice) {
     throw new Error('Insufficient funds to book this event');
   }
 
-  
+  // Deduct event price from wallet
   tourist.wallet -= eventPrice;
-  await tourist.save();
 
-  
-  const updateData = {};
+  // Prepare the update data for adding event details
+  const eventData = { id: eventId, pricePaid: eventPrice };
   switch (eventType) {
     case 'itinerary':
-      updateData.$addToSet = { itineraryId: eventId };
+      tourist.itineraryId.push(eventData);
       break;
     case 'activity':
-      updateData.$addToSet = { activityId: eventId };
+      tourist.activityId.push(eventData);
       break;
     case 'historicalPlace':
-      updateData.$addToSet = { historicalplaceId: eventId };
+      tourist.historicalplaceId.push(eventData);
       break;
   }
 
-  return await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
+  // Save the tourist with the updated data
+  await tourist.save();
+
+  return tourist;
 };
 
 
-
+const mongoose = require('mongoose');
 const cancelEvent = async (touristId, eventType, eventId) => {
   const currentTime = new Date();
-  const fortyEightHoursInMs = 48 * 60 * 60 * 1000; 
+  const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
 
-  
   const updateData = {};
-
- 
   let eventPrice = 0;
-
-  
   let startDate;
+
+  // Ensure eventId is a valid ObjectId
+  const eventObjectId = new mongoose.Types.ObjectId(eventId); // Use 'new' keyword
 
   switch (eventType) {
     case 'itinerary':
-     
-      const itinerary = await Itinerary.findById(eventId);
+      const itinerary = await Itinerary.findById(eventObjectId);
       if (!itinerary) throw new Error('Itinerary not found');
-      
-      
+
       startDate = itinerary.dateTimeAvailable.sort((a, b) => a - b)[0];
       if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
         throw new Error('Cancellations must be made at least 48 hours before the itinerary start date.');
       }
 
-      
-      eventPrice = itinerary.price;
+      // Retrieve the tourist's itinerary
+      const touristItinerary = await Tourist.findById(touristId).select('itineraryId');
 
-      updateData.$pull = { itineraryId: eventId };
+      // Find the itinerary item using .equals() for ObjectId comparison
+      const itineraryItem = touristItinerary.itineraryId.find(item => {
+        console.log('Comparing item id:', item.id, 'with eventObjectId:', eventObjectId); // Debug log
+        return item.id.equals(eventObjectId);
+      });
+
+      if (!itineraryItem) throw new Error('Itinerary not found in tourist data');
+
+      eventPrice = itineraryItem.pricePaid; // Use pricePaid
+
+      // Remove the whole object from the itineraryId array based on the id
+      updateData.$pull = { itineraryId: { id: eventObjectId } };
       break;
 
     case 'activity':
-      
-      const activity = await Activity.findById(eventId);
+      const activity = await Activity.findById(eventObjectId);
       if (!activity) throw new Error('Activity not found');
-      
-      
+
       startDate = activity.date;
       if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
         throw new Error('Cancellations must be made at least 48 hours before the activity start date.');
       }
 
-     
-      eventPrice = activity.price;
+      // Retrieve the tourist's activity
+      const touristActivity = await Tourist.findById(touristId).select('activityId');
 
-      updateData.$pull = { activityId: eventId };
+      // Find the activity item using .equals() for ObjectId comparison
+      const activityItem = touristActivity.activityId.find(item => {
+        return item.id.equals(eventObjectId);
+      });
+
+      if (!activityItem) throw new Error('Activity not found in tourist data');
+
+      eventPrice = activityItem.pricePaid; // Use pricePaid
+
+      // Remove the whole object from the activityId array based on the id
+      updateData.$pull = { activityId: { id: eventObjectId } };
       break;
 
     case 'historicalPlace':
-     
-      const historicalPlace = await HistoricalPlace.findById(eventId);
+      const historicalPlace = await HistoricalPlace.findById(eventObjectId);
       if (!historicalPlace) throw new Error('Historical place event not found');
-      
-     
-      eventPrice = historicalPlace.price;
 
-      updateData.$pull = { historicalplaceId: eventId };
+      // Retrieve the tourist's historical place events
+      const touristHistoricalPlace = await Tourist.findById(touristId).select('historicalplaceId');
+
+      // Find the historical place item using .equals() for ObjectId comparison
+      const historicalPlaceItem = touristHistoricalPlace.historicalplaceId.find(item => {
+        return item.id.equals(eventObjectId);
+      });
+
+      if (!historicalPlaceItem) throw new Error('Historical place event not found in tourist data');
+
+      eventPrice = historicalPlaceItem.pricePaid; // Use pricePaid
+
+      // Remove the whole object from the historicalplaceId array based on the id
+      updateData.$pull = { historicalplaceId: { id: eventObjectId } };
       break;
 
     default:
       throw new Error('Invalid event type');
   }
 
- 
+  // Increment the wallet by the event price
+  updateData.$inc = { wallet: eventPrice };
+
   const updatedTourist = await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
 
-  if (updatedTourist) {
-    
-    updatedTourist.wallet += eventPrice;
+  if (!updatedTourist) throw new Error('Tourist not found');
 
-    
-    await updatedTourist.save();
-  }
-
-  return updatedTourist;
+  return {
+    message: `${eventType} event cancelled successfully.`,
+    eventPriceRefunded: eventPrice,
+    updatedTourist,
+  };
 };
 
 

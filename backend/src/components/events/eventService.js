@@ -101,6 +101,7 @@ const updateEventFlag = async ( eventType, eventID) => {
   }
 };
 
+// eventService
 const bookedEvents = async (touristId) => {
   const tourist = await eventRepository.bookedEvents({ touristId });
 
@@ -109,13 +110,19 @@ const bookedEvents = async (touristId) => {
   }
 
   return {
-     
       itineraries: tourist.itineraryId.map(itinerary => ({
-          ...itinerary._doc,
-          timeline: itinerary.timeline.map(item => item.toString()) 
+          ...itinerary.id._doc,
+          pricePaid: itinerary.pricePaid,
+          timeline: itinerary.id.timeline.map(item => item.toString()) 
       })),
-      activities: tourist.activityId,
-      historicalPlaces: tourist.historicalplaceId
+      activities: tourist.activityId.map(activity => ({
+          ...activity.id._doc,
+          pricePaid: activity.pricePaid
+      })),
+      historicalPlaces: tourist.historicalplaceId.map(historicalPlace => ({
+          ...historicalPlace.id._doc,
+          pricePaid: historicalPlace.pricePaid
+      }))
   };
 };
 
@@ -202,26 +209,19 @@ const fetchCityCode = async (city) => {
 };
 
 
-const flightOffers = async ({ originCode, destinationCode, dateOfDeparture, currency, personCount  }) => {
+const flightOffers = async ({ originCode, destinationCode, dateOfDeparture }) => {
   try {
-      if (currency === 'euro') {
-          currency = 'EUR';
-      } else if (currency === 'dollar') {
-          currency = 'USD';
-      } else {
-          currency = 'EGP';
-      }
-
+      // Prepare the request body as per Amadeus API requirements
       const requestBody = {
-          currencyCode: currency, 
+          currencyCode: 'USD', // or any other currency you want to use
           originDestinations: [
               {
                   id: '1',
                   originLocationCode: originCode,
                   destinationLocationCode: destinationCode,
                   departureDateTimeRange: {
-                      date: dateOfDeparture, 
-                      time: '10:00:00' 
+                      date: dateOfDeparture, // YYYY-MM-DD format
+                      time: '10:00:00' // adjust as needed
                   }
               }
           ],
@@ -233,7 +233,7 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture, curr
           ],
           sources: ['GDS'],
           searchCriteria: {
-              maxFlightOffers: 5,
+              maxFlightOffers: 2,
               flightFilters: {
                   cabinRestrictions: [
                       {
@@ -246,44 +246,33 @@ const flightOffers = async ({ originCode, destinationCode, dateOfDeparture, curr
           }
       };
 
+      // Use Amadeus API to search for flights
       const response = await amadeus.shopping.flightOffersSearch.post(requestBody);
 
-      if (Object.keys(response.data).length === 0) {
-          throw new Error("No flights available");
-      }
+      // Check response and handle accordingly
+      const formattedFlights = response.data.map(flightOffer => ({
+          id: flightOffer.id,
+          price: flightOffer.price.total,
+          currency: flightOffer.price.currency,
+          departure: flightOffer.itineraries[0].segments[0].departure,
+          arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
+          carrierCode: flightOffer.validatingAirlineCodes[0],
+          segments: flightOffer.itineraries[0].segments.map(segment => ({
+              carrierCode: segment.carrierCode,
+              departure: segment.departure,
+              arrival: segment.arrival,
+              duration: segment.duration,
+          })),
+      }));
 
-      const formattedFlights = response.data.map(flightOffer => {
-          const basePrice = parseFloat(flightOffer.price.total);
-          const totalPrice = Math.round(basePrice * personCount * 100) / 100; 
-
-          return {
-              id: flightOffer.id,
-              price: totalPrice.toFixed(2), 
-              personCount: personCount,
-              currency: flightOffer.price.currency,
-              departure: flightOffer.itineraries[0].segments[0].departure,
-              arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
-              carrierCode: flightOffer.validatingAirlineCodes[0],
-              segments: flightOffer.itineraries[0].segments.map(segment => ({
-                  carrierCode: segment.carrierCode,
-                  departure: segment.departure,
-                  arrival: segment.arrival,
-                  duration: segment.duration,
-              })),
-          };
-      });
-
-      return formattedFlights; 
+      return formattedFlights; // Return the formatted flight data
   } catch (error) {
-      if (error.message === "Error fetching flights: undefined") {
-          throw new Error("Server busy, try again");
-      } else if (error.message === "No flights available") {
-          throw new Error("No flights available");
-      } else {
-          throw new Error("Server busy, try again");
-      }
+      // Check if error response contains a message and handle it
+      const errorMessage = error.response ? error.response.data : error.message;
+      throw new Error(`Error fetching flights: ${errorMessage}`);
   }
 };
+
 
 
 
