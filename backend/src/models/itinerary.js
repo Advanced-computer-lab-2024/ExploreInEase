@@ -71,6 +71,14 @@ const itinerarySchema = new Schema({
     min: 0,
     max: 5, // Rating on a scale of 0 to 5
   },
+  ratingSum: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
   comments: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' }, // Comments related to the itinerary
     text: { type: String, required: true },
