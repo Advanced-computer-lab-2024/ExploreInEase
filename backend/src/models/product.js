@@ -35,12 +35,12 @@ const ProductsSchema = new Schema({
     },
     ratingSum: {
         type: Number,
-        default: 0
-    },
+        default: 0,
+      },
       ratingCount: {
         type: Number,
-        default: 0
-    },
+        default: 0,
+      },
     reviews: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -83,6 +83,6 @@ const ProductsSchema = new Schema({
 });
 
 // Create the Products Model
-const Products = mongoose.models.Products || mongoose.model('Product', ProductsSchema);
+const Products = mongoose.models.Products || mongoose.model('Products', ProductsSchema);
 
 module.exports = Products;

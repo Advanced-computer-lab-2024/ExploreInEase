@@ -46,12 +46,10 @@ const TouristSchema = new Schema({
         id: { type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary', required: true }, // Reference to Itinerary schema
         pricePaid: { type: Number, required: true, min: 0 } // Ensure price is not negative
     }],
-
     activityId: [{
         id: { type: mongoose.Schema.Types.ObjectId, ref: 'Activity'}, // Reference to Activity schema
         pricePaid: { type: Number,min: 0 }
     }],
-
     historicalplaceId: [{
         id: { type: mongoose.Schema.Types.ObjectId, ref: 'HistoricalPlace' }, // Reference to HistoricalPlace schema
         pricePaid: { type: Number,  min: 0 }
