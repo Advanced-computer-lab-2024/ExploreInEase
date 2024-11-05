@@ -95,20 +95,7 @@ documents: {
         type: [String]
     },
 
-    selfPicture: {
-        type: String, 
-    },
-photo: {
-    selfPicture: {
-        type: String,
-    },
-    logo: {
-        type: String,
-    }
-},
-comment: {
-    type: [String]
-},
+   
     industry: {
         type: String,
         
@@ -140,6 +127,22 @@ comment: {
         default: false
     },
     requestDeletion: {
+        type: Boolean,
+        default: false
+    },
+     founded: {
+        type: Number,
+       
+    },
+    specialist: {
+        type: String,
+        
+    },
+    noEmployees: {
+        type: Number,
+      
+    }, 
+    status: {
         type: Boolean,
         default: false
     },
