@@ -3,6 +3,13 @@ const mongoose = require('mongoose')
 const router = express.Router()
 const eventController = require('../events/eventController');
 
+
+router.put('/inappropriate', eventController.updateEventFlagController);
+
+router.get('/getAllEvents', eventController.getAllEvents);
+
+
+
 /**
  * @swagger
  * /GetMyEvents/{_id}/{userType}:

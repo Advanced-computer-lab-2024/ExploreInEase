@@ -9,6 +9,30 @@ const mongoose = require('mongoose');
 const historicalTags = require('../../models/historicalTag');
 const historicalPlace = require('../../models/historicalPlace');
 
+
+
+
+const getAllItineraries2 = async () => {
+  return Itinerary.find();
+};
+
+// const getAllHistoricalPlaces = async () => {
+//   return HistoricalPlace.find();
+// };
+
+
+
+const setFlagToZeroForItinerary = async (_id) => {
+  return await Itinerary.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+const setFlagToZeroForActivity = async (_id) => {
+  return await Activity.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+
+
+
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
     .populate('category', 'categoryName') // Get categoryName from ActivityCategory
@@ -439,7 +463,10 @@ module.exports = {
   checkTourismGovernor,
   getTypeForTag,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  setFlagToZeroForItinerary,
+  setFlagToZeroForActivity,
+  getAllItineraries2
 };
 
 

@@ -2,6 +2,10 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import React, { Suspense } from 'react';
 import Signup from './SignUp/Signup';
+import ResponsiveDrawer from './Admin/AdminSideMenu';
+
+
+
   
 // Lazy load components
 const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
@@ -34,46 +38,58 @@ const SignIn = React.lazy(() => import("./Login/login"));
 const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"))
 const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"))
 
+
+
+const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
+
+
+
 const App = () => {
 
   return (
-    <Router>
-      {/* Wrapping Routes with Suspense to handle loading */}
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<GuestNavbar />} />
-          <Route path="/register" element={<Signup />} />
-          <Route path="/explore" element={<Filter />} />
-          <Route path="/viewProduct" element={<Product />} />
-          <Route path="/viewTouristProfile" element={<TouristProfile />} />
-          <Route path="/HistoricalPlaces" element={<HistoricalPlaces />} />
-          <Route path="/viewAllGovernorCreatedMuseum" element={<MuseumList />} />
-          <Route path="/viewHistoricalTags" element={<Tags />} />
-          <Route path="/viewSellerProfile" element={<SellerProfile />} />
-          <Route path="/viewAdvertiserProfile" element={<AdvertiserProfile />} />
-          <Route path="/viewAllCreatedActivities" element={<ActivityList />} />
-          <Route path="/viewTourGuideProfile" element={<TourGuideProfile />} />
-          <Route path="/viewCreatedItineraryList" element={<ItineraryList />} />
-          <Route path="/viewMyItinerary" element={<ItineraryForm />} />
-          <Route path="/CreateItinerary" element={<CreateItinerary />} />
-          <Route path="/viewActivityCategory" element={<ActivityCategory />} />
-          <Route path="/viewPreferencatags" element={<Preferencetags />} />
-          <Route path="/viewAddedUsers" element={<AddUser />} />
-          <Route path="/viewAllUserProfiles" element={<AdminUserProfiles />} />
-          <Route path="/TouristHomePage" element={<TouristNavbar />} />
-          <Route path="/SellerHomePage" element={<SellerNavbar />} />
-          <Route path="/TourGuideHomePage" element={<TourGuideNavbar />} />
-          <Route path="/AdminHomePage" element={<AdminNavbar />} />
-          <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} />
-          <Route path="/GovernorHomePage" element={<GovernorNavbar />} />
-          <Route path="/Activities" element={<Activity />} />
-          <Route path="/Login" element={<SignIn />} />
-          <Route path="/AdminHomePage" element={<AdminHomePage />} />
-          <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
-          <Route path="/AddUser" element={<AddUser />} />
-        </Routes>
-      </Suspense>
-    </Router>
+    <div>
+      <ResponsiveDrawer />
+      
+
+    </div>
+
+    // <Router>
+    //   {/* Wrapping Routes with Suspense to handle loading */}
+    //   <Suspense fallback={<div>Loading...</div>}>
+    //     <Routes>
+    //       <Route path="/" element={<GuestNavbar />} />
+    //       <Route path="/register" element={<Signup />} />
+    //       <Route path="/explore" element={<Filter />} />
+    //       <Route path="/viewProduct" element={<Product />} />
+    //       <Route path="/viewTouristProfile" element={<TouristProfile />} />
+    //       <Route path="/HistoricalPlaces" element={<HistoricalPlaces />} />
+    //       <Route path="/viewAllGovernorCreatedMuseum" element={<MuseumList />} />
+    //       <Route path="/viewHistoricalTags" element={<Tags />} />
+    //       <Route path="/viewSellerProfile" element={<SellerProfile />} />
+    //       <Route path="/viewAdvertiserProfile" element={<AdvertiserProfile />} />
+    //       <Route path="/viewAllCreatedActivities" element={<ActivityList />} />
+    //       <Route path="/viewTourGuideProfile" element={<TourGuideProfile />} />
+    //       <Route path="/viewCreatedItineraryList" element={<ItineraryList />} />
+    //       <Route path="/viewMyItinerary" element={<ItineraryForm />} />
+    //       <Route path="/CreateItinerary" element={<CreateItinerary />} />
+    //       <Route path="/viewActivityCategory" element={<ActivityCategory />} />
+    //       <Route path="/viewPreferencatags" element={<Preferencetags />} />
+    //       <Route path="/viewAddedUsers" element={<AddUser />} />
+    //       <Route path="/viewAllUserProfiles" element={<AdminUserProfiles />} />
+    //       <Route path="/TouristHomePage" element={<TouristNavbar />} />
+    //       <Route path="/SellerHomePage" element={<SellerNavbar />} />
+    //       <Route path="/TourGuideHomePage" element={<TourGuideNavbar />} />
+    //       <Route path="/AdminHomePage" element={<AdminNavbar />} />
+    //       <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} />
+    //       <Route path="/GovernorHomePage" element={<GovernorNavbar />} />
+    //       <Route path="/Activities" element={<Activity />} />
+    //       <Route path="/Login" element={<SignIn />} />
+    //       <Route path="/AdminHomePage" element={<AdminHomePage />} />
+    //       <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
+    //       <Route path="/AddUser" element={<AddUser />} />
+    //     </Routes>
+    //   </Suspense>
+    // </Router>
   );
 };
 

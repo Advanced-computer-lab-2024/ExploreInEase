@@ -3,6 +3,32 @@ const User = require('../../models/user');
 const HistoricalPlace = require('../../models/historicalPlace');
 
 
+
+const  getAllEvents=async()=> {
+  const activities = await eventRepository.getAllActivities();
+  const itineraries = await eventRepository.getAllItineraries2();
+  const historicalPlaces = await eventRepository.getAllHistoricalPlaces();
+
+  return {
+    activities,
+    itineraries,
+    historicalPlaces
+  };
+}
+
+
+const updateEventFlag = async ( eventType, eventID) => {
+  
+  if (eventType === 'itinerary') {
+      return await eventRepository.setFlagToZeroForItinerary(eventID);
+  } else if (eventType === 'activity') {
+      return await eventRepository.setFlagToZeroForActivity(eventID);
+  } else {
+      throw new Error('Invalid event type. Must be "itinerary" or "activity".');
+  }
+};
+
+
 const getUserEvents = async (_id, userType) => {
   const user = await User.findById(_id); // Find user by _id
   
@@ -550,6 +576,8 @@ module.exports = {
   getFilteredItineraries,
   getFilteredHistoricalPlaces,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  updateEventFlag,
+  getAllEvents
 };
 

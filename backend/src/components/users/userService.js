@@ -5,6 +5,23 @@ const getUserById = async (id) => {
     return await userRepository.findUserById(id);
 };
 
+
+
+
+
+const fetchUsersForDeletion = async () => {
+    try {
+        const { users, tourists } = await userRepository.getAllUsersForDeletion();
+        return { users, tourists };
+    } catch (error) {
+        throw new Error('Error fetching users for deletion');
+    }
+};
+
+
+
+
+
 const deleteUserByIdAndType = async (_id, userType) => {
     let result = false;
 
@@ -234,6 +251,7 @@ module.exports = {
   updateTourist,
   registerTourist,
   registerUser,
-  login
+  login,
+  fetchUsersForDeletion
 };
 

@@ -13,6 +13,15 @@ const findUserById = async (id) => {
     }
 };
 
+
+// Find all users with requestDeletion set to true
+const getAllUsersForDeletion = async () => {
+    const usersToDelete = await Users.find({ requestDeletion: true });
+    const touristsToDelete = await Tourist.find({ requestDeletion: true });
+    return { users: usersToDelete, tourists: touristsToDelete };
+};
+
+
 // Delete user from Users table by ID
 const deleteUserById = async (id) => {
     try {
@@ -194,5 +203,6 @@ module.exports = {
     saveTourist,
     checkUserExists,
     checkUserExistsByEmail,
-    login
+    login,
+    getAllUsersForDeletion 
 };

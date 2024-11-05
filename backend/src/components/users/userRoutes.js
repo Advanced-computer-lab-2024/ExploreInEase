@@ -12,6 +12,13 @@ let db;
 const setDBConnection = (database) => {
     db = database;
 };
+
+
+
+
+router.get('/deletionrequests', userController.getUsersForDeletion);
+
+
 /**
  * @swagger
  * /deleteUserByIdAndType:

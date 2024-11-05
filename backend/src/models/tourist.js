@@ -35,25 +35,28 @@ const TouristSchema = new Schema({
     dob: {
         type: Date,
         required: [true, 'Date of birth is required'],
-    },
-    
+    }, 
     profession: {
         type: String,
         required: [true,'Profession is required'],
         required: true
     },
     itineraryId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Itinerary', // Foreign key reference to Itinerary schema
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary', required: true }, // Reference to Itinerary schema
+        pricePaid: { type: Number, required: true, min: 0 } // Ensure price is not negative
     }],
     activityId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity', // Foreign key reference to Activity schema
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'Activity'}, // Reference to Activity schema
+        pricePaid: { type: Number,min: 0 }
     }],
     historicalplaceId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'HistoricalPlace', // Foreign key reference to HistoricalPlace schema
-    }],
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'HistoricalPlace' }, // Reference to HistoricalPlace schema
+        pricePaid: { type: Number,  min: 0 }
+    }],
+    transportationId: [{    
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'Transportation' }, // Reference to Transportation schema
+        pricePaid: { type: Number,min: 0 }
+    }],
     bookmark: {
         type: String, // You can change this to a specific type based on the data you expect
         default: ''
@@ -76,11 +79,6 @@ const TouristSchema = new Schema({
         default: 0,
         min: 0 // Ensures points cannot go below zero
     },
-    redeemedPoints: {
-        type: Number,
-        default: 0,
-        min: 0 // Ensures points cannot go below zero
-    },
     wishlists: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product', // Assuming you have a Product schema for products in the wishlist
@@ -90,15 +88,20 @@ const TouristSchema = new Schema({
         default: 0, // Starting wallet balance
         min: 0 // Ensures wallet balance cannot be negative
     },
+    requestDeletion: {
+        type: Boolean,
+        default: false
+    },
+    redeemedPoints: {
+        type: Number,
+        default: 0,
+        min: 0 // Ensures points cannot go below zero
+    },
     archived: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         default: null
-    }],
-    requestDeletion: {
-        type: Boolean,
-        default: false
-    },
+    }]    
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"

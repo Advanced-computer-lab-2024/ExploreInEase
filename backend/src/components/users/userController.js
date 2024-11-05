@@ -2,12 +2,33 @@ const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 
+
+
+
+
+// Controller to handle request for users with requestDeletion set to true
+const getUsersForDeletion = async (req, res) => {
+    try {
+        const result = await userService.fetchUsersForDeletion();
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
 // Delete user by _id and userType, ensuring self-id check
 const deleteUserByIdAndType = async (req, res) => {
     const { _id, userType, selfId } = req.body;
     
     console.log(req.body);
     // Validation
+
+    console.log(_id);
+    console.log(userType);
+    console.log(selfId);
+
     if (!_id || !userType || !selfId) {
         console.log("here");
         return res.status(400).json({ error: 'Missing parameters' });
@@ -403,5 +424,6 @@ module.exports = {
   getTourist,
   updateTourist,
   registerUser,
-  login
+  login,
+    getUsersForDeletion
 };

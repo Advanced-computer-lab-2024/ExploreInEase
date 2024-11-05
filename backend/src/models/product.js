@@ -5,9 +5,6 @@ const { Schema } = mongoose;
 const ProductsSchema = new Schema({
     productId: {
         type: String,
-        required: [true, 'Product ID is required'],
-        unique: true,              // Ensures each product has a unique ID
-        trim: true
     },
     picture: {
         type: String,              // URL or path to the product image
@@ -33,6 +30,14 @@ const ProductsSchema = new Schema({
         max: 5,
         default: 0                 // Default rating
     },
+    ratingSum: {
+        type: Number,
+        default: 0,
+      },
+      ratingCount: {
+        type: Number,
+        default: 0,
+      },
     reviews: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -43,12 +48,6 @@ const ProductsSchema = new Schema({
             type: String,
             required: [true, 'Review comment is required'],
             minlength: 1
-        },
-        rating: {
-            type: Number,
-            min: 0,
-            max: 5,
-            required: true
         },
         createdAt: {
             type: Date,
