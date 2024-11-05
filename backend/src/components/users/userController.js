@@ -110,16 +110,16 @@ const acceptTerms = async (req, res) => {
 
 
 const requestDeletion = async (req, res) => {
-    const { _id, type } = req.body;
+    const { id, type } = req.body;
 
-    // Check if username and type are provided
-    if (!_id || !type) {
+    
+    if (!id || !type) {
         return res.status(400).json({ message: "ID and type are required." });
     }
 
     try {
         
-        const result = await userService.requestDeletion(_id, type);
+        const result = await userService.requestDeletion(id, type);
        
         if (!result) {
             return res.status(404).json({ message: "User not found." });

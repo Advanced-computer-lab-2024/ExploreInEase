@@ -109,51 +109,45 @@ const updateTermsAndConditions = async (_id, type) => {
 };
 
 //tested alllll
-const checkTouristDeletionCriteria = async (_id) => { 
-    const tourist = await Tourist.findById(_id)
-        .populate('itineraryId')
-        .populate('activityId')
-        
+const checkTouristDeletionCriteria = async (id) => {
+    const tourist = await Tourist.findById(id)
+        .populate('itineraryId.id') 
+        .populate('activityId.id'); 
 
     if (!tourist) return false;
 
     const now = new Date();
 
-    // Check itinerary dates for the tourist
-    for (const itinerary of tourist.itineraryId) {
-        if (itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
-            return false; // Future date found, reject deletion
-        }
-    }
-
     
-     // Check if any activity has a future date
-     for (const activity of tourist.activityId) {
-        if (new Date(activity.date) > now) {
-            return false; // Active activity found, reject deletion
+    for (const itineraryObj of tourist.itineraryId) {
+        const itinerary = itineraryObj.id;
+        if (itinerary && itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
+            return false; 
         }
     }
 
-    return true; // All conditions met
+
+    for (const activityObj of tourist.activityId) {
+        const activity = activityObj.id; 
+        if (activity && new Date(activity.date) > now) {
+            return false; 
+        }
+    }
+    return true; 
 };
 
 
 
 const checkTourGuideItineraryDates = async (tourGuideId) => {
     const now = new Date();
-
-    // Fetch itineraries created by the tour guide
     const itineraries = await Itinerary.find({ created_by: tourGuideId });
 
-    // Check each itinerary's dateTimeAvailable to see if any dates are in the future
-    for (const itinerary of itineraries) {
-        // Iterate through each date in dateTimeAvailable array
+    for (const itinerary of itineraries) {        
         if (itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
-            return false; // Future date found, reject deletion
+            return false; 
         }
     }
-
-    return true; // All dates are in the past, deletion can proceed
+    return true; 
 };
 
 
@@ -170,28 +164,27 @@ const checkSellerProductStatus = async (sellerId) => {
 const checkAdvertiserActivityStatus = async (advertiserId) => {
     const now = new Date();
 
-    // Find activities created by the advertiser with a future date
     const futureActivities = await Activity.find({ 
         created_by: advertiserId, 
-        date: { $gt: now } // Filter for future dates
+        date: { $gt: now } 
     });
 
-    return futureActivities.length === 0; // Return true if no future-dated activities
+    return futureActivities.length === 0; 
 };
 
 
 
 
-// Generic update function to set requestDeletion to true
-const updateRequestDeletion = async (_id, type) => {
+
+const updateRequestDeletion = async (id, type) => {
     const Model = type === 'tourist' ? Tourist : Users;
-    const result = await Model.findByIdAndUpdate(_id, { requestDeletion: true }, { new: true });
+    const result = await Model.findByIdAndUpdate(id, { requestDeletion: true }, { new: true });
     return result;
 };
 
 
 
-// Find all users with requestDeletion set to true
+
 const getAllUsersForDeletion = async () => {
     const usersToDelete = await Users.find({ requestDeletion: true });
     const touristsToDelete = await Tourist.find({ requestDeletion: true });

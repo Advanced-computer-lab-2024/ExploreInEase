@@ -58,21 +58,21 @@ const acceptTerms = async (_id, type) => {
     return await userRepository.updateTermsAndConditions(_id, type);
 };
 
-const requestDeletion = async (_id, type) => {
+const requestDeletion = async (id, type) => {
     let canDelete = false;
 
     if (type === 'tourist') {
         // Check conditions for tourist
-        canDelete = await userRepository.checkTouristDeletionCriteria(_id);
+        canDelete = await userRepository.checkTouristDeletionCriteria(id);
     } else if (type === 'tourGuide') {
         // Check conditions for tour guide in itinerary
-        canDelete = await userRepository.checkTourGuideItineraryDates(_id);
+        canDelete = await userRepository.checkTourGuideItineraryDates(id);
     } else if (type === 'seller') {
         // Check conditions for seller in product table
-        canDelete = await userRepository.checkSellerProductStatus(_id);
+        canDelete = await userRepository.checkSellerProductStatus(id);
     } else if (type === 'advertiser') {
         // Check conditions for advertiser in activity table
-        canDelete = await userRepository.checkAdvertiserActivityStatus(_id);
+        canDelete = await userRepository.checkAdvertiserActivityStatus(id);
     } else {
         throw new Error("Invalid user type");
     }
@@ -82,7 +82,7 @@ const requestDeletion = async (_id, type) => {
     }
 
     // Update requestDeletion in the respective table
-    const updateResult = await userRepository.updateRequestDeletion(_id, type);
+    const updateResult = await userRepository.updateRequestDeletion(id, type);
     return updateResult;
 };
 
