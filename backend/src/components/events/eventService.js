@@ -377,7 +377,17 @@ const bookTransportation = async (touristId, transportationId) => {
 };
 
 
-  
+const  getAllEvents=async()=> {
+  const activities = await eventRepository.getAllActivities();
+  const itineraries = await eventRepository.getAllItineraries();
+  const historicalPlaces = await eventRepository.getAllHistoricalPlaces();
+
+  return {
+    activities,
+    itineraries,
+    historicalPlaces
+  };
+}
 module.exports = {
   getUserEvents,
   createCategory,
@@ -401,6 +411,7 @@ module.exports = {
   bookedEvents,
   flightOffers,
   flightBooking,
-  bookingHotel
+  bookingHotel,
+  getAllEvents
 };
 

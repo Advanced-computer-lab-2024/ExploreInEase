@@ -309,4 +309,7 @@ router.get('/getTransportations', eventController.getTransportations);
 router.post('/bookTransportation', eventController.bookTransportation);
 
 
+
+router.get('/getAllEvents', eventController.getAllEvents);
+
 module.exports = router;

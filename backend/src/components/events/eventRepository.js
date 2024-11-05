@@ -534,6 +534,17 @@ const bookTransportation = async (touristId, transportationId) => {
   return { message: 'Transportation booked successfully', tourist };
 };
 
+const getAllActivities = async () => {
+  return Activity.find();
+};
+
+const getAllItineraries = async () => {
+  return Itinerary.find();
+};
+
+const getAllHistoricalPlaces = async () => {
+  return HistoricalPlace.find();
+};
 
 
 module.exports = {
@@ -559,7 +570,10 @@ module.exports = {
   bookingHotel,
   createTransportation,
   getTransportations,
-  bookTransportation
+  bookTransportation,
+  getAllActivities,
+  getAllItineraries,
+  getAllHistoricalPlaces
 
  
 };
