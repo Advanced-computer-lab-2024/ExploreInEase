@@ -38,7 +38,7 @@ cartSchema.index({ touristId: 1 });
 cartItemSchema.index({ productId: 1 });
 
 // Compile the Cart model
-const Cart = mongoose.model("Cart", cartSchema);
+const Cart = mongoose.models.Cart || mongoose.model("Cart", cartSchema);
 
 // Export the Cart model for use in other parts of the application
 module.exports = Cart;

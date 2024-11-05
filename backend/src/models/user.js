@@ -36,6 +36,19 @@ const UsersSchema = new Schema(
         );
       },
     },
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
+    ratingSum: {
+      type: Number,
+      default: 0,
+    },
+    ratingCount: {
+      type: Number,
+      default: 0,
+    },
     documents: {
       nationalId: {
         type: String,
@@ -81,20 +94,7 @@ const UsersSchema = new Schema(
     comment: {
       type: [String],
     },
-    rating: {
-      type: [Number],
-      min: 0,
-      max: 5,
-    },
-    founded: {
-      type: Number,
-    },
-    specialist: {
-      type: String,
-    },
-    noEmployees: {
-      type: Number,
-    },
+
     industry: {
       type: String,
     },
@@ -124,6 +124,23 @@ const UsersSchema = new Schema(
       },
     },
     termsAndConditions: {
+      type: Boolean,
+      default: false,
+    },
+    requestDeletion: {
+      type: Boolean,
+      default: false,
+    },
+    founded: {
+      type: Number,
+    },
+    specialist: {
+      type: String,
+    },
+    noEmployees: {
+      type: Number,
+    },
+    status: {
       type: Boolean,
       default: false,
     },

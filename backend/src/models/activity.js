@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Define the schema for the activity
@@ -24,7 +24,7 @@ const activitySchema = new Schema({
       longitude: {
         type: Number,
         required: true,
-      }
+      },
     },
     required: true,
   },
@@ -33,16 +33,16 @@ const activitySchema = new Schema({
     required: true,
   },
   category: {
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'ActivityCategory', 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ActivityCategory",
     required: true,
   },
   specialDiscounts: {
-    type: Number, 
+    type: Number,
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users',
+    ref: "Users",
     required: true,
   },
   flag: {
@@ -60,17 +60,27 @@ const activitySchema = new Schema({
     min: 0,
     max: 5,
   },
-  comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
-    text: { type: String, required: true },
-    date: { type: Date, default: Date.now }
-  }],
+  ratingSum: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
+  comments: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "Tourist" },
+      text: { type: String, required: true },
+      date: { type: Date, default: Date.now },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
-  }
+  },
 });
 
 // Create and export the model
-const Activity = mongoose.model('Activity', activitySchema);
+const Activity = mongoose.model("Activity", activitySchema);
 module.exports = Activity;

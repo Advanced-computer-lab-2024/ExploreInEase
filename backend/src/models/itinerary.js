@@ -1,21 +1,25 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Define the Itinerary schema
 const itinerarySchema = new Schema({
-  name:{
+  name: {
     type: String,
   },
-  activities: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Activity', // Referencing the Activity schema
-    required: true,
-  }],
-  preftag: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'PreferenceTags', // Referencing the Activity schema
-    required: true,
-  }],
+  activities: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Activity", // Referencing the Activity schema
+      required: true,
+    },
+  ],
+  preftag: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PreferenceTags", // Referencing the Activity schema
+      required: true,
+    },
+  ],
   locations: {
     type: [String], // An array of strings for location names
     required: true,
@@ -24,6 +28,7 @@ const itinerarySchema = new Schema({
     type: [String], // An array of strings representing the timeline for each activity
     required: true,
   },
+
   directions: {
     type: String, // Directions to follow during the itinerary
     required: true,
@@ -58,7 +63,7 @@ const itinerarySchema = new Schema({
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users', // Assuming 'User' is the creator of the itinerary
+    ref: "Users", // Assuming 'User' is the creator of the itinerary
     required: true,
   },
   flag: {
@@ -71,11 +76,21 @@ const itinerarySchema = new Schema({
     min: 0,
     max: 5, // Rating on a scale of 0 to 5
   },
-  comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' }, // Comments related to the itinerary
-    text: { type: String, required: true },
-    date: { type: Date, default: Date.now },
-  }],
+  ratingSum: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
+  comments: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "Tourist" }, // Comments related to the itinerary
+      text: { type: String, required: true },
+      date: { type: Date, default: Date.now },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -87,5 +102,5 @@ const itinerarySchema = new Schema({
 });
 
 // Create and export the model
-const Itinerary = mongoose.model('Itinerary', itinerarySchema);
+const Itinerary = mongoose.model("Itinerary", itinerarySchema);
 module.exports = Itinerary;
