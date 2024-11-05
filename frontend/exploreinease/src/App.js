@@ -36,9 +36,9 @@ const Booked=React.lazy(()=>import("./Tourist/booked"));
 const ProductPurchased= React.lazy(() => import("./Shared/Components/Product/PurchaseProduct"));
 const Transportion= React.lazy(() => import("./Advertier/transportation"));
 const BookTransportation= React.lazy(() => import("./Tourist/bookTransportation"));
-
+const BookHotel= React.lazy(() => import("./Tourist/hotels"));
+const BookFlight= React.lazy(() => import("./Tourist/flights"));
 const App = () => {
-
   return (
     <Router>
       {/* Wrapping Routes with Suspense to handle loading */}
@@ -78,7 +78,8 @@ const App = () => {
           <Route path="/ViewPurchasedProduct" element={<ProductPurchased/>} />
           <Route path="/transportion" element={<Transportion/>} />
           <Route path="/BookTransportation" element={<BookTransportation/>} />
-                    
+          <Route path="/BookHotel" element={<BookHotel/>} />
+          <Route path="/BookFlight" element={<BookFlight/>} />
         </Routes>
       </Suspense>
     </Router>

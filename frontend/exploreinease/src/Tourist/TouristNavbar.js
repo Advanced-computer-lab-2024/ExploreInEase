@@ -95,6 +95,12 @@ const TouristNavbar = () => {
           }
         }
       }
+      else if(title =="Book Hotels") {
+       navigate(`/BookHotel`);          
+      }
+      else if(title =="Book Flights") {
+        navigate(`/BookFlight`);          
+      }
       else if(title =="Book transportation") {
         // try {
         //   const options = {
@@ -163,6 +169,12 @@ const TouristNavbar = () => {
           <button 
           onClick={() => handleRegisterClick("View/Rate Purchased Product")}
           className="small-button">View/Rate Purchased Product</button>
+                     <button 
+          onClick={() => handleRegisterClick("Book Hotels")}
+          className="small-button">Book Hotels</button>
+                     <button 
+          onClick={() => handleRegisterClick("Book Flight")}
+          className="small-button">Book Flights</button>
            <button 
           onClick={() => handleRegisterClick("My Profile")}
           className="small-button">My Profile</button>
