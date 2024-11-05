@@ -1,6 +1,6 @@
 const checkoutService = require("../checkouts/checkoutService");
 
-const ProductStatusChange = async (req, res) => {
+const archiveOrUnarchiveProduct = async (req, res) => {
   try {
     const { requestorID } = req.query;
     const { productId } = req.params;
@@ -19,7 +19,7 @@ const ProductStatusChange = async (req, res) => {
       });
     }
     // Call the service to mark the complaint
-    const updatedProduct = await checkoutService.updateProductStatus(
+    const updatedProduct = await checkoutService.changeProductStatus(
       requestorID,
       productId,
       status
@@ -40,5 +40,5 @@ const ProductStatusChange = async (req, res) => {
 };
 
 module.exports = {
-  ProductStatusChange,
+  archiveOrUnarchiveProduct,
 };

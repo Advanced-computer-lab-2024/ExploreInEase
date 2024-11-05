@@ -9,6 +9,7 @@ const ProductsSchema = new Schema({
     unique: true, // Ensures each product has a unique ID
     trim: true,
   },
+
   picture: {
     type: String, // URL or path to the product image
     required: [true, "Picture is required"],
@@ -78,6 +79,40 @@ const ProductsSchema = new Schema({
     type: Boolean,
     default: true, // Indicates whether the product is active or inactive
   },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   status: {
     type: String,
