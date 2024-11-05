@@ -42,7 +42,7 @@ const ProductsSchema = new Schema({
     reviews: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Users',           // Assuming reviews are associated with Users
+            ref: 'Tourist',           // Assuming reviews are associated with Users
             required: true
         },
         comment: {
