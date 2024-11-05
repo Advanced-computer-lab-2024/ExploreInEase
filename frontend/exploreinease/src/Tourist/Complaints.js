@@ -1,75 +1,31 @@
 import React, { useState } from 'react';
 import {
     TextField,
-    Card,
-    CardContent,
-    Typography,
-    Grid,
-    Slider,
-    MenuItem,
-    Select,
-    InputLabel,
-    FormControl,
     Button,
-    Box,
-    Paper,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    List,
-    ListItem,
-    ListItemText, Divider,
 } from '@mui/material';
+import { useLocation } from 'react-router-dom';
+import NetworkService from '../NetworkService';
 
 const Complaints = () => {
-    const [isComplaintModalOpen, setIsComplaintModalOpen] = useState(false);
-    const [errors, setErrors] = useState({});
-    const [openCreate, setOpenCreate] = useState(false);
 
-    const [complaintData, setComplaintData] = useState({
+    const location = useLocation();
+  const { User } = location.state || {};
+  console.log("admin",User);
+  //const userId = User._id;
+    // Separate state for form data and complaints list
+    const [formData, setFormData] = useState({
         title: '',
         body: '',
         date: new Date().toISOString().split('T')[0]
     });
-    const handleClose = () => {
-        setOpenCreate(false);
-        setComplaintData({
-            title: '',
-            body: '',
-        });
-        setErrors({});
-    };
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setComplaintData({ ...complaintData, [name]: value });
-    };
-    const handleSubmitCreate = () => {
-        console.log(complaintData);
-
-        // if (validateForm()) {
-        const newComplaint = {
-            title: complaintData.title,
-            body: complaintData.body,
-        };
-        //   const option = {
-        //     apiPath: `/addProduct/${userId}`,
-        //     urlParam: userId,
-        //     body: newComplaint
-        //   }
-        //   const response = NetworkService.post(option);
-        //   console.log(response);
-        // setComplaintData((prev) => [...prev, newComplaint]);
-        //   console.log(products);
-
-        //   setNextId((prev) => prev + 1);
-        handleClose();
-
-    };
-
-    // Sample complaints data - in real app, this would come from props or context
-    const sampleComplaints = [
+    
+    // State for list of complaints
+    const [complaints, setComplaints] = useState([
         {
             title: "Sample Complaint 1",
             body: "This is a sample complaint body text.",
@@ -80,17 +36,52 @@ const Complaints = () => {
             body: "Another sample complaint description.",
             date: "2024-03-15"
         }
-    ];
+    ]);
 
-    const handleComplaintSubmit = () => {
-        // Handle submission logic here
-        console.log('Submitting complaint:', complaintData);
+    const [openCreate, setOpenCreate] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const handleClose = () => {
         setOpenCreate(false);
-        setComplaintData({
-            title: complaintData.title,
-            body: complaintData.body,
+        setFormData({
+            title: '',
+            body: '',
             date: new Date().toISOString().split('T')[0]
         });
+        setErrors({});
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleComplaintSubmit = () => {
+        // Validate form data
+        const newErrors = {};
+        if (!formData.title) newErrors.title = 'Title is required';
+        if (!formData.body) newErrors.body = 'Description is required';
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+        // const option = {
+        //     apiPath: `/fileComplaint`,
+        //     urlParam: userId,
+        //     body: newComplaint
+        //   }
+        //   const response = NetworkService.post(option);
+        //   console.log(response);
+
+        // Add new complaint to the list
+        const newComplaint = {
+            ...formData,
+            date: new Date().toISOString().split('T')[0]
+        };
+        
+        setComplaints(prevComplaints => [...prevComplaints, newComplaint]);
+        handleClose();
     };
 
     return (
@@ -113,7 +104,7 @@ const Complaints = () => {
             </div>
 
             <div style={{ display: 'grid', gap: '16px' }}>
-                {sampleComplaints.map((complaint, index) => (
+                {complaints.map((complaint, index) => (
                     <div key={index} style={{
                         backgroundColor: 'white',
                         borderRadius: '8px',
@@ -132,7 +123,7 @@ const Complaints = () => {
                     </div>
                 ))}
 
-                {sampleComplaints.length === 0 && (
+                {complaints.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '32px', color: '#666' }}>
                         No complaints filed yet.
                     </div>
@@ -150,32 +141,32 @@ const Complaints = () => {
                         margin="dense"
                         label="Title"
                         name="title"
-                        value={complaintData.title || ''}
+                        value={formData.title}
                         onChange={handleInputChange}
                         fullWidth
-                        error={!!errors.name}
-                        helperText={errors.name}
+                        error={!!errors.title}
+                        helperText={errors.title}
                     />
 
                     <TextField
                         margin="dense"
                         label="Problem"
                         name="body"
-                        value={complaintData.body || ''}
+                        value={formData.body}
                         onChange={handleInputChange}
                         fullWidth
-                        error={!!errors.description}
-                        helperText={errors.description}
+                        multiline
+                        rows={4}
+                        error={!!errors.body}
+                        helperText={errors.body}
                     />
-                    
-
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
                         Cancel
                     </Button>
                     <Button onClick={handleComplaintSubmit} color="primary">
-                        Confirm
+                        Submit
                     </Button>
                 </DialogActions>
             </Dialog>
