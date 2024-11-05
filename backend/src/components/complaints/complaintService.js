@@ -19,22 +19,25 @@ const createComplaint = async (complaintData) => {
 
 //re73
 const ViewComplain = async (adminId) => {
-  // Validate if the user is an admin
   const admin = await User.findById(adminId);
   if (!admin || admin.type !== "admin") {
     throw new Error("Access denied. Admins only.");
   }
 
-  const complaints = await complaintRepository.getAllComplaints();
-  return complaints.map((complaint) => ({
-    _id: complaint._id,
-    touristId: complaint.touristId,
-    touristName: complaint.touristId.username,
-    problem: complaint.problem,
-    dateOfComplaint: complaint.dateOfComplaint,
-    status: complaint.status,
-    reply: complaint.reply,
-  }));
+  try {
+    const complaints = await complaintRepository.getAllComplaints();
+
+    return complaints.map((complaint) => ({
+      _id: complaint._id,
+      problem: complaint.problem,
+      dateOfComplaint: complaint.dateOfComplaint,
+      status: complaint.status,
+      reply: complaint.reply,
+    }));
+  } catch (error) {
+    console.error("Error in ViewComplain:", error);
+    throw new Error("Failed to retrieve complaints.");
+  }
 };
 
 const getComplaintDetails = async (adminId, complaintId) => {
@@ -45,13 +48,7 @@ const getComplaintDetails = async (adminId, complaintId) => {
   }
   const complaint = await complaintRepository.getSelectedComplaint(complaintId);
   return {
-    _id: complaint._id,
-    touristId: complaint.touristId,
-    touristName: complaint.touristId.username,
-    problem: complaint.problem,
-    dateOfComplaint: complaint.dateOfComplaint,
-    status: complaint.status,
-    reply: complaint.reply,
+    complaint
   };
 };
 

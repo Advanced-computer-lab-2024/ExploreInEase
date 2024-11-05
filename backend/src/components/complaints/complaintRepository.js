@@ -9,11 +9,10 @@ const saveComplaint = async (complaintData) => {
   return await complaint.save();
 };
 
-// Get all complaints
 const getAllComplaints = async () => {
   try {
     const complaints = await Complaint.find()
-      .populate("touristId", "username email") // Populate tourist details
+      .populate("touristId", "username email") // Populate tourist details with specific fields
       .sort({ dateOfComplaint: -1 }); // Sort by date in descending order
 
     return complaints;
@@ -46,52 +45,50 @@ const getSelectedComplaint = async (complaintId) => {
   }
 };
 
-
 //76
 
 const updateStatus = async (complaintId, status) => {
-    const complaint = await Complaint.findByIdAndUpdate(
-      complaintId,
-      { status },
-      { new: true } // Return the updated document
-    ).populate("touristId", "username email"); // Optionally populate tourist details
-  
-    if (!complaint) {
-      throw new Error("Complaint not found.");
-    }
-  
-    return complaint;
-  };
+  const complaint = await Complaint.findByIdAndUpdate(
+    complaintId,
+    { status },
+    { new: true } // Return the updated document
+  ).populate("touristId", "username email"); // Optionally populate tourist details
 
+  if (!complaint) {
+    throw new Error("Complaint not found.");
+  }
+
+  return complaint;
+};
 
 //77
 const addReply = async (complaintId, reply) => {
-    const complaint = await Complaint.findByIdAndUpdate(
-      complaintId,
-      { reply },
-      { new: true }
-    ).populate("touristId", "username email"); 
-  
-    if (!complaint) {
-      throw new Error("Complaint not found.");
-    }
-  
-    return complaint;
-  };
+  const complaint = await Complaint.findByIdAndUpdate(
+    complaintId,
+    { reply },
+    { new: true }
+  ).populate("touristId", "username email");
 
-  const findComplaintsByTourist = async (touristId) => {
-    const complaints = await Complaint.find({ touristId }).populate(
-      "touristId",
-      "username email"
-    );
-    return complaints;
-  };
-  
+  if (!complaint) {
+    throw new Error("Complaint not found.");
+  }
+
+  return complaint;
+};
+
+const findComplaintsByTourist = async (touristId) => {
+  const complaints = await Complaint.find({ touristId }).populate(
+    "touristId",
+    "username email"
+  );
+  return complaints;
+};
+
 module.exports = {
   saveComplaint,
   getAllComplaints,
   getSelectedComplaint,
   updateStatus,
   addReply,
-  findComplaintsByTourist
+  findComplaintsByTourist,
 };
