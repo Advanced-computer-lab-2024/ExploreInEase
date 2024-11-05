@@ -1,6 +1,7 @@
 import React, { useState , useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../../../NetworkService';
+import axios from 'axios';
 import {
   TextField,
   Card,
@@ -25,7 +26,7 @@ import {
   ListItemText,Divider,
 } from '@mui/material';
 
-const ProductCard = () => {
+const ProductCard = ({userType,currency}) => {
   const location = useLocation();
   const { Product,Type, User } = location.state || {};
   console.log(User);
@@ -44,6 +45,8 @@ const ProductCard = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openReviews, setOpenReviews] = useState(false);
+  const [takenQuantity, setTakenQuantity] = useState(0);
+  const [sales, setSales] = useState(0);
   const [productData, setProductData] = useState({
     productId: null,
     name: '',
@@ -52,6 +55,8 @@ const ProductCard = () => {
     sellerType: User.sellerType,
     ratings: 0,
     originalQuantity: '',
+    takenQuantity: '',
+    sales: '',
     reviews: [],
     picture: '',
   });
@@ -73,6 +78,30 @@ const ProductCard = () => {
       // console.log("No Product data received or it's not an array");
     }
   }, [Product]);
+
+  useEffect(() => {
+    // Fetch data from your API
+    const fetchProductData = async () => {
+      try {
+        const response = await axios.get(`/availableQuantityAndSales`, {
+          userType,
+          productId,
+          currency
+        }); // Replace with your API endpoint
+        
+        // setProductData(response.data);
+
+        // Assuming the API returns 'takenQuantity' and 'sales' values for the product
+        const { takenQuantity, sales } = response.data;
+        setTakenQuantity(takenQuantity);
+        setSales(sales);
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+      }
+    };
+
+    fetchProductData();
+  }, [productId, userType, currency]);
 
   useEffect(() => {
     // console.log("Current products state:", products);
@@ -122,6 +151,8 @@ const ProductCard = () => {
       sellerType: User.sellerType,
       ratings: 0,
       originalQuantity: '',
+      takenQuantity: '',
+      sales:'',
       picture:'',
       reviews: [],
     });
@@ -197,6 +228,7 @@ const handleSubmitUpdate = async () => {
       price: parseFloat(productData.price),
       description: productData.description,
       originalQuantity: productData.originalQuantity,
+      takenQuantity: productData.takenQuantity
     };
     
     const option = {
@@ -304,7 +336,9 @@ const handleSubmitUpdate = async () => {
                   <Typography>Price: ${product.price}</Typography>
                   <Typography>Ratings: {product.ratings}</Typography>
                   <Typography>Description: {product.description}</Typography>
-                  <Typography>Quantity: {product.originalQuantity}</Typography>
+                  <Typography>originalQuantity: {product.originalQuantity}</Typography>
+                  <Typography>takenQuantity: {takenQuantity}</Typography>
+                  <Typography>Sales: {sales} </Typography>
                   <Typography>Seller: {product.sellerType}</Typography>
                     <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
@@ -438,6 +472,19 @@ const handleSubmitUpdate = async () => {
             fullWidth
             error={!!errors.originalQuantity}
             helperText={errors.originalQuantity}
+          />
+          <TextField
+            margin="dense"
+
+            label="takenQuantity"
+            name="takenQuantity"
+            type="number"
+
+            value={productData.takenQuantity || ''}
+            onChange={handleInputChange}
+            fullWidth
+            error={!!errors.takenQuantity}
+            helperText={errors.takenQuantity}
           />
         </DialogContent>
         <DialogActions>
