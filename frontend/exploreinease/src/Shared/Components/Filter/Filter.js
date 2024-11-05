@@ -32,10 +32,9 @@ const roleFields = {
 
 const Filter = () => {
   const location = useLocation();
-  const { events } = location.state || {};
+  const { events , User} = location.state || {};
   const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
-  console.log(events);
-  console.log(itemList);
+  console.log(User);
 
   const [filters, setFilters] = useState({
     budget: '',

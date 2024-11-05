@@ -803,6 +803,19 @@ const getHistoricalTagDetails = async (req, res) => {
       .json({ error: "An error occurred", details: error.message });
   }
 }
+
+const sendEventEmail = async (req, res) => {
+  const { touristId, receiverEmail } = req.params;
+  const eventDetails = req.body;
+
+  try {
+      const result = await eventService.sendEventEmail(touristId, receiverEmail, eventDetails);
+      res.status(200).json(result);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getHistoricalTagDetails,
   getUserEvents,
@@ -835,6 +848,7 @@ module.exports = {
   getAllItineraries,
   getAllActivities,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  sendEventEmail
   };
   

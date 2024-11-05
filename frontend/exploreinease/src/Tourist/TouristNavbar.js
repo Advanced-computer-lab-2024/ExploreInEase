@@ -14,6 +14,7 @@ const TouristNavbar = () => {
     const initialUsername = User?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=User?._id;
+     console.log(User);
      
     async function handleRegisterClick(title) {
         if (title == "View Products") {
@@ -65,7 +66,7 @@ const TouristNavbar = () => {
             setSuccess(response.message); // Set success message
             console.log(response);
             const events=response;
-            navigate(`/explore`,{state:{events}});          
+            navigate(`/explore`,{state:{events,User:User}});          
           } catch (err) {
             if (err.response) {
                 console.log(err.message);

@@ -2,7 +2,22 @@ import React, { useState } from 'react';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import MailIcon from '@mui/icons-material/Mail';
 import LinkIcon from '@mui/icons-material/Link';
+import { useLocation } from 'react-router-dom';
+import NetworkService from '../../../NetworkService';
 const TravelItemsShareDialog = ({ item, onClose }) => {
+
+  const location = useLocation();
+  const { User } = location.state || {};
+  console.log("admin",User);
+  const userId = User._id;
+  console.log(User.username);
+  const price = item.budget;
+  console.log(item);
+  const item2 = {
+    name: item.name,
+    budget: item.budget,
+    date: item.date
+  };
   const [shareMethod, setShareMethod] = useState('email');
   const [emailAddress, setEmailAddress] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
@@ -18,9 +33,17 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
   const handleShareByEmail = () => {
 
     // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
+    const option = {
+      apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
+      urlParam: userId,email: emailAddress,
+      body: item2
+    }
+    const response = NetworkService.post(option);
+    console.log(response);
+    
 
     // Implement email sharing logic here
-    console.log('Sharing by email:', emailAddress, item);
+    // console.log('Sharing by email:', emailAddress, item);
     onClose();
   };
 
