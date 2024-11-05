@@ -5,9 +5,6 @@ const { Schema } = mongoose;
 const ProductsSchema = new Schema({
     productId: {
         type: String,
-        required: [true, 'Product ID is required'],
-        unique: true,              // Ensures each product has a unique ID
-        trim: true
     },
     picture: {
         type: String,              // URL or path to the product image

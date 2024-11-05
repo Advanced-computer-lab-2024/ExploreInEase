@@ -62,7 +62,7 @@ const HomePage = () => {
         if (file) {
             const formData = new FormData();
             formData.append('image', file);
-
+            console.log('Uploading image:', formData);
             try {
                 const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
                     headers: {

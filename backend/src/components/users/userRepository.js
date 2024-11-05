@@ -214,6 +214,7 @@ const uploadImage = async (userId, fileName, fileBuffer) => {
 const updateUserProfilePicture = async (userId, fileName) => {
     try {
         const user = await findUserById(userId);
+        console.log("User:",  user.rating);
         if (!user) {
             throw new Error('User not found');
         }

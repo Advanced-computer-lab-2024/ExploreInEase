@@ -1,5 +1,7 @@
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const Product = require('../../models/product'); 
+const path = require('path');
+
 
 const addProduct = async (productData) => {
     return await checkoutRepository.addProduct(productData);
@@ -50,7 +52,28 @@ const searchProductByName = async (name) => {
     return await checkoutRepository.searchByName(name);
 };
 
+const uploadImage = async (productId, file) => {
+    console.log('Service');
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+        throw new Error('Only image files are allowed (jpg, jpeg, png).');
+    }
+
+    const fileName = `${productId}-${Date.now()}${fileExtension}`;
+    const fileBuffer = file.buffer;
+
+    await checkoutRepository.uploadImage(productId, fileName, fileBuffer); 
+    const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+    await checkoutRepository.updateProductImage(productId, fileName);
+
+    return { message: 'Image uploaded successfully', imageUrl: imageUrl };
+};
+
 module.exports = {
+    uploadImage,
     addProduct,
     getAvailableProducts,
     getProductsByPriceRange,

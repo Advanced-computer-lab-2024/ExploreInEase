@@ -1,6 +1,8 @@
 const Product = require('../../models/product'); 
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const path = require('path');
+const fs = require('fs');
 
 const addProduct = async (productData) => {
     try {
@@ -62,8 +64,8 @@ const getProductsByPriceRange = async (minPrice, maxPrice) => {
 
 const getProductById = async (productId) => {
     try {
-        console.log("id: ", productId)
         const product = await Product.findOne({ _id: productId })
+        console.log("product: ", product)
         return product;
     } catch (error) {
         throw new Error(`Error fetching product by ID: ${error.message}`);
@@ -117,7 +119,44 @@ const getType = async (id) => {
     }
 };
 
+const updateProductImage = async (productId, fileName) => {
+    try {
+        const product = await Product.findById(productId);
+        if (!product) {
+            throw new Error('product not found');
+        }
+        product.picture = fileName;
+        await product.save();
+    } catch (error) {
+        throw new Error(`Error updating profile picture: ${error.message}`);
+    }
+};
+
+
+
+const uploadImage = async (productId, fileName, fileBuffer) => {
+    try {
+        const imagesDir = path.join(__dirname, '../images');
+        
+        // Check if the 'images' directory exists, and create it if it doesn't
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
+        const filePath = path.join(imagesDir, fileName);
+        
+        // Write the file to the filesystem
+        await fs.promises.writeFile(filePath, fileBuffer);
+
+        return { message: 'Image uploaded successfully', fileName: fileName };
+    } catch (error) {
+        throw new Error(`Error uploading image: ${error.message}`);
+    }
+};
+
 module.exports = {
+    uploadImage,
+    updateProductImage,
     addProduct,
     getAllAvailableProducts,
     getProductsByPriceRange,

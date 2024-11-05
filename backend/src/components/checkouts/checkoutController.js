@@ -1,16 +1,16 @@
 const checkoutService = require('../checkouts/checkoutService');
 const checkoutRepository = require('../checkouts/checkoutRepository');
+const userRepository = require('../users/userRepository');
 const addProduct = async (req, res) => {
-    const { productId, price, description, originalQuantity, name } = req.body;
+    const { price, description, originalQuantity, name } = req.body;
     console.log(req.body)
     const {userId} = req.params;
 
     if (!price || !originalQuantity || !name || !description) {
-        return res.status(400).json({ message: "ProductId, price, picture, original quantity, description, sellerId and name are required." });
+        return res.status(400).json({ message: "Products price, picture, original quantity, description, sellerId and name are required." });
     }
 
     const productData = {
-        productId,
         sellerId: userId,
         price,
         description,
@@ -146,9 +146,38 @@ const searchProductByName = async (req, res) => {
     }
 };
 
+const uploadImage = async (req, res) => {
+    const { productId, userId } = req.params;
+    console.log('Controller');
+    console.log(req);
+    const file = req.file;
 
+    if (!productId) {
+        return res.status(400).json({ message: 'Missing productId' });
+    }
+
+    const product = await checkoutRepository.getProductById(productId);
+    if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+    }
+
+    try {
+        if (!file) {
+            return res.status(400).send('No file uploaded.');
+        }
+
+        // Call service to upload image
+        const result = await checkoutService.uploadImage(productId, file);
+        return res.status(200).send(result);
+
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return res.status(500).send({ error: 'Error uploading image.' });
+    }
+};
 
 module.exports = {
+    uploadImage,
     addProduct,
     getAvailableProducts,
     getProductsByPriceRange,
