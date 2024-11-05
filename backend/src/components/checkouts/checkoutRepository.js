@@ -15,7 +15,8 @@ const getAllAvailableProducts = async () => {
     try {
         // Step 1: Find all available products where takenQuantity is less than originalQuantity
         const availableProducts = await Product.find({
-            $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
+            $expr: { $lt: ["$takenQuantity", "$originalQuantity"] },
+            isActive: true
         })
         .select('picture price description ratings reviews name originalQuantity sellerId') // Include sellerId for population
         .populate({
@@ -39,7 +40,7 @@ const getAllAvailableProducts = async () => {
         return productsWithSellerType;
     } catch (error) {
         throw new Error(`Error retrieving product: ${error.message}`);
-    }
+    }
 };
 
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
