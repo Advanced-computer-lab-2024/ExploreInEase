@@ -5,6 +5,7 @@ import axios from 'axios'; // Make sure to import axios
 import NetworkService from '../NetworkService';
 import './Signup.css';
 
+
 const GuideAdvertiserSignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -81,7 +82,14 @@ const GuideAdvertiserSignUp = () => {
 
         // Step 5: Success handling
         setSuccess('Files uploaded successfully');
-        navigate(`/${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}HomePage`, { state: { User: registerResponse.User } });
+        if (formData.type === 'advertiser' || 'tourGuide' || 'seller'){
+          console.log("Navigating to Terms and Conditions page");
+          navigate('/TermsAcceptance', { state: { userId: userId, userType: formData.type } });
+
+
+        }
+        else
+        navigate(`/Login`);
     } catch (err) {
         if (err.response) {
             setError(err.response.data.message);

@@ -4,6 +4,7 @@ import React, { Suspense } from 'react';
 import Signup from './SignUp/Signup';
   
 // Lazy load components
+const TermsAcceptance = React.lazy(() => import('./TermsAcceptance'));
 const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
 const TourGuideProfile = React.lazy(() => import('./Shared/Components/TourGuideProfile/TourGuideProfile'));
 const AdvertiserProfile = React.lazy(() => import('./Shared/Components/advertiserProfile/advertiserProfile'));
@@ -31,8 +32,10 @@ const TourGuideNavbar = React.lazy(() => import("./TourGuide/TourGuideNavbar"));
 const Product = React.lazy(() => import("./Shared/Components/Product/Product"));
 const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar"));
 const SignIn = React.lazy(() => import("./Login/login"));
-const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"))
-const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"))
+const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"));
+const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"));
+
+
 
 const App = () => {
 
@@ -43,6 +46,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<GuestNavbar />} />
           <Route path="/register" element={<Signup />} />
+          <Route path="/TermsAcceptance" element={<TermsAcceptance />} />
           <Route path="/explore" element={<Filter />} />
           <Route path="/viewProduct" element={<Product />} />
           <Route path="/viewTouristProfile" element={<TouristProfile />} />
@@ -61,16 +65,18 @@ const App = () => {
           <Route path="/viewAddedUsers" element={<AddUser />} />
           <Route path="/viewAllUserProfiles" element={<AdminUserProfiles />} />
           <Route path="/TouristHomePage" element={<TouristNavbar />} />
-          <Route path="/SellerHomePage" element={<SellerNavbar />} />
-          <Route path="/TourGuideHomePage" element={<TourGuideNavbar />} />
+          <Route path="/SellerHomePage" element={<SellerNavbar />} />    //dee
+          <Route path="/TourGuideHomePage" element={<TourGuideNavbar />} /> //dee
           <Route path="/AdminHomePage" element={<AdminNavbar />} />
-          <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} />
+          <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} /> //dee
           <Route path="/GovernorHomePage" element={<GovernorNavbar />} />
           <Route path="/Activities" element={<Activity />} />
           <Route path="/Login" element={<SignIn />} />
           <Route path="/AdminHomePage" element={<AdminHomePage />} />
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
+         
+          
         </Routes>
       </Suspense>
     </Router>

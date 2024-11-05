@@ -2,6 +2,8 @@ import React,{ useState } from 'react';
 import HomePageLogo from '../HomePageLogo.png';
 import '../Guest/GuestHP.css';
 import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
@@ -15,6 +17,16 @@ const HomePage = () => {
     const initialUsername = User?.username;
     const userId=User._id;
     const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+    const userType = User.type;
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleAvatarClick = (event) => {
+      setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+      setAnchorEl(null);
+  };
+
     async function handleClick(title) {
        if (title=="My Profile"){
         try {
@@ -58,6 +70,25 @@ const HomePage = () => {
         }
       }
       };
+      const handleDeleteAccount = async () => {
+        handleClose();
+        try {
+            const options = {
+                apiPath: '/requestDeletion',
+                method: 'PUT',
+                data: { userId, userType },
+            };
+            const response = await NetworkService.request(options);
+
+            if (response.success) {
+                setSuccess("Account deletion requested successfully.");
+            } else {
+                setError(response.message || "Account deletion request failed.");
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+        }
+    };
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -91,22 +122,40 @@ const HomePage = () => {
         </div>
         </div>
         <div className="avatar-container">
-        <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
+                    <Avatar
+                        sx={{
+                            bgcolor: 'darkblue',
+                            color: 'white',
+                            width: 56,
+                            height: 56,
+                            fontSize: 24,
+                            cursor: 'pointer',
+                            marginLeft: 2,
+                        }}
+                        onClick={handleAvatarClick}
+                    >
+                        {firstInitial}
+                    </Avatar>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        anchorOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                    >
+                        <MenuItem onClick={handleDeleteAccount}>Delete My Account</MenuItem>
+                    </Menu>
+                </div>
+            </nav>
+            {success && <p className="success-message">{success}</p>}
+            {error && <p className="error-message">{error}</p>}
         </div>
-      </nav>
-      {/* Other homepage content goes here */}
-    </div>
   );
 };
 
