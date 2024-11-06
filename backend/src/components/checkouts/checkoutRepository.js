@@ -128,6 +128,146 @@ const findUserById = async (_id) => {
         return false;
     }
 };
+
+const isPurchased = async (TouristId, ProductId) => {
+    try {
+        const order = await Order.findOne({ 
+            touristId: TouristId, 
+            productIds: { $in: [ProductId]} // Checks if ProductId exists in the productIds array
+        });
+
+        if (!order) {
+            throw new Error("No such product exists or the tourist did not order this product");
+        }
+        else{
+            if(order.status == "delivered"){
+                return true;
+            }
+        }
+
+    } catch (error) {
+        console.error("Error checking product purchase:", error);
+        throw error;
+    }
+}
+
+const updateProductRating = async (productId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedProduct = await Products.findByIdAndUpdate(
+            productId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedProduct) {
+            throw new Error("Product not found or could not be updated.");
+        }
+
+        return updatedProduct;
+    } catch (error) {
+        console.error("Error updating product ratings:", error);
+        throw error;
+    }
+}
+
+const updateProductReviews = async (productId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedProduct = await Products.findByIdAndUpdate(
+            productId,
+            updatedFields,
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+        
+        if (!updatedProduct) {
+            throw new Error("Product not found or could not be updated.");
+        }
+
+        return updatedProduct;
+    } catch (error) {
+        console.error("Error updating product comments:", error);
+        throw error;
+    }
+};
+
+const getOrderById = async (orderId) => {
+    try {
+        // Use Mongoose to find the order by its ID
+        const order = await Order.findById(orderId)
+            .populate('touristId', 'name email') // Populate touristId with specific fields if needed
+            .populate('productIds', 'name price') // Populate productIds with specific fields if needed
+            .exec(); // Execute the query
+
+        return order; // Return the found order, or null if not found
+    } catch (error) {
+        throw new Error(`Error retrieving order: ${error.message}`); // Throw an error if something goes wrong
+    }
+};
+
+
+const addOrder = async (orderData) => {
+    try {
+        const newOrder = new Order(orderData);
+        return await newOrder.save();
+    } catch (error) {
+        throw new Error(`Error adding order: ${error.message}`);
+    }
+};
+
+const getAllOrders = async () => {
+    try {
+        // Find all orders and populate `touristId` and `productIds`
+        const orders = await Order.find()
+            .select('touristId productIds quantities status dateDelivered createdAt') // Select the desired fields
+            .populate({
+                path: 'touristId',
+                select: 'name email', // Adjust to select desired fields from the Tourist model
+            })
+            .populate({
+                path: 'productIds',
+                select: 'name price', // Adjust to select desired fields from the Product model
+            });
+
+        // Map over the orders to add custom fields if needed
+        const ordersWithDetails = orders.map(order => {
+            const orderObj = order.toObject(); // Convert the document to a plain object
+
+            return {
+                ...orderObj,
+                // You can add custom processing here if needed, e.g., removing fields
+                touristId: order.touristId,
+                productIds: order.productIds,
+            };
+        });
+
+        return ordersWithDetails;
+    } catch (error) {
+        throw new Error(`Error retrieving orders: ${error.message}`);
+    }
+};
+
+const getOrdersByTouristId = async (touristId) => {
+    try {
+        // Find orders with the matching touristId
+        const orders = await Order.find({ touristId })
+            .select('productIds quantities status dateDelivered createdAt') // Select specific fields you need
+            .populate({
+                path: 'productIds',
+                select: 'name price description', // Populate fields from Product schema
+            });
+
+        // Map through orders if any additional processing is required
+        const ordersWithProductDetails = orders.map(order => {
+            return order.toObject(); // Convert each order document to a plain object
+        });
+
+        return ordersWithProductDetails;
+    } catch (error) {
+        throw new Error(`Error fetching orders for tourist: ${error.message}`);
+    }
+};
+
 module.exports = {
     addProduct,
     getAllAvailableProducts,
@@ -137,5 +277,12 @@ module.exports = {
     getAvailableProductsSortedByRatings,
     searchByName,
     getType,
-    findUserById
+    findUserById,
+    isPurchased,
+    updateProductRating,
+    updateProductReviews,
+    addOrder,
+    getAllOrders,
+    getOrdersByTouristId,
+    getOrderById
 };
