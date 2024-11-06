@@ -34,13 +34,12 @@ const HomePage = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
-        <div className="nav-links">
         <button
-         onClick={() => handleLoginClick()}
-          className="small-button" >
+     onClick={() => handleLoginClick()}
+  className="small-button"
+        >
           Login
         </button>
-        </div>
         <div className="nav-links">
         <button 
          onClick={() => handleRegisterClick("Register")}
