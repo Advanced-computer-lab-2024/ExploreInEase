@@ -459,6 +459,31 @@ const commentOnActivity = async (req, res) => {
     }
 }
 
+const rateHistoricalPlace = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { historicalPlaceId, rating } = req.body;
+
+    try {
+        const result = await userService.rateHistoricalPlace(touristId,historicalPlaceId,rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const commentOnHistoricalPlace = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { historicalPlaceId, commentText } = req.body;
+
+    try {
+        const result = await userService.commentOnHistoricalPlace(touristId,historicalPlaceId,commentText);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -482,5 +507,7 @@ module.exports = {
   rateActivity,
   commentOnActivity,
   rateItinerary,
-  commentOnItinerary
+  commentOnItinerary,
+  rateHistoricalPlace,
+  commentOnHistoricalPlace
 };
