@@ -35,6 +35,11 @@ const TouristProfile = (props) => {
   const location = useLocation();
   const { Tourist } = location.state || {};
   console.log("tourist", Tourist);
+  const userId = Tourist._id
+  const points = Tourist.points
+  console.log("tourist", userId);
+  console.log("tourist", points);
+
 
   const initialUsername = Tourist?.username || '';
   const initialWallet = Tourist?.wallet || 0;
@@ -84,6 +89,13 @@ const TouristProfile = (props) => {
 
   const handleRedeem = () => {
     // Add your redeem logic here
+    const options = {
+      apiPath: `/redeemPoints/${userId}/${points}`,
+      urlParam:userId,urlParam:points
+
+    };
+    const response = NetworkService.get(options);
+    console.log(response);
     console.log('Redeeming points...');
   };
 

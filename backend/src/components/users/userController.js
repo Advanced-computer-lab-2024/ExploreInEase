@@ -386,6 +386,28 @@ const login = async (req, res) => {
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
 }
+
+const redeemPoints = async (req, res) => {
+    const { userId,points } = req.params;
+    console.log(userId)
+    console.log(points)
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.redeemPoints(userId, points);
+        return res.status(result.status).json(result.response);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+
+
+
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -403,5 +425,6 @@ module.exports = {
   getTourist,
   updateTourist,
   registerUser,
-  login
+  login,
+  redeemPoints
 };

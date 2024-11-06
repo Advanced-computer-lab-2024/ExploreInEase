@@ -4,7 +4,7 @@ const Tourist = require('../../models/tourist');
 // Find user by ID
 const findUserById = async (id) => {
     try {
-        const user = await Users.findById(id);
+        const user = await Tourist.findById(id);
         
         return user ? user : null;
     } catch (error) {
@@ -177,6 +177,21 @@ const login = async (username, password) => {
     }
 }
 
+const redeemPoints = async (userId, points) => {
+    const user = await findUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    user.redeemedPoints += points;
+    user.wallet = user.wallet + points;
+    user.points=0
+    await user.save();
+    return user;
+}
+
+
+
+
 
 module.exports = {
     addGovernorOrAdmin,
@@ -194,5 +209,6 @@ module.exports = {
     saveTourist,
     checkUserExists,
     checkUserExistsByEmail,
-    login
+    login,
+    redeemPoints
 };
