@@ -19,10 +19,14 @@ const getAllAvailableProducts = async () => {
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
         })
-        .select('picture price description ratings reviews name originalQuantity sellerId isActive') // Include sellerId for population
+        .select('picture price description ratings reviews name originalQuantity sellerId isActive')
         .populate({
-            path: 'sellerId',
-            select: 'type' // Only select the 'type' field from the User (seller)
+            path: 'reviews.userId', // Populate userId in each review
+            select: 'username mobileNum email nation dob profession', // Specify fields to include from the Tourist model
+        })
+        .populate({
+            path: 'sellerId', // Populate sellerId if you want more details about the seller
+            select: 'type name' // Select fields to show for the seller, such as type or name
         });
 
         // Step 2: Map over the available products and add the sellerType directly
@@ -43,6 +47,7 @@ const getAllAvailableProducts = async () => {
         throw new Error(`Error retrieving product: ${error.message}`);
     }
 };
+
 
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
     try {

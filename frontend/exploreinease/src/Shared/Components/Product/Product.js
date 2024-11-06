@@ -18,6 +18,7 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import InfoIcon from '@mui/icons-material/Info';
 import ShoppingBasket from '@mui/icons-material/ShoppingBasket';
 import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
+import Avatar from '@mui/material/Avatar';
 
 
 
@@ -369,7 +370,7 @@ const ProductCard = () => {
   
   {/* Tooltip for sorting by rating */}
   <Tooltip title="Sort by Rating" placement="top" arrow>
-    <IconButton onClick={handleSortByRating} sx={{ color: '#1976d2' }}>
+    <IconButton onClick={handleSortByRating}>
       <SwapVert />
     </IconButton>
   </Tooltip>
@@ -701,16 +702,60 @@ const ProductCard = () => {
     
           {/* Reviews Dialog */}
           <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-            <DialogTitle>Reviews</DialogTitle>
-            <DialogContent>
-            <Typography><strong>Product Name:</strong> {selectedProductName}</Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog} color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </Dialog>
+  <DialogTitle>
+    <Typography variant="h5" fontWeight="bold" gutterBottom>
+      Product Reviews
+    </Typography>
+  </DialogTitle>
+  
+  <DialogContent dividers>
+    <Typography variant="h6" sx={{ mb: 2, color: '#000' }}>
+      {selectedProductName}
+    </Typography>
+
+    <Box sx={{ maxHeight: '400px', overflowY: 'auto', paddingRight: 1 }}>
+      {selectedProductReviews.length > 0 ? (
+        selectedProductReviews.map((review, index) => (
+          <Box 
+            key={review._id} 
+            sx={{ display: 'flex', gap: 2, padding: 2, borderBottom: '1px solid #eee' }}
+          >
+            <Avatar sx={{ bgcolor: '#1976d2' }}>
+              {review.userId.username.charAt(0).toUpperCase()}
+            </Avatar>
+            
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="body1" fontWeight="bold">
+                Review {index + 1}
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 1 }}>
+                <strong>Comment:</strong> {review.comment}
+              </Typography>
+              
+              <Typography variant="caption" color="text.secondary">
+                <strong>Created At:</strong> {new Date(review.createdAt).toLocaleString()}
+              </Typography>
+            </Box>
+          </Box>
+        ))
+      ) : (
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 2 }}>
+          No reviews available.
+        </Typography>
+      )}
+    </Box>
+  </DialogContent>
+  
+  <DialogActions>
+    <Button onClick={handleCloseDialog} color="primary" variant="contained">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
+
 
       {(User.type === 'seller' || User.type === 'admin') && (
   <Tooltip title="Create" placement="top" arrow>

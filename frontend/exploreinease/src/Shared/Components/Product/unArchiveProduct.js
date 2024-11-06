@@ -15,6 +15,10 @@ import {
 } from '@mui/icons-material';
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
 import ArchiveIcon from '@mui/icons-material/Unarchive';
+import Avatar from '@mui/material/Avatar';
+import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
+
+
 
 
 
@@ -35,6 +39,14 @@ const UnarchiveProduct = () => {
   const [messageContent, setMessageContent] = useState('');
   const [messageType, setMessageType] = useState('success');
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [sortOrder, setSortOrder] = useState('desc'); // Initial sort order
+
+
+  const [selectedProductName, setSelectedProductName] = useState('');
+  const [selectedProductPrice, setSelectedProductPrice] = useState('');
+  const [selectedProductSales, setSelectedProductSales] = useState('');
+  const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
+  const [selectedProductReviews, setSelectedProductReviews] = useState([]);
 
 
   const [productData, setProductData] = useState({
@@ -93,7 +105,17 @@ const UnarchiveProduct = () => {
       console.error('Failed to UnArchive product:', error);
     }
   };
-  const handleViewReviews = () => {
+  const handleViewReviews = async (productId) => {
+    console.log('Viewing reviews for product:', productId);
+    const product = products.find((product) => product._id === productId);
+      if (!product) {
+        throw new Error('Product not found');
+      }
+      setSelectedProductName(product.name);
+      setSelectedProductPrice(product.price);
+      setSelectedProductSales(product.sales);
+      setSelectedProductQuantity(product.availableQuantity);
+      setSelectedProductReviews(product.reviews);
     setDialogOpen(true);
   };
 
@@ -111,6 +133,16 @@ const UnarchiveProduct = () => {
       }));
       await handleUploadImage(productId, files[0]); // Upload the image with productId
     }
+  };
+
+  const handleSortByRating = () => {
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+      return sortOrder === 'desc' ? b.ratings - a.ratings : a.ratings - b.ratings;
+    });
+    setProducts(sortedProducts);
+  
+    // Toggle sort order
+    setSortOrder((prevOrder) => (prevOrder === 'desc' ? 'asc' : 'desc'));
   };
   
   const handleUploadImage = async (_id, file) => {
@@ -189,6 +221,12 @@ const UnarchiveProduct = () => {
           }}
           sx={{ mr: 2 }}
         />
+        {/* Tooltip for sorting by rating */}
+  <Tooltip title="Sort by Rating" placement="top" arrow>
+    <IconButton onClick={handleSortByRating}>
+      <SwapVert />
+    </IconButton>
+  </Tooltip>
       </Box>
 
       {/* Filter Dialog */}
@@ -291,10 +329,14 @@ const UnarchiveProduct = () => {
               }}
             >
               <Tooltip title="Reviews" placement="top" arrow>
-                <IconButton onClick={handleViewReviews} sx={{ color: '#1976d2' }}>
-                  <RateReviewIcon />
-                </IconButton>
-              </Tooltip>
+        <IconButton onClick={
+          () => { 
+          setSelectedProductId(product._id); 
+          handleViewReviews(product._id);
+          }} sx={{ color: '#1976d2' }}>
+          <RateReviewIcon />
+        </IconButton>
+      </Tooltip>
               <Tooltip title="Unarchive" placement="top" arrow>
                 <IconButton 
                   onClick={() => { 
@@ -314,16 +356,57 @@ const UnarchiveProduct = () => {
 
           {/* Reviews Dialog */}
           <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-            <DialogTitle>Reviews</DialogTitle>
-            <DialogContent>
-              {/* Empty Content - Placeholder for future review data */}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog} color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </Dialog>
+  <DialogTitle>
+    <Typography variant="h5" fontWeight="bold" gutterBottom>
+      Product Reviews
+    </Typography>
+  </DialogTitle>
+  
+  <DialogContent dividers>
+    <Typography variant="h6" sx={{ mb: 2, color: '#000' }}>
+      {selectedProductName}
+    </Typography>
+
+    <Box sx={{ maxHeight: '400px', overflowY: 'auto', paddingRight: 1 }}>
+      {selectedProductReviews.length > 0 ? (
+        selectedProductReviews.map((review, index) => (
+          <Box 
+            key={review._id} 
+            sx={{ display: 'flex', gap: 2, padding: 2, borderBottom: '1px solid #eee' }}
+          >
+            <Avatar sx={{ bgcolor: '#1976d2' }}>
+              {review.userId.username.charAt(0).toUpperCase()}
+            </Avatar>
+            
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="body1" fontWeight="bold">
+                Review {index + 1}
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 1 }}>
+                <strong>Comment:</strong> {review.comment}
+              </Typography>
+              
+              <Typography variant="caption" color="text.secondary">
+                <strong>Created At:</strong> {new Date(review.createdAt).toLocaleString()}
+              </Typography>
+            </Box>
+          </Box>
+        ))
+      ) : (
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 2 }}>
+          No reviews available.
+        </Typography>
+      )}
+    </Box>
+  </DialogContent>
+  
+  <DialogActions>
+    <Button onClick={handleCloseDialog} color="primary" variant="contained">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
           {/* Archive Confirmation Dialog */}
           <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
   <DialogTitle>Confirm Unarchive</DialogTitle>
