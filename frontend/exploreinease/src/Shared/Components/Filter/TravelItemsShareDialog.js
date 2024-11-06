@@ -8,7 +8,7 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
 
   const location = useLocation();
   const { User } = location.state || {};
-  console.log("admin",User);
+  console.log("admin", User);
   const userId = User._id;
   console.log(User.username);
   const price = item.budget;
@@ -16,11 +16,34 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
   const item2 = {
     name: item.name,
     price: item.budget,
-    date: item.date
+    date: item.date,
+    type: item.type
+  };
+  const item3 = {
+    name: item.name,
+    price: item.price,
+    language: item.language,
+    type: item.type
+
+  };
+  const item4 = {
+    name: item.name,
+    description: item.description,
+    type: item.type
+
   };
   const [shareMethod, setShareMethod] = useState('email');
   const [emailAddress, setEmailAddress] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const handleShareClick = () => {
+    if (item.type === 'Activity') {
+      handleShareByEmail();
+    } else if (item.type === 'Itinerary') {
+      handleShareByEmail2();
+    } else {
+      handleShareByEmail3();
+    }
+  }
 
   const handleShareMethodChange = (e) => {
     setShareMethod(e.target.value);
@@ -35,12 +58,44 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
     // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
     const option = {
       apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
-      urlParam: userId,email: emailAddress,
+      urlParam: userId, email: emailAddress,
       body: item2
     }
     const response = NetworkService.post(option);
     console.log(response);
-    
+
+
+    // Implement email sharing logic here
+    // console.log('Sharing by email:', emailAddress, item);
+    onClose();
+  };
+  const handleShareByEmail2 = () => {
+
+    // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
+    const option = {
+      apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
+      urlParam: userId, email: emailAddress,
+      body: item3
+    }
+    const response = NetworkService.post(option);
+    console.log(response);
+
+
+    // Implement email sharing logic here
+    // console.log('Sharing by email:', emailAddress, item);
+    onClose();
+  };
+  const handleShareByEmail3 = () => {
+
+    // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
+    const option = {
+      apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
+      urlParam: userId, email: emailAddress,
+      body: item4
+    }
+    const response = NetworkService.post(option);
+    console.log(response);
+
 
     // Implement email sharing logic here
     // console.log('Sharing by email:', emailAddress, item);
@@ -110,16 +165,16 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
           Cancel
         </Button>
         {shareMethod === 'email' ? (
-        <Button variant="contained" onClick={handleShareByEmail}>
-          <MailIcon className="mr-2" />
-          Share by Email
-        </Button>
-      ) : (
-        <Button variant="contained" onClick={handleShareByLink}>
-          <LinkIcon className="mr-2" />
-          Copy Link
-        </Button>
-      )}
+          <Button variant="contained" onClick={handleShareClick}>
+            <MailIcon className="mr-2" />
+            Share by Email
+          </Button>
+        ) : (
+          <Button variant="contained" onClick={handleShareByLink}>
+            <LinkIcon className="mr-2" />
+            Copy Link
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
