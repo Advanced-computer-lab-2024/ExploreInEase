@@ -1145,4 +1145,17 @@ router.post('/register/:type', userController.registerUser);
  */
 router.post('/login', userController.login);
 
+
+router.post('/rateTourGuide/:touristId', userController.rateTourGuide);
+
+router.post('/commentTourGuide/:touristId', userController.commentOnTourGuide);
+
+router.post('/rateItinerary/:touristId', userController.rateItinerary);
+
+router.post('/commentItinerary/:touristId', userController.commentOnItinerary);
+
+router.post('/rateActivity/:touristId', userController.rateActivity);
+
+router.post('/commentActivity/:touristId', userController.commentOnActivity);
+
 module.exports = router;
