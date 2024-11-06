@@ -216,6 +216,221 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+const rateTourGuide = async (touristId, tourGuideId, itineraryId, rating) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot rate this tour guide because you havent attended an itinerary with them yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const tourGuide = await Users.findOne({ _id: tourGuideId, type: 'tourGuide' });
+        if (!tourGuide) {
+            throw new Error("Tour guide not found.");
+        }
+
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        // Update the rating sum and count
+        tourGuide.ratingSum += rating; // Add the new rating to the sum
+        tourGuide.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        tourGuide.rating = tourGuide.ratingSum / tourGuide.ratingCount; // Update the average rating
+
+        // Update the activity with the new rating values
+        await userRepository.updateTourGuideRatings(tourGuideId, {
+            rating: tourGuide.rating,
+            ratingSum: tourGuide.ratingSum,
+            ratingCount: tourGuide.ratingCount,
+        });
+
+        return { message: "Rating added successfully", updatedTourGuide: tourGuide };
+    } catch (error) {
+        console.error("Error adding rating to tour guide:", error);
+        throw error;
+    }
+};
+
+
+
+const commentOnTourGuide = async (touristId, tourGuideId, itineraryId, commentText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot comment on this tour guide because you haven't completed this itinerary with them.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const tourGuide = await Users.findOne({ _id: tourGuideId, type: 'tourGuide' });
+        if (!tourGuide) {
+            throw new Error("Tour guide not found.");
+        }   
+        // Add the comment to the tour guide's comments array
+        tourGuide.comment.push(commentText);    
+
+        // Update the tour guide with the new comment
+        await userRepository.updateTourGuideComments(tourGuideId, { comment: tourGuide.comment });
+
+        return { message: "Comment added successfully", updatedTourGuide: tourGuide };
+    } catch (error) {
+        console.error("Error adding comment to tour guide:", error);
+        throw error;
+    }
+};
+
+const commentOnItinerary = async (touristId, tourGuideId, itineraryId, commentText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot comment on this itinerary because you haven't completed this itinerary yet.");
+        }
+
+        const itinerary = await Itinerary.findOne({ _id: itineraryId});
+        if (!itinerary) {
+            throw new Error("itinerary not found.");
+        }   
+        // Create the new comment
+        const newComment = {
+            user: touristId,
+            text: commentText,
+            date: new Date()
+        };
+
+        // Use the repository method to push the new comment to the comments array
+        const updatedItinerary = await userRepository.updateItineraryComments(itineraryId, { $push: { comments: newComment } });
+
+
+        return { message: "Comment added successfully", updatedItinerary };
+    } catch (error) {
+        console.error("Error adding comment to itinerary:", error);
+        throw error;
+    }
+};
+
+const rateItinerary = async (touristId, tourGuideId, itineraryId, rating) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasCompleted = await userRepository.hasCompletedItinerary(touristId, itineraryId, tourGuideId);
+        
+        if (!hasCompleted) {
+            throw new Error("You cannot rate this itinerary because you havent attended it yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const itinerary = await Itinerary.findOne({ _id: itineraryId });
+        if (!itinerary) {
+            throw new Error("Itinerary not found.");
+        }
+
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        // Update the rating sum and count
+        itinerary.ratingSum += rating; // Add the new rating to the sum
+        itinerary.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        itinerary.rating = itinerary.ratingSum / itinerary.ratingCount; // Update the average rating
+
+        // Update the activity with the new rating values
+        await userRepository.updateItineraryRatings(itineraryId, {
+            rating: itinerary.rating,
+            ratingSum: itinerary.ratingSum,
+            ratingCount: itinerary.ratingCount,
+        });
+
+        return { message: "Rating added successfully", updatedItinerary: itinerary };
+    } catch (error) {
+        console.error("Error adding rating to itinerary:", error);
+        throw error;
+    }
+};
+
+const rateActivity = async (touristId, activityId, rating) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasAttended = await userRepository.hasAttendedActivity(touristId, activityId);
+        
+        if (!hasAttended) {
+            throw new Error("You cannot rate this activity because you havent attended this activity yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const activity = await Activity.findOne({ _id: activityId });
+        if (!activity) {
+            throw new Error("activity not found.");
+        }
+
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        // Update the rating sum and count
+        activity.ratingSum += rating; // Add the new rating to the sum
+        activity.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        activity.rating = activity.ratingSum / activity.ratingCount; // Update the average rating
+
+        // Update the activity with the new rating values
+        await userRepository.updateActivityRatings(activityId, {
+            rating: activity.rating,
+            ratingSum: activity.ratingSum,
+            ratingCount: activity.ratingCount,
+        });
+
+        return { message: "Rating added successfully", updatedActivity: activity };
+    } catch (error) {
+        console.error("Error adding rating to activity:", error);
+        throw error;
+    }
+};
+
+const commentOnActivity = async (touristId, activityId, commentText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        const hasAttended = await userRepository.hasAttendedActivity(touristId, activityId);
+        
+        if (!hasAttended) {
+            throw new Error("You cannot comment on this Activity because you haven't attended this activity yet.");
+        }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const activity = await Activity.findOne({ _id: activityId});
+        if (!activity) {
+            throw new Error("activity not found.");
+        }   
+        // Create the new comment
+        const newComment = {
+            user: touristId,
+            text: commentText,
+            date: new Date(),
+        };
+
+        // Use the repository method to push the new comment to the comments array
+        const updatedActivity = await userRepository.updateActivityComments(activityId, { $push: { comments: newComment } });
+
+
+        return { message: "Comment added successfully", updatedActivity };
+    } catch (error) {
+        console.error("Error adding comment to activity:", error);
+        throw error;
+    }
+};
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -236,6 +451,12 @@ module.exports = {
   updateTourist,
   registerTourist,
   registerUser,
-  login
+  login,
+  rateTourGuide,
+  commentOnTourGuide,
+  rateItinerary,
+  commentOnItinerary,
+  rateActivity,
+  commentOnActivity
 };
 
