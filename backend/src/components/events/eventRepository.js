@@ -350,8 +350,8 @@ const createHistoricalPlace = async (data) => {
   return { status: 200, response: { message: "Historical Place created successfully", savedPlace } };
 };
 
-const findTagByTypeAndPeriod = async (type) => {
-  return await historicalTags.findOne({type:type});
+const findTagByTypeAndPeriod = async (type, period) => {
+  return await historicalTags.findOne({ type, period });
 };
 
 const checkTourismGovernor = async (userId) => {
@@ -798,23 +798,6 @@ const bookTransportation = async (touristId, transportationId) => {
   return { message: 'Transportation booked successfully', tourist };
 };
 
-const getAllActivities3 = async () => {
-  return Activity.find()
-    .populate('tags')           
-    .populate('category');      
-};
-
-const getAllItineraries3 = async () => {
-  return Itinerary.find()
-    .populate({
-      path: 'activities',
-      populate: { path: 'category tags' } 
-    });
-};
-
-const getAllHistoricalPlaces3 = async () => {
-  return HistoricalPlace.find().populate('tags');
-};
 
 
 

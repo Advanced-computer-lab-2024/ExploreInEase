@@ -634,17 +634,18 @@ const deleteItinerary = async (req, res) => {
 // Create a new Historical Place
 const createHistoricalPlace = async (req, res) => {
   const {
-    name,
     description,
     pictures,
     location,
     openingHours,
     ticketPrice,
+    type, // this should refer to the tags
+    period, // this should refer to the tags
     created_by,
   } = req.body;
 
   // Validate required fields
-  if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by) {
+  if (!description || !pictures || !location || !openingHours || !ticketPrice || !type || !period || !created_by) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -655,18 +656,21 @@ const createHistoricalPlace = async (req, res) => {
   }
 
   try {
-    // const tag = await eventRepository.findTagByTypeAndPeriod(type);
-    // if (!tag) {
-    //   return res.status(400).json({ message: 'Invalid tag type' });
-    // }
+    // Ensure the tag exists in the database
+    const tag = await eventRepository.findTagByTypeAndPeriod(type, period);
+    if (!tag) {
+      return res.status(400).json({ message: 'Invalid tag type or period' });
+    }
+
+    // Prepare the data for the historical place
     const historicalPlaceData = {
-      name,
       description,
       pictures,
       location,
       openingHours,
       ticketPrice,
       created_by,
+      tags: tag._id // Use the tag's ObjectId
     };
 
     // Call the service to create the historical place
