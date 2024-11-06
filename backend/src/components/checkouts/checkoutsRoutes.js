@@ -540,4 +540,11 @@ router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSorte
 router.get('/searchProductByName/:userId', checkoutController.searchProductByName);
 
 
+router.post('/rateProduct/:touristId', checkoutController.rateProduct);
+router.post('/reviewProduct/:touristId', checkoutController.reviewProduct);
+
+router.post('/addOrder', checkoutController.addOrder);
+router.get('/getOrders/:userId', checkoutController.getOrders);
+router.put('/editOrder/:userId', checkoutController.updateOrder)
+
 module.exports = router;
