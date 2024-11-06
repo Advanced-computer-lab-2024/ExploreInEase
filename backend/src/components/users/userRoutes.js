@@ -1145,7 +1145,6 @@ router.post('/register/:type', userController.registerUser);
  */
 router.post('/login', userController.login);
 
-
 router.post('/rateTourGuide/:touristId', userController.rateTourGuide);
 
 router.post('/commentTourGuide/:touristId', userController.commentOnTourGuide);

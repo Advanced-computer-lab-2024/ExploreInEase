@@ -24,7 +24,7 @@ import {
   import React, { useState, useEffect } from "react";
   import { differenceInHours } from 'date-fns'; // Use date-fns or a similar library
   import axios from "axios";
-  
+  import NetworkService from "../NetworkService";
   // Sample data with 'type' field added
   const itemList = [];
   
@@ -37,10 +37,10 @@ import {
   
   const Booked = () => {
     const location = useLocation();
-    const { events } = location.state || {};
+    const { events ,userId} = location.state || {};
     const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
-    console.log(events);
-    console.log(itemList);
+    console.log("event",events);
+    console.log("user",userId);
   
     const [filters, setFilters] = useState({
       budget: '',
@@ -324,14 +324,66 @@ import {
         const hoursDifference = differenceInHours(new Date(startDate), now);
         return hoursDifference >= 48;
       };
-    // useEffect(() => {
-    //   filteredData.forEach((item) => {
-    //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
-    //       getHistoricalTags(item.tags);
-    //     }
-    //   });
-    // }, [filteredData, historicalTags]);
-  // getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
+    const  handleSaveRating=async (type,rating,selectedItem)=>{
+      console.log(selectedItem);
+      console.log(selectedItem.created_by._id);
+
+      if(type==="tourGuide") {
+        try {
+          const options = { apiPath: `/rateTourGuide/${userId}`,
+          body:{
+            tourGuideId:selectedItem.created_by._id,
+            itineraryId:selectedItem.id,
+            rating:rating
+          }
+          };
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }else if (type==="Itinerary"){
+        try {
+          const options = { apiPath: `/rateItinerary/${userId}`,
+          body:{
+            tourGuideId:selectedItem.created_by._id,
+            itineraryId:selectedItem.id,
+            rating:rating
+          }
+          };
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      else if (type==="activity"){
+        try {
+          const options = { apiPath: `/rateActivity/${userId}`,
+        body:{
+          activityId:selectedItem.id,
+          rating:rating
+        } };
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      else {
+        try {
+          const options = { apiPath: `/rateTourGuide/${userId}` };
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+    }
     return (
       <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
@@ -467,8 +519,6 @@ import {
                     <Button onClick={handleClose}>Close</Button>
                   </DialogActions>
                 </Dialog>
-
-
                 <Dialog
                   open={openRate}
                   onClose={handleClose}
@@ -591,7 +641,7 @@ import {
       )}
                 </DialogContent>
                 <DialogActions>
-                <Button onClick={handleClose} autoFocus>
+                <Button onClick={()=>handleSaveRating(rateType,rating,selectedItem)} autoFocus>
                     Save
                   </Button>
                   <Button onClick={handleClose}>Close</Button>

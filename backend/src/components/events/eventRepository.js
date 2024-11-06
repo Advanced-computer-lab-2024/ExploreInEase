@@ -495,8 +495,6 @@ const bookEvent = async (touristId, eventType, eventId, ticketType, currency, ac
   return tourist;
 };
 
-
-const mongoose = require('mongoose');
 const cancelEvent = async (touristId, eventType, eventId) => {
   const currentTime = new Date();
   const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
@@ -851,9 +849,7 @@ module.exports = {
   createTransportation,
   getTransportations,
   bookTransportation,
-  getAllActivities3,
-  getAllItineraries3,
-  getAllHistoricalPlaces3,
+ 
   bookedEvents,
   bookEvent,
   cancelEvent,

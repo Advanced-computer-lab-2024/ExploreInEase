@@ -48,7 +48,7 @@ function HistoricalPlaces() {
     studentTicketPrice: '',
     foreignerTicketPrice: '',
     images: [],
-    tagId:'',
+    tagId:[],
   });
 
   useEffect(() => {
@@ -135,7 +135,7 @@ function HistoricalPlaces() {
       studentTicketPrice: '',
       foreignerTicketPrice: '',
       images: [],
-      tagId:'',
+      tagId:[],
     });
     setImages([]);
     setImagePreviews([]);
@@ -173,6 +173,7 @@ function HistoricalPlaces() {
           foreign: newHistoricPlace.foreignerTicketPrice,
         },
         created_by: governorId,
+        tags:newHistoricPlace.tagId
       };
         console.log("create Body:",body);
 
@@ -282,6 +283,7 @@ function HistoricalPlaces() {
         studentTicketPrice: place.ticketPrice.student || '',
         foreignerTicketPrice: place.ticketPrice.foreign || '',
         images: place.pictures || [],
+        tagId:place.tagId||[]
       });
       setOpen(true);
     
@@ -371,7 +373,7 @@ const getAllTags=async ()=>{
     const selectedTagId = event.target.value;
     setNewHistoricPlace((prev) => ({
       ...prev,
-      tagId: selectedTagId
+      tagId: [selectedTagId]
     }));
   };
   return (

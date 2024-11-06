@@ -1,6 +1,6 @@
-const mangoose = require("mangoose");
+const mongoose = require("mongoose");
 const Tourist = require("./tourist");
-const Schema = mangoose.Schema;
+const Schema = mongoose.Schema;
 
 const orderSchema = new Schema(
   {
@@ -25,20 +25,20 @@ const orderSchema = new Schema(
     quantities: [
       {
         type: Number,
-        min: [1, "Quantity cannot be less than 1"], //haga 2esmha min validation in mongoo
+        min: [1, "Quantity cannot be less than 1"], // Minimum validation in Mongoose
         required: true,
       },
     ],
     dateDelivered: {
       type: Date,
-      default: null, // Initially null; set when status is 'delivered' bas when delivered
+      default: null, // Initially null; set when status is 'delivered'
     },
   },
   {
-    timestamps: true, // bey7ot adds createdAt and updatedAt fields beta3 el order
+    timestamps: true, // Adds createdAt and updatedAt fields
   }
 );
 
-const Order = mongoose.models.Order ||mongoose.model("Order", orderSchema);
+const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
 
 module.exports = Order;

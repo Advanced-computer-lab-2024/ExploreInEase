@@ -1,7 +1,7 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const HistoricalPlace = require('../../models/historicalPlace');
-
+require('dotenv').config({ path: "src/.env" });
 
 const getUserEvents = async (_id, userType) => {
   const user = await User.findById(_id); // Find user by _id
