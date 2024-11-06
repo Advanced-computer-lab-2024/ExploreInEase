@@ -1,6 +1,7 @@
 const Activity = require('../../models/activity');
 const Itinerary = require('../../models/itinerary');
 const Users = require('../../models/user');
+const HistoricalPlace = require('../../models/historicalPlace');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const getUserById = async (id) => {
@@ -434,6 +435,78 @@ const commentOnActivity = async (touristId, activityId, commentText) => {
     }
 };
 
+const rateHistoricalPlace = async (touristId, historicalPlaceId, rating) => {
+    try {
+        // // Check if the tourist has completed the itinerary with the specified tour guide
+        // const hasAttended = await userRepository.hasAttendedActivity(touristId, activityId);
+        
+        // if (!hasAttended) {
+        //     throw new Error("You cannot rate this activity because you havent attended this activity yet.");
+        // }
+
+        const historicalPlace = await HistoricalPlace.findOne({ _id: historicalPlaceId });
+        if (!historicalPlace) {
+            throw new Error("historical place not found.");
+        }
+
+        // Validate the rating value to ensure it's between 1 and 5 inclusive
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        // Update the rating sum and count
+        historicalPlace.ratingSum += rating; // Add the new rating to the sum
+        historicalPlace.ratingCount += 1;     // Increment the count of ratings
+        
+        // Calculate the new average rating
+        historicalPlace.rating = historicalPlace.ratingSum / historicalPlace.ratingCount; // Update the average rating
+
+        // Update the activity with the new rating values
+        await userRepository.updateHistoricalPlacesRatings(historicalPlaceId, {
+            rating: historicalPlace.rating,
+            ratingSum: historicalPlace.ratingSum,
+            ratingCount: historicalPlace.ratingCount,
+        });
+
+        return { message: "Rating added successfully", updatedHistoricalPlace: historicalPlace };
+    } catch (error) {
+        console.error("Error adding rating to historical place:", error);
+        throw error;
+    }
+};
+
+const commentOnHistoricalPlace = async (touristId, historicalPlaceId, commentText) => {
+    try {
+        // Check if the tourist has completed the itinerary with the specified tour guide
+        // const hasAttended = await userRepository.hasAttendedActivity(touristId, activityId);
+        
+        // if (!hasAttended) {
+        //     throw new Error("You cannot comment on this Activity because you haven't attended this activity yet.");
+        // }
+
+        // Retrieve the tour guide directly by querying the user repository
+        const historicalPlace = await HistoricalPlace.findOne({ _id: historicalPlaceId});
+        if (!historicalPlace) {
+            throw new Error("Historical place not found.");
+        }   
+        // Create the new comment
+        const newComment = {
+            user: touristId,
+            text: commentText,
+            date: new Date(),
+        };
+
+        // Use the repository method to push the new comment to the comments array
+        const updatedHistoricalPlace = await userRepository.updateHistoricalPlacesComments(historicalPlaceId, { $push: { comments: newComment } });
+
+
+        return { message: "Comment added successfully", updatedHistoricalPlace };
+    } catch (error) {
+        console.error("Error adding comment to historical place:", error);
+        throw error;
+    }
+};
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -460,6 +533,8 @@ module.exports = {
   rateItinerary,
   commentOnItinerary,
   rateActivity,
-  commentOnActivity
+  commentOnActivity,
+  rateHistoricalPlace,
+  commentOnHistoricalPlace
 };
 
