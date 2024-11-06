@@ -185,6 +185,30 @@ const ItineraryList = () => {
 
   };
 
+  const toggleStatus = async (itineraryId, currentStatus) => {
+    const newStatus = currentStatus === "Activated" ? 1 : 0;
+    try {
+      const options = {
+        apiPath: `/updateItineraryActivation`,
+        body: {
+          itineraryId,
+          isActivated: newStatus,
+          userId,
+          userType: "tour guide"
+        }
+      };
+      await NetworkService.put(options);
+      setItinerariesData((prev) =>
+        prev.map((itinerary) =>
+          itinerary._id === itineraryId ? { ...itinerary, status: newStatus } : itinerary
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling status:", error);
+    }
+  };
+  
+
   return (
     <div className="itinerary-list-container">
       <h2>Your Created Itineraries</h2>
@@ -204,6 +228,7 @@ const ItineraryList = () => {
             <p><strong>Drop Off Location:</strong> {itinerary.dropoffLocation}</p>
             <p><strong>Price:</strong> {itinerary.price}</p>
             <p><strong>Ratings:</strong> {itinerary.ratings || "0"}</p>
+            <p><strong>isActivated( 1 for Yes , 0 for No ):</strong> {itinerary.isActivated}</p>
             <br />
             <h4>Activities:</h4>
             <div className="activity-details">
@@ -303,6 +328,33 @@ const ItineraryList = () => {
                 onChange={handleInputChange} 
               />
             </label>
+            
+<label>
+  isActivated:
+  <div>
+    <label>
+      <input
+        type="radio"
+        name="isActivated"
+        value="0"
+        checked={editItineraryData.isActivated === "0"}
+        onChange={handleInputChange}
+      />
+      Deactivated
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="isActivated"
+        value="1"
+        checked={editItineraryData.isActivated === "1"}
+        onChange={handleInputChange}
+      />
+      Activated
+    </label>
+  </div>
+</label>
+
             <button onClick={submitEdit}>Submit</button>
           </div>
         </div>
