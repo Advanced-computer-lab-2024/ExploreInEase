@@ -195,7 +195,7 @@ const updateEventFlagController = async (req, res) => {
 
 const bookedEvents = async (req, res) => {
   try {
-      const { touristId } = req.body;
+      const { touristId } = req.params;
 
       
       if (!touristId) {

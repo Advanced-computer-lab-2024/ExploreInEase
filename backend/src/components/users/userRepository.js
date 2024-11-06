@@ -118,21 +118,30 @@ const checkTouristDeletionCriteria = async (id) => {
 
     const now = new Date();
 
-    
+    // Check if the itineraryId array is empty
+    if (!tourist.itineraryId || tourist.itineraryId.length === 0) {
+        return true;
+    }
+
     for (const itineraryObj of tourist.itineraryId) {
         const itinerary = itineraryObj.id;
-        if (itinerary && itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
+        if (itinerary && itinerary.dateTimeAvailable && itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
             return false; 
         }
     }
 
+    // Check if the activityId array is empty
+    if (!tourist.activityId || tourist.activityId.length === 0) {
+        return true;
+    }
 
     for (const activityObj of tourist.activityId) {
         const activity = activityObj.id; 
-        if (activity && new Date(activity.date) > now) {
+        if (activity && activity.date && new Date(activity.date) > now) {
             return false; 
         }
     }
+
     return true; 
 };
 
@@ -141,6 +150,11 @@ const checkTouristDeletionCriteria = async (id) => {
 const checkTourGuideItineraryDates = async (tourGuideId) => {
     const now = new Date();
     const itineraries = await Itinerary.find({ created_by: tourGuideId });
+
+    if (itineraries.length==0){
+        return true;
+    }
+
 
     for (const itinerary of itineraries) {        
         if (itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
