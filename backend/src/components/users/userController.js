@@ -313,7 +313,6 @@ const checkUsername = (username) => {
 const registerUser = async (req, res) => {
     const { type } = req.params;
     const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
-    console.log(email);
     if (!type) {
         return res.status(400).json({ message: "User type is required" });
     }
@@ -434,9 +433,18 @@ const uploadImage = async (req, res) => {
     }
 };
 
-
+const getNotAcceptedUsers = async (req, res) => {
+    try {
+        const users = await userService.getNotAcceptedUsers();
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error.message);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
 
 module.exports = {
+    getNotAcceptedUsers,
     uploadImage,
     changePassword ,
   deleteUserByIdAndType,

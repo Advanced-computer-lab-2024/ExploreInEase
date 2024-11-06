@@ -145,10 +145,6 @@ const UsersSchema = new Schema({
       
     },
     
-    
-    
-    
-    
     status: {
         type: Boolean,
         default: false

@@ -186,7 +186,7 @@ const registerTourist = async (email, username, password, mobileNum, nation, dob
         mobileNum: mobileNum,
         nation: nation,
         dob: dob,
-        profession: profession
+        profession: profession,
     };
     const tourist = await userRepository.saveTourist(newTourist);
     return { status: tourist.status, response: {message: "Turist registered successfully", tourist: tourist.tourist, type: 'tourist'} };
@@ -206,7 +206,8 @@ const registerUser = async (type, email, username, password) => {
             email,
             username,
             password: password,
-            type
+            type,
+            docStatus: 'pending',
         };
 
         // Save the user using the repository
@@ -250,9 +251,12 @@ const uploadImage = async (userId, file) => {
 };
 
 
-
+const getNotAcceptedUsers = async () => {
+    return await userRepository.getNotAcceptedUsers();
+};
 
 module.exports = {
+    getNotAcceptedUsers,
     uploadImage,
     changePassword,
   deleteUserByIdAndType,

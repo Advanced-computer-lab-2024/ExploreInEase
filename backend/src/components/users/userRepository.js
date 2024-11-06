@@ -249,7 +249,17 @@ const getUserProfilePicture = async (userId) => {
         throw new Error(`Error getting profile picture: ${error.message}`);
     }
 }
+
+const getNotAcceptedUsers = async () => {
+    try {
+        return await Users.find({ docStatus: "pending" });
+    } catch (error) {
+        throw new Error(`Error fetching not accepted users: ${error.message}`);
+    }
+};
+
 module.exports = {
+    getNotAcceptedUsers,
     getUserProfilePicture,
     uploadImage,
     updateUserProfilePicture,

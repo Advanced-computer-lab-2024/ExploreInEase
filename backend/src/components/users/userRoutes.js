@@ -1159,7 +1159,7 @@ router.put('/changePassword/:userId', userController.changePassword);
 
 router.post('/uploadImage/:userId', upload.single('image'), userController.uploadImage);
 
-
+router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
 
 module.exports = {
     setDBConnection,
