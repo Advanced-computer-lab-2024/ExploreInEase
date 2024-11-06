@@ -277,14 +277,14 @@ router.delete('/deleteTagById/:id', eventController.deleteTagById);
 router.put('/updateItineraryActivation', eventController.updateItineraryActivation);
 
 router.put('/inappropriate', eventController.updateEventFlagController);
-router.get('/bookedEvents', eventController.bookedEvents)
-router.put('/bookEvent', eventController.bookEvent);
-router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
+
 router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEventEmail);
 
 
 
-
+router.get('/bookedEvents', eventController.bookedEvents)
+router.put('/bookEvent', eventController.bookEvent);
+router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
 // Route to get city code by city name
 router.get('/city/:city', eventController.getCityCode);
 
