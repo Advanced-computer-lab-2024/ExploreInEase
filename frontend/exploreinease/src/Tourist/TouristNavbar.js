@@ -10,15 +10,15 @@ import { useLocation } from 'react-router-dom';
 const TouristNavbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { User } = location.state || {};
+    const { tourist } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
-    const userType = User.type;
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const initialUsername = User?.username;
+    const initialUsername = tourist?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-     const userId=User?._id;
+     const userId=tourist?._id;
+     const userType = "tourist";
 
      
      const handleAvatarClick = (event) => {
@@ -39,7 +39,7 @@ const TouristNavbar = () => {
                 console.log(response);
                 const Product=response.Products;
                 const Type='tourist';
-                navigate(`/viewProduct`,{ state: { Product, Type ,User:User} });          
+                navigate(`/viewProduct`,{ state: { Product, Type ,User:tourist} });          
               } catch (err) {
                 if (err.response) {
                     console.log(err.message);
@@ -90,23 +90,24 @@ const TouristNavbar = () => {
       }
       }
       const handleDeleteAccount = async () => {
-        handleClose();
         try {
-            const options = {
-                apiPath: '/requestDeletion',
-                method: 'PUT',
-                data: { userId, userType },
-            };
-            const response = await NetworkService.request(options);
+          console.log(userId,userType);
 
-            if (response.success) {
-                setSuccess("Account deletion requested successfully.");
-            } else {
-                setError(response.message || "Account deletion request failed.");
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
-        }
+          const options = {
+              apiPath: `/requestDeletion/${userId}/${userType}`,
+              useParams:userId,userType,
+            };
+          const response = await NetworkService.put(options);
+          console.log(response);
+
+          if (response.success) {
+              setSuccess("Account deletion requested successfully.");
+          } else {
+              setError(response.message || "Account deletion request failed.");
+          }
+      } catch (err) {
+          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+      }
     };
   return (
     <div className="homepage">

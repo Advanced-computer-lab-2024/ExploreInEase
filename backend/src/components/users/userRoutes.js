@@ -1156,6 +1156,10 @@ router.post('/login', userController.login);
 
 router.put('/acceptTerms/:_id/:type', userController.acceptTerms);
 
+
+router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
+
+
 module.exports = {
     setDBConnection,
     router,

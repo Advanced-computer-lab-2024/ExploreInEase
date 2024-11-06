@@ -397,6 +397,17 @@ const getAllHistoricalTags = async () => {
 const getHistoricalTagDetails = async (id) => {
   return await historicalTags.find({ _id: id });
 }
+
+
+const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
+  const updatedItinerary = await Itinerary.findOneAndUpdate(
+      { _id: itineraryId, created_by: userId }, 
+      { isActivated: isActivated },
+      { new: true } 
+  );
+
+  return updatedItinerary; 
+};
 module.exports = {
   getHistoricalTagDetails,
   createCategory,
@@ -439,7 +450,8 @@ module.exports = {
   checkTourismGovernor,
   getTypeForTag,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  updateItineraryActivation
 };
 
 

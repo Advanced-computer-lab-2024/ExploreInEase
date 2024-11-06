@@ -413,7 +413,30 @@ const acceptTerms = async (req, res) => {
 };
 
 
+const requestDeletion = async (req, res) => {
+    const { userId, type } = req.params;
+    console.log(userId);
+    console.log(type);
 
+
+    
+    if (!userId || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.requestDeletion(userId, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Request to be deleted accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports = {
   deleteUserByIdAndType,
@@ -433,5 +456,6 @@ module.exports = {
   updateTourist,
   registerUser,
   login,
-  acceptTerms
+  acceptTerms,
+  requestDeletion
 };

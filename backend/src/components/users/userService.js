@@ -221,6 +221,35 @@ const acceptTerms = async (_id, type) => {
     return await userRepository.updateTermsAndConditions(_id, type);
 };
 
+
+const requestDeletion = async (userId, type) => {
+    let canDelete = false;
+
+    if (type === 'tourist') {
+        // Check conditions for tourist
+        canDelete = await userRepository.checkTouristDeletionCriteria(userId);
+    } else if (type === 'tourGuide') {
+        console.log('a7a');
+        // Check conditions for tour guide in itinerary
+        canDelete = await userRepository.checkTourGuideItineraryDates(userId);
+    } else if (type === 'seller') {
+        // Check conditions for seller in product table
+        canDelete = await userRepository.checkSellerProductStatus(userId);
+    } else if (type === 'advertiser') {
+        // Check conditions for advertiser in activity table
+        canDelete = await userRepository.checkAdvertiserActivityStatus(userId);
+    } else {
+        throw new Error("Invalid user type");
+    }
+
+    if (!canDelete) {
+        throw new Error("Request deletion rejected due to active records.");
+    }
+
+    // Update requestDeletion in the respective table
+    const updateResult = await userRepository.updateRequestDeletion(userId, type);
+    return updateResult;
+};
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -242,6 +271,7 @@ module.exports = {
   registerTourist,
   registerUser,
   login,
-  acceptTerms
+  acceptTerms,
+  requestDeletion
 };
 

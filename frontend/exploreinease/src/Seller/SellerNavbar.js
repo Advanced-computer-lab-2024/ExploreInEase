@@ -71,23 +71,24 @@ const HomePage = () => {
       }
       };
       const handleDeleteAccount = async () => {
-        handleClose();
         try {
-            const options = {
-                apiPath: '/requestDeletion',
-                method: 'PUT',
-                data: { userId, userType },
-            };
-            const response = await NetworkService.request(options);
+          console.log(userId,userType);
 
-            if (response.success) {
-                setSuccess("Account deletion requested successfully.");
-            } else {
-                setError(response.message || "Account deletion request failed.");
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
-        }
+          const options = {
+              apiPath: `/requestDeletion/${userId}/${userType}`,
+              useParams:userId,userType,
+            };
+          const response = await NetworkService.put(options);
+          console.log(response);
+
+          if (response.success) {
+              setSuccess("Account deletion requested successfully.");
+          } else {
+              setError(response.message || "Account deletion request failed.");
+          }
+      } catch (err) {
+          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+      }
     };
   return (
     <div className="homepage">

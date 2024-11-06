@@ -15,6 +15,7 @@ const TourGuideHP = () => {
     const { User } = location.state || {};
     const [success, setSuccess] = useState();
     const [error, setError] = useState();
+    console.log(User)
     const initialUsername = User.username;
     const userId = User._id;
     const userType = User.type;
@@ -50,7 +51,7 @@ const TourGuideHP = () => {
                 const response = await NetworkService.get(options);
                 setSuccess(response.message);
                 const TourGuideItinerary = response;
-                navigate(`/viewCreatedItineraryList`, { state: { TourGuideItinerary, userId } });
+                navigate(`/viewCreatedItineraryList`, { state: {TourGuideItinerary: TourGuideItinerary, User:User } });
             } catch (err) {
                 setError(err.response?.data?.message || 'An unexpected error occurred.');
             }
@@ -60,14 +61,15 @@ const TourGuideHP = () => {
     }
 
     const handleDeleteAccount = async () => {
-        handleClose();
         try {
+            console.log(userId,userType);
+
             const options = {
-                apiPath: '/requestDeletion',
-                method: 'PUT',
-                data: { userId, userType },
-            };
-            const response = await NetworkService.request(options);
+                apiPath: `/requestDeletion/${userId}/${userType}`,
+                useParams:userId,userType,
+              };
+            const response = await NetworkService.put(options);
+            console.log(response);
 
             if (response.success) {
                 setSuccess("Account deletion requested successfully.");

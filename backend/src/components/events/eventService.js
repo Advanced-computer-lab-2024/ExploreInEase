@@ -516,6 +516,15 @@ const getAllHistoricalTags = async () => {
 const getHistoricalTagDetails = async (tagId) => {
   return await eventRepository.getHistoricalTagDetails(tagId);
 }
+
+
+
+
+const updateItineraryActivation = async (itineraryId, isActivated, userId, userType) => {
+ 
+
+  return await eventRepository.updateItineraryActivation(itineraryId, isActivated, userId);
+};
 module.exports = {
   getHistoricalTagDetails,
   getUserEvents,
@@ -550,6 +559,7 @@ module.exports = {
   getFilteredItineraries,
   getFilteredHistoricalPlaces,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  updateItineraryActivation
 };
 

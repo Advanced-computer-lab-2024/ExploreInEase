@@ -10,8 +10,15 @@ import DatePicker from "react-datepicker";
 
 const ItineraryList = () => {
   const location = useLocation();
-  const TourGuideItinerary = location.state?.TourGuideItinerary || { Itineraries: [] };
-  const userId = location.state?.userId || null;
+  const { TourGuideItinerary,User } = location.state || {};
+  console.log(User)
+  console.log(TourGuideItinerary)
+
+  const userId = User._id
+  const userType = User.type
+  const itineraryId = TourGuideItinerary.Itineraries[0]._id
+  console.log(itineraryId)
+
   const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary.Itineraries);
   const [activitiesData, setActivitiesData] = useState({});
   const [selectedActivity, setSelectedActivity] = useState(null);
@@ -20,13 +27,15 @@ const ItineraryList = () => {
   const [newDate, setNewDate] = useState(null);
   const [removeDateModalOpen, setRemoveDateModalOpen] = useState(false);
   const [dateToRemove, setDateToRemove] = useState(null);
+  const [error, setError] = useState();
+
 
   const getLocationName = async (lat, lng) => {
     const provider = new OpenStreetMapProvider();
     const result = await provider.search({ query: `${lat}, ${lng}` });
     return result && result.length > 0 ? result[0].label : "Unknown location";
   };
-
+console.log(itinerariesData[0].isActivated)
   useEffect(() => {
     const fetchActivities = async () => {
       const allActivitiesPromises = [];
@@ -104,6 +113,8 @@ const ItineraryList = () => {
       ...prevData,
       [name]: value,
     }));
+    
+    toggleStatus(itineraryId,itinerariesData[0].isActivated)
   };
 
   const handleDateChange = (dates) => {
@@ -186,26 +197,15 @@ const ItineraryList = () => {
   };
 
   const toggleStatus = async (itineraryId, currentStatus) => {
-    const newStatus = currentStatus === "Activated" ? 1 : 0;
+    const newStatus = currentStatus == 0 ? 1 : 0;
     try {
       const options = {
-        apiPath: `/updateItineraryActivation`,
-        body: {
-          itineraryId,
-          isActivated: newStatus,
-          userId,
-          userType: "tour guide"
-        }
+          apiPath: `/updateItineraryActivation/${itineraryId}/${newStatus}/${userId}/${userType}`,
       };
-      await NetworkService.put(options);
-      setItinerariesData((prev) =>
-        prev.map((itinerary) =>
-          itinerary._id === itineraryId ? { ...itinerary, status: newStatus } : itinerary
-        )
-      );
-    } catch (error) {
-      console.error("Error toggling status:", error);
-    }
+      const response = await NetworkService.put(options);
+  } catch (err) {
+      setError(err.response?.data?.message || 'An unexpected error occurred.');
+  }
   };
   
 
@@ -228,7 +228,7 @@ const ItineraryList = () => {
             <p><strong>Drop Off Location:</strong> {itinerary.dropoffLocation}</p>
             <p><strong>Price:</strong> {itinerary.price}</p>
             <p><strong>Ratings:</strong> {itinerary.ratings || "0"}</p>
-            <p><strong>isActivated( 1 for Yes , 0 for No ):</strong> {itinerary.isActivated}</p>
+            <p><strong>Active:</strong> {itinerary.isActivated}</p>
             <br />
             <h4>Activities:</h4>
             <div className="activity-details">

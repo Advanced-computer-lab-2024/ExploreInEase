@@ -803,6 +803,40 @@ const getHistoricalTagDetails = async (req, res) => {
       .json({ error: "An error occurred", details: error.message });
   }
 }
+
+
+const updateItineraryActivation = async (req, res) => {
+  
+  const { itineraryId, isActivated, userId, userType } = req.params;
+
+console.log(itineraryId, isActivated, userId, userType )
+  
+  if (!itineraryId || isActivated === undefined || !userId || !userType) {
+      return res.status(400).json({ message: "Itinerary ID, activation status, user ID, and userType are required." });
+  }
+  if (userType !== 'tourGuide') {
+    throw new Error('Only tour guides can update itineraries.');
+  }
+  if ( (isActivated !== 0 && isActivated !== 1)) {
+      return res.status(400).json({ error: 'isActivated must be 0 (deactivate) or 1 (activate)' });
+  }
+
+  try {
+      const updatedItinerary = await eventService.updateItineraryActivation(itineraryId, isActivated, userId, userType);
+      if (!updatedItinerary) {
+          return res.status(404).json({ message: 'Itinerary not found or not created by this user.' });
+      }
+      return res.status(200).json(updatedItinerary);
+  } catch (error) {
+      console.error('Error updating itinerary activation:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
 module.exports = {
   getHistoricalTagDetails,
   getUserEvents,
@@ -835,6 +869,7 @@ module.exports = {
   getAllItineraries,
   getAllActivities,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  updateItineraryActivation
   };
   
