@@ -16,8 +16,10 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-
-
+import { useEffect,useState } from 'react';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 //component imports
 
  import ComplaintsTable from './AdminComplaintsTable';
@@ -28,10 +30,67 @@ import EventsAndItineraries from './EventsAndItenararies';
 
 const drawerWidth = 240;
 
+
+
 function ResponsiveDrawer(props) {
   const { window } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [isClosing, setIsClosing] = React.useState(false);
+  const [mobileOpen, setMobileOpen] =useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const [collapseOpen, setCollapseOpen] = useState(false);
+
+  const handleCollapseToggle = () => {
+    setCollapseOpen(!collapseOpen);
+  };
+
+  const [ openTab , setOpenTab ] = useState('ComplaintsTable');
+
+  const [tab, setTab] = useState(<ComplaintsTable />);
+
+
+  useEffect(() => {
+
+    console.log(localStorage.getItem('openTab'));
+
+    
+
+    const tab = () => {
+      localStorage.getItem('openTab') && setOpenTab(localStorage.getItem('openTab'));
+
+      console.log('openTab', openTab);
+
+      switch(openTab){
+        case 'ComplaintsTable':
+          setTab(<ComplaintsTable />);
+          return <ComplaintsTable />
+        case 'DeletionRequests':
+          setTab(<DeletionRequests />);
+          return <DeletionRequests />
+        case 'EventsAndItineraries':
+          setTab(<EventsAndItineraries />);
+          return <EventsAndItineraries />
+        case 'RegistringUsers':
+          setTab(<RegistringUsers />);
+          return <RegistringUsers />
+        default:
+          setTab(<ComplaintsTable />);
+          return <ComplaintsTable />
+      }
+    }
+
+    tab();
+
+   
+
+  }, [openTab]);
+
+  const handleTabChange = (tab) => {
+    setOpenTab(tab);
+    localStorage.setItem('openTab', tab);
+
+    console.log('openTab', openTab);
+  }
+
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -53,25 +112,30 @@ function ResponsiveDrawer(props) {
       <Toolbar />
       <Divider />
       <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        <ListItemButton onClick={handleCollapseToggle}>
+          <ListItemText primary="Admin Options" />
+          {collapseOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers'].map((text) => (
+              <ListItemButton
+                key={text}
+                sx={{ pl: 4 }}
+                onClick={() => handleTabChange(text)}
+              >
+                <ListItemText primary={text} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Collapse>
       </List>
       <Divider />
       <List>
         {['All mail', 'Trash', 'Spam'].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
+              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
           </ListItem>
@@ -146,10 +210,12 @@ function ResponsiveDrawer(props) {
         sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` },marginTop: "50px" }}
       >
 
+
+          {tab}
         {/* <ComplaintsTable /> */}
         {/* <DeletionRequests /> */}
         {/* <EventsAndItineraries /> */}
-        <RegistringUsers />
+        {/* <RegistringUsers /> */}
         
       </Box>
     </Box>
