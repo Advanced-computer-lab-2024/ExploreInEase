@@ -36,12 +36,30 @@ const getAvailableProducts = async (req, res) => {
 
     try {
         const products = await checkoutService.getAvailableProducts();
-        res.status(200).json({message: "Fetched successfully!",Products: products});
+        console.log(products);
+        const allActiveProducts = products.filter(product => product.isActive === true);
+        res.status(200).json({message: "Fetched successfully!",Products: allActiveProducts});
         } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
+const getArchivedProducts = async (req, res) => {
+    const {userId} = req.params;
+    const type = await checkoutRepository.getType(userId);
+    if (type !== 'admin' && type !== 'seller') 
+    {
+        return res.status(400).json(type);
+    }
+
+    try {
+        const products = await checkoutService.getAvailableProducts();
+        const allArchivedProducts = products.filter(product => product.isActive === false);
+        res.status(200).json({message: "Fetched Archived Products successfully!",Products: allArchivedProducts});
+        } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 const getProductsByPriceRange = async (req, res) => {
     const {userId} = req.params;
@@ -176,7 +194,70 @@ const uploadImage = async (req, res) => {
     }
 };
 
+const archiveProduct = async (req, res) => {
+    const { productId, userId } = req.params;
+    const type = await checkoutRepository.getType(userId);
+    if (type !== 'admin' && type !== 'seller') {
+        return res.status(400).json({ message: 'Invalid user type' });
+    }
+
+    try {
+        const product = await checkoutService.getProductById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        await checkoutService.archiveProduct(product);
+        return res.status(200).json({message: "Product archived/unarchived"});
+    }
+    catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+
+const availableQuantityAndSales = async (req, res) => {
+    const { userType, productId, currency } = req.params;
+    console.log(req.params);
+
+    if (!userType || !["admin", "seller"].includes(userType)) {
+        return res.status(400).json({
+            success: false,
+            message: 'User type must be "admin" or "seller".',
+        });
+    }
+
+    if (!productId || typeof productId !== 'string') {
+        return res.status(400).json({
+            success: false,
+            message: 'Product ID is required and must be a valid string.',
+        });
+    }
+
+    const validCurrencies = ["euro", "dollar", "EGP"];
+    if (!currency || !validCurrencies.includes(currency)) {
+        return res.status(400).json({
+            success: false,
+            message: `Currency must be one of the following: ${validCurrencies.join(', ')}.`,
+        });
+    }
+
+    try {
+        const result = await checkoutService.calculateSalesAndAvailability(userType, productId, currency);
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 module.exports = {
+    availableQuantityAndSales,
+    archiveProduct,
+    getArchivedProducts,
     uploadImage,
     addProduct,
     getAvailableProducts,

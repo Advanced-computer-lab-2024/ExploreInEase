@@ -537,6 +537,10 @@ const checkoutController = require('../checkouts/checkoutController');
 
 router.post('/addProduct/:userId', checkoutController.addProduct);
 router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProducts);
+router.get('/getArchivedProducts/:userId', checkoutController.getArchivedProducts);
+router.put('/archiveProduct/:userId/:productId', checkoutController.archiveProduct);
+router.get('/availableQuantityAndSales/:userType/:productId/:currency', checkoutController.availableQuantityAndSales);
+
 router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange);
 router.put('/editProducts/:userId/:productId', checkoutController.updateProduct);
 router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSortedByRatings);

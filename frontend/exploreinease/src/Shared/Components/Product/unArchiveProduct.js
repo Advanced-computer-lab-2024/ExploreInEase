@@ -14,14 +14,13 @@ import {
   Add as AddIcon,
 } from '@mui/icons-material';
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
-import ArchiveIcon from '@mui/icons-material/Archive';
-import InfoIcon from '@mui/icons-material/Info';
+import ArchiveIcon from '@mui/icons-material/Unarchive';
 
 
 
-const ProductCard = () => {
+const UnarchiveProduct = () => {
   const location = useLocation();
-  const { Product, User, currency } = location.state || {};
+  const { Product, User } = location.state || {};
   const userId = User ? User._id : null;
   
   const [products, setProducts] = useState([]);
@@ -32,18 +31,10 @@ const ProductCard = () => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isArchiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [isSalesDialogOpen, setSalesDialogOpen] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [messageContent, setMessageContent] = useState('');
   const [messageType, setMessageType] = useState('success');
   const [selectedProductId, setSelectedProductId] = useState(null);
-
-  const [selectedProductName, setSelectedProductName] = useState('');
-  const [selectedProductPrice, setSelectedProductPrice] = useState('');
-  const [selectedProductSales, setSelectedProductSales] = useState('');
-  const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
 
 
   const [productData, setProductData] = useState({
@@ -79,42 +70,11 @@ const ProductCard = () => {
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
   const handleRatingMinChange = (event) => setRatingFilter([Number(event.target.value), ratingFilter[1]]);
   const handleRatingMaxChange = (event) => setRatingFilter([ratingFilter[0], Number(event.target.value)]);
-  
   const handleOpenFilterDialog = () => setFilterDialogOpen(true);
   const handleCloseFilterDialog = () => setFilterDialogOpen(false);
-
-  const handleOpenCreateDialog = () => setCreateDialogOpen(true);
-
   const handleOpenArchiveDialog = () => setArchiveDialogOpen(true);
   const handleCloseArchiveDialog = () => setArchiveDialogOpen(false);
 
-  const handleOpenSalesDialog = () => setSalesDialogOpen(true);
-  const handleCloseSalesDialog = () => setSalesDialogOpen(false);
-
-
-  const handleSalesDetails = async (productId) => {
-    try {
-      console.log(User.type);
-      // Replace with your API endpoint
-      const options = {
-        apiPath: '/availableQuantityAndSales/{userType}/{productId}/{currency}',
-        urlParam: { userType: User.type , productId: productId, currency: "EGP"},
-      }
-      const response = await NetworkService.get(options);
-      console.log(response);
-      const product = products.find((product) => product._id === productId);
-      if (!product) {
-        throw new Error('Product not found');
-      }
-      setSelectedProductName(product.name);
-      setSelectedProductPrice(product.price);
-      setSelectedProductSales(response.data.sales);
-      setSelectedProductQuantity(response.data.availableQuantity);
-      setSalesDialogOpen(true);
-    } catch (error) {
-      console.error('Failed to get product details:', error);
-    }
-  };
   const handleArchiveProduct = async (productId) => {
     try {
       // Replace with your API endpoint
@@ -130,7 +90,7 @@ const ProductCard = () => {
       setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
       handleCloseArchiveDialog();
     } catch (error) {
-      console.error('Failed to archive product:', error);
+      console.error('Failed to UnArchive product:', error);
     }
   };
   const handleViewReviews = () => {
@@ -140,105 +100,6 @@ const ProductCard = () => {
   // Function to close the dialog
   const handleCloseDialog = () => {
     setDialogOpen(false);
-  };
-
-  const handleOpenEditDialog = (product) => {
-    setProductData(product);
-    setEditDialogOpen(true);
-  };
-
-  const handleCloseDialogs = () => {
-    setCreateDialogOpen(false);
-    setEditDialogOpen(false);
-    setProductData({
-      _id: null,
-      name: '',
-      price: '',
-      description: '',
-      sellerType: '',
-      ratings: '',
-      originalQuantity: '',
-      picture: null,
-    });
-    setErrors({});
-  };
-
-  const validateForm = () => {
-    let formErrors = {};
-    if (!productData.name) formErrors.name = 'Name is required';
-    if (!productData.price) formErrors.price = 'Price is required';
-    else if (productData.price < 0) formErrors.price = 'Price must be a positive number';
-    if (!productData.description) formErrors.description = 'Description is required';
-    if (!productData.originalQuantity) formErrors.originalQuantity = 'Quantity is required';
-    setErrors(formErrors);
-    return Object.keys(formErrors).length === 0;
-  };
-
-  const handleCreateSubmit = async () => {
-    if (validateForm()) {
-      try {
-        const productDataToSend = {
-          price: productData.price,
-          description: productData.description,
-          originalQuantity: productData.originalQuantity,
-          name: productData.name,
-        };
-        const options = {
-          apiPath: '/addProduct/{userId}',
-          urlParam: { userId },
-          body: productDataToSend,
-        };
-        const response = await NetworkService.post(options);
-        console.log(response);
-        const newProduct = { ...productData, _id: response.product._id, picture: productData.picture ? URL.createObjectURL(productData.picture) : '' };
-        setProducts([...products, newProduct]);
-        setMessageContent('Product added successfully!');
-        setMessageType('success');
-        handleCloseDialogs();
-      } catch (error) {
-        console.error("Error during API request:", error);
-        setMessageContent('Error occurred while adding product.');
-        setMessageType('error');
-      } finally {
-        setMessageDialogOpen(true);
-      }
-    }
-  };
-
-  const handleEditSubmit = async () => {
-    if (validateForm()) {
-      try {
-        const productDataToSend = {
-          price: productData.price,
-          description: productData.description,
-          originalQuantity: productData.originalQuantity,
-          name: productData.name,
-        };
-
-        const options = {
-          apiPath: '/editProducts/{userId}/{_id}',
-          urlParam: { userId, _id: productData._id },
-          body: productDataToSend,
-        };
-        const response = await NetworkService.put(options);
-        console.log(response);
-        const updatedProducts = products.map(product =>
-          product._id === productData._id
-            ? { ...productData }
-            : product
-        );
-        setProducts(updatedProducts);
-        setMessageContent('Product updated successfully!');
-        setMessageType('success');
-        handleCloseDialogs();
-      } catch (error) {
-        console.error("Error during API request:", error);
-        setMessageContent('Error occurred while updating product.');
-        setMessageType('error');
-      } finally {
-        setMessageDialogOpen(true);
-      }
-    }
   };
 
   const handleInputChange = async (e, productId) => {
@@ -251,14 +112,6 @@ const ProductCard = () => {
       await handleUploadImage(productId, files[0]); // Upload the image with productId
     }
   };
-
-  const handleCreateChange = async (e) => {
-    const { name, value } = e.target;
-    setProductData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  }
   
   const handleUploadImage = async (_id, file) => {
     console.log('Product ID:', _id);
@@ -426,29 +279,7 @@ const ProductCard = () => {
               <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Quantity: {product.originalQuantity}</Typography>
               <Typography variant="body2" color="text.secondary">Ratings: {product.ratings}</Typography>
             </CardContent>
-            
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 140,
-                right: 8,
-                display: 'flex',
-                gap: 1, // Space between icons
-              }}
-            >
-              <Tooltip title="Sales" placement="top" arrow>
-                <IconButton 
-                  onClick={() => { 
-                    setSelectedProductId(product._id); 
-                    handleOpenSalesDialog(); 
-                    handleSalesDetails(product._id);
-                  }} 
-                  sx={{ color: 'black' }}
-                >
-                  <InfoIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
+    
             {/* Icon Buttons at the bottom-right corner */}
             <Box
               sx={{
@@ -464,12 +295,7 @@ const ProductCard = () => {
                   <RateReviewIcon />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Edit" placement="top" arrow>
-              <IconButton onClick={() => handleOpenEditDialog(product)} sx={{ color: '#1976d2' }}>
-                <EditIcon />
-              </IconButton>
-              </Tooltip>
-              <Tooltip title="Archive" placement="top" arrow>
+              <Tooltip title="Unarchive" placement="top" arrow>
                 <IconButton 
                   onClick={() => { 
                     setSelectedProductId(product._id); 
@@ -482,34 +308,10 @@ const ProductCard = () => {
               </Tooltip>
             </Box>
           </Card>
+        </Grid>
+  ))}
+</Grid>
 
-          {/* Archive Confirmation Dialog */}
-        <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
-          <DialogTitle>Confirm Archive</DialogTitle>
-          <DialogContent>
-            <Typography>Are you sure you want to archive this product?</Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseArchiveDialog} color="primary">Cancel</Button>
-            <Button onClick={() => handleArchiveProduct(selectedProductId)} color="error">Yes, Archive</Button>
-            </DialogActions>
-        </Dialog>
-
-                  {/* Sales Details Dialog */}
-                  <Dialog open={isSalesDialogOpen} onClose={handleCloseSalesDialog} fullWidth maxWidth="xs">
-          <DialogTitle>Product Details</DialogTitle>
-          <DialogContent>
-          <Typography><strong>Product Name:</strong> {selectedProductName}</Typography>
-          <Typography><strong>Product Price:</strong> ${selectedProductPrice}</Typography>
-          <Typography><strong>Product Sales:</strong> {selectedProductSales}</Typography>
-          <Typography><strong>Product Quantity:</strong> {selectedProductQuantity}</Typography>
-
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseSalesDialog} color="primary">Done</Button>
-            </DialogActions>
-        </Dialog>
-    
           {/* Reviews Dialog */}
           <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
             <DialogTitle>Reviews</DialogTitle>
@@ -522,120 +324,17 @@ const ProductCard = () => {
               </Button>
             </DialogActions>
           </Dialog>
-        </Grid>
-  ))}
-</Grid>
-      {/* Create Product Dialog */}
-      <Dialog open={createDialogOpen} onClose={handleCloseDialogs} fullWidth>
-        <DialogTitle>Create Product</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Fill out the form to add a new product.
-          </DialogContentText>
-          <TextField
-            label="Name"
-            name="name"
-            value={productData.name}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.name)}
-            helperText={errors.name}
-          />
-          <TextField
-            label="Price"
-            name="price"
-            type="number"
-            value={productData.price}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.price)}
-            helperText={errors.price}
-          />
-          <TextField
-            label="Description"
-            name="description"
-            value={productData.description}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.description)}
-            helperText={errors.description}
-          />
-          <TextField
-            label="Quantity"
-            name="originalQuantity"
-            type="number"
-            value={productData.originalQuantity}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.originalQuantity)}
-            helperText={errors.originalQuantity}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialogs} color="secondary">Cancel</Button>
-          <Button onClick={handleCreateSubmit} color="primary">Add Product</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Edit Product Dialog */}
-      <Dialog open={editDialogOpen} onClose={handleCloseDialogs} fullWidth>
-        <DialogTitle>Edit Product</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Modify the fields to update product details.
-          </DialogContentText>
-          <TextField
-            label="Name"
-            name="name"
-            value={productData.name}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.name)}
-            helperText={errors.name}
-          />
-          <TextField
-            label="Price"
-            name="price"
-            type="number"
-            value={productData.price}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.price)}
-            helperText={errors.price}
-          />
-          <TextField
-            label="Description"
-            name="description"
-            value={productData.description}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.description)}
-            helperText={errors.description}
-          />
-          <TextField
-            label="Quantity"
-            name="originalQuantity"
-            type="number"
-            value={productData.originalQuantity}
-            onChange={handleCreateChange}
-            fullWidth
-            margin="normal"
-            error={Boolean(errors.originalQuantity)}
-            helperText={errors.originalQuantity}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialogs} color="secondary">Cancel</Button>
-          <Button onClick={handleEditSubmit} color="primary">Update</Button>
-        </DialogActions>
-      </Dialog>
+          {/* Archive Confirmation Dialog */}
+          <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
+  <DialogTitle>Confirm Unarchive</DialogTitle>
+  <DialogContent>
+    <Typography>Are you sure you want to Unarchive this product?</Typography>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseArchiveDialog} color="primary">Cancel</Button>
+    <Button onClick={() => handleArchiveProduct(selectedProductId)} color="error">Yes, Unarchive</Button>
+  </DialogActions>
+</Dialog>
 
       {/* Message Dialog */}
       <Dialog open={messageDialogOpen} onClose={() => setMessageDialogOpen(false)}>
@@ -648,19 +347,8 @@ const ProductCard = () => {
         </DialogActions>
       </Dialog>
 
-      <Tooltip title="Create" placement="top" arrow>
-      <Fab
-        color="primary"
-        aria-label="add"
-        onClick={handleOpenCreateDialog}
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
-      >
-        <AddIcon />
-      </Fab>
-      </Tooltip>
-
     </Box>
   );
 };
 
-export default ProductCard;
+export default UnarchiveProduct;

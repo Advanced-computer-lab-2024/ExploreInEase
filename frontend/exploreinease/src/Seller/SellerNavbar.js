@@ -107,6 +107,7 @@ const HomePage = () => {
         }
       }
       else {
+        if (title=="View List of Available Products"){
         try {
           const options = {
             apiPath: `/getAvailableProducts/${userId}`,
@@ -126,6 +127,27 @@ const HomePage = () => {
           }
         }
       }
+      else{
+        try {
+          const options = {
+            apiPath: `/getArchivedProducts/${userId}`,
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const Product=response.Products;
+          const Type='Seller';
+          navigate(`/unArchiveProduct`,{ state: { Product, Type ,User:User} });          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
+      }
+    }
       };
   return (
     <div className="homepage">
@@ -139,6 +161,8 @@ const HomePage = () => {
           <span className="website-name">ExploreInEase</span>
         </div>
         <div className="nav-links">
+        <button onClick={() => handleClick("View Archived Products")}
+              className="small-button">View Archived Products</button>
           <button onClick={() => handleClick("View List of Available Products")}
               className="small-button">View List of Available Products</button>
           <button onClick={() => handleClick("Add Product")}

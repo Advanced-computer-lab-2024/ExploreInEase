@@ -72,7 +72,51 @@ const uploadImage = async (productId, file) => {
     return { message: 'Image uploaded successfully', imageUrl: imageUrl };
 };
 
+const archiveProduct = async (product) => {
+     await checkoutRepository.archiveProduct(product);
+};
+
+const calculateSalesAndAvailability = async (userType, productId, currency) => {
+
+    const product = await checkoutRepository.getProductById2(productId);
+    
+
+    if (!product) {
+        throw new Error('Product not found'); 
+    }
+
+    const { price, originalQuantity, takenQuantity } = product;
+    const availableQuantity = originalQuantity - takenQuantity; 
+
+    
+    let sales = price * takenQuantity;
+
+    switch (currency) {
+        case 'euro':
+            sales = (sales / 55).toFixed(2); 
+            break;
+        case 'dollar':
+            sales = (sales / 50).toFixed(2); 
+            break;
+        case 'EGP':
+            sales = sales.toFixed(2); 
+            break;
+        default:
+            throw new Error('Invalid currency'); 
+    }
+    
+    
+    sales = parseFloat(sales);
+
+    return {
+        sales,
+        availableQuantity,
+    };
+};
+
 module.exports = {
+    calculateSalesAndAvailability,
+    archiveProduct,
     uploadImage,
     addProduct,
     getAvailableProducts,

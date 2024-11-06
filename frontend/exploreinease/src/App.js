@@ -34,7 +34,7 @@ const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar
 const SignIn = React.lazy(() => import("./Login/login"));
 const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"))
 const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"))
-
+const UnArchiveProduct = React.lazy(() => import("./Shared/Components/Product/unArchiveProduct"));
 const App = () => {
 
   return (
@@ -73,6 +73,7 @@ const App = () => {
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/unArchiveProduct" element={<UnArchiveProduct />} />
         </Routes>
       </Suspense>
     </Router>

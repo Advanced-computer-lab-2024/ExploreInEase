@@ -102,6 +102,15 @@ const AdminNavbar = () => {
                 }
               }
             }
+            else if (title === "UnArchive Products") {
+                options = { apiPath: `/unArchiveProducts/${adminId}` };
+                response = await NetworkService.get(options);
+                setSuccess(response.message);
+                console.log(response);
+                const Product = response.Products;
+                const Type = 'admin';
+                navigate('/unArchiveProduct', { state: { Product, Type, User:tourist } });
+            }
             else {
                 options = { apiPath: `/getAvailableProducts/${adminId}` };
                 response = await NetworkService.get(options);
@@ -134,6 +143,7 @@ const AdminNavbar = () => {
                     <span className="website-name">ExploreInEase</span>
                 </div>
                 <div className="nav-links">
+                    <button onClick={() => handleClick("unArchive Products")} className="small-button"> View UnArchive Products</button>
                     <button onClick={() => handleClick("CRUD Activity Category")} className="small-button">CRUD Activity Category</button>
                     <button onClick={() => handleClick("CRUD Preference Tag")} className="small-button">CRUD Preference Tag</button>
                     <button onClick={() => handleClick("Add User")} className="small-button">Add User</button>

@@ -19,7 +19,7 @@ const getAllAvailableProducts = async () => {
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
         })
-        .select('picture price description ratings reviews name originalQuantity sellerId') // Include sellerId for population
+        .select('picture price description ratings reviews name originalQuantity sellerId isActive') // Include sellerId for population
         .populate({
             path: 'sellerId',
             select: 'type' // Only select the 'type' field from the User (seller)
@@ -64,12 +64,17 @@ const getProductsByPriceRange = async (minPrice, maxPrice) => {
 
 const getProductById = async (productId) => {
     try {
-        const product = await Product.findOne({ _id: productId })
+        const product = await Product.findOne({ _id: productId }).select(' picture price description sellerId ratings reviews originalQuantity name isActive').populate('sellerId', 'name type');
         console.log("product: ", product)
         return product;
     } catch (error) {
         throw new Error(`Error fetching product by ID: ${error.message}`);
     }
+};
+
+const getProductById2 = async (productId) => {
+    
+    return await Product.findOne({ _id :productId }).exec();
 };
 
 
@@ -154,7 +159,18 @@ const uploadImage = async (productId, fileName, fileBuffer) => {
     }
 };
 
+const archiveProduct = async (product) => {
+    if (product.isActive == true) {
+        product.isActive = false;
+    } else {
+        product.isActive = true;
+    }
+    await product.save();
+};
+
 module.exports = {
+    getProductById2,
+    archiveProduct,
     uploadImage,
     updateProductImage,
     addProduct,
