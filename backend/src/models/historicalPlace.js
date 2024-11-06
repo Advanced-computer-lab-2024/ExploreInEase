@@ -49,6 +49,19 @@ const historicalPlaceSchema = new Schema({
       required: true,
     },
   },
+  ratingSum: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
+  comments: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }, // Comments related to the itinerary
+    text: { type: String, required: true },
+    date: { type: Date, default: Date.now },
+  }],
   createdAt: {
     type: Date,
     default: Date.now,
