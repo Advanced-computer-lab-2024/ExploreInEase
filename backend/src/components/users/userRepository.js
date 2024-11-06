@@ -177,6 +177,187 @@ const login = async (username, password) => {
     }
 }
 
+// Check if the itinerary was completed by the tourist (after date passed and booked)
+const hasCompletedItinerary = async (touristId, ItineraryId, guideId) => {
+    try {
+        // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourGuide
+        const tourist = await Tourist.findOne({
+            _id: touristId,
+            itineraryId: { $elemMatch: { id: ItineraryId } }
+        });
+
+        const itinerary = await Itinerary.findOne ({ _id: ItineraryId, created_by: guideId });
+        if (!tourist){
+            throw new Error("Itinerary does not belong to the specified tourist");
+        }
+        else if(!itinerary) {
+            throw new Error("Itinerary is not found or does not belong to the specified tour guide");
+        }
+        else{
+            // Check if any of the itinerary dates have passed
+            const now = new Date();
+            const hasDatePassed = itinerary.dateTimeAvailable.some(date => date < now);
+            if (!hasDatePassed) {
+                // If no dates have passed, the itinerary isn't considered completed
+                return false;
+            }
+            return true;
+        }        
+
+    } catch (error) {
+        console.error("Error checking itinerary completion:", error);
+        throw error;
+    }
+};
+
+const updateTourGuideComments = async (tourGuideId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedTourGuide = await Users.findByIdAndUpdate(
+            tourGuideId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedTourGuide) {
+            throw new Error("Tour guide not found or could not be updated.");
+        }
+
+        return updatedTourGuide;
+    } catch (error) {
+        console.error("Error updating tour guide comments:", error);
+        throw error;
+    }
+};
+
+const updateTourGuideRatings = async (tourGuideId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedTourGuide = await Users.findByIdAndUpdate(
+            tourGuideId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedTourGuide) {
+            throw new Error("Tour guide not found or could not be updated.");
+        }
+
+        return updatedTourGuide;
+    } catch (error) {
+        console.error("Error updating tour guide ratings:", error);
+        throw error;
+    }
+};
+
+const updateItineraryComments = async (itineraryId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedItinerary = await Itinerary.findByIdAndUpdate(
+            itineraryId,
+            updatedFields,
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+        
+        if (!updatedItinerary) {
+            throw new Error("Itinerary not found or could not be updated.");
+        }
+
+        return updatedItinerary;
+    } catch (error) {
+        console.error("Error updating itinerary comments:", error);
+        throw error;
+    }
+};
+
+const updateItineraryRatings = async (itineraryId, updatedFields) => {
+    try {
+        const updatedItinerary = await Itinerary.findByIdAndUpdate(
+            itineraryId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedItinerary) {
+            throw new Error("Itinerary not found or could not be updated.");
+        }
+
+        return updatedItinerary;
+    } catch (error) {
+        console.error("Error updating itinerary ratings:", error);
+        throw error;
+    }
+};
+
+// Check if the activty was completed by the tourist (after date passed and booked)
+const hasAttendedActivity = async (touristId, ActivityId) => {
+    try {
+        // Step 1: Retrieve the itinerary to check if its date has passed and if it was created by the specified tourGuide
+        const tourist = await Tourist.findOne({
+            _id: touristId,
+            activityId: { $elemMatch: { id: ActivityId } }
+        });        
+        if (!tourist) {
+            throw new Error("No such activity exists or the tourist did not sign up for this activity");
+        }
+        else{
+            const activity = await Activity.findOne({ _id: ActivityId });
+            // Check if any of the itinerary dates have passed
+            const now = new Date();
+            const hasDatePassed = activity.date < now;
+            console.log(hasDatePassed);
+            if (!hasDatePassed) {
+                // If no dates have passed, the itinerary isn't considered completed
+                return false;
+            }
+            return true;
+        }
+
+    } catch (error) {
+        console.error("Error checking Activity completion:", error);
+        throw error;
+    }
+};
+
+const updateActivityRatings = async (activityId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedActivity = await Activity.findByIdAndUpdate(
+            activityId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedActivity) {
+            throw new Error("Activity not found or could not be updated.");
+        }
+
+        return updatedActivity;
+    } catch (error) {
+        console.error("Error updating Activity ratings:", error);
+        throw error;
+    }
+};
+
+const updateActivityComments = async (activityId, updateOperation) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to apply the update operation (like $push for comments)
+        const updatedActivity = await Activity.findByIdAndUpdate(
+            activityId,
+            updateOperation,
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedActivity) {
+            throw new Error("Activity not found or could not be updated.");
+        }
+
+        return updatedActivity;
+    } catch (error) {
+        console.error("Error updating Activity comments:", error);
+        throw error;
+    }
+};
 
 module.exports = {
     addGovernorOrAdmin,
@@ -194,5 +375,13 @@ module.exports = {
     saveTourist,
     checkUserExists,
     checkUserExistsByEmail,
-    login
+    login,
+    hasCompletedItinerary,
+    updateTourGuideRatings,
+    updateTourGuideComments,
+    updateItineraryComments,
+    updateItineraryRatings,
+    hasAttendedActivity,
+    updateActivityRatings,
+    updateActivityComments
 };
