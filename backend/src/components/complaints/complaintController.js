@@ -6,16 +6,22 @@ const complaintService = require("../complaints/complaintService");
 const fileComplaint = async (req, res) => {
   //console.log("i am here");
   try {
-    const { touristId, problem } = req.body;
+    const { touristId } = req.params;
 
-    if (!touristId || !problem) {
+    const {  problem } = req.params;
+    const {  title } = req.params;
+    console.log(touristId)
+    console.log(problem)
+
+
+    if (!touristId || !problem|| !title) {
       return res.status(400).json({
         success: false,
-        message: "tourist Id and problem description is required.",
+        message: "tourist Id and problem description  is required.",
       });
     }
 
-    const complaint = await complaintService.createComplaint(req.body);
+    const complaint = await complaintService.createComplaint(req.params);
     return res.status(201).json({
       success: true,
       message: "Complaint filed successfully.",
@@ -43,6 +49,8 @@ const AdminViewComplain = async (req, res) => {
     }
 
     const complaints = await complaintService.ViewComplain(adminId);
+
+    console.log(complaints);
 
     if (complaints.length === 0) {
       return res.status(404).json({ message: "No complaints found." });
@@ -186,7 +194,7 @@ const replyToComplaint = async (req, res) => {
 //80
 const getMyComplaints = async (req, res) => {
   try {
-    const { touristId } = req.query;
+    const { touristId } = req.params;
     console.log(touristId);
     if (!touristId) {
       return res.status(400).json({
@@ -198,9 +206,9 @@ const getMyComplaints = async (req, res) => {
     const complaints = await complaintService.getTouristComplaints(touristId);
 
     if (complaints.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No complaints found.",
+      return res.status(200).json({
+        success: true,
+        data: complaints.length,
       });
     }
 

@@ -112,7 +112,7 @@ function ResponsiveDrawer(props) {
       <Toolbar />
       <Divider />
       <List>
-        <ListItemButton onClick={handleCollapseToggle}>
+        {/* <ListItemButton onClick={handleCollapseToggle}>
           <ListItemText primary="Admin Options" />
           {collapseOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
@@ -126,9 +126,48 @@ function ResponsiveDrawer(props) {
               >
                 <ListItemText primary={text} />
               </ListItemButton>
+              
+            ))}
+          </List>
+        </Collapse> */}
+        <ListItemButton onClick={handleCollapseToggle}>
+          <ListItemText primary="Users" />
+          {collapseOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers'].map((text) => (
+              <ListItemButton
+                key={text}
+                sx={{ pl: 4 }}
+                onClick={() => handleTabChange(text)}
+              >
+                <ListItemText primary={text} />
+              </ListItemButton>
+              
             ))}
           </List>
         </Collapse>
+        <ListItemButton onClick={handleCollapseToggle}>
+          <ListItemText primary="Events" />
+          {collapseOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers'].map((text) => (
+              <ListItemButton
+                key={text}
+                sx={{ pl: 4 }}
+                onClick={() => handleTabChange(text)}
+              >
+                <ListItemText primary={text} />
+              </ListItemButton>
+              
+            ))}
+          </List>
+        </Collapse>
+        
+        
       </List>
       <Divider />
       <List>

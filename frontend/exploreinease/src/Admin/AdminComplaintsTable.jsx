@@ -255,7 +255,7 @@ const ComplaintsTable = () => {
               <TableRow>
                 <StyledTableCell align="center">Tourist Name</StyledTableCell>
                 <StyledTableCell align="center">Tourist Email</StyledTableCell>
-                {/* <StyledTableCell align="center">problem</StyledTableCell> */}
+                <StyledTableCell align="center">Title</StyledTableCell>
 
                 <StyledTableCell align="center">Date
                   <Tooltip title={sortOrder === "asc" ? "Sort by Date DESC" : "Sort by Date ASC"} arrow>
@@ -314,7 +314,7 @@ const ComplaintsTable = () => {
                 >
                   <TableCell align="center">{complaint.touristName}</TableCell>
                   <TableCell align="center">{complaint.touristEmail}</TableCell>
-                  {/* <TableCell sx={{maxWidth:"250px"}} align="center">{complaint.problem}</TableCell> */}
+                  <TableCell sx={{maxWidth:"250px"}} align="center">{complaint.title}</TableCell>
 
                   <TableCell align="center">{dayjs(complaint.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
                   <TableCell align="center">{complaint.status}</TableCell>
@@ -340,7 +340,9 @@ const ComplaintsTable = () => {
           <DialogContent>
             <Typography mb={1} variant="body1"><strong>Tourist Name:</strong> {complaintDetails.touristName}</Typography>
             <Typography mb={1} variant="body1"><strong>Tourist Email:</strong> {complaintDetails.touristEmail}</Typography>
+            <Typography mb={1} variant="body1"><strong>Title:</strong> {complaintDetails.title}</Typography>
             <Typography mb={1} variant="body1"><strong>Problem:</strong> {complaintDetails.problem}</Typography>
+
             <Typography mb={1} variant="body1"><strong>Date of Complaint:</strong> {dayjs(complaintDetails.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</Typography>
             <Typography mb={1} variant="body1"><strong>Reply:</strong> {complaintDetails.reply}</Typography>
 
@@ -357,7 +359,9 @@ const ComplaintsTable = () => {
           <DialogContent>
             <Typography mb={1} variant="body1"><strong>Tourist Name:</strong> {complaintDetails.touristName}</Typography>
             <Typography mb={1} variant="body1"><strong>Tourist Email:</strong> {complaintDetails.touristEmail}</Typography>
+            <Typography mb={1} variant="body1"><strong>Title:</strong> {complaintDetails.title}</Typography>
             <Typography mb={1} variant="body1"><strong>Problem:</strong> {complaintDetails.problem}</Typography>
+
             <Typography mb={1} variant="body1"><strong>Date of Complaint:</strong> {dayjs(complaintDetails.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</Typography>
             <Typography mb={1} variant="body1"><strong>Status:</strong> {complaintDetails.status}</Typography>
 

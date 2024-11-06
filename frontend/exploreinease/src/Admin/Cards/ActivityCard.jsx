@@ -2,7 +2,7 @@ import { React, useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Button, IconButton, Tooltip, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@mui/material';
 import { format, parseISO } from 'date-fns';
 import axios from 'axios';
-
+import debounce from 'lodash/debounce';
 import FlagIcon from '@mui/icons-material/Flag';
 
 const ActivityCard = ({ item }) => {
@@ -61,7 +61,6 @@ const ActivityCard = ({ item }) => {
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
       return 'Location not available';
     }
-
     const [longitude, latitude] = coordinates;
 
     // Check cache first
@@ -69,7 +68,6 @@ const ActivityCard = ({ item }) => {
     if (addressCache[cacheKey]) {
       return addressCache[cacheKey];
     }
-
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
@@ -79,15 +77,16 @@ const ActivityCard = ({ item }) => {
           },
         }
       );
-
+      
       if (!response.ok) {
         throw new Error('Geocoding failed');
       }
 
       const data = await response.json();
-
+      
       // Create a readable address from the response
       const address = data.display_name.split(',').slice(0, 3).join(',');
+      addressCache[cacheKey] = address;
 
       // Cache the result
       setAddressCache(prev => ({
@@ -102,25 +101,60 @@ const ActivityCard = ({ item }) => {
       return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
     }
   };
+  const fetchAddressFromAPI = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
+        {
+          headers: {
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error('Geocoding failed');
+      }
+  
+      const data = await response.json();
+      return data.display_name.split(',').slice(0, 3).join(',');
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
+    }
+  };
+  const debouncedFetchAddress = debounce(async (latitude, longitude, setAddress) => {
+
+    console.log(2)
+    const cacheKey = `${latitude},${longitude}`;
+    console.log(3)
+    console.log("cacheKey : ",cacheKey);
+  
+    if (addressCache[cacheKey]) {
+      setAddress(addressCache[cacheKey]);
+    } else {
+      const address = await fetchAddressFromAPI(latitude, longitude);
+      addressCache[cacheKey] = address; 
+      setAddress(address);
+    }
+  }, 300);
   const LocationDisplay = ({ coordinates }) => {
-    const [address, setAddress] = useState('Loading...');
-
+    const [address, setAddress] = useState('Press here to view location...');
+  
     useEffect(() => {
-      const fetchAddress = async () => {
-        const result = await getAddressFromCoordinates(coordinates);
-        setAddress(result);
-      };
-      fetchAddress();
+      if (coordinates && coordinates.latitude && coordinates.longitude) {
+        const { latitude, longitude } = coordinates;
+        debouncedFetchAddress(latitude, longitude, setAddress);
+      }
     }, [coordinates]);
-
+  
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {address}
         <Button
           size="small"
-          onClick=
-          {() => {
-            const [longitude, latitude] = coordinates;
+          onClick={() => {
+            const { latitude, longitude } = coordinates;
             window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
           }}
           style={{ minWidth: 'auto', padding: '4px' }}
@@ -130,6 +164,13 @@ const ActivityCard = ({ item }) => {
       </span>
     );
   };
+  
+
+
+  const location = {
+    latitude:item.location.latitude,
+    longitude:item.location.longitude
+  }
 
   return (
     <Card sx={{ maxWidth: 345, margin: '16px auto', boxShadow: 3, position: 'relative' }}>
@@ -174,27 +215,26 @@ const ActivityCard = ({ item }) => {
           {item.type}
         </Typography>
 
-        <Typography color="text.secondary">Budget: {item.budget}</Typography>
+        <Typography color="text.secondary">Budget: {item.price}</Typography>
 
         <Typography color="text.secondary">
           Date: {format(parseISO(item.date), 'MMMM d, yyyy')}
         </Typography>
 
-        <Typography color="text.secondary">Category: {item.category}</Typography>
+        <Typography color="text.secondary">Category: {item.category.categoryName}</Typography>
 
         <Typography color="text.secondary">
-          Locations: {Array.isArray(item.location[0]) ?
-            item.location.map((loc, index) => (
-              <span key={index}>
-                <LocationDisplay coordinates={loc} />
-                {index < item.location.length - 1 ? ', ' : ''}
-              </span>
-            )) :
-            <LocationDisplay coordinates={item.location} />
-          }
+        Locations: { 
+                              <LocationDisplay coordinates={location} />
+                         }
         </Typography>
 
-        <Typography color="text.secondary">Tags: {item.tags}</Typography>
+        <Typography color="text.secondary">Tags: {item.tags.map((tag, index) => (
+    <span key={tag._id}>
+      {tag.tags}
+      {index < item.tags.length - 1 && ', '}
+    </span>
+  ))}</Typography>
 
         {item.specialDiscount && (
           <Typography color="text.secondary">
