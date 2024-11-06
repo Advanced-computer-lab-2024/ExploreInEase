@@ -5,7 +5,6 @@ const checkoutService = require('../checkouts/checkoutService');
 const availableQuantityAndSales = async (req, res) => {
     const { userType, productId, currency } = req.body;
 
-    // Validation checks
     if (!userType || !["admin", "seller"].includes(userType)) {
         return res.status(400).json({
             success: false,

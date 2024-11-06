@@ -11,11 +11,6 @@ const itinerarySchema = new Schema({
     ref: 'Activity', // Referencing the Activity schema
     required: true,
   }],
-  preftag: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'PreferenceTags', // Referencing the Activity schema
-    required: true,
-  }],
   locations: {
     type: [String], // An array of strings for location names
     required: true,

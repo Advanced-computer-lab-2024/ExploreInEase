@@ -20,16 +20,16 @@ const calculateSalesAndAvailability = async (userType, productId, currency) => {
 
     switch (currency) {
         case 'euro':
-            sales = (sales / 55).toFixed(2); // Adjust sales for Euro and round to 2 decimal places
+            sales = (sales / 55).toFixed(2); 
             break;
         case 'dollar':
-            sales = (sales / 50).toFixed(2); // Adjust sales for Dollar and round to 2 decimal places
+            sales = (sales / 50).toFixed(2); 
             break;
         case 'EGP':
-            sales = sales.toFixed(2); // No change needed for EGP, but round to 2 decimal places
+            sales = sales.toFixed(2); 
             break;
         default:
-            throw new Error('Invalid currency'); // Handle invalid currency
+            throw new Error('Invalid currency'); 
     }
     
     

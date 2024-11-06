@@ -7,6 +7,9 @@ const Tourist = require('../../models/tourist');
 const BookedFlight = require('../../models/bookedFlights');
 const BookedHotel = require('../../models/bookedHotels');
 const Transportation = require('../../models/transportation');
+const HistoricalTags = require('../../models/historicalTag');
+
+
 
 
 const getActivitiesByUserId = async (userId) => {
@@ -535,16 +538,23 @@ const bookTransportation = async (touristId, transportationId) => {
 };
 
 const getAllActivities = async () => {
-  return Activity.find();
+  return Activity.find()
+    .populate('tags')           
+    .populate('category');      
 };
 
 const getAllItineraries = async () => {
-  return Itinerary.find();
+  return Itinerary.find()
+    .populate({
+      path: 'activities',
+      populate: { path: 'category tags' } 
+    });
 };
 
 const getAllHistoricalPlaces = async () => {
-  return HistoricalPlace.find();
+  return HistoricalPlace.find().populate('tags');
 };
+
 
 
 module.exports = {
