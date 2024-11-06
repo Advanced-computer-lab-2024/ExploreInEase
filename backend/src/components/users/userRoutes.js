@@ -1157,4 +1157,6 @@ router.post('/rateActivity/:touristId', userController.rateActivity);
 
 router.post('/commentActivity/:touristId', userController.commentOnActivity);
 
+router.post('/commentHistoricalPlace/:touristId', userController.commentOnHistoricalPlace);
+
 module.exports = router;
