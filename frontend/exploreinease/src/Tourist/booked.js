@@ -70,6 +70,24 @@ import {
     const [budget, setBudget] = useState('');
   
 
+    const getAllBooked=async()=>{
+      try {
+        const touristId=userId;
+
+        const options = { 
+          apiPath: `/bookedEvents/${touristId}`
+         };
+        const response = await NetworkService.get(options);
+          console.log(response);
+          
+      } catch (error) {
+        console.log('Error:', error);
+      }
+    
+    }
+    
+    getAllBooked();
+
     const getAddressFromCoordinates = async (coordinates) => {
       if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
         return 'Location not available';
@@ -365,7 +383,8 @@ import {
         body:{
           activityId:selectedItem.id,
           rating:rating
-        } };
+        }
+       };
           const response = await NetworkService.post(options);
             console.log(response);
             
@@ -375,7 +394,14 @@ import {
       }
       else {
         try {
-          const options = { apiPath: `/rateTourGuide/${userId}` };
+          const options = { 
+            apiPath: `/rateHistoricalPlace/${userId}`,
+            body:{
+              historicalPlaceId:selectedItem.id,
+              rating:rating
+            }
+           };
+           
           const response = await NetworkService.post(options);
             console.log(response);
             
@@ -531,26 +557,9 @@ import {
         <>
           {selectedItem.type === 'Activity' && (
             <>
-                     <div style={{ display: 'flex', alignItems: 'center',  }}>
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
-                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
-                   <InputLabel id="demo-simple-select-label"><strong>what to Rate?</strong> </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          value={rateType}
-                          label="Rate"
-                          onChange={handleChange}
-                          required
-                        >
-                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
-                          <MenuItem value={'activity'}>Activity</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </div>
-                    {(rateType === 'tourGuide' || rateType === 'activity') && (
+           {(
             <div style={{ marginTop: '16px' }}>
-              <Typography variant="body1">Enter rating for {rateType === 'tourGuide' ? 'Tour Guide' : 'Activity'} (out of 5):</Typography>
+              <Typography variant="body1">Enter rating for {'Activity'} (out of 5):</Typography>
               <TextField
               label="Rate"
               type="number"
@@ -603,26 +612,9 @@ import {
           )}
           {selectedItem.type === 'HistoricalPlace' && (
             <>
-                             <div style={{ display: 'flex', alignItems: 'center',  }}>
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
-                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
-                   <InputLabel id="demo-simple-select-label"><strong>what to Rate?</strong> </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          value={rateType}
-                          label="Rate"
-                          onChange={handleChange}
-                          required
-                        >
-                          <MenuItem value={'tourGuide'}>Tour Guide</MenuItem>
-                          <MenuItem value={'event'}>Event</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </div>
-                    {(rateType === 'tourGuide' || rateType === 'event') && (
+                    { (
             <div style={{ marginTop: '16px' }}>
-              <Typography variant="body1">Enter rating for {rateType === 'tourGuide' ? 'Tour Guide' : 'Event'} (out of 5):</Typography>
+              <Typography variant="body1">Enter rating for {'Event'} (out of 5):</Typography>
               <TextField
               label="Rate"
               type="number"

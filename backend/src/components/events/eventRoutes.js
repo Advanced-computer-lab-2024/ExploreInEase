@@ -2592,7 +2592,7 @@ router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDe
 
 //mohamed apis 
 
-router.get('/bookedEvents', eventController.bookedEvents)
+router.get('/bookedEvents/:touristId', eventController.bookedEvents)
 router.put('/bookEvent', eventController.bookEvent);
 router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
 // Route to get city code by city name

@@ -560,7 +560,7 @@ const getAllTags=async ()=>{
               Location: {place.location?.address}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-              Tags: 
+              Tags: {place.tags}
               </Typography>
             </CardContent>
             <CardActions>

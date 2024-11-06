@@ -534,26 +534,36 @@ const bookedEvents = async (touristId) => {
   }
 
   return {
-    itineraries: tourist.itineraryId.map(itinerary => ({
-      ...itinerary.id._doc,
-      pricePaid: itinerary.pricePaid,
-      timeline: itinerary.id.timeline.map(item => item.toString())
-    })),
-    activities: tourist.activityId.map(activity => ({
-      ...activity.id._doc,
-      pricePaid: activity.pricePaid
-    })),
-    historicalPlaces: tourist.historicalplaceId.map(historicalPlace => ({
-      ...historicalPlace.id._doc,
-      pricePaid: historicalPlace.pricePaid
-    })),
-    transportations: tourist.transportationId.map(transportation => ({
-      ...transportation.id._doc,
-      pricePaid: transportation.pricePaid
-    }))
+    itineraries: tourist.itineraryId.length > 0 ? tourist.itineraryId
+      .filter(itinerary => itinerary.id) // Ensure id is defined
+      .map(itinerary => ({
+        ...itinerary.id._doc,
+        pricePaid: itinerary.pricePaid,
+        timeline: itinerary.id.timeline ? itinerary.id.timeline.map(item => item.toString()) : []
+      })) : [],
+      
+    activities: tourist.activityId.length > 0 ? tourist.activityId
+      .filter(activity => activity.id) // Ensure id is defined
+      .map(activity => ({
+        ...activity.id._doc,
+        pricePaid: activity.pricePaid
+      })) : [],
+      
+    historicalPlaces: tourist.historicalplaceId.length > 0 ? tourist.historicalplaceId
+      .filter(historicalPlace => historicalPlace.id) // Ensure id is defined
+      .map(historicalPlace => ({
+        ...historicalPlace.id._doc,
+        pricePaid: historicalPlace.pricePaid
+      })) : [],
+      
+    transportations: tourist.transportationId && tourist.transportationId.length > 0 ? tourist.transportationId
+      .filter(transportation => transportation.id) // Ensure id is defined
+      .map(transportation => ({
+        ...transportation.id._doc,
+        pricePaid: transportation.pricePaid
+      })) : []
   };
 };
-
 
 const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {
   

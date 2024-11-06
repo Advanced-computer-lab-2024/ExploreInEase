@@ -331,6 +331,9 @@ const Filter = () => {
   const handleBudgetChange = (event) => {
     setBudget(event.target.value);
   };
+  const handleSaveBook=(selectedItem)=>{
+    
+  }
   // useEffect(() => {
   //   filteredData.forEach((item) => {
   //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
@@ -606,7 +609,7 @@ const Filter = () => {
                     </div>
                 </DialogContent>
                 <DialogActions>
-                <Button onClick={handleClose} autoFocus>
+                <Button onClick={()=>handleSaveBook(selectedItem)} autoFocus>
                     Book
                   </Button>
                   <Button onClick={handleClose}>Close</Button>

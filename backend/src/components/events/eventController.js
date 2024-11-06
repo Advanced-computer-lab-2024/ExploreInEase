@@ -826,18 +826,17 @@ const getHistoricalTagDetails = async (req, res) => {
 
 const bookedEvents = async (req, res) => {
   try {
-      const { touristId } = req.body;
-
-      
+      const { touristId } = req.params;
       if (!touristId) {
           return res.status(400).json({ error: "touristId is required in the request body" });
       }
-
-     
       const result = await eventService.bookedEvents(touristId);
+      console.log(result);
       return res.status(200).json(result);
   } catch (error) {
+    // console.log(error.message );
       return res.status(500).json({ error: error.message });
+      
   }
 };
 

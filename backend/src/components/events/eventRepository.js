@@ -350,8 +350,8 @@ const createHistoricalPlace = async (data) => {
   return { status: 200, response: { message: "Historical Place created successfully", savedPlace } };
 };
 
-const findTagByTypeAndPeriod = async (type, period) => {
-  return await historicalTags.findOne({ type, period });
+const findTagByTypeAndPeriod = async (type) => {
+  return await historicalTags.findOne({_id:type});
 };
 
 const checkTourismGovernor = async (userId) => {
