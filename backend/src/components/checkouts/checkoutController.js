@@ -153,6 +153,127 @@ const searchProductByName = async (req, res) => {
     }
 };
 
+const rateProduct = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { productId, rating } = req.body;
+
+    try {
+        const result = await checkoutService.rateProduct(touristId,productId,rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const reviewProduct = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { productId, reviewText } = req.body;
+
+    try {
+        const result = await checkoutService.reviewProduct(touristId,productId,reviewText);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const addOrder = async (req, res) => {
+    const { touristId, productIds, quantities } = req.body;
+
+    // Ensure all required fields are provided
+    if (!touristId || !productIds || !quantities || productIds.length === 0 || quantities.length === 0) {
+        return res.status(400).json({ message: "touristId, productIds, and quantities are required." });
+    }
+
+    // Check if the number of products matches the number of quantities
+    if (productIds.length !== quantities.length) {
+        return res.status(400).json({ message: "Each product must have a corresponding quantity." });
+    }
+
+    // Prepare order data
+    const orderData = {
+        touristId,
+        productIds,
+        quantities,
+        status: 'pending', // Default status
+        dateDelivered: null // Initially null, can be updated later
+    };
+
+    try {
+        // Call the service function to add the order
+        const newOrder = await checkoutService.addOrder(orderData);
+        res.status(201).json({ message: "Order added successfully", order: newOrder });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getOrders = async (req, res) => {
+    const { userId } = req.params;
+    const user = await checkoutRepository.findUserById(userId);
+
+    // Check if the user is authorized to view orders
+    if (user.type !== 'admin' && user.type !== 'tourist') {
+        return res.status(400).json({ message: 'Invalid type' });
+    }
+
+    try {
+        let orders;
+        if (user.type === 'admin') {
+            // Fetch all orders if the user is an admin
+            orders = await checkoutService.getAllOrders();
+        } else {
+            // Fetch orders specific to the tourist
+            orders = await checkoutService.getOrdersByTouristId(userId);
+        }
+
+        res.status(200).json({ message: "Orders fetched successfully", orders });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const updateOrder = async (req, res) => {
+    const { userId } = req.params; // Extract userId from the URL params
+    const { orderId, ...updatedOrderData } = req.body; // Extract orderId from the body and the rest as updated data
+
+    // Fetch the user to check their type
+    const user = await checkoutRepository.findUserById(userId);
+
+    if (user.type !== 'admin') {
+        return res.status(400).json({ message: 'Invalid type' });
+    }
+
+    try {
+        // Fetch the current order using orderId
+        const currentOrder = await checkoutRepository.getOrderById(orderId);
+
+        if (!currentOrder) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Ensure certain fields are not altered, e.g., `touristId` or `productIds`
+        delete updatedOrderData.touristId;
+        delete updatedOrderData.productIds;
+
+        // If the status is being changed, ensure it's a valid value
+        if (updatedOrderData.status && !["delivered", "pending", "canceled"].includes(updatedOrderData.status)) {
+            return res.status(400).json({ message: "Invalid order status." });
+        }
+
+        // Apply the update to the order
+        const updatedOrder = await checkoutService.updateOrder(orderId, updatedOrderData);
+
+        if (updatedOrder) {
+            return res.status(200).json({ message: "Order updated successfully", order: updatedOrder });
+        } else {
+            return res.status(404).json({ message: "Order not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -161,5 +282,10 @@ module.exports = {
     getProductsByPriceRange,
     updateProduct,
     getAvailableProductsSortedByRatings,
-    searchProductByName
+    searchProductByName,
+    rateProduct,
+    reviewProduct,
+    addOrder,
+    getOrders,
+    updateOrder
 };
