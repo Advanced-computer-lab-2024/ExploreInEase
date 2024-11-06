@@ -521,6 +521,246 @@ const getAllHistoricalTags = async () => {
 const getHistoricalTagDetails = async (tagId) => {
   return await eventRepository.getHistoricalTagDetails(tagId);
 }
+
+
+
+
+//Mohamed APis
+const bookedEvents = async (touristId) => {
+  const tourist = await eventRepository.bookedEvents({ touristId });
+
+  if (!tourist) {
+    throw new Error('Tourist not found');
+  }
+
+  return {
+    itineraries: tourist.itineraryId.map(itinerary => ({
+      ...itinerary.id._doc,
+      pricePaid: itinerary.pricePaid,
+      timeline: itinerary.id.timeline.map(item => item.toString())
+    })),
+    activities: tourist.activityId.map(activity => ({
+      ...activity.id._doc,
+      pricePaid: activity.pricePaid
+    })),
+    historicalPlaces: tourist.historicalplaceId.map(historicalPlace => ({
+      ...historicalPlace.id._doc,
+      pricePaid: historicalPlace.pricePaid
+    })),
+    transportations: tourist.transportationId.map(transportation => ({
+      ...transportation.id._doc,
+      pricePaid: transportation.pricePaid
+    }))
+  };
+};
+
+
+const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {
+  
+  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice);
+};
+
+const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
+    
+    return await eventRepository.cancelEvent(touristId, eventType, eventId);
+  }
+
+const Amadeus = require('amadeus');
+
+const amadeus = new Amadeus({
+    clientId: process.env.AMADEUS_CLIENT_ID3, 
+    clientSecret: process.env.AMADEUS_CLIENT_SECRET3,
+});
+
+
+const fetchCityCode = async (city) => {
+  try {
+    const response = await amadeus.referenceData.locations.cities.get({ keyword: city });
+
+    const simplifiedResponse = response.data
+      .filter(location => location.iataCode)
+      .map(location => ({
+        name: location.name,
+        iataCode: location.iataCode
+      }));
+
+    if (simplifiedResponse.length === 0) {
+      throw new Error("No city found with the specified name. Please try again.");
+    }
+
+    return simplifiedResponse;
+  } catch (error) {
+    throw new Error(error.message); // Throw the error message without adding any prefix
+  }
+};
+
+
+
+
+
+const flightOffers = async (originCode, destinationCode, dateOfDeparture, currency, personCount) => {
+  try {
+    switch (currency) {
+      case 'euro':
+        currency = "EUR";
+        break;
+      case 'dollar':
+        currency = "USD";
+        break;
+      case 'EGP':
+        currency = "EGP";
+        break;
+      default:
+        throw new Error('Invalid currency');
+    }
+    
+    const requestBody = {
+      currencyCode: currency,
+      originDestinations: [
+        {
+          id: '1',
+          originLocationCode: originCode,
+          destinationLocationCode: destinationCode,
+          departureDateTimeRange: {
+            date: dateOfDeparture,
+            time: '10:00:00'
+          }
+        }
+      ],
+      travelers: [
+        {
+          id: '1',
+          travelerType: 'ADULT'
+        }
+      ],
+      sources: ['GDS'],
+      searchCriteria: {
+        maxFlightOffers: 8,
+        flightFilters: {
+          cabinRestrictions: [
+            {
+              cabin: 'BUSINESS',
+              coverage: 'MOST_SEGMENTS',
+              originDestinationIds: ['1']
+            }
+          ]
+        }
+      }
+    };
+
+    const response = await amadeus.shopping.flightOffersSearch.post(requestBody);
+
+    if (!response.data || response.data.length === 0) {
+      // No flights available
+      return { message: "No flights are available." };
+    }
+
+    const formattedFlights = response.data.map(flightOffer => ({
+      id: flightOffer.id,
+      price: (flightOffer.price.total) * personCount,
+      currency: flightOffer.price.currency,
+      departure: flightOffer.itineraries[0].segments[0].departure,
+      arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
+      carrierCode: flightOffer.validatingAirlineCodes[0],
+      segments: flightOffer.itineraries[0].segments.map(segment => ({
+        carrierCode: segment.carrierCode,
+        departure: segment.departure,
+        arrival: segment.arrival,
+        duration: segment.duration,
+      })),
+    }));
+
+    return formattedFlights;
+  } catch (error) {
+    let errorMessage;
+
+    if (error.response && error.response.data) {
+      errorMessage = error.response.data;
+      console.error(`API response error: ${errorMessage}`);
+    } else if (error.message) {
+      errorMessage = error.message;
+      console.error(`Network error: ${errorMessage}`);
+    } else {
+      errorMessage = "Server busy, try again please";
+      console.error(errorMessage);
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+
+
+
+
+
+const flightBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
+  
+  return await eventRepository.flightBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode });
+};
+
+
+
+const fetchHotelsByCityCode = async (cityCode, startDate, endDate, currency, personCount) => {
+  try {
+      const response = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
+      
+      const simplifiedResponse = response.data.map(hotel => {
+          let basePrice = Math.floor(Math.random() * (6000 - 3000 + 1)) + 3000; 
+        
+          if (currency === 'euro') {
+              basePrice = basePrice / 55;
+          } else if (currency === 'dollar') {
+              basePrice = basePrice / 50;
+          }
+
+          
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24))); 
+
+          
+          const price = Math.round(basePrice * personCount * days * 100) / 100;
+
+          return {
+              iataCode: hotel.iataCode,
+              name: hotel.name,
+              hotelId: hotel.hotelId,
+              startDate: startDate || null,
+              endDate: endDate || null,
+              price: price
+          };
+      });
+      
+      return simplifiedResponse; 
+  } catch (error) {
+      throw new Error(`Error fetching hotels: ${error.message}`);
+  }
+};
+
+
+const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency }) => {
+  
+  return await eventRepository.bookingHotel({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency });
+};
+
+
+const createTransportation = async (advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType) => {
+  return await eventRepository.createTransportation(advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType);
+};
+
+const getTransportations = async (currency) => {
+  return await eventRepository.getTransportations(currency);
+}
+
+const bookTransportation = async (touristId, transportationId) => {
+  return await eventRepository.bookTransportation(touristId, transportationId);
+};
+
+
+
+
+
 module.exports = {
   getHistoricalTagDetails,
   getUserEvents,
@@ -555,6 +795,19 @@ module.exports = {
   getFilteredItineraries,
   getFilteredHistoricalPlaces,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  getFilteredHistoricalPlaces,
+  bookedEvents,
+  addEventToTourist,
+  cancelEventToTourist,
+  fetchCityCode,
+  flightOffers,
+  flightBooking,
+  fetchHotelsByCityCode,
+  bookingHotel,
+  createTransportation,
+  getTransportations,
+  bookTransportation,
+  
 };
 

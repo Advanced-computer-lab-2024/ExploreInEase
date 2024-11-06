@@ -27,34 +27,31 @@ const UsersSchema = new Schema({
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         }
         
+},
+rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+  },
+  ratingSum: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
+documents: {
+    nationalId: {
+        type: String,
     },
-    rating: {
-        type: Number,
-        min: 0,
-        max: 5,
-      },
-      ratingSum: {
-        type: Number,
-        default: 0,
-      },
-      ratingCount: {
-        type: Number,
-        default: 0,
-      },
-    documents: {
-        nationalId: {
-            type: String,
-           
-        },
-        certificate: {
-            type: String,
-            
-        },
-        taxation: {
-            type: String,
-            
-        },  
+    certificate: {
+        type: String,
     },
+    taxation: {
+        type: String,
+    },  
+},
     experience: {
         type: String,
        
@@ -87,17 +84,18 @@ const UsersSchema = new Schema({
     photo: {
         selfPicture: {
             type: String,
-            default: ""
+            
         },
         logo: {
             type: String,
-            default: ""
+            
         }
     },
     comment: {
-        type: [String],
-        
+        type: [String]
     },
+
+   
     industry: {
         type: String,
         
@@ -110,7 +108,7 @@ const UsersSchema = new Schema({
         type: String,
         enum: ['VTP', 'External',''], // Seller types
         default: function() {
-            return this.type === 'seller' ? 'External' : '';
+            return this.sellerType === 'seller' ? 'External' : '';
         }
     },
     docStatus: {
@@ -130,9 +128,9 @@ const UsersSchema = new Schema({
     },
     requestDeletion: {
         type: Boolean,
-        default: false
-    },
-    founded: {
+        default: false
+    },
+     founded: {
         type: Number,
        
     },
@@ -143,17 +141,11 @@ const UsersSchema = new Schema({
     noEmployees: {
         type: Number,
       
-    },
-    
-    
-    
-    
-    
+    }, 
     status: {
         type: Boolean,
         default: false
     },
-    
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

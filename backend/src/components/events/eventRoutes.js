@@ -2585,4 +2585,42 @@ router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags
 router.get('/allActivities', eventController.getAllActivitiesInDatabase);
 router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
 
+
+
+
+
+
+//mohamed apis 
+
+router.get('/bookedEvents', eventController.bookedEvents)
+router.put('/bookEvent', eventController.bookEvent);
+router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
+// Route to get city code by city name
+router.get('/city/:city', eventController.getCityCode);
+
+// Route to get hotel IDs by city code
+router.get('/hotels/:cityCode', eventController.getHotelsByCityCode);
+
+//define the route to book hotels 
+router.post('/bookHotel', eventController.bookHotel);
+
+// Route to get Flight Offers
+router.post('/flightOffers', eventController.flightOffers);
+// Define the route to book a flight
+router.post('/bookFlight', eventController.bookFlight);
+
+// Create Transportation Route
+router.post('/createTransportation', eventController.createTransportation);
+
+// Get Transportation Route
+router.get('/getTransportations', eventController.getTransportations);
+
+// Route to book transportation
+router.post('/bookTransportation', eventController.bookTransportation);
+
+
+
+
+
+
 module.exports = router;

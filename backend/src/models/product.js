@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const ProductsSchema = new Schema({
     productId: {
         type: String,
+
     },
     picture: {
         type: String,              // URL or path to the product image
@@ -49,6 +50,7 @@ const ProductsSchema = new Schema({
             required: [true, 'Review comment is required'],
             minlength: 1
         },
+
         createdAt: {
             type: Date,
             default: Date.now       // Timestamp for when the review was created

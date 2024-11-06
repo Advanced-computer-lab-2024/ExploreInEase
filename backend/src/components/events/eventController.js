@@ -817,6 +817,231 @@ const getHistoricalTagDetails = async (req, res) => {
       .json({ error: "An error occurred", details: error.message });
   }
 }
+
+//Mohamed Apis
+
+
+
+const bookedEvents = async (req, res) => {
+  try {
+      const { touristId } = req.body;
+
+      
+      if (!touristId) {
+          return res.status(400).json({ error: "touristId is required in the request body" });
+      }
+
+     
+      const result = await eventService.bookedEvents(touristId);
+      return res.status(200).json(result);
+  } catch (error) {
+      return res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+const bookEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice } = req.body;
+
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+    }
+    if (!touristId || !userType || !eventType || !eventID) {
+      return res.status(400).json({ error: "All attributes are required in the request body" });
+    }
+
+    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event booked successfully',
+      data: updatedTourist,
+    });
+  } catch (error) {
+    if (error.message.includes('already been booked')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+const cancelBookingEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID } = req.body;
+
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+     }
+
+      const updatedTourist = await eventService.cancelEventToTourist(userType, touristId, eventType, eventID);
+      return res.status(200).json({
+          success: true,
+          message: 'Event updated successfully',
+          data: updatedTourist,
+      });
+  } catch (error) {
+      return res.status(400).json({
+          success: false,
+          message: error.message,
+      });
+  }
+};
+
+
+const getCityCode = async (req, res) => {
+  try {
+      const response = await eventService.fetchCityCode(req.params.city);
+      res.status(200).json(response);  
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+const flightOffers = async (req, res) => {
+  const { originCode, destinationCode, dateOfDeparture,currency,personCount } = req.body;
+
+  if (!originCode || !destinationCode || !dateOfDeparture  || !currency || !personCount) {
+      return res.status(400).json({ message: "Origin, destination, and departure date are required." });
+  }
+
+  try {
+      
+      const flights = await eventService.flightOffers( originCode, destinationCode, dateOfDeparture,currency,personCount);
+      return res.status(200).json(flights);
+  } catch (error) {
+      console.error('Error searching flights:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+const bookFlight = async (req, res) => {
+  const { bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode } = req.body;
+
+  
+  if (!bookedBy || !price || !departureTime || !arrivalTime || !personCount || !currency || !originCode || !destinationCode) {
+      return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+      const newBooking = await eventService.flightBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency ,originCode,destinationCode });
+      return res.status(201).json(newBooking);
+  } catch (error) {
+      console.error('Error booking flight:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+const getHotelsByCityCode = async (req, res) => {
+  try {
+      const { startDate, endDate, currency, personCount } = req.body; 
+      const response = await eventService.fetchHotelsByCityCode(
+          req.params.cityCode,
+          startDate,
+          endDate,
+          currency,  
+          parseInt(personCount) || 1  
+      );
+      res.status(200).json(response); 
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+const bookHotel = async (req, res) => {
+  const { bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency } = req.body;
+
+  
+  if (!bookedBy || !price || !iataCode || !hotelName || !hotelId || !startDate || !endDate || !personCount || !currency) {
+      return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+      const newBooking = await eventService.bookingHotel({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency });
+      return res.status(201).json(newBooking);
+  } catch (error) {
+      console.error('Error booking hotel:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
+
+const createTransportation = async (req, res) => {
+  try {
+    const { advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType } = req.body; 
+
+    if (!advertiserId || !pickupLocation || !dropoffLocation || !dateAvailable || !timeAvailable || !price || !transportationType ) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const newTransportation = await eventService.createTransportation(advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType);
+    return res.status(201).json({
+      success: true,
+      message: 'Transportation created successfully.',
+      data: newTransportation,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+const getTransportations = async (req, res) => {
+  try {
+    const{currency} = req.body;
+    const transportation = await eventService.getTransportations(currency);
+    return res.status(200).json(transportation);
+  } catch (error) {
+    console.error('Error fetching transportation:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+
+
+const bookTransportation = async (req, res) => {
+  const { touristId, transportationId } = req.body;
+
+  try {
+      const result = await eventService.bookTransportation(touristId, transportationId);
+      return res.status(200).json(result);
+  } catch (error) {
+      console.error('Error in booking transportation:', error.message);
+      return res.status(400).json({ message: error.message });
+  }
+};
+
+
+
+
+
 module.exports = {
   getHistoricalTagDetails,
   getUserEvents,
@@ -849,6 +1074,18 @@ module.exports = {
   getAllItineraries,
   getAllActivities,
   getAllHistoricalTags,
-  getAllActivitiesInDatabase
+  getAllActivitiesInDatabase,
+  bookedEvents,
+  bookEvent,
+  cancelBookingEvent,
+  getCityCode,
+  flightOffers,
+  bookFlight,
+  getHotelsByCityCode,
+  bookHotel,
+  createTransportation,
+  getTransportations,
+  bookTransportation
+  
   };
   
