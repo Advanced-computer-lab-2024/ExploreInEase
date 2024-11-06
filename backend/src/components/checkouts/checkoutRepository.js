@@ -116,7 +116,18 @@ const getType = async (id) => {
         throw new Error('User not found');
     }
 };
+const findUserById = async (_id) => {
+    try {
+        const existsUser = await Users.findOne({ _id });
+        if (existsUser) return existsUser;
 
+        const existsTourist = await Tourist.findOne({ _id });
+        return existsTourist ? {tourist: existsTourist, type: "tourist"} : false;
+    } catch (error) {
+        console.error(`Error checking if user exists: ${error.message}`);
+        return false;
+    }
+};
 module.exports = {
     addProduct,
     getAllAvailableProducts,
@@ -125,5 +136,6 @@ module.exports = {
     updateProduct,
     getAvailableProductsSortedByRatings,
     searchByName,
-    getType
+    getType,
+    findUserById
 };

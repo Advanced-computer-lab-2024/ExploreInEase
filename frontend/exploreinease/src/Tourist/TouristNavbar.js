@@ -173,7 +173,7 @@ const TouristNavbar = () => {
           onClick={() => handleRegisterClick("Book Hotels")}
           className="small-button">Book Hotels</button>
                      <button 
-          onClick={() => handleRegisterClick("Book Flight")}
+          onClick={() => handleRegisterClick("Book Flights")}
           className="small-button">Book Flights</button>
            <button 
           onClick={() => handleRegisterClick("My Profile")}
