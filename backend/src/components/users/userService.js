@@ -214,6 +214,13 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+
+
+const acceptTerms = async (_id, type) => {
+   
+    return await userRepository.updateTermsAndConditions(_id, type);
+};
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -234,6 +241,7 @@ module.exports = {
   updateTourist,
   registerTourist,
   registerUser,
-  login
+  login,
+  acceptTerms
 };
 

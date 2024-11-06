@@ -386,6 +386,35 @@ const login = async (req, res) => {
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
 }
+
+const acceptTerms = async (req, res) => {
+    const { _id, type } = req.params;
+    console.log("id",_id)
+    console.log("type",type)
+
+
+    // Check if username and type are provided
+    if (!_id || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.acceptTerms(_id, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Terms and conditions accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+
 module.exports = {
   deleteUserByIdAndType,
   addGovernorOrAdmin,
@@ -403,5 +432,6 @@ module.exports = {
   getTourist,
   updateTourist,
   registerUser,
-  login
+  login,
+  acceptTerms
 };

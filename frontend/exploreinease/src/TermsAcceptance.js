@@ -1,33 +1,42 @@
 // src/Login/TermsAcceptance.js
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import NetworkService from './NetworkService';
 
 import './TermsAcceptance.css';
 
-const TermsAcceptance = () => {
+const TermsAcceptance = ({userId,userType}) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userId, userType } = location.state || {}; // Extract userId and userType from location state
+  const {registerResponse}= location.state || {};
+  console.log(registerResponse);
+  // const { userId, userType } = location.state || {}; // Extract userId and userType from location state
+  console.log(registerResponse.User._id);
+  console.log(registerResponse.User.type);
+  const _id = registerResponse.User._id;
+  const type = registerResponse.User.type;
+  console.log(_id)
+  console.log(type)
+
+
 
   // Redirect to login if userId or userType is missing
-  useEffect(() => {
-    if (!userId || !userType) {
-      console.error('User ID or User Type is missing, redirecting to login.');
-      navigate('/Login');
-    }
-  }, [userId, userType, navigate]);
+  // useEffect(() => {
+  //   if (!userId || !userType) {
+  //     console.error('User ID or User Type is missing, redirecting to login.');
+  //     // navigate('/Login');
+  //   }
+  // }, [userId, userType, navigate]);
 
   const handleAccept = async () => {
     try {
       const options = {
-        apiPath: `/acceptTerms`,
-        payload: {
-          _id: userId,
-          type: userType,
-        },
+        apiPath: `/acceptTerms/${_id}/${type}`,
+        useParams:_id,type,
       };
-      await NetworkService.post(options);
+      const response =await NetworkService.put(options);
+      console.log(response)
+
 
       // After successful API call, redirect to login page
       navigate('/Login');

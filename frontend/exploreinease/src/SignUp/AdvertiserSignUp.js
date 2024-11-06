@@ -4,10 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Make sure to import axios
 import NetworkService from '../NetworkService';
 import './Signup.css';
+import { useLocation } from 'react-router-dom';
 
 
 const GuideAdvertiserSignUp = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const {User}= location.state || {};
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -37,6 +40,7 @@ const GuideAdvertiserSignUp = () => {
     try {
         // Step 1: Prepare registration data as an object
         const registrationData = {
+           
             email: formData.email,
             username: formData.username,
             password: formData.password,
@@ -52,6 +56,7 @@ const GuideAdvertiserSignUp = () => {
         const registerResponse = await NetworkService.post(options);
         console.log(registerResponse);
         const userId = registerResponse.User._id;
+        const userType = registerResponse.User.type;
         console.log("User ID:", userId);
 
         // Step 3: Prepare document upload data as objects for each file
@@ -82,15 +87,11 @@ const GuideAdvertiserSignUp = () => {
 
         // Step 5: Success handling
         setSuccess('Files uploaded successfully');
-        if (formData.type === 'advertiser' || 'tourGuide' || 'seller'){
-          console.log("Navigating to Terms and Conditions page");
-          navigate('/TermsAcceptance', { state: { userId: userId, userType: formData.type } });
-
-
-        }
-        else
-        navigate(`/Login`);
-    } catch (err) {
+        console.log(registerResponse);
+        console.log("Navigating to Terms and Conditions page");
+        navigate('/TermsAcceptance', { state: { registerResponse } }); 
+        
+      } catch (err) {
         if (err.response) {
             setError(err.response.data.message);
         } else {

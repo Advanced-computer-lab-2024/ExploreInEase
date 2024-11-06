@@ -178,6 +178,20 @@ const login = async (username, password) => {
 }
 
 
+const updateTermsAndConditions = async (_id, type) => {
+    try {
+        // Find the user by username and type
+        const user = await Users.findOneAndUpdate(
+            { _id: _id, type: type },
+            { termsAndConditions: true },
+            { new: true } 
+        );
+        return user;
+    } catch (error) {
+        throw new Error(`Error updating terms and conditions: ${error.message}`);
+    }
+};
+
 module.exports = {
     addGovernorOrAdmin,
     fetchAllUsers,
@@ -194,5 +208,6 @@ module.exports = {
     saveTourist,
     checkUserExists,
     checkUserExistsByEmail,
-    login
+    login,
+    updateTermsAndConditions
 };

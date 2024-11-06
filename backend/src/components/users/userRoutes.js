@@ -1153,6 +1153,9 @@ router.post('/register/:type', userController.registerUser);
  */
 router.post('/login', userController.login);
 
+
+router.put('/acceptTerms/:_id/:type', userController.acceptTerms);
+
 module.exports = {
     setDBConnection,
     router,
