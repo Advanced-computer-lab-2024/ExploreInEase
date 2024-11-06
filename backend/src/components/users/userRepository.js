@@ -2,6 +2,8 @@ const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
 const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
+const HistoricalPlace = require('../../models/historicalPlace');
+
 // Find user by ID
 const findUserById = async (id) => {
     try {
@@ -360,6 +362,46 @@ const updateActivityComments = async (activityId, updateOperation) => {
     }
 };
 
+const updateHistoricalPlacesRatings = async (historicalPlaceId, updatedFields) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
+        const updatedHistoricalPlace = await HistoricalPlace.findByIdAndUpdate(
+            historicalPlaceId,
+            { $set: updatedFields },
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedHistoricalPlace) {
+            throw new Error("Historical Place not found or could not be updated.");
+        }
+
+        return updatedHistoricalPlace;
+    } catch (error) {
+        console.error("Error updating historical place ratings:", error);
+        throw error;
+    }
+};
+
+const updateHistoricalPlacesComments = async (historicalPlaceId, updateOperation) => {
+    try {
+        // Use Mongoose's `findByIdAndUpdate` to apply the update operation (like $push for comments)
+        const updatedHistoricalPlace = await HistoricalPlace.findByIdAndUpdate(
+            historicalPlaceId,
+            updateOperation,
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedHistoricalPlace) {
+            throw new Error("Historical Place not found or could not be updated.");
+        }
+
+        return updatedHistoricalPlace;
+    } catch (error) {
+        console.error("Error updating Historical Place comments:", error);
+        throw error;
+    }
+};
+
 module.exports = {
     addGovernorOrAdmin,
     fetchAllUsers,
@@ -384,5 +426,7 @@ module.exports = {
     updateItineraryRatings,
     hasAttendedActivity,
     updateActivityRatings,
-    updateActivityComments
+    updateActivityComments,
+    updateHistoricalPlacesComments,
+    updateHistoricalPlacesRatings
 };
