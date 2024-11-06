@@ -1,7 +1,7 @@
 const Product = require('../../models/product'); 
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
-
+const Order = require('../../models/order');
 const addProduct = async (productData) => {
     try {
         const newProduct = new Product(productData);

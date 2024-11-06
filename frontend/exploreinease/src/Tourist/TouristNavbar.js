@@ -77,7 +77,7 @@ const TouristNavbar = () => {
       else if(title =="View/Rate Purchased Product") {
         try {
           const options = {
-            apiPath: `/getAvailableProducts/${userId}`,
+            apiPath: `/getOrders/${userId}`,
           };
           
           const response = await NetworkService.get(options);
