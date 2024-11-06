@@ -194,6 +194,7 @@ const DeletionRequests = () => {
 
         // visualize authors in a table map over authors
         <div className="UsersList">
+            <h1>Account Deletion Requests</h1>
 
             {
                 loaded ? <TableContainer component={Paper}>

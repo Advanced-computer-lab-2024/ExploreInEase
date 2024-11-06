@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const { router: userRoutes, setDBConnection } = require('./src/components/users/userRoutes');
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
 const eventRoutes = require('./src/components/events/eventRoutes');
+
+const complaintRoutes = require('./src/components/complaints/complaintRoutes');
+
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config({ path: 'src/.env' });
@@ -137,6 +140,7 @@ ACLapp.get('/viewDocument/:fileId', (req, res) => {
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);
+ACLapp.use(complaintRoutes);
 
 // Swagger configuration options
 const swaggerOptions = {

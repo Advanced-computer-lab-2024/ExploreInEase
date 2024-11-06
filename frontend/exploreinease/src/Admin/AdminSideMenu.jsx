@@ -146,9 +146,9 @@ function ResponsiveDrawer(props) {
         sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` },marginTop: "50px" }}
       >
 
-        {/* <ComplaintsTable /> */}
+        <ComplaintsTable />
         {/* <DeletionRequests /> */}
-        <EventsAndItineraries />
+        {/* <EventsAndItineraries /> */}
         
       </Box>
     </Box>
