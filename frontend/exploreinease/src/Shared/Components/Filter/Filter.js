@@ -23,9 +23,11 @@ import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import debounce from 'lodash.debounce';
 
 // Sample data with 'type' field added
 const itemList = [];
+const addressCache = {};
 
 // Role-based fields
 const roleFields = {
@@ -92,7 +94,8 @@ const Filter = () => {
       
       // Create a readable address from the response
       const address = data.display_name.split(',').slice(0, 3).join(',');
-      
+      addressCache[cacheKey] = address;
+
       // Cache the result
       setAddressCache(prev => ({
         ...prev,
@@ -106,19 +109,48 @@ const Filter = () => {
       return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
     }
   };
+  const fetchAddressFromAPI = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
+        {
+          headers: {
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+        }
+      );
   
+      if (!response.ok) {
+        throw new Error('Geocoding failed');
+      }
+  
+      const data = await response.json();
+      return data.display_name.split(',').slice(0, 3).join(',');
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
+    }
+  };
+  const debouncedFetchAddress = debounce(async (latitude, longitude, setAddress) => {
+    const cacheKey = `${latitude},${longitude}`;
+  
+    if (addressCache[cacheKey]) {
+      setAddress(addressCache[cacheKey]);
+    } else {
+      const address = await fetchAddressFromAPI(latitude, longitude);
+      addressCache[cacheKey] = address; 
+      setAddress(address);
+    }
+  }, 300);
   const LocationDisplay = ({ coordinates }) => {
-    const [address, setAddress] = useState('Loading...');
-
-      useEffect(() => {
-        const fetchAddress = async () => {
-          const result = await getAddressFromCoordinates(coordinates);
-          console.log(result);
-          
-          setAddress(result);
-        };
-        fetchAddress();
-      }, [coordinates]);
+    const [address, setAddress] = useState('Press here to view location...');
+  
+    useEffect(() => {
+      if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
+        const [longitude, latitude] = coordinates;
+        debouncedFetchAddress(latitude, longitude, setAddress);
+      }
+    }, [coordinates]);
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {address}
@@ -271,6 +303,15 @@ const Filter = () => {
     } catch (err) {
       console.log(err.response ? err.message : 'An unexpected error occurred.');
     }
+  };
+  const renderTags = (tagId) => {
+    if (!historicalTags[tagId]) {
+      // Fetch tags only if they haven't been fetched yet
+      getHistoricalTags(tagId);
+      return 'Loading...';
+    }
+    // Display the cached tags
+    return historicalTags[tagId].join(', ');
   };
   const handleClose = () => {
     setOpen(false);
@@ -454,18 +495,14 @@ const Filter = () => {
                       <Typography color="text.secondary">Budget: {item.budget}</Typography>
                       <Typography color="text.secondary">Date: {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
                       <Typography color="text.secondary">Category: {item.category}</Typography>
-                      {/* <Typography color="text.secondary">
-                          Locations: {Array.isArray(item.location[0]) ? 
-                          item.location.map((loc, index) => (
-                            <span key={index}>
-                              <LocationDisplay coordinates={loc} />
-                              {index < item.location.length - 1 ? ', ' : ''}
-                            </span>
-                          )) : 
-                          <LocationDisplay coordinates={item.location} />}
-                      </Typography> */}
-                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
-                      {item.specialDiscount && (
+                      <Typography color="text.secondary">
+                          Locations: { 
+                              <LocationDisplay coordinates={item.location} />
+                         }
+                      </Typography> 
+                      <Typography color="text.secondary">
+                        Tags: {item.tags[0] ? renderTags(item.tags[0]) : 'No tags available'}
+                      </Typography>                        {item.specialDiscount && (
                         <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
                       )}
                     </>
@@ -475,12 +512,8 @@ const Filter = () => {
                       <Typography color="text.secondary">Activities: {item.activities.join(', ')}</Typography>
                       <Typography color="text.secondary">Locations: {item.locations.join(', ')}</Typography>
                       <Typography color="text.secondary">
-                            Date Available: {item.dateAvailable.length > 0 ? (
-                              item.dateAvailable.map(date => format(parseISO(date), 'dd/MM/yyyy')).join('-')
-                            ) : (
-                              'No dates available'
-                            )}
-                       </Typography>  
+                        Tags: {item.tags ? renderTags(item.tags) : 'No tags available'}
+                      </Typography>      
                       <Typography color="text.secondary">Price: {item.price}</Typography>
                       <Typography color="text.secondary">Rating: {item.rating.length ==0 ?0:item.rating}</Typography>
                       <Typography color="text.secondary">Language: {item.language}</Typography>
@@ -492,23 +525,18 @@ const Filter = () => {
                   {item.type === 'HistoricalPlace' && (
                     <>
                       <Typography color="text.secondary">Description: {item.description}</Typography>
-                      {/* <Typography color="text.secondary">
-                          Locations: {Array.isArray(item.location[0]) ? 
-                          item.location.map((loc, index) => (
-                            <span key={index}>
-                              <LocationDisplay coordinates={loc} />
-                              {index < item.location.length - 1 ? ', ' : ''}
-                            </span>
-                          )) : 
-                          <LocationDisplay coordinates={item.location} />}
-                      </Typography> */}
+                      <Typography color="text.secondary">
+                          Locations: { 
+                              <LocationDisplay coordinates={item.location} />
+                         }
+                      </Typography>
                       <Typography color="text.secondary">Opening Hours: {item.openingHours}</Typography>
                       <Typography color="text.secondary">Students ticket price: {item.ticketPrice[0]}</Typography>
                       <Typography color="text.secondary">Native ticket price: {item.ticketPrice[1]}</Typography>
                       <Typography color="text.secondary">Foreign ticket price: {item.ticketPrice[2]}</Typography>
-
-                      Tags: {historicalTags[item.tags] ? historicalTags[item.tags].join(', ') : 'No tag selected'}
-                      </>
+                      <Typography color="text.secondary">
+                          Tags: {item.tags ? renderTags(item.tags) : 'No tags available'}
+                      </Typography>                      </>
                   )}
                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                  <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
