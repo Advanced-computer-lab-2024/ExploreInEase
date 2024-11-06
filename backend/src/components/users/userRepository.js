@@ -1,5 +1,6 @@
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 // Find user by ID
 const findUserById = async (id) => {
