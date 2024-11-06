@@ -7,7 +7,7 @@ const User = require("../../models/user");
 //req 72 Creating el complaint
 const createComplaint = async (complaintData) => {
   const { touristId } = complaintData;
-
+   console.log(touristId)
   //validiation lel tourist
   const touristExists = await Tourist.findById(touristId);
   if (!touristExists) {
@@ -95,6 +95,7 @@ const getTouristComplaints = async (touristId) => {
   );
   return complaints.map((complaint) => ({
     _id: complaint._id,
+    title:complaint.title,
     problem: complaint.problem,
     dateOfComplaint: complaint.dateOfComplaint,
     status: complaint.status,

@@ -401,7 +401,7 @@ const getHistoricalTagDetails = async (id) => {
 const getTouristEmailById = async (touristId) => {
   try {
       const tourist = await Tourist.findById(touristId);
-      return tourist ? tourist.username : null;
+      return tourist ? tourist.email : null;
   } catch (error) {
       console.error(`Error fetching tourist email: ${error.message}`);
       throw new Error('Could not fetch tourist email');

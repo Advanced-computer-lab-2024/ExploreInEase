@@ -15,7 +15,7 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
   console.log(item);
   const item2 = {
     name: item.name,
-    budget: item.budget,
+    price: item.budget,
     date: item.date
   };
   const [shareMethod, setShareMethod] = useState('email');

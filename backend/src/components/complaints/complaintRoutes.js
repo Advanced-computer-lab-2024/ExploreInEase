@@ -4,7 +4,7 @@ const router = express.Router();
 const complaintController = require("../complaints/complaintController");
 
 // Route for filing a complaint
-router.post("/fileComplaint", complaintController.fileComplaint);
+router.post("/fileComplaint/:touristId/:problem/:title", complaintController.fileComplaint);
 
 router.get("/ViewComplaints", complaintController.AdminViewComplain);
 
@@ -14,7 +14,7 @@ router.patch("/markComplaint/:complaintId",complaintController.markComplaint);
 
 router.patch("/replyComplaint/:complaintId",complaintController.replyToComplaint);
 
-router.get("/myComplaints", complaintController.getMyComplaints);
+router.get("/myComplaints/:touristId", complaintController.getMyComplaints);
 
 router.delete("/deleteAllComplaints", complaintController.deleteAllComplaints);
 module.exports = router;

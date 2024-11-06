@@ -14,29 +14,22 @@ import NetworkService from '../NetworkService';
 const Complaints = () => {
 
     const location = useLocation();
-  const { User } = location.state || {};
-  console.log("admin",User);
-  //const userId = User._id;
+    const { events, User } = location.state || {};
+    console.log("admin", User);
+    const userId = User._id;
+    console.log(events)
     // Separate state for form data and complaints list
     const [formData, setFormData] = useState({
         title: '',
-        body: '',
+        problem: '',
         date: new Date().toISOString().split('T')[0]
     });
-    
+
     // State for list of complaints
     const [complaints, setComplaints] = useState([
-        {
-            title: "Sample Complaint 1",
-            body: "This is a sample complaint body text.",
-            date: "2024-03-01"
-        },
-        {
-            title: "Sample Complaint 2",
-            body: "Another sample complaint description.",
-            date: "2024-03-15"
-        }
+
     ]);
+
 
     const [openCreate, setOpenCreate] = useState(false);
     const [errors, setErrors] = useState({});
@@ -45,7 +38,7 @@ const Complaints = () => {
         setOpenCreate(false);
         setFormData({
             title: '',
-            body: '',
+            problem: '',
             date: new Date().toISOString().split('T')[0]
         });
         setErrors({});
@@ -54,32 +47,38 @@ const Complaints = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        console.log(formData.problem)
+
     };
 
     const handleComplaintSubmit = () => {
         // Validate form data
-        const newErrors = {};
-        if (!formData.title) newErrors.title = 'Title is required';
-        if (!formData.body) newErrors.body = 'Description is required';
+        // const newErrors = {};
+        // if (!formData.title) newErrors.title = 'Title is required';
+        // if (!formData.problem) newErrors.problem = 'Description is required';
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
-        // const option = {
-        //     apiPath: `/fileComplaint`,
-        //     urlParam: userId,
-        //     body: newComplaint
-        //   }
-        //   const response = NetworkService.post(option);
-        //   console.log(response);
+        // if (Object.keys(newErrors).length > 0) {
+        //     setErrors(newErrors);
+        //     return;
 
-        // Add new complaint to the list
+        // }
+        // // Add new complaint to the list
         const newComplaint = {
             ...formData,
             date: new Date().toISOString().split('T')[0]
         };
-        
+        console.log(formData.problem)
+        console.log(formData)
+        console.log(newComplaint.title)
+        const option = {
+            apiPath: `/fileComplaint/${userId}/${newComplaint.problem}/${newComplaint.title}`,
+            urlParam: userId, urlParam: newComplaint.problem, urlParam: newComplaint.title
+        }
+        const response = NetworkService.post(option);
+        console.log(response);
+
+
+
         setComplaints(prevComplaints => [...prevComplaints, newComplaint]);
         handleClose();
     };
@@ -104,30 +103,34 @@ const Complaints = () => {
             </div>
 
             <div style={{ display: 'grid', gap: '16px' }}>
-                {complaints.map((complaint, index) => (
-                    <div key={index} style={{
-                        backgroundColor: 'white',
-                        borderRadius: '8px',
-                        padding: '20px',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
-                    }}>
-                        <div style={{ marginBottom: '12px' }}>
-                            <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
-                                {complaint.title}
-                            </h3>
-                            <p style={{ fontSize: '14px', color: '#666' }}>
-                                {new Date(complaint.date).toLocaleDateString()}
-                            </p>
-                        </div>
-                        <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.body}</p>
-                    </div>
-                ))}
-
-                {complaints.length === 0 && (
+                {events === 0 ? (
                     <div style={{ textAlign: 'center', padding: '32px', color: '#666' }}>
-                        No complaints filed yet.
+                        No complaints available.
                     </div>
+                ) : (
+                    events.map((complaint, index) => (
+                        <div key={index} style={{
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            padding: '20px',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
+                        }}>
+                            <div style={{ marginBottom: '12px' }}>
+                                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
+                                    {complaint.title}
+                                </h3>
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.problem}</p>
+
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.dateOfComplaint}</p>
+
+                            </div>
+                            <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.status}</p>
+
+                        </div>
+                    ))
                 )}
+
+
             </div>
 
             {/* File Complaint Dialog */}
@@ -151,14 +154,14 @@ const Complaints = () => {
                     <TextField
                         margin="dense"
                         label="Problem"
-                        name="body"
-                        value={formData.body}
+                        name="problem"
+                        value={formData.problem}
                         onChange={handleInputChange}
                         fullWidth
                         multiline
                         rows={4}
-                        error={!!errors.body}
-                        helperText={errors.body}
+                        error={!!errors.problem}
+                        helperText={errors.problem}
                     />
                 </DialogContent>
                 <DialogActions>

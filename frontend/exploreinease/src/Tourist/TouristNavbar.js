@@ -14,7 +14,7 @@ const TouristNavbar = () => {
     const initialUsername = User?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=User?._id;
-     console.log(User);
+     console.log(userId);
      
     async function handleRegisterClick(title) {
         if (title == "View Products") {
@@ -85,13 +85,16 @@ const TouristNavbar = () => {
       else{
         try {
           const options = {
-            apiPath: `/upcomingEvents`,
+            apiPath: `/myComplaints/${userId}`,
+            urlParam:userId
+
           };
           const response = await NetworkService.get(options);
           setSuccess(response.message); // Set success message
           console.log(response);
-          const events=response;
-          navigate(`/Complaints`,{state:{events}});          
+          const events=response.data;
+          console.log(events)
+          navigate(`/Complaints`,{state:{events,User:User}});          
         } catch (err) {
           if (err.response) {
               console.log(err.message);

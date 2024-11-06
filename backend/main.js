@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const userRoutes = require('./src/components/users/userRoutes');
 const eventRoutes = require('./src/components/events/eventRoutes');
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
+const complaintRoutes = require('./src/components/complaints/complaintRoutes');
+
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const fs = require('fs'); // Import filesystem module
@@ -27,6 +29,8 @@ ACLapp.use((req, res, next) => {
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);
+ACLapp.use(complaintRoutes);
+
 
 // router.use('/',userRoutes)
 
