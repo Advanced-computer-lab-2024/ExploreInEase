@@ -49,6 +49,11 @@ const historicalPlaceSchema = new Schema({
       required: true,
     },
   },
+  rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+  },
   ratingSum: {
     type: Number,
     default: 0,
