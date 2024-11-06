@@ -9,6 +9,13 @@ const getUserById = async (id) => {
 
 
 
+const getNotAcceptedUsers = async () => {
+    return await userRepository.getNotAcceptedUsers();
+};
+
+
+
+
 const fetchUsersForDeletion = async () => {
     try {
         const { users, tourists } = await userRepository.getAllUsersForDeletion();
@@ -231,7 +238,16 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+const updatingStatusUser = async (userId, status) => {
+    const newUser = await userRepository.updateUserStatus(userId, status);
+    return {status: 200, response: { message: "Status updated successfully", user: newUser } };
+}
+
+
+
+
 module.exports = {
+    updatingStatusUser,
   deleteUserByIdAndType,
   addGovernorOrAdmin,
   fetchAllUsersAndTourists,
@@ -252,6 +268,7 @@ module.exports = {
   registerTourist,
   registerUser,
   login,
-  fetchUsersForDeletion
+  fetchUsersForDeletion,
+    getNotAcceptedUsers
 };
 

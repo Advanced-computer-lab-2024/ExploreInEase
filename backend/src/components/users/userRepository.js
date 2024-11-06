@@ -1,6 +1,60 @@
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
 
+
+
+
+// const findUserById = async (_id) => {
+//     try {
+//         const existsUser = await Users.findOne({ _id });
+//         if (existsUser) return existsUser;
+
+//         const existsTourist = await Tourist.findOne({ _id });
+//         return existsTourist ? {tourist: existsTourist, type: "tourist"} : false;
+//     } catch (error) {
+//         console.error(Error checking if user exists: ${error.message});
+//         return false;
+//     }
+// };
+
+const updateUserStatus = async (userId, status) => {
+    try {
+        const user = await findUserById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if(status === 'accepted'){
+            user.status = true
+        }
+        else{
+            if(status === 'rejected'){
+                user.status = false;
+            }
+        }
+        await user.save();
+        return user;
+    } catch (error) {
+        throw new Error(`Error updating user status: ${error.message}`);
+    }
+};
+
+
+
+
+
+
+
+const getNotAcceptedUsers = async () => {
+    try {
+        return await Users.find({ docStatus: "pending" });
+    } catch (error) {
+        throw new Error(`Error fetching not accepted users: ${error.message}`);
+    }
+};
+
+
+
+
 // Find user by ID
 const findUserById = async (id) => {
     try {
@@ -204,5 +258,7 @@ module.exports = {
     checkUserExists,
     checkUserExistsByEmail,
     login,
-    getAllUsersForDeletion 
+    getAllUsersForDeletion ,
+    getNotAcceptedUsers,
+    updateUserStatus
 };

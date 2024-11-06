@@ -21,7 +21,7 @@ import Typography from '@mui/material/Typography';
 //component imports
 
  import ComplaintsTable from './AdminComplaintsTable';
-
+import RegistringUsers from './AdminRegistringUsers';
 import DeletionRequests from './DeletionRequests';
 import EventsAndItineraries from './EventsAndItenararies';
 
@@ -146,9 +146,10 @@ function ResponsiveDrawer(props) {
         sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` },marginTop: "50px" }}
       >
 
-        <ComplaintsTable />
+        {/* <ComplaintsTable /> */}
         {/* <DeletionRequests /> */}
         {/* <EventsAndItineraries /> */}
+        <RegistringUsers />
         
       </Box>
     </Box>

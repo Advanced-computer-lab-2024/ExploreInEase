@@ -14,9 +14,11 @@ const setDBConnection = (database) => {
 };
 
 
-
+router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
 
 router.get('/deletionrequests', userController.getUsersForDeletion);
+
+router.put('/user/updatingStatus/:userId/:status', userController.updatingStatusUser)
 
 
 /**
