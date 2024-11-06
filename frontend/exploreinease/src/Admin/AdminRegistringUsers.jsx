@@ -38,6 +38,8 @@ const RegistringUsers = () => {
 
     const [anchorEl, setAnchorEl] = useState(null);
 
+
+
     const [users, setUsers] = useState([
 
 
@@ -71,7 +73,9 @@ const RegistringUsers = () => {
 
         getReqs()
 
-    }, [])
+    }, [loaded]);
+
+
     const [selectedUserId, setSelectedUserId] = useState(null);
 
     const handleOptionsClick = (event, id) => {
@@ -90,6 +94,7 @@ const RegistringUsers = () => {
 
         await axios.put(`http://localhost:3030/user/updatingStatus/${selectedUserId}/accepted`).then(response => {
             console.log(response.data);
+            setLoaded(false);
         }).catch(err => console.log(err));
     
 
@@ -104,6 +109,7 @@ const RegistringUsers = () => {
 
         await axios.put(`http://localhost:3030/user/updatingStatus/${selectedUserId}/rejected`).then(response => {
             console.log(response.data);
+            setLoaded(false);
         }).catch(err => console.log(err));
 
     };
@@ -125,7 +131,7 @@ const RegistringUsers = () => {
                                 <StyledTableCell align="center">Username</StyledTableCell>
                                 <StyledTableCell align="center">Email</StyledTableCell>
                                 <StyledTableCell align="center">Type</StyledTableCell>
-                                <StyledTableCell align="center">Documents</StyledTableCell>
+                                {/* <StyledTableCell align="center">Documents</StyledTableCell> */}
                                 <StyledTableCell align="center"> </StyledTableCell>
                             </TableRow>
                         </TableHead>
@@ -146,7 +152,7 @@ const RegistringUsers = () => {
                                     <TableCell align="center">{user.username}</TableCell>
                                     <TableCell align="center">{user.email}</TableCell>
                                     <TableCell align="center">{user.type}</TableCell>
-                                    <TableCell align="center">{user.documents.nationalId}</TableCell>
+                                    {/* <TableCell align="center">{user.documents.nationalId}</TableCell> */}
                                     <TableCell align="center">
                                         <IconButton onClick={(event)=>{ handleOptionsClick(event, user._id)}}>
                                             <MoreVertIcon />

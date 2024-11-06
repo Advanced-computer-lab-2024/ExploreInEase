@@ -24,11 +24,11 @@ const updateUserStatus = async (userId, status) => {
             throw new Error('User not found');
         }
         if(status === 'accepted'){
-            user.status = true
+            user.docStatus = 'approved'
         }
         else{
             if(status === 'rejected'){
-                user.status = false;
+                user.docStatus = 'rejected';
             }
         }
         await user.save();
