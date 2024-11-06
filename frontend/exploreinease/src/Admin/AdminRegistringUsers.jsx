@@ -117,11 +117,15 @@ const RegistringUsers = () => {
 
     const handleOpenFile = async (event, id) => {
         console.log("Opening file", id);
-        await axios.get(`http://localhost:3030/viewDocument/${id}`).then(response => {
-            console.log(response);
-            window.open(`http://localhost:3030/viewDocument/${id}`);
 
-        }).catch(err => console.log(err));
+        window.open(`http://localhost:3030/viewDocument/${id}`);
+
+
+        // await axios.get(`http://localhost:3030/viewDocument/${id}`).then(response => {
+        //     console.log(response);
+        //     window.open(`http://localhost:3030/viewDocument/${id}`);
+
+        // }).catch(err => console.log(err));
 
 
     }
@@ -168,7 +172,19 @@ const RegistringUsers = () => {
                                     <TableCell align="center">
                                     <Button
                                     onClick={(event)=>{handleOpenFile(event, user.documents.nationalId)}}
-                                    > open file</Button>
+                                    > View National ID</Button>
+                                     <Button
+                                    onClick={(event)=>{
+
+                                        if(user.documents.taxation){
+                                            handleOpenFile(event, user.documents.taxation)
+                                        }else{
+                                        
+                                        handleOpenFile(event, user.documents.certificate)
+                                    
+                                        }
+                                    }}
+                                    >{user.documents.taxation?  "View Taxation" : "View Certificate"}</Button>
 
 
 
