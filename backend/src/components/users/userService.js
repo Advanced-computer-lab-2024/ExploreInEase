@@ -1,3 +1,6 @@
+const Activity = require('../../models/activity');
+const Itinerary = require('../../models/itinerary');
+const Users = require('../../models/user');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const getUserById = async (id) => {
