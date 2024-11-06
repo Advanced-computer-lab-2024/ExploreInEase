@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 // Define the Complaints schema
 const complaintSchema = new Schema({
+  title:{
+    type: String,
+    required: true,
+  },
   touristId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Tourist", // Reference to the Tourist model mesh el schema

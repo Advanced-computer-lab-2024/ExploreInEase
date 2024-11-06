@@ -16,7 +16,5 @@ const historicalTagsSchema = new Schema({
 
 });
 
-// Create and export the model
-const historicalTags = mongoose.model('historicalTags', historicalTagsSchema);
-
-module.exports = historicalTags;
+const HistoricalTags = mongoose.model('HistoricalTags', historicalTagsSchema);
+module.exports = HistoricalTags;
