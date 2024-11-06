@@ -74,7 +74,7 @@ const Login = () => {
         navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
-        navigate('/TouristHomePage', { state: { User: user } });
+        navigate('/TouristHomePage', { state: { tourist: user } });
     }
   };
 

@@ -16,6 +16,8 @@ import {
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
 import ArchiveIcon from '@mui/icons-material/Archive';
 import InfoIcon from '@mui/icons-material/Info';
+import ShoppingBasket from '@mui/icons-material/ShoppingBasket';
+import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
 
 
 
@@ -39,11 +41,14 @@ const ProductCard = () => {
   const [messageContent, setMessageContent] = useState('');
   const [messageType, setMessageType] = useState('success');
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [sortOrder, setSortOrder] = useState('desc'); // Initial sort order
+
 
   const [selectedProductName, setSelectedProductName] = useState('');
   const [selectedProductPrice, setSelectedProductPrice] = useState('');
   const [selectedProductSales, setSelectedProductSales] = useState('');
   const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
+  const [selectedProductReviews, setSelectedProductReviews] = useState([]);
 
 
   const [productData, setProductData] = useState({
@@ -74,7 +79,11 @@ const ProductCard = () => {
       setPriceRange([0, maxProductPrice]);
     }
   }, [Product]);
-
+  const handlePurchase = (productId) => {
+    // Your purchase logic here
+    console.log(`Purchasing product with ID: ${productId}`);
+  };
+  
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
   const handleRatingMinChange = (event) => setRatingFilter([Number(event.target.value), ratingFilter[1]]);
@@ -133,9 +142,30 @@ const ProductCard = () => {
       console.error('Failed to archive product:', error);
     }
   };
-  const handleViewReviews = () => {
+  const handleViewReviews = async (productId) => {
+    console.log('Viewing reviews for product:', productId);
+    const product = products.find((product) => product._id === productId);
+      if (!product) {
+        throw new Error('Product not found');
+      }
+      setSelectedProductName(product.name);
+      setSelectedProductPrice(product.price);
+      setSelectedProductSales(product.sales);
+      setSelectedProductQuantity(product.availableQuantity);
+      setSelectedProductReviews(product.reviews);
     setDialogOpen(true);
   };
+
+  const handleSortByRating = () => {
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+      return sortOrder === 'desc' ? b.ratings - a.ratings : a.ratings - b.ratings;
+    });
+    setProducts(sortedProducts);
+  
+    // Toggle sort order
+    setSortOrder((prevOrder) => (prevOrder === 'desc' ? 'asc' : 'desc'));
+  };
+  
 
   // Function to close the dialog
   const handleCloseDialog = () => {
@@ -312,31 +342,38 @@ const ProductCard = () => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
       <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}>
-        <TextField
-          label="Search Products"
-          variant="outlined"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-              <Tooltip title="Filter" placement="top" arrow>
-                <IconButton onClick={handleOpenFilterDialog}>
-                  <FilterListIcon />
-                </IconButton>
-                </Tooltip>
-              </InputAdornment>
-            ),
-          }}
-          sx={{ mr: 2 }}
-        />
-      </Box>
+  <TextField
+    label="Search Products"
+    variant="outlined"
+    value={searchTerm}
+    onChange={handleSearchChange}
+    fullWidth
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon />
+        </InputAdornment>
+      ),
+      endAdornment: (
+        <InputAdornment position="end">
+          <Tooltip title="Filter" placement="top" arrow>
+            <IconButton onClick={handleOpenFilterDialog}>
+              <FilterListIcon />
+            </IconButton>
+          </Tooltip>
+        </InputAdornment>
+      ),
+    }}
+    sx={{ mr: 2 }}
+  />
+  
+  {/* Tooltip for sorting by rating */}
+  <Tooltip title="Sort by Rating" placement="top" arrow>
+    <IconButton onClick={handleSortByRating} sx={{ color: '#1976d2' }}>
+      <SwapVert />
+    </IconButton>
+  </Tooltip>
+</Box>
 
       {/* Filter Dialog */}
       <Dialog open={filterDialogOpen} onClose={handleCloseFilterDialog} fullWidth>
@@ -419,70 +456,95 @@ const ProductCard = () => {
           onChange={(e) => handleInputChange(e, product._id)}  // Pass the specific product ID
         />
     
-            <CardContent>
-              <Typography variant="h6" gutterBottom>{product.name}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Price: ${product.price}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Description: {product.description}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Quantity: {product.originalQuantity}</Typography>
-              <Typography variant="body2" color="text.secondary">Ratings: {product.ratings}</Typography>
-            </CardContent>
-            
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 140,
-                right: 8,
-                display: 'flex',
-                gap: 1, // Space between icons
-              }}
-            >
-              <Tooltip title="Sales" placement="top" arrow>
-                <IconButton 
-                  onClick={() => { 
-                    setSelectedProductId(product._id); 
-                    handleOpenSalesDialog(); 
-                    handleSalesDetails(product._id);
-                  }} 
-                  sx={{ color: 'black' }}
-                >
-                  <InfoIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            {/* Icon Buttons at the bottom-right corner */}
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 8,
-                right: 8,
-                display: 'flex',
-                gap: 1, // Space between icons
-              }}
-            >
-              <Tooltip title="Reviews" placement="top" arrow>
-                <IconButton onClick={handleViewReviews} sx={{ color: '#1976d2' }}>
-                  <RateReviewIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Edit" placement="top" arrow>
-              <IconButton onClick={() => handleOpenEditDialog(product)} sx={{ color: '#1976d2' }}>
-                <EditIcon />
-              </IconButton>
-              </Tooltip>
-              <Tooltip title="Archive" placement="top" arrow>
-                <IconButton 
-                  onClick={() => { 
-                    setSelectedProductId(product._id); 
-                    handleOpenArchiveDialog(); 
-                  }} 
-                  sx={{ color: 'red' }}
-                >
-                  <ArchiveIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Card>
+    <CardContent>
+  <Typography variant="h6" gutterBottom>{product.name}</Typography>
+  <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Price: ${product.price}</Typography>
+  <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Description: {product.description}</Typography>
+  <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Quantity: {product.originalQuantity}</Typography>
+  <Typography variant="body2" color="text.secondary">Ratings: {product.ratings}</Typography>
+</CardContent>
 
+<Box
+  sx={{
+    position: 'absolute',
+    top: 140,
+    right: 8,
+    display: 'flex',
+    gap: 1, // Space between icons
+  }}
+>
+
+{(User.type === 'seller' || User.type === 'admin') && (
+      <Tooltip title="Details" placement="top" arrow>
+      <IconButton 
+        onClick={() => { 
+          setSelectedProductId(product._id); 
+          handleOpenSalesDialog(); 
+          handleSalesDetails(product._id);
+        }} 
+        sx={{ color: 'black' }}
+      >
+        <InfoIcon />
+      </IconButton>
+    </Tooltip>
+)}
+</Box>
+
+<Box
+  sx={{
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    display: 'flex',
+    gap: 1, // Space between icons
+  }}
+>
+  {User.type === 'seller' || User.type === 'admin' ? (
+    <>
+      <Tooltip title="Reviews" placement="top" arrow>
+        <IconButton onClick={
+          () => { 
+          setSelectedProductId(product._id); 
+          handleViewReviews(product._id);
+          }} sx={{ color: '#1976d2' }}>
+          <RateReviewIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Edit" placement="top" arrow>
+        <IconButton onClick={() => handleOpenEditDialog(product)} sx={{ color: '#1976d2' }}>
+          <EditIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Archive" placement="top" arrow>
+        <IconButton 
+          onClick={() => { 
+            setSelectedProductId(product._id); 
+            handleOpenArchiveDialog(); 
+          }} 
+          sx={{ color: 'red' }}
+        >
+          <ArchiveIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  ) : (
+    <>
+      <Tooltip title="Reviews" placement="top" arrow>
+        <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2' }}>
+          <RateReviewIcon />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title="Purchase" placement="top" arrow>
+        <IconButton onClick={() => handlePurchase(product._id)} sx={{ color: '#1976d2' }}>
+          <ShoppingBasket />
+        </IconButton>
+      </Tooltip>
+    </>
+  )}
+</Box>
+
+          </Card>
           {/* Archive Confirmation Dialog */}
         <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
           <DialogTitle>Confirm Archive</DialogTitle>
@@ -495,34 +557,6 @@ const ProductCard = () => {
             </DialogActions>
         </Dialog>
 
-                  {/* Sales Details Dialog */}
-                  <Dialog open={isSalesDialogOpen} onClose={handleCloseSalesDialog} fullWidth maxWidth="xs">
-          <DialogTitle>Product Details</DialogTitle>
-          <DialogContent>
-          <Typography><strong>Product Name:</strong> {selectedProductName}</Typography>
-          <Typography><strong>Product Price:</strong> ${selectedProductPrice}</Typography>
-          <Typography><strong>Product Sales:</strong> {selectedProductSales}</Typography>
-          <Typography><strong>Product Quantity:</strong> {selectedProductQuantity}</Typography>
-
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseSalesDialog} color="primary">Close</Button>
-            </DialogActions>
-        </Dialog>
-    
-          {/* Reviews Dialog */}
-          <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-            <DialogTitle>Reviews</DialogTitle>
-            <DialogContent>
-            <Typography><strong>Product Name:</strong> {selectedProductName}</Typography>
-            <Typography><strong>Product Reviews:</strong> ${selectedProductReviews}</Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog} color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </Dialog>
         </Grid>
   ))}
 </Grid>
@@ -649,17 +683,47 @@ const ProductCard = () => {
         </DialogActions>
       </Dialog>
 
-      <Tooltip title="Create" placement="top" arrow>
-      <Fab
-        color="primary"
-        aria-label="add"
-        onClick={handleOpenCreateDialog}
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
-      >
-        <AddIcon />
-      </Fab>
-      </Tooltip>
+      
+    {/* Sales Details Dialog */}
+    <Dialog open={isSalesDialogOpen} onClose={handleCloseSalesDialog} fullWidth maxWidth="xs">
+          <DialogTitle>Product Details</DialogTitle>
+          <DialogContent>
+          <Typography><strong>Product Name:</strong> {selectedProductName}</Typography>
+          <Typography><strong>Product Price:</strong> ${selectedProductPrice}</Typography>
+          <Typography><strong>Product Sales:</strong> {selectedProductSales}</Typography>
+          <Typography><strong>Product Quantity:</strong> {selectedProductQuantity}</Typography>
 
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseSalesDialog} color="primary">Close</Button>
+            </DialogActions>
+        </Dialog>
+    
+          {/* Reviews Dialog */}
+          <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+            <DialogTitle>Reviews</DialogTitle>
+            <DialogContent>
+            <Typography><strong>Product Name:</strong> {selectedProductName}</Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+      {(User.type === 'seller' || User.type === 'admin') && (
+  <Tooltip title="Create" placement="top" arrow>
+    <Fab
+      color="primary"
+      aria-label="add"
+      onClick={handleOpenCreateDialog}
+      sx={{ position: 'fixed', bottom: 16, right: 16 }}
+    >
+      <AddIcon />
+    </Fab>
+  </Tooltip>
+)}
     </Box>
   );
 };

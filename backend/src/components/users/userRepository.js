@@ -152,14 +152,14 @@ const checkUserExistsByEmail = async (email) => {
 const login = async (username, password) => {
     try {
         const user = await Users.findOne({ username });
-        console.log(user);
         const tourist = await Tourist.findOne({ username });
+        console.log(tourist);
         if (user !== null) {
             const isMatch = await password === user.password;
             if (!isMatch) {
                 throw new Error('Incorrect username or password');
             }
-            return user;
+            return "user";
         }
         else{
             if(tourist !== null){
@@ -167,7 +167,8 @@ const login = async (username, password) => {
                 if (!isMatch) {
                     throw new Error('Incorrect username or password');
                 }
-                return tourist;
+                console.log("Tourist: ",tourist);
+                return "tourist";
             }
             else{
                 throw new Error('Incorrect username or password');
@@ -178,6 +179,22 @@ const login = async (username, password) => {
         console.error(`Error logging in: ${error.message}`);
         return null;
     }
+}
+
+const getUserbyUsername = async (username) => {
+        const user = await Users.findOne({ username: username });
+        if(user){
+            return user;
+        }
+        else{
+            const tourist = await Tourist.findOne({ username: username });
+            if(tourist){
+                return tourist;
+            }
+            else{
+                return null;
+            }
+        }
 }
 
 const updateUserPassword = async (user, password) => {
@@ -259,6 +276,7 @@ const getNotAcceptedUsers = async () => {
 };
 
 module.exports = {
+    getUserbyUsername,
     getNotAcceptedUsers,
     getUserProfilePicture,
     uploadImage,

@@ -378,11 +378,16 @@ const login = async (req, res) => {
     }
     try{
         const user = await userService.login(username, password);
-        if (!user) {
+        if (!(user == "user") && !(user == "tourist")) {
             return res.status(404).json({ error: 'Invalid username or password' });
         }
-        const imageUrl = await userRepository.getUserProfilePicture(user._id);
-        return res.status(200).json({message: "Logged in Successfully", user: user, imageUrl: imageUrl});
+        let imageUrl;
+        const allUser = await userRepository.getUserbyUsername(username);
+        if(user != 'tourist'){
+            imageUrl = await userRepository.getUserProfilePicture(allUser._id);
+        }
+
+        return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl});
     }catch(error){
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
