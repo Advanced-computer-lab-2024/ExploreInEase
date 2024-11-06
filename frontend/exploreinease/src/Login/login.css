@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: flex-start; /* Align slightly to the left */
   height: 100vh;
-  background: url('../airplane.jpg') no-repeat center center fixed;
+ /* background: url('../airplane.jpg') no-repeat center center fixed;*/
   background-size: cover;
   padding-left: 10vw; /* Adjust to position the card slightly left */
 }
