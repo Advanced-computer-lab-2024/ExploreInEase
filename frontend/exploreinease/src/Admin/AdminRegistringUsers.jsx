@@ -115,6 +115,19 @@ const RegistringUsers = () => {
     };
 
 
+    const handleOpenFile = async (event, id) => {
+        console.log("Opening file", id);
+        await axios.get(`http://localhost:3030/viewDocument/${id}`).then(response => {
+            console.log(response);
+            window.open(`http://localhost:3030/viewDocument/${id}`);
+
+        }).catch(err => console.log(err));
+
+
+    }
+
+
+
 
 
     return (
@@ -131,7 +144,7 @@ const RegistringUsers = () => {
                                 <StyledTableCell align="center">Username</StyledTableCell>
                                 <StyledTableCell align="center">Email</StyledTableCell>
                                 <StyledTableCell align="center">Type</StyledTableCell>
-                                {/* <StyledTableCell align="center">Documents</StyledTableCell> */}
+                                <StyledTableCell align="center">Documents</StyledTableCell>
                                 <StyledTableCell align="center"> </StyledTableCell>
                             </TableRow>
                         </TableHead>
@@ -152,7 +165,15 @@ const RegistringUsers = () => {
                                     <TableCell align="center">{user.username}</TableCell>
                                     <TableCell align="center">{user.email}</TableCell>
                                     <TableCell align="center">{user.type}</TableCell>
-                                    {/* <TableCell align="center">{user.documents.nationalId}</TableCell> */}
+                                    <TableCell align="center">
+                                    <Button
+                                    onClick={(event)=>{handleOpenFile(event, user.documents.nationalId)}}
+                                    > open file</Button>
+
+
+
+
+                                    </TableCell>
                                     <TableCell align="center">
                                         <IconButton onClick={(event)=>{ handleOptionsClick(event, user._id)}}>
                                             <MoreVertIcon />

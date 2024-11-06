@@ -112,30 +112,47 @@ ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) =
 
 // Download Document Endpoint
 ACLapp.get('/viewDocument/:fileId', (req, res) => {
-    const fileId = req.params.fileId; // Get the fileId from the URL
+    const fileId = req.params.fileId;
 
     // Ensure fileId is a valid MongoDB ObjectId
     if (!ObjectId.isValid(fileId)) {
         return res.status(400).json({ message: 'Invalid file ID' });
     }
 
-    // Create a download stream
-    const downloadStream = bucket.openDownloadStream(new ObjectId(fileId)); // Use new ObjectId()
+    if (!bucket) {
+        return res.status(500).json({ error: 'GridFSBucket not initialized' });
+    }
 
-    downloadStream.on('error', (error) => {
-        console.error('Download error:', error);
-        return res.status(404).json({ message: 'File not found' });
-    });
+    try {
+        // Create a download stream for the file
+        const downloadStream = bucket.openDownloadStream(new ObjectId(fileId));
 
-    downloadStream.on('data', (chunk) => {
-        res.write(chunk); // Write chunks of data to the response
-    });
+        // Set response headers for file download
+        downloadStream.on('file', (file) => {
+            res.set({
+                'Content-Type': file.contentType || 'application/octet-stream',
+                'Content-Disposition': `attachment; filename="${file.filename}"`,
+            });
+        });
 
-    downloadStream.on('end', () => {
-        res.end(); // End the response when the download is complete
-    });
+        downloadStream.on('data', (chunk) => {
+            res.write(chunk); // Write each chunk to the response
+            res.flush(); // Ensure data is sent in real-time
+        });
+
+        downloadStream.on('end', () => {
+            res.end(); // Close the response after all data is sent
+        });
+
+        downloadStream.on('error', (error) => {
+            console.error('Download error:', error);
+            return res.status(404).json({ message: 'File not found' });
+        });
+    } catch (error) {
+        console.error('Error in viewDocument:', error);
+        return res.status(500).json({ message: 'Error retrieving document' });
+    }
 });
-
 
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
