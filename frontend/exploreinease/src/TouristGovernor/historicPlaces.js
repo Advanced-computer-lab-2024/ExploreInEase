@@ -1,5 +1,5 @@
 import React, { useState, useEffect,useCallback } from 'react';
-import { Card, CardContent, CardMedia, Typography, Button, Alert,CardActions } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Button, Alert,CardActions,Select,MenuItem,FormControl,InputLabel} from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -38,6 +38,7 @@ function HistoricalPlaces() {
   const [map, setMap] = useState(null);
   const [placesService, setPlacesService] = useState(null);
   const [currentPlace, setCurrentPlace] = useState(null);
+  const [tags, setTags] = React.useState([]);
   const [newHistoricPlace, setNewHistoricPlace] = useState({
     name: '',
     description: '',
@@ -47,11 +48,13 @@ function HistoricalPlaces() {
     studentTicketPrice: '',
     foreignerTicketPrice: '',
     images: [],
+    tagId:'',
   });
 
   useEffect(() => {
     // Fetch historical places when the component mounts
     getAllHistoricalPlaces();
+    getAllTags();
   }, []);
 
   const getAllHistoricalPlaces = async () => {
@@ -132,6 +135,7 @@ function HistoricalPlaces() {
       studentTicketPrice: '',
       foreignerTicketPrice: '',
       images: [],
+      tagId:'',
     });
     setImages([]);
     setImagePreviews([]);
@@ -140,8 +144,7 @@ function HistoricalPlaces() {
 
   const handleSaveHistoricPlaces = async () => {
     try {
-if (currentPlace==null){
-
+  if (currentPlace==null){
     if (newHistoricPlace.name.trim()) {
       console.log("New Historical Place",newHistoricPlace);
       const formattedOpeningHours = newHistoricPlace.openingHours 
@@ -293,9 +296,6 @@ const handleDeletePlace = async (place) => {
    const placeId=place._id;
    console.log("Place Id :",place);
    console.log(governorId);
-   
-   
-  
   try {
     const options ={
        apiPath:`/historical-places/${placeId}/${governorId}`,
@@ -315,8 +315,35 @@ const handleDeletePlace = async (place) => {
     }
   }
 };
-
-
+const getAllTags=async ()=>{
+  try {
+    const apiPath = `http://localhost:3030/getAllHistoricalTags/${governorId}`;  // Ensure this matches your API route
+    const response = await axios.get(apiPath);
+    console.log(response.data.tags);
+    
+    if (Array.isArray(response.data.tags)) {
+      const tags = response.data.tags.map(tag => ({
+        id: tag._id,
+        tagType: tag.type,
+      period:tag.period
+      }));
+      setTags(tags);    
+        
+    } else {
+      console.error('Unexpected data format from API');
+    }
+    
+  } catch (err) {
+    // Check if there is a response from the server and handle error
+    if (err.response) {
+      console.error('API Error:', err.message);
+      // setError(err.response.data.message);  // Display error message from the server
+    } else {
+      console.error('Unexpected Error:', err);
+      // setError('An unexpected error occurred.');  // Display generic error message
+    }
+  }
+}
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -340,7 +367,13 @@ const handleDeletePlace = async (place) => {
     setImagePreviews(files.map((file) => URL.createObjectURL(file)));
 
   };
-
+  const handleTagChange = (event) => {
+    const selectedTagId = event.target.value;
+    setNewHistoricPlace((prev) => ({
+      ...prev,
+      tagId: selectedTagId
+    }));
+  };
   return (
     <div>  
     <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
@@ -349,7 +382,7 @@ const handleDeletePlace = async (place) => {
         Add Historical Places
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{currentPlace !== null ? 'Edit Activity' : 'Add Activity'}</DialogTitle>
+        <DialogTitle>{currentPlace !== null ? 'Edit Historical Place' : 'Add Historical Place'}</DialogTitle>
         <DialogContent>
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           
@@ -428,6 +461,7 @@ const handleDeletePlace = async (place) => {
             value={newHistoricPlace.studentTicketPrice}
             onChange={handleInputChange}
           />
+          
           <TextField
             required
             margin="normal"
@@ -440,7 +474,23 @@ const handleDeletePlace = async (place) => {
             value={newHistoricPlace.foreignerTicketPrice}
             onChange={handleInputChange}
           />
-
+ <FormControl fullWidth>
+  <InputLabel id="tags-label">Tags</InputLabel>
+  <Select
+    labelId="tags-label"
+    id="tags-select"
+    name="Tags"
+    label="Tags"
+    value={newHistoricPlace.tagId}
+    onChange={handleTagChange}
+  >
+    {tags.map((tag) => (
+      <MenuItem key={tag.id} value={tag.id}>
+        {tag.period}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
           <input
             accept="image/*"
             style={{ display: 'none' }}
@@ -506,6 +556,9 @@ const handleDeletePlace = async (place) => {
               </Typography>
               <Typography variant="body2" color="text.secondary">
               Location: {place.location?.address}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+              Tags: 
               </Typography>
             </CardContent>
             <CardActions>
