@@ -506,7 +506,7 @@ const ProductCard = () => {
 
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseSalesDialog} color="primary">Done</Button>
+            <Button onClick={handleCloseSalesDialog} color="primary">Close</Button>
             </DialogActions>
         </Dialog>
     
@@ -514,7 +514,8 @@ const ProductCard = () => {
           <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
             <DialogTitle>Reviews</DialogTitle>
             <DialogContent>
-              {/* Empty Content - Placeholder for future review data */}
+            <Typography><strong>Product Name:</strong> {selectedProductName}</Typography>
+            <Typography><strong>Product Reviews:</strong> ${selectedProductReviews}</Typography>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseDialog} color="primary">

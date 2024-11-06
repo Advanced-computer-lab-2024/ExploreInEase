@@ -349,7 +349,7 @@ const createHistoricalPlace = async (data) => {
 };
 
 const findTagByTypeAndPeriod = async (type) => {
-  return await historicalTags.findOne({type:type});
+  return await historicalTags.findOne({_id:type});
 };
 
 const checkTourismGovernor = async (userId) => {

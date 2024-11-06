@@ -60,8 +60,9 @@ const historicalPlaceSchema = new Schema({
   },
   tags: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'historicalTags', // Assuming 'User' is the creator of the itinerary
+    ref: 'HistoricalTags', // Update this to match the corrected model name
   }
+  
   
 });
 

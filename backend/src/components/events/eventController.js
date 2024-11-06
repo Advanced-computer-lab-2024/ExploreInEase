@@ -631,10 +631,11 @@ const createHistoricalPlace = async (req, res) => {
     openingHours,
     ticketPrice,
     created_by,
+    tags
   } = req.body;
 
   // Validate required fields
-  if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by) {
+  if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by || !tags) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -645,10 +646,10 @@ const createHistoricalPlace = async (req, res) => {
   }
 
   try {
-    // const tag = await eventRepository.findTagByTypeAndPeriod(type);
-    // if (!tag) {
-    //   return res.status(400).json({ message: 'Invalid tag type' });
-    // }
+    const tag = await eventRepository.findTagByTypeAndPeriod(tags);
+      if (!tag) {
+        return res.status(400).json({ message: 'Invalid tag type' });
+      }
     const historicalPlaceData = {
       name,
       description,
@@ -657,6 +658,7 @@ const createHistoricalPlace = async (req, res) => {
       openingHours,
       ticketPrice,
       created_by,
+      tags
     };
 
     // Call the service to create the historical place

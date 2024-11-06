@@ -70,8 +70,8 @@ const activitySchema = new Schema({
     default: Date.now,
   },
   tags: [{
-    type: mongoose.Schema.Types.String,
-    ref: 'preferenceTags',
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PreferenceTags',
     required: true,
   }],
 });
