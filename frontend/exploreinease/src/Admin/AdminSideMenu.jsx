@@ -37,10 +37,19 @@ function ResponsiveDrawer(props) {
   const [mobileOpen, setMobileOpen] =useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+
+
   const [collapseOpen, setCollapseOpen] = useState(false);
 
   const handleCollapseToggle = () => {
     setCollapseOpen(!collapseOpen);
+  };
+
+
+  const [UsercollapseOpen, setUserCollapseOpen] = useState(false);
+
+  const handleUserCollapseToggle = () => {
+    setUserCollapseOpen(!UsercollapseOpen);
   };
 
   const [ openTab , setOpenTab ] = useState('ComplaintsTable');
@@ -112,29 +121,12 @@ function ResponsiveDrawer(props) {
       <Toolbar />
       <Divider />
       <List>
-        {/* <ListItemButton onClick={handleCollapseToggle}>
-          <ListItemText primary="Admin Options" />
-          {collapseOpen ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers'].map((text) => (
-              <ListItemButton
-                key={text}
-                sx={{ pl: 4 }}
-                onClick={() => handleTabChange(text)}
-              >
-                <ListItemText primary={text} />
-              </ListItemButton>
-              
-            ))}
-          </List>
-        </Collapse> */}
-        <ListItemButton onClick={handleCollapseToggle}>
+        
+        <ListItemButton onClick={handleUserCollapseToggle}>
           <ListItemText primary="Users" />
-          {collapseOpen ? <ExpandLess /> : <ExpandMore />}
+          {UsercollapseOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
-        <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
+        <Collapse in={UsercollapseOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers'].map((text) => (
               <ListItemButton

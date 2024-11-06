@@ -22,7 +22,7 @@ import axios from 'axios';
 import ActivityCard from './Cards/ActivityCard';
 import HistoricalPlaceCard from './Cards/HistoricalPlacesCard';
 import ItineraryCard from './Cards/ItenraryCard';
-  
+import CircularProgress from '@mui/material/CircularProgress';
   // Sample data with 'type' field added
 
   
@@ -34,6 +34,8 @@ import ItineraryCard from './Cards/ItenraryCard';
     const [historicalPlaces, setHistoricalPlaces] = useState([]);
 
     const [currentTab , setCurrentTab] = useState('activities');
+
+    const [loaded,setLoaded] = useState(false);
 
 
     useEffect(() => {
@@ -47,6 +49,7 @@ import ItineraryCard from './Cards/ItenraryCard';
                 setActivities(response.data.activities);
                 setItineraries(response.data.itineraries);
                 setHistoricalPlaces(response.data.historicalPlaces);
+                setLoaded(true);
             }).catch(error => {
                 console.log(error);
             });
@@ -81,7 +84,8 @@ import ItineraryCard from './Cards/ItenraryCard';
   
           <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
             
-              
+              {loaded ?(
+                <>
                 {currentTab === 'activities' &&
                 activities.map(item => (
                     
@@ -97,6 +101,9 @@ import ItineraryCard from './Cards/ItenraryCard';
                 {currentTab === 'historicalPlaces' && historicalPlaces.map(item => (
                     <HistoricalPlaceCard item={item} />
                     ))}
+                    
+                    </>):(<CircularProgress />)}
+                
               </Grid>
             
         </div>

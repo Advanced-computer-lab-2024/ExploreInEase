@@ -173,7 +173,7 @@ const ActivityCard = ({ item }) => {
   }
 
   return (
-    <Card sx={{ maxWidth: 345, margin: '16px auto', boxShadow: 3, position: 'relative' }}>
+    <Card sx={{ maxWidth: 345, margin: '16px auto', boxShadow: 3, position: 'relative' , maxHeight:"400px"}}>
       <Tooltip title={flag === 1 ? "Flag as inappropriate" :  "Item already flagged as inappropriate"} arrow>
 
       {flag === 1 ? (

@@ -17,6 +17,14 @@ const HistoricalPlaceCard = ({ item }) => {
 
 
 
+
+  console.log("item : ",item);
+
+  // console.log("tags : ",item.tags);
+
+  // console.log("period : ",item.tags.period);
+
+  // console.log("type : ",item.tags.type);
     
   const [addressCache, setAddressCache] = useState({});
 
@@ -171,10 +179,10 @@ const HistoricalPlaceCard = ({ item }) => {
                 </Typography>
 
                 <Typography color="text.secondary">
-                    Type: {item.tags.type || 'N/A'}
+                    Type: {item.tags? item.tags.type : 'N/A'}
                 </Typography>
                 <Typography color="text.secondary">
-                    Period: {item.tags.period || 'N/A'}
+                Period: {item.tags? item.tags.period : 'N/A'}
                 </Typography>
             </CardContent>
         </Card>
