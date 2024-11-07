@@ -850,6 +850,12 @@ const bookEvent = async (req, res) => {
       throw new Error('User type must be tourist');
     }
     if (!touristId || !userType || !eventType || !eventID) {
+      console.log("touristId",touristId);
+      console.log("userType",userType);
+      console.log("eventType",eventType);
+      console.log("eventID",eventID);
+
+      
       return res.status(400).json({ error: "All attributes are required in the request body" });
     }
 
@@ -1016,13 +1022,13 @@ const createTransportation = async (req, res) => {
 
 const getTransportations = async (req, res) => {
   try {
-    const{currency} = req.body;
+    const{currency} = req.params;
     const transportation = await eventService.getTransportations(currency);
     return res.status(200).json(transportation);
   } catch (error) {
     console.error('Error fetching transportation:', error.message);
-    return res.status(500).json({ message: error.message });
-  }
+    return res.status(500).json({ message: error.message });
+  }
 }
 
 

@@ -8,7 +8,7 @@ const Tourist = require('../../models/tourist');
 const mongoose = require('mongoose');
 const historicalTags = require('../../models/historicalTag');
 const historicalPlace = require('../../models/historicalPlace');
-
+const Transportation = require('../../models/transportation');
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
     .populate('category', 'categoryName') // Get categoryName from ActivityCategory
@@ -405,9 +405,15 @@ const getHistoricalTagDetails = async (id) => {
 //Mohamed Apis
 const bookedEvents = async ({ touristId }) => {
   return await Tourist.findById(touristId)
-      .populate('itineraryId.id')  
-      .populate('activityId.id')    
-      .populate('historicalplaceId.id') 
+      .populate({
+        path: 'activityId.id',
+        populate: { path: 'category', model: 'ActivityCategory' } // Populate category in Activity
+      })
+      .populate({
+        path: 'historicalplaceId.id',
+        populate: { path: 'tags', model: 'HistoricalTags' } // Populate tags in HistoricalPlace
+      })
+      .populate('itineraryId.id')
       .populate('transportationId.id')
       .exec();
 };

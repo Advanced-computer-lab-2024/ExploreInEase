@@ -3,6 +3,7 @@ import { Button, TextField, Select, MenuItem, Grid, InputLabel, FormControl, Box
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
@@ -93,6 +94,9 @@ const flightData = [
 ];
 
 const Flights = () => {
+  const location = useLocation();
+  const { userId } = location.state || {};
+
     const flightsImage=[flight];
   const [searchParams, setSearchParams] = useState({
     from: '',
@@ -101,7 +105,40 @@ const Flights = () => {
     peopleCount: null,
     currency: '',
   });
-
+  const handlegetCities=async()=>{
+    try {
+      // touristId, productIds, quantities
+      
+      const options = { 
+        apiPath: `/city/${searchParams.from}`,
+       };
+       
+      const response = await NetworkService.get(options);
+    
+        console.log(response);
+    
+        setIatCode(response.iatCode);
+    } catch (error) {
+      console.log('Error fetching historical places:', error);
+    }
+  }
+  const handlegetCities2=async()=>{
+    try {
+      // touristId, productIds, quantities
+      
+      const options = { 
+        apiPath: `/city/${searchParams.to}`,
+       };
+       
+      const response = await NetworkService.get(options);
+    
+        console.log(response);
+    
+        setIatCode(response.iatCode);
+    } catch (error) {
+      console.log('Error fetching historical places:', error);
+    }
+  }
   const handleDateChange = (date) => {
     setSearchParams((prev) => ({ ...prev, date }));
   };

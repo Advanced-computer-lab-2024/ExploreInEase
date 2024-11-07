@@ -58,35 +58,30 @@ const TouristNavbar = () => {
       }
       else if(title =="View Booked items") {
         try {
-          const options = {
-            apiPath: `/upcomingEvents`,
-          };
+          const touristId=userId;
+          const options = { 
+            apiPath: `/bookedEvents/${touristId}`
+           };
           const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          console.log(response);
-          const events=response;
-          navigate(`/ViewListofBooked`,{state:{events:events,userId:userId}});          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
+          navigate(`/ViewListofBooked`,{state:{events:response,userId:userId}});          
+  
+        } catch (error) {
+          console.log('Error:', error);
         }
       }
       else if(title =="View/Rate Purchased Product") {
         try {
           const options = {
-            apiPath: `/getAvailableProducts/${userId}`,
+            apiPath: `/getOrders/${userId}`,
           };
-          
           const response = await NetworkService.get(options);
           setSuccess(response.message); // Set success message
-          console.log(response);
-          const Product=response.Products;
+          console.log("get Purchased Product",response);
+          const Product=response.orders;
+          console.log("get Purchased Product",Product);
+
           const Type='tourist';
-          navigate(`/ViewPurchasedProduct`,{ state: { Product, Type ,User:User} });          
+          navigate(`/ViewPurchasedProduct`,{ state: { Product:Product, Type:Type ,User:User} });          
         } catch (err) {
           if (err.response) {
               console.log(err.message);
@@ -97,52 +92,44 @@ const TouristNavbar = () => {
         }
       }
       else if(title =="Book Hotels") {
-       navigate(`/BookHotel`);          
+       navigate(`/BookHotel`,{state:{userId}});          
       }
       else if(title =="Book Flights") {
-        navigate(`/BookFlight`);          
+        navigate(`/BookFlight`,{state:{userId}});          
       }
       else if(title =="Book transportation") {
-        // try {
-        //   const options = {
-        //     apiPath: `/getAvailableProducts/${userId}`,
-        //   };
+        try {
+          const touristId=userId;
+          const options = { 
+            apiPath: `/getTransportations/EGP`
+           };
+          const response = await NetworkService.get(options);
+          console.log(response);
           
-        //   const response = await NetworkService.get(options);
-        //   setSuccess(response.message); // Set success message
-        //   console.log(response);
-        //   const Product=response.Products;
-        //   const Type='tourist';
-        //   navigate(`/ViewPurchasedProduct`,{ state: { Product, Type ,User:User} });          
-        // } catch (err) {
-        //   if (err.response) {
-        //       console.log(err.message);
-        //     setError(err.response.data.message); // Set error message from server response if exists
-        //   } else {
-        //     setError('An unexpected error occurred.'); // Generic error message
-        //   }
-        // }
-                 navigate(`/BookTransportation`);          
-
+           const transportationData=response;
+          navigate(`/BookTransportation`,{state:{userId:userId,transportationData:transportationData}});          
+          } catch (error) {
+          console.log('Error:', error);
+        }
       }
       else {
         try {
-            const options = {
-              apiPath: `/upcomingEvents`,
-            };
-            const response = await NetworkService.get(options);
-            setSuccess(response.message); // Set success message
-            console.log(response);
-            const events=response;
-            navigate(`/explore`,{state:{events}});          
-          } catch (err) {
-            if (err.response) {
-                console.log(err.message);
-              setError(err.response.data.message); // Set error message from server response if exists
-            } else {
-              setError('An unexpected error occurred.'); // Generic error message
-            }
+          const options = {
+            apiPath: `/upcomingEvents`,
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const events=response;
+          navigate(`/explore`,{state:{events:events,userId:userId}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
           }
+        }
       }
       }
   return (

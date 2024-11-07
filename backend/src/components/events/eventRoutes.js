@@ -2613,14 +2613,8 @@ router.post('/bookFlight', eventController.bookFlight);
 router.post('/createTransportation', eventController.createTransportation);
 
 // Get Transportation Route
-router.get('/getTransportations', eventController.getTransportations);
-
+router.get('/getTransportations/:currency', eventController.getTransportations);
 // Route to book transportation
 router.post('/bookTransportation', eventController.bookTransportation);
-
-
-
-
-
 
 module.exports = router;

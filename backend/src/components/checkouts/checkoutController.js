@@ -182,6 +182,11 @@ const addOrder = async (req, res) => {
 
     // Ensure all required fields are provided
     if (!touristId || !productIds || !quantities || productIds.length === 0 || quantities.length === 0) {
+        console.log("touristId",touristId);
+        console.log("productIds",productIds);
+        console.log("quantities",quantities);
+
+        
         return res.status(400).json({ message: "touristId, productIds, and quantities are required." });
     }
 

@@ -186,9 +186,30 @@ const ProductCard = () => {
       
       setNextId((prev) => prev + 1);
       handleClose();
-     }
-  };
-
+      }
+  };
+  const handleClickPurchase=async(product)=>{
+    try {
+      // touristId, productIds, quantities
+      console.log("Product",product._id);
+      
+      const options = { 
+        apiPath: `/addOrder`,
+        body:
+        {
+          touristId:userId,
+          productIds:[product._id],
+          quantities:[1],
+        }
+       };
+       
+      const response = await NetworkService.post(options);
+        console.log(response);
+        
+    } catch (error) {
+      console.log('Error fetching historical places:', error);
+    }
+  }
 const handleSubmitUpdate = async () => {
   console.log("ProductData: ", productData);
   if (validateForm()) {
@@ -306,17 +327,28 @@ const handleSubmitUpdate = async () => {
                   <Typography>Description: {product.description}</Typography>
                   <Typography>Quantity: {product.originalQuantity}</Typography>
                   <Typography>Seller: {product.sellerType}</Typography>
-                    <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
+                 <div>
+                 <Button variant="contained" color="primary" onClick={() => handleClickOpenUpdate(product)}>
                       Update
                     </Button>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={() => handleClickOpenReviews(product.reviews)} // Open reviews dialog
-                    style={{ marginTop: '10px' }}
+                    style={{ marginLeft:'10px' }}
                   >
                     View Reviews
                   </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleClickPurchase(product)} // Open reviews dialog
+                    style={{ marginLeft:'10px' }}
+                  >
+                    Purchase
+                  </Button>
+                 </div>
+
                 </CardContent>
               </Card>
             </Grid>

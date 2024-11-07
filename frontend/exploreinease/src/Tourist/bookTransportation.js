@@ -5,6 +5,8 @@ import {
 import Grid from '@mui/material/Grid';
 import dayjs from 'dayjs';
 import axios from 'axios'; // Ensure Axios is imported
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';  
 import { useLocation } from 'react-router-dom';
 
 import NetworkService from '../NetworkService';
@@ -28,28 +30,91 @@ const MenuProps = {
 };
 function BookTransportation() {
     const location = useLocation();
-    const [transportation, setTransportion] = useState(null); 
+    const {userId,transportationData} = location.state || {};
+    const [transportation, setTransportion] = useState(transportationData); 
     const [open, setOpen] = useState(false);
-    const handleClickOpen = () => setOpen(true);
+    const [success,setSuccess]=useState(false);
+    const [error,setError]=useState(false);
+    const [selectedTransportation,setSelectedTransportation]=useState();
+    const handleClickOpen = (item) => {
+      setSelectedTransportation(item);
+      setOpen(true);
+    }
     const handleClose = () => setOpen(false);
 
+    const handleBookTransportation=async()=>{
+      console.log("selected",selectedTransportation);
+      try {
+        const options = { apiPath: `/bookTransportation`,
+        body:{
+          touristId:userId,
+          transportationId:selectedTransportation._id,
+          
+        }
+        };
+        const response = await NetworkService.post(options);
+          console.log(response);
+          setTransportion(prevData => prevData.filter(item => item._id !== transportation._id));
+          setSuccess(true);
+          
+      } catch (error) {
+        console.log('Error fetching historical places:', error);
+        setError(true);
+
+      }
+      handleClose();
+    }
+    useEffect(() => {
+      if (success) {
+        const timer = setTimeout(() => {
+          setSuccess(false); // Hide the alert after 3 seconds
+        }, 7000);
+        return () => clearTimeout(timer); // Clean up the timer on component unmount
+
+      }
+      else {
+        const timer = setTimeout(() => {
+          setError(false); // Hide the alert after 3 seconds
+        }, 7000);
+        return () => clearTimeout(timer); // Clean up the timer on component unmount
+      }
+      
+    }, [success,error]);
   return (
     <div>
+     <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>
+      {/* Alert component to show success message */}
+      {success && (
+        <Alert severity="success">
+          <AlertTitle>Success</AlertTitle>
+          Booked successfully
+        </Alert>
+      )}
+       {error && (
+        <Alert severity="error">
+          <AlertTitle>Error</AlertTitle>
+          Booked Failed
+        </Alert>
+      )}
+    </div>
         <Grid container spacing={2} style={{ marginTop: 20 }}>
-          {transportation?.map((transportation, index) => (
+          {transportation?.map((transportationn, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card>
                 <CardContent>
-                  <Typography variant="body2">Date: {dayjs(transportation.date).format('DD/MM/YYYY')}</Typography>
-                  <Typography variant="body2">Time: {transportation.time}</Typography>
-                  <Typography variant="body2">Price: {transportation.price}</Typography>
-                  <Typography variant="body2">Transportation Type: {transportation.transportationType}</Typography>
-                  <Typography variant="body2">PickUp Location: {transportation.pickupLocation}</Typography>
-                  <Typography variant="body2">PickOff Location: {transportation.pickoffLocation}</Typography>
+                <Typography variant="h5" component="div">
+                      Transportation {index+1}
+                    </Typography>
+                  <Typography variant="body2">Date: {dayjs(transportationn.dateAvailable).format('DD/MM/YYYY')}</Typography>
+                  <Typography variant="body2">Time: {transportationn.timeAvailable}</Typography>
+                  <Typography variant="body2">Price: {transportationn.price}</Typography>
+                  <Typography variant="body2">Transportation Type: {transportationn.transportationType}</Typography>
+                  <Typography variant="body2">PickUp Location: {transportationn.pickupLocation}</Typography>
+                  <Typography variant="body2">PickOff Location: {transportationn.dropoffLocation}</Typography>
                 </CardContent>
                 <CardActions>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                 <Button variant="contained" color="primary" onClick={() => handleClickOpen()}>
+                 <Button variant="contained" color="primary" onClick={() => handleClickOpen(transportationn)}>
                       Book a transportation 
                  </Button> 
                  </div>
@@ -70,7 +135,7 @@ function BookTransportation() {
                       </div>
                   </DialogContent>
                   <DialogActions>
-                  <Button onClick={handleClose} autoFocus>
+                  <Button onClick={() => handleBookTransportation()} autoFocus>
                     Save   
                  </Button>
                     <Button onClick={handleClose}>Close</Button>

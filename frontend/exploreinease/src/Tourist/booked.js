@@ -38,10 +38,13 @@ import {
   const Booked = () => {
     const location = useLocation();
     const { events ,userId} = location.state || {};
+    console.log(events);
+    
     const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
     console.log("event",events);
     console.log("user",userId);
-  
+    console.log("itemList",itemList);
+
     const [filters, setFilters] = useState({
       budget: '',
       price: '',
@@ -68,25 +71,7 @@ import {
     const [commentType, setCommentType] = useState(''); 
     const [comment, setComment] = useState(''); 
     const [budget, setBudget] = useState('');
-  
-
-    const getAllBooked=async()=>{
-      try {
-        const touristId=userId;
-
-        const options = { 
-          apiPath: `/bookedEvents/${touristId}`
-         };
-        const response = await NetworkService.get(options);
-          console.log(response);
-          
-      } catch (error) {
-        console.log('Error:', error);
-      }
-    
-    }
-    
-    getAllBooked();
+     
 
     const getAddressFromCoordinates = async (coordinates) => {
       if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
@@ -308,7 +293,6 @@ import {
       setCommentType(null);
 
     };
-  
     const handleClickOpenCancelation = (item) => {
       setOpenCancelation(true);
       setSelectedItem(item);
@@ -343,7 +327,7 @@ import {
         return hoursDifference >= 48;
       };
     const  handleSaveRating=async (type,rating,selectedItem)=>{
-      console.log(selectedItem);
+      console.log("selectedItem",selectedItem);
       console.log(selectedItem.created_by._id);
 
       if(type==="tourGuide") {
@@ -361,7 +345,7 @@ import {
         } catch (error) {
           console.log('Error fetching historical places:', error);
         }
-      }else if (type==="Itinerary"){
+      }else if (selectedItem.type==="Itinerary"){
         try {
           const options = { apiPath: `/rateItinerary/${userId}`,
           body:{
@@ -377,7 +361,7 @@ import {
           console.log('Error fetching historical places:', error);
         }
       }
-      else if (type==="activity"){
+      else if (selectedItem.type==="Activity"){
         try {
           const options = { apiPath: `/rateActivity/${userId}`,
         body:{
@@ -409,7 +393,142 @@ import {
           console.log('Error fetching historical places:', error);
         }
       }
+      handleClose();
     }
+    const handleCancelBooking=async(selectedItem)=>{
+
+          if (selectedItem.type==="Activity"){
+            try {
+              const options = { apiPath: `/cancelBookingEvent`,
+              body:{
+                userType:'tourist',
+                touristId:userId,
+                eventType:'activity',
+                eventID:selectedItem.id,
+              }
+              };
+              const response = await NetworkService.put(options);
+                console.log(response);
+                setFilteredData(prevData => prevData.filter(item => item.id !== filteredData.id));
+
+            } catch (error) {
+              console.log('Error fetching historical places:', error);
+            }
+          }
+          else if (selectedItem.type==="Itinerary"){
+            try {
+              const options = { apiPath: `/cancelBookingEvent`,
+              body:{
+                userType:'tourist',
+                touristId:userId,
+                eventType:'itinerary',
+                eventID:selectedItem.id,
+              }
+              };
+              const response = await NetworkService.put(options);
+                console.log(response);
+                setFilteredData(prevData => prevData.filter(item => item.id !== filteredData.id));
+
+            } catch (error) {
+              console.log('Error fetching historical places:', error);
+            }
+          }
+          else {
+            try {
+              const options = { apiPath: `/cancelBookingEvent`,
+              body:{
+                userType:'tourist',
+                touristId:userId,
+                eventType:'historicalPlace',
+                eventID:selectedItem.id,
+              }
+              };
+              const response = await NetworkService.put(options);
+                console.log(response);
+                setFilteredData(prevData => prevData.filter(item => item._id !== filteredData._id));
+
+            } catch (error) {
+              console.log('Error fetching historical places:', error);
+            }
+          }
+          handleClose();
+    }
+    const handleSaveComments=async(type,comment,selectedItem)=>{
+      if (type ==='tourGuide'){
+        try {
+          const options = { 
+            apiPath: `/commentTourGuide/${userId}`,
+            body:{
+              tourGuideId:selectedItem.created_by._id,
+              itineraryId:selectedItem.id,
+              commentText:comment,
+            }
+           };
+           
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      else if (selectedItem.type==="Activity"){
+        try {
+          const options = { 
+            apiPath: `/commentActivity/${userId}`,
+            body:{
+              activityId:selectedItem.id,
+              commentText:comment,
+            }
+           };
+           
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      else if (selectedItem.type==="Itinerary"){
+        try {
+          const options = { 
+            apiPath: `/commentItinerary/${userId}`,
+            body:{
+              tourGuideId:selectedItem.created_by._id,
+              itineraryId:selectedItem.id,
+              commentText:comment,
+            }
+           };
+           
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      else {
+        try {
+          const options = { 
+            apiPath: `/commentHistoricalPlace/${userId}`,
+            body:{
+              historicalPlaceId:selectedItem.id,
+              commentText:comment,
+            }
+           };
+           
+          const response = await NetworkService.post(options);
+            console.log(response);
+            
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      handleClose();
+
+    }
+    console.log("Filtered Data",filteredData);
+    
     return (
       <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
@@ -495,7 +614,7 @@ import {
                         </>
                     )}
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                    {canCancelBooking(item.startDate) ? (
+                    {!canCancelBooking(item.startDate) ? (
                             <Button
                             style={{ height: "50px", width: "80px", marginRight: '7px' }}
                             variant="contained"
@@ -514,12 +633,33 @@ import {
                             Cancel Booking
                             </Button>
                         )}
-                     <Button style={{width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpenComment(item)}>
+                        {!canCancelBooking(item.startDate)?(
+                          <Button style={{width:"80px",marginRight: '7px'}} 
+                            variant="contained" color="primary"
+                              onClick={() => handleClickOpenComment(item)}
+                              disabled>
+                            Comment 
+                            </Button> 
+                        ):(          
+                      <Button style={{width:"80px",marginRight: '7px'}} variant="contained" color="primary" onClick={() => handleClickOpenComment(item)}>
                         Comment 
-                     </Button> 
-                     <Button style={{width:"20px"}}  variant="contained" color="primary" onClick={() => handleClickOpenRate(item)}>
-                       Rate 
-                         </Button> 
+                     </Button> )}
+                     {!canCancelBooking(item.startDate)?(
+                     <Button style={{width:"20px"}}  
+                     variant="contained" color="primary" 
+                     disabled
+                     onClick={() => handleClickOpenRate(item)}>
+                           Rate 
+                       </Button> 
+                        ):(          
+                          <Button style={{width:"20px"}}
+                            variant="contained" 
+                            color="primary" 
+                            onClick={() => handleClickOpenRate(item)}>
+                               Rate 
+                          </Button> 
+                           )}
+
                         </div>
                     </CardContent>
                     </Card>    
@@ -539,12 +679,15 @@ import {
                       </div>
                   </DialogContent>
                   <DialogActions>
-                  <Button onClick={handleClose} autoFocus>
+                  <Button onClick={()=>handleCancelBooking(selectedItem)} autoFocus>
                       Confirm
                     </Button>
                     <Button onClick={handleClose}>Close</Button>
                   </DialogActions>
                 </Dialog>
+
+
+
                 <Dialog
                   open={openRate}
                   onClose={handleClose}
@@ -639,6 +782,7 @@ import {
                   <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
               </Dialog>
+
 
               <Dialog
                   open={openComment}
@@ -756,7 +900,7 @@ import {
       )}
                 </DialogContent>
                 <DialogActions>
-                <Button onClick={handleClose} autoFocus>
+                <Button onClick={()=>handleSaveComments(rateType,comment,selectedItem)} autoFocus>
                     Save
                   </Button>
                   <Button onClick={handleClose}>Close</Button>

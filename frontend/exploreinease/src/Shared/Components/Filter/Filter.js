@@ -19,12 +19,14 @@ import {
   DialogContentText,
   DialogTitle
 } from "@mui/material";
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';  
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import debounce from 'lodash.debounce';
-
+import NetworkService from "../../../NetworkService";
 // Sample data with 'type' field added
 const itemList = [];
 const addressCache = {};
@@ -38,7 +40,7 @@ const roleFields = {
 
 const Filter = () => {
   const location = useLocation();
-  const { events } = location.state || {};
+  const { events,userId } = location.state || {};
   const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
   console.log(events);
   console.log(itemList);
@@ -62,9 +64,17 @@ const Filter = () => {
   const [historicalTags, setHistoricalTags] = useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [type, setType] = useState(''); // State to store the selected item
+  const [type, setType] = useState(''); 
   const [budget, setBudget] = useState('');
+  const [currency, setCurrency] = useState('');
+  const [success,setSuccess]=useState(false);
 
+
+
+  const showSuccess=()=>{
+      setSuccess(true);
+      return true;
+  }
   const getAddressFromCoordinates = async (coordinates) => {
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
       return 'Location not available';
@@ -316,6 +326,7 @@ const Filter = () => {
   const handleClose = () => {
     setOpen(false);
     setType(null);
+    setCurrency(null);
     setBudget(null);
      setSelectedItem(null); 
     
@@ -328,12 +339,140 @@ const Filter = () => {
   const handleChange = (event) => {
     setType(event.target.value);
   };
+  const handleChangeCurrency = (event) => {
+    setCurrency(event.target.value);
+  };
   const handleBudgetChange = (event) => {
     setBudget(event.target.value);
   };
-  const handleSaveBook=(selectedItem)=>{
-    
+  const handleSaveBook=async(selectedItem,budget,type,currency)=>{
+    console.log(selectedItem);
+    console.log("type:",type);
+
+    if (selectedItem.type === 'Activity'){
+      try {
+        const options = { apiPath: `/bookEvent`,
+        body:{
+          userType:'tourist',
+           touristId:userId,
+           eventType:'activity',
+           eventID:selectedItem.id,
+           ticketType:'',
+           currency:currency,
+           activityPrice:budget
+        }
+        };
+        const response = await NetworkService.put(options);
+          console.log(response);
+          setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+          setSuccess(true);
+          
+      } catch (error) {
+        console.log('Error fetching historical places:', error);
+      }
+    }
+    else if (selectedItem.type === 'Itinerary'){
+      try {
+        const options = { apiPath: `/bookEvent`,
+        body:{
+          userType:'tourist',
+           touristId:userId,
+           eventType:'itinerary',
+           eventID:selectedItem.id,
+           ticketType:'',
+           currency:'',
+           activityPrice:selectedItem.price
+        }
+        };
+        const response = await NetworkService.put(options);
+        console.log(response);
+        setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+          setSuccess(true);
+
+      } catch (error) {
+        console.log('Error fetching historical places:', error);
+      }
+    }
+    else {
+      if (type === 'student'){
+        try {
+          const options = { apiPath: `/bookEvent`,
+          body:{
+            userType:'tourist',
+             touristId:userId,
+             eventType:'historicalPlace',
+             eventID:selectedItem.id,
+             ticketType:type,
+             currency:'',
+             activityPrice:selectedItem.ticketPrice[0]
+          }
+          };
+          const response = await NetworkService.put(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setSuccess(true);
+
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      else if (type ==='native'){
+        try {
+          const options = { apiPath: `/bookEvent`,
+          body:{
+            userType:'tourist',
+             touristId:userId,
+             eventType:'historicalPlace',
+             eventID:selectedItem.id,
+             ticketType:type,
+             currency:'',
+             activityPrice:selectedItem.ticketPrice[1]
+          }
+          };
+          const response = await NetworkService.put(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setSuccess(true);
+
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+      else{
+        try {
+          const options = { apiPath: `/bookEvent`,
+          body:{
+            userType:'tourist',
+             touristId:userId,
+             eventType:'historicalPlace',
+             eventID:selectedItem.id,
+             ticketType:type,
+             currency:'',
+             activityPrice:selectedItem.ticketPrice[2]
+          }
+          };
+          const response = await NetworkService.put(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setSuccess(true);
+
+        } catch (error) {
+          console.log('Error fetching historical places:', error);
+        }
+      }
+     
+    }
+    handleClose();
   }
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(false); // Hide the alert after 3 seconds
+      }, 7000);
+  
+      return () => clearTimeout(timer); // Clean up the timer on component unmount
+    }
+  }, [success]);
   // useEffect(() => {
   //   filteredData.forEach((item) => {
   //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
@@ -343,7 +482,18 @@ const Filter = () => {
   // }, [filteredData, historicalTags]);
 // getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
   return (
+
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
+     <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>
+      {/* Alert component to show success message */}
+      {success && (
+        <Alert severity="success">
+          <AlertTitle>Success</AlertTitle>
+          Booked successfully
+        </Alert>
+      )}
+      {/* Your other component code here */}
+    </div>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
         <Tabs value={role} onChange={handleRoleChange}>
           <Tab label="Activities" value="Activities" />
@@ -551,11 +701,13 @@ const Filter = () => {
                 </Grid>
                   ))}
                 </Grid>
+
+
+
                 <Dialog
                   open={open}
                   onClose={handleClose}
-                  disableBackdropClick
-                  disableEscapeKeyDown
+                 
                >
                 <DialogTitle id="alert-dialog-title">
                 {'Book a Ticket for '} {selectedItem?.name}
@@ -566,7 +718,26 @@ const Filter = () => {
           {selectedItem.type === 'Activity' && (
             <>
               <Typography>Budget for Activity: {selectedItem.budget}</Typography>
+              <div style={{ display: 'flex', alignItems: 'center',  }}>
+                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your currency:</span>
+                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
+                   <InputLabel id="demo-simple-select-label">currency</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={currency}
+                          label="currency"
+                          onChange={handleChangeCurrency}
+                          required
+                        >
+                          <MenuItem value={'EGP'}>EGP</MenuItem>
+                          <MenuItem value={'euro'}>euro</MenuItem>
+                          <MenuItem value={'dollar'}>USD</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
               <div  style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                  
                     <span style={{ marginRight: '8px',marginTop:'10px' }}>Write your Budget for the Activity:</span>
                      <TextField id="standard-basic" label="budget" type="number" variant="standard" style={{ width: '150px' }}
                        required value={budget} onChange={handleBudgetChange}  />  
@@ -599,23 +770,27 @@ const Filter = () => {
                         </Select>
                       </FormControl>
                     </div>
-            </>
-          )}
-        </>
-      )}
+
+                            </>
+                          )}
+                        </>
+                      )}
                     <div>
                     <strong>Important Note:</strong>
                     <p>*Please note that you must bring a Student ID/Passport/National ID to the location*</p>
                     </div>
+
                 </DialogContent>
                 <DialogActions>
-                <Button onClick={()=>handleSaveBook(selectedItem)} autoFocus>
+                <Button onClick={()=>handleSaveBook(selectedItem,budget,type,currency)} autoFocus>
                     Book
                   </Button>
                   <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
               </Dialog>
+
               </div>
+
             </div>
           );
         };

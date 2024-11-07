@@ -3,10 +3,11 @@ import { Button, TextField, Select, MenuItem, Grid, InputLabel, FormControl, Box
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 import PeopleIcon from '@mui/icons-material/People';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-
+import NetworkService from '../NetworkService';
 import Hotel1 from '../Hotels Images/Hotel 1.jpeg';
 import Hotel2 from '../Hotels Images/Hotel 2.jpeg';
 import Hotel3 from '../Hotels Images/Hotel 3.jpeg';
@@ -41,13 +42,85 @@ const hotelData = [
 ];
 
 const Hotels = () => {
+  const location = useLocation();
+  const { userId } = location.state || {};
+
+  const [iatCode,setIatCode]=useState('');
   const [searchParams, setSearchParams] = useState({
+    country:'',
     startDate: null,
     endDate: null,
     peopleCount: null,
     currency: '',
   });
 
+const handlegetCities=async()=>{
+  try {
+    // touristId, productIds, quantities
+    
+    const options = { 
+      apiPath: `/city/${searchParams.country}`,
+     };
+     
+    const response = await NetworkService.get(options);
+  
+      console.log(response);
+  
+      setIatCode(response.iatCode);
+  } catch (error) {
+    console.log('Error fetching historical places:', error);
+  }
+}
+const handleGetHotels=async()=>{
+  try {
+    // touristId, productIds, quantities
+    
+    const options = { 
+      apiPath: `/hotels/${iatCode}`,
+      body:{
+        startDate:searchParams.startDate,
+         endDate:searchParams.endDate,
+          currency:searchParams.currency,
+           personCount:searchParams.peopleCount
+      }
+     };
+     
+    const response = await NetworkService.get(options);
+  
+      console.log(response);
+  
+  } catch (error) {
+    console.log('Error fetching historical places:', error);
+  }
+}
+
+const handleBookHotels=async(selected)=>{
+  try {
+    // touristId, productIds, quantities
+    // bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency
+    const options = { 
+      apiPath: `/bookHotel`,
+      body:{
+        bookedBy:userId,
+        price:selected.price,
+        hotelName:selected.hotelName,
+        hotelId:selected.hotelId,
+        startDate:searchParams.startDate,
+        endDate:searchParams.endDate,
+        currency:searchParams.currency,
+        personCount:searchParams.peopleCount
+      }
+     };
+     
+    const response = await NetworkService.post(options);
+  
+      console.log(response);
+  
+      setIatCode(response.iatCode);
+  } catch (error) {
+    console.log('Error fetching historical places:', error);
+  }
+}
   const handleDateChange = (field) => (date) => {
     setSearchParams((prev) => ({ ...prev, [field]: date }));
   };
@@ -58,6 +131,7 @@ const Hotels = () => {
   };
 
   const handleSearch = () => {
+
     console.log("Search parameters:", searchParams);
     setSearchParams({
       startDate: null,
@@ -81,6 +155,13 @@ const Hotels = () => {
                 Hotel Search
               </Typography>
               <Box display="flex" flexDirection="column" gap={2}>
+              <TextField
+                  label="Country"
+                  name="Country"
+                  value={searchParams.country}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
                 <FormControl fullWidth>
                   <DatePicker
                     label="Start Date"
@@ -97,6 +178,7 @@ const Hotels = () => {
                     renderInput={(params) => <TextField {...params} fullWidth />}
                   />
                 </FormControl>
+                
                 <TextField
                   label="Number of People"
                   type="number"
