@@ -403,15 +403,14 @@ const createTransportation = async (req, res) => {
 
 const getTransportations = async (req, res) => {
   try {
-    const{currency} = req.body;
+    const{currency} = req.params;
     const transportation = await eventService.getTransportations(currency);
     return res.status(200).json(transportation);
   } catch (error) {
     console.error('Error fetching transportation:', error.message);
-    return res.status(500).json({ message: error.message });
-  }
+    return res.status(500).json({ message: error.message });
+  }
 }
-
 
 
 const bookTransportation = async (req, res) => {

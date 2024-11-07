@@ -110,37 +110,90 @@ const bookedEvents = async (touristId) => {
     throw new Error('Tourist not found');
   }
 
-  return {
-    itineraries: tourist.itineraryId.length > 0 ? tourist.itineraryId
-      .filter(itinerary => itinerary.id) // Ensure `id` is defined
-      .map(itinerary => ({
-        ...itinerary.id._doc,
-        pricePaid: itinerary.pricePaid,
-        timeline: itinerary.id.timeline ? itinerary.id.timeline.map(item => item.toString()) : []
-      })) : [],
-      
-    activities: tourist.activityId.length > 0 ? tourist.activityId
-      .filter(activity => activity.id) // Ensure `id` is defined
+  return [
+    // Process `activityId` array
+    tourist.activityId.length > 0 ? tourist.activityId
+      .filter(activity => activity.id)
       .map(activity => ({
-        ...activity.id._doc,
-        pricePaid: activity.pricePaid
+        id: activity.id._id.toString(),
+        name: activity.id.name,
+        date: activity.id.date,
+        time: activity.id.time,
+        location: [
+          activity.id.location.latitude,
+          activity.id.location.longitude
+        ],
+        budget: activity.id.price,
+        category: activity.id.category ? activity.id.category.categoryName : 'Unknown', 
+        tags: activity.id.tags.map(tag => tag.toString()), 
+        specialDiscounts: activity.id.specialDiscounts,
+        created_by: activity.id.created_by ? activity.id.created_by.toString() : null,
+        flag: activity.id.flag,
+        isOpen: activity.id.isOpen,
+        comments: activity.id.comments,
+        createdAt: activity.id.createdAt,
+        type: "Activity"
       })) : [],
-      
-    historicalPlaces: tourist.historicalplaceId.length > 0 ? tourist.historicalplaceId
-      .filter(historicalPlace => historicalPlace.id) // Ensure `id` is defined
+
+    // Process `itineraryId` array
+    tourist.itineraryId.length > 0 ? tourist.itineraryId
+      .filter(itinerary => itinerary.id)
+      .map(itinerary => ({
+        id: itinerary.id._id.toString(),
+        name: itinerary.id.name,
+        activities: itinerary.id.activities ? itinerary.id.activities.map(activity => activity.toString()) : [],
+        locations: itinerary.id.locations ? itinerary.id.locations.map(location => location.toString()) : [],
+        timeline: itinerary.id.timeline ? itinerary.id.timeline.map(time => time.toString()) : [],
+        directions: itinerary.id.directions,
+        language: itinerary.id.language,
+        price: itinerary.id.price,
+        dateAvailable: itinerary.id.dateAvailable ? itinerary.id.dateAvailable.map(date => date.toISOString()) : [],
+        accessibility: itinerary.id.accessibility,
+        pickupLocation: itinerary.id.pickupLocation,
+        dropoffLocation: itinerary.id.dropoffLocation,
+        isActivated: itinerary.id.isActivated,
+        created_by: itinerary.id.created_by ? { _id: itinerary.id.created_by._id.toString(), username: itinerary.id.created_by.username } : null,
+        flag: itinerary.id.flag,
+        rating: itinerary.id.rating || [],
+        comments: itinerary.id.comments || [],
+        type: "Itinerary",
+        pricePaid: itinerary.pricePaid
+      })) : [],
+
+    // Process `historicalplaceId` array
+    tourist.historicalplaceId.length > 0 ? tourist.historicalplaceId
+      .filter(historicalPlace => historicalPlace.id)
       .map(historicalPlace => ({
-        ...historicalPlace.id._doc,
-        pricePaid: historicalPlace.pricePaid
+        id: historicalPlace.id._id.toString(),
+        name: historicalPlace.id.name,
+        description: historicalPlace.id.description,
+        pictures: historicalPlace.id.pictures || [],
+        location: [
+          historicalPlace.id.location.latitude,
+          historicalPlace.id.location.longitude,
+        ],
+        openingHours: historicalPlace.id.openingHours,
+        ticketPrice: [
+          historicalPlace.id.ticketPrice.student,
+          historicalPlace.id.ticketPrice.native,
+          historicalPlace.id.ticketPrice.foreign
+        ],
+        createdAt: historicalPlace.id.createdAt,
+        tags: historicalPlace.id.tags ? historicalPlace.id.tags.type : [], // Get tag name
+        type: 'HistoricalPlace',
+        pricePaid: historicalPlace.pricePaid,
       })) : [],
-      
-    transportations: tourist.transportationId && tourist.transportationId.length > 0 ? tourist.transportationId
-      .filter(transportation => transportation.id) // Ensure `id` is defined
+
+    // Process `transportationId` array
+    tourist.transportationId && tourist.transportationId.length > 0 ? tourist.transportationId
+      .filter(transportation => transportation.id)
       .map(transportation => ({
         ...transportation.id._doc,
         pricePaid: transportation.pricePaid
       })) : []
-  };
+  ];
 };
+
 
 
 const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {

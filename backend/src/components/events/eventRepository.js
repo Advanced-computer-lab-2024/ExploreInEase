@@ -130,9 +130,15 @@ const setFlagToZeroForActivity = async (_id) => {
 
 const bookedEvents = async ({ touristId }) => {
   return await Tourist.findById(touristId)
-      .populate('itineraryId.id')  
-      .populate('activityId.id')    
-      .populate('historicalplaceId.id') 
+      .populate({
+        path: 'activityId.id',
+        populate: { path: 'category', model: 'ActivityCategory' } // Populate category in Activity
+      })
+      .populate({
+        path: 'historicalplaceId.id',
+        populate: { path: 'tags', model: 'HistoricalTags' } // Populate tags in HistoricalPlace
+      })
+      .populate('itineraryId.id')
       .populate('transportationId.id')
       .exec();
 };
