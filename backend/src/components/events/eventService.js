@@ -251,8 +251,8 @@ const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
 const Amadeus = require('amadeus');
 
 const amadeus = new Amadeus({
-    clientId: process.env.AMADEUS_CLIENT_ID3, 
-    clientSecret: process.env.AMADEUS_CLIENT_SECRET3,
+    clientId: process.env.AMADEUS_CLIENT_ID4, 
+    clientSecret: process.env.AMADEUS_CLIENT_SECRET4,
 });
 
 
@@ -273,10 +273,10 @@ const fetchCityCode = async (city) => {
 
     return simplifiedResponse;
   } catch (error) {
-    throw new Error(error.message); // Throw the error message without adding any prefix
+    console.error("Error in fetchCityCode:", error); // Log the error object for debugging
+    throw new Error(error.message || "An error occurred while fetching city code."); // Add a fallback message
   }
 };
-
 
 
 

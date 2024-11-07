@@ -286,16 +286,15 @@ const sendEventEmail = async (req, res) => {
 
 
 
-
 const getCityCode = async (req, res) => {
   try {
       const response = await eventService.fetchCityCode(req.params.city);
       res.status(200).json(response);  
   } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Error in getCityCode:", error); // Log the error object for debugging
+      res.status(500).json({ error: error.message || "An unexpected error occurred." });
   }
 };
-
 const flightOffers = async (req, res) => {
   const { originCode, destinationCode, dateOfDeparture,currency,personCount } = req.body;
 
