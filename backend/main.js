@@ -5,15 +5,14 @@ const mongoose = require('mongoose');
 const { router: userRoutes, setDBConnection } = require('./src/components/users/userRoutes');
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
 const eventRoutes = require('./src/components/events/eventRoutes');
-
-const complaintRoutes = require('./src/components/complaints/complaintRoutes');
-
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config({ path: 'src/.env' });
 const { GridFSBucket, ObjectId } = require('mongodb'); // Ensure ObjectId is imported
 const multer = require('multer'); // Import multer for file uploads
 const Users = require('./src/models/user'); // Import Users model
+const path = require('path');
+
 
 // Initialize Express app
 const ACLapp = express();
@@ -53,18 +52,18 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
 // Upload Document Endpoint
 ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) => {
     try {
-        console.log("dbbbbb");
-        
         const { userId } = req.params;
-        const { uploadData } = req.body; // Document type from request body
-        console.log(uploadData);
+        const { docType } = req.body; // Document type from request body
+        const file = req.file; // File from Multer
+        console.log(req.body);
+        console.log(docType, file)
         // Validate that both 'docType' and 'file' are provided
-        if (!uploadData.docType || !uploadData.file) {
+        if (!docType || !file) {
             return res.status(400).json({ error: 'Both docType and file are required' });
         }
 
         // Find user by ID
-        const user = await Users.findById(userId); // Use async/await for MongoDB operations
+        const user = await Users.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -72,12 +71,10 @@ ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) =
         if (!bucket) {
             return res.status(500).json({ error: 'GridFSBucket not initialized' });
         }
-        console.log(uploadData.file.name);
-        // Upload the file using the buffer since Multer is storing it in memory
-        const uploadStream = bucket.openUploadStream(uploadData.file.name);
-        uploadStream.end(uploadData.file.buffer);
 
-        console.log("Upload Stream:", uploadStream);
+        // Upload the file using the buffer from Multer
+        const uploadStream = bucket.openUploadStream(file.originalname);
+        uploadStream.end(file.buffer);
 
         uploadStream
             .on('error', (error) => {
@@ -85,22 +82,21 @@ ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) =
             })
             .on('finish', async () => {
                 // Save the file reference in the user's document based on docType
-                switch (uploadData.docType) {
+                switch (docType) {
                     case 'nationalId':
-                        user.documents.nationalId = uploadStream.id; // Save file ID
+                        user.documents.nationalId = uploadStream.id;
                         break;
                     case 'certificate':
-                        user.documents.certificate = uploadStream.id; // Save file ID
+                        user.documents.certificate = uploadStream.id;
                         break;
                     case 'taxRegistry':
-                        user.documents.taxation = uploadStream.id; // Save file ID
+                        user.documents.taxation = uploadStream.id;
                         break;
                     default:
                         return res.status(400).json({ error: 'Invalid document type' });
                 }
-                console.log(user);
 
-                await user.save(); // Save the updated user document
+                await user.save();
                 return res.status(201).json({ message: 'File uploaded successfully', fileId: uploadStream.id });
             });
     } catch (error) {
@@ -110,54 +106,38 @@ ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) =
 });
 
 
+
 // Download Document Endpoint
 ACLapp.get('/viewDocument/:fileId', (req, res) => {
-    const fileId = req.params.fileId;
+    const fileId = req.params.fileId; // Get the fileId from the URL
 
     // Ensure fileId is a valid MongoDB ObjectId
     if (!ObjectId.isValid(fileId)) {
         return res.status(400).json({ message: 'Invalid file ID' });
     }
 
-    if (!bucket) {
-        return res.status(500).json({ error: 'GridFSBucket not initialized' });
-    }
+    // Create a download stream
+    const downloadStream = bucket.openDownloadStream(new ObjectId(fileId)); // Use new ObjectId()
 
-    try {
-        // Create a download stream for the file
-        const downloadStream = bucket.openDownloadStream(new ObjectId(fileId));
+    downloadStream.on('error', (error) => {
+        console.error('Download error:', error);
+        return res.status(404).json({ message: 'File not found' });
+    });
 
-        // Set response headers for file download
-        downloadStream.on('file', (file) => {
-            res.set({
-                'Content-Type': file.contentType || 'application/octet-stream',
-                'Content-Disposition': `attachment; filename="${file.filename}"`,
-            });
-        });
+    downloadStream.on('data', (chunk) => {
+        res.write(chunk); // Write chunks of data to the response
+    });
 
-        downloadStream.on('data', (chunk) => {
-            res.write(chunk); // Write each chunk to the response
-            res.flush(); // Ensure data is sent in real-time
-        });
-
-        downloadStream.on('end', () => {
-            res.end(); // Close the response after all data is sent
-        });
-
-        downloadStream.on('error', (error) => {
-            console.error('Download error:', error);
-            return res.status(404).json({ message: 'File not found' });
-        });
-    } catch (error) {
-        console.error('Error in viewDocument:', error);
-        return res.status(500).json({ message: 'Error retrieving document' });
-    }
+    downloadStream.on('end', () => {
+        res.end(); // End the response when the download is complete
+    });
 });
+
+ACLapp.use('/images', express.static(path.join(__dirname, 'src', 'components', 'images')));
 
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);
-ACLapp.use(complaintRoutes);
 
 // Swagger configuration options
 const swaggerOptions = {
