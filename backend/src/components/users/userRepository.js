@@ -15,6 +15,16 @@ const findUserById = async (id) => {
     }
 };
 
+const findTouristById = async (id) => {
+    try {
+        const tourist = await Tourist.findById(id);
+        return tourist ? tourist : null;
+    } catch (error) {
+        console.error(`Error finding tourist: ${error.message}`);
+        return null;
+    }
+};
+
 // Delete user from Users table by ID
 const deleteUserById = async (id) => {
     try {
@@ -275,7 +285,26 @@ const getNotAcceptedUsers = async () => {
     }
 };
 
+
+const redeemPoints = async (userId, points) => {
+    const user = await findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    user.redeemedPoints += points;
+    console.log("Before: ",user.wallet);
+    console.log("Points: ",points);
+    user.wallet = user.wallet + points;
+    console.log("After: ",user.wallet);
+    user.points=0
+    await user.save();
+    return user;
+}
+
+
 module.exports = {
+    findTouristById,
+    redeemPoints,
     getUserbyUsername,
     getNotAcceptedUsers,
     getUserProfilePicture,

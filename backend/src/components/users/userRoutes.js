@@ -1161,6 +1161,9 @@ router.post('/uploadImage/:userId', upload.single('image'), userController.uploa
 
 router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
 
+router.get('/redeemPoints/:userId/:points', userController.redeemPoints);
+
+
 module.exports = {
     setDBConnection,
     router,

@@ -273,20 +273,18 @@ const getTourist = async (req, res) => {
 
 // Update a tourist profile (excluding username and wallet)
 const updateTourist = async (req, res) => {
-    
-    
-
+    console.log("hii")
+    const updateData = req.body;
+    console.log(updateData)
     try {
-        const updateData = { ...req.body };
         if(updateData.username){
             return res.status(400).json({ message: 'Cannot update username' });
         }else if(updateData.wallet){
             return res.status(400).json({ message: 'Cannot update wallet' });
         }
 
-        console.log(updateData)
+        console.log("hiii")
 
-        console.log('dakhal')
 
         const updatedTourist = await userService.updateTourist(req.params._id, updateData);
         if (!updatedTourist) {
@@ -448,7 +446,25 @@ const getNotAcceptedUsers = async (req, res) => {
     }
 }
 
+const redeemPoints = async (req, res) => {
+    const { userId, points } = req.params;
+    console.log(userId, points);
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.redeemPoints(userId, points);
+        return res.status(result.status).json(result.response);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+
 module.exports = {
+    redeemPoints,
     getNotAcceptedUsers,
     uploadImage,
     changePassword ,

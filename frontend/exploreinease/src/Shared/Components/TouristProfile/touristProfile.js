@@ -1,406 +1,278 @@
-import React, { useState } from 'react';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import InputAdornment from '@mui/material/InputAdornment';
-import Input from '@mui/material/Input';
+import React, { useState, useEffect } from 'react';
+import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import Divider from '@mui/material/Divider';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import { useLocation } from 'react-router-dom';
+import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Email, Phone, Cake, Flag, LocationOn, Wc, Lock } from '@mui/icons-material';
+import WorkIcon from '@mui/icons-material/Work';
 import NetworkService from '../../../NetworkService';
+import { useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 import axios from 'axios';
-const useForm = (initialValues) => {
-  const [formValues, setFormValues] = useState(initialValues);
-
-  const handleChange = (name) => (valueOrEvent) => {
-    const newValue = name === 'dob' ? valueOrEvent : valueOrEvent.target.value;
-    setFormValues({ ...formValues, [name]: newValue });
-  };
-
-  return [formValues, handleChange];
-};
 
 const TouristProfile = (props) => {
   const location = useLocation();
-  const { Tourist } = location.state || {};  
-  console.log("tourist", Tourist);
-  
-  const initialUsername = Tourist?.username || '';
-  const initialWallet = Tourist?.wallet || 0;
-  const [formValues, handleChange] = useForm({
+  const { Tourist } = location.state || {}; // Destructure Tourist from location.state
+  console.log(Tourist);
+
+  const initialData = {
     email: Tourist?.email || '',
-    password: Tourist?.password || '',
-    mobileNumber: Tourist?.mobileNum || '',
+    mobileNum: Tourist?.mobileNum || '',
     nationality: Tourist?.nation || '',
-    dob: Tourist?.dob ? dayjs(Tourist.dob) : null, // Ensure this is a dayjs object
-    educationState: Tourist?.profession || '',
-    wallet: Tourist?.wallet || '0',
-  });
-  console.log(Tourist.dob ,typeof Tourist.dob);
+    dob: Tourist?.dob ? dayjs(Tourist.dob) : null,
+    profession: Tourist?.profession || '',
+    password: Tourist?.password || '',
+    wallet: Tourist?.wallet || 0,
+    points: Tourist?.points || 0,
+  };
+
+  const [formValues, setFormValues] = useState(initialData);
   const [isEditable, setIsEditable] = useState({
     email: false,
-    password: false,
-    mobileNumber: false,
+    mobileNum: false,
     nationality: false,
     dob: false,
-    educationState: false,
-    wallet: false,
+    password: false,
+    profession: false,
   });
-
-  const initialLetter = Tourist.username;  
-  const firstInitial = initialLetter ? initialLetter.charAt(0).toUpperCase() : '?';
   const [showPassword, setShowPassword] = useState(false);
 
-  const toggleEditMode = (field) => {
-    setIsEditable((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
-
-  const handleClickShowPassword = () => {
-    setShowPassword((prevShow) => !prevShow);
-  };
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
-  const toggleAllEditMode = () => {
-    const allEditable = Object.values(isEditable).some(editable => editable);
-    const newEditableState = {
-      email: !allEditable,
-      password: !allEditable,
-      mobileNumber: !allEditable,
-      nationality: !allEditable,
-      dob: !allEditable,
-      educationState: !allEditable,
-      wallet: !allEditable,
+  useEffect(() => {
+    const fetchTouristData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3030/getTourist/${Tourist._id}`);
+        console.log('Tourist data:', response.data);
+        setFormValues({
+          ...formValues,
+          email: response.data.email,
+          mobileNum: response.data.mobileNum,
+          nationality: response.data.nation,
+          dob: response.data.dob ? dayjs(response.data.dob) : null,
+          profession: response.data.profession,
+          points: response.data.points,
+          password: response.data.password,
+          wallet: response.data.wallet,
+          points: response.data.points,
+        });
+      } catch (error) {
+        console.error('Error fetching tourist data:', error);
+      }
     };
-    setIsEditable(newEditableState);
 
-    if (allEditable) {
-      handleSave(); // Save values if switching to non-editable mode
-    }
+    fetchTouristData();
+  }, [Tourist._id]);
+
+  const handleChange = (field) => (event) => {
+    setFormValues({ ...formValues, [field]: event.target ? event.target.value : event });
+  };
+
+  const handleRedeemPoints = async () => {
+      console.log('Redeeming points...');
+      console.log(Tourist._id, formValues.points);
+        // Add your redeem logic here
+        const options = {
+          apiPath: `/redeemPoints/${Tourist._id}/${formValues.points}`,
+        };
+        const response = NetworkService.get(options);
+        console.log(response);
+    
   };
 
   const handleSave = async () => {
     try {
-      const updatedTourist = {
+      console.log('Updating tourist:', formValues);
+      const body = {
         email: formValues.email,
-        mobileNum: formValues.mobileNumber,
+        mobileNum: formValues.mobileNum,
+        nation: formValues.national,
+        dob: formValues.dob,
+        profession: formValues.profession,
         password: formValues.password,
-        profession: formValues.educationState,
-        nation: formValues.nationality
-        // username: formValues.username,
-        // dateOfBirth: formValues.dateOfBirth
       };
-
-      console.log(updatedTourist);
-      const options = {
-        apiPath:  ` /updateTourist/${Tourist._id}`,
-        // urlParam: Tourist._id,
-        body: updatedTourist,
-      };
-
-      const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`,updatedTourist);
-
-
-      // const response = await NetworkService.put(options);
-      console.log(response.data)
-      console.log("test :",response.data.tourist)
-      console.log(Tourist._id)
-
-      // Update frontend form with the updated values
-      handleChange({
-        ...formValues,
-        email: response.data.tourist.email,
-        mobileNumber: response.data.tourist.mobileNum,
-        // dateOfBirth: response.data.tourist.dateOfBirth, // Convert back to Day.js format if needed
-      });
-
+      const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`, body);
+      console.log(response.message);
       setIsEditable({
         email: false,
-        password: false,
-        mobileNumber: false,
+        mobileNum: false,
         nationality: false,
-        dateOfBirth: false,
-        educationState: false,
-        wallet: false,
+        dob: false,
+        password: false,
+        profession: false,
       });
     } catch (error) {
       console.error('Error updating tourist:', error);
     }
   };
 
+  const toggleEdit = (field) => setIsEditable({ ...isEditable, [field]: !isEditable[field] });
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Card sx={{ padding: 3, width: '80%', margin: 'auto' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h4" gutterBottom>
-            Manage Profile
-          </Typography>
-          <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
-        </Box>
-
-        <Divider sx={{ mb: 2 }} />
-
-        {/* Username */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
-            <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Username:</Typography>
-            <Typography>{initialUsername}</Typography>
+      {/* Flex container to center the card */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',  // Full height of the screen
+          padding: 2,
+        }}
+      >
+        <Card sx={{ padding: 4, width: '90%', maxWidth: 600, boxShadow: 3, borderRadius: 16 }}>
+          <Box display="flex" alignItems="Left" justifyContent="center">
+          <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 1}}>My Profile</Typography>
+            </Box>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Avatar sx={{ bgcolor: 'primary.main', width: 80, height: 80, fontSize: 40, margin: 'auto' }}>
+              {Tourist.username?.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box display="flex" alignItems="center" justifyContent="center" sx={{ mt: 1 }}>
+              <Typography variant="h5" fontWeight="bold" sx={{ mt: 1 }}>
+                {Tourist?.username}
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={1}>
+              <StarIcon color="warning" />
+              <Typography variant="h6" ml={1}>{formValues.points} Points</Typography>
+              {/* Redeem button */}
+              <IconButton onClick={handleRedeemPoints} color="primary" sx={{ ml: 0.5 }}>
+                <Redeem />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
-        <Divider />
 
-        {/* Email Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Email:</Typography>
-            {isEditable.email ? (
-              <TextField
-                sx={{ width: '70%' }}
-                id="email-edit"
-                type="email"
-                variant="standard"
-                value={formValues.email}
-                onChange={handleChange('email')}
-              />
-            ) : (
-              <Typography>{formValues.email}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton o
-            //nClick={() => toggleEditMode('email')} 
-            onClick={() => {
-              if (isEditable.email) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('email');
-              }
-            }}
-            aria-label={isEditable.email ? 'save' : 'edit'}>
-              {isEditable.email ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+          <Divider sx={{ mb: 1}} />
 
-        {/* Password Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Password:</Typography>
-            {isEditable.password ? (
-              <Input
-                sx={{ width: '70%' }}
-                type={showPassword ? 'text' : 'password'}
-                value={formValues.password}
-                onChange={handleChange('password')}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                    >
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            ) : (
-              <Typography>{formValues.password}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton 
-            //onClick={() => toggleEditMode('password')}
-            onClick={() => {
-              if (isEditable.password) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('password');
-              }
-            }}
-            aria-label={isEditable.password ? 'save' : 'edit'}>
-              {isEditable.password ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+          {/* Profile Fields */}
+          <Grid container spacing={2}>
+            {/* Email */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Email color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Email:</Typography>
+                {isEditable.email ? (
+                  <TextField fullWidth value={formValues.email} onChange={handleChange('email')} />
+                ) : (
+                  <Typography>{formValues.email}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('email'); if (isEditable.email) handleSave(); }}>
+                  {isEditable.email ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Mobile Number Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Mobile Number:</Typography>
-            {isEditable.mobileNumber ? (
-              <TextField
-                sx={{ width: '70%' }}
-                variant="standard"
-                type="tel"
-                value={formValues.mobileNumber}
-                onChange={handleChange('mobileNumber')}
-              />
-            ) : (
-              <Typography>{formValues.mobileNumber}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton o
-            //nClick={() => toggleEditMode('mobileNumber')} 
-            onClick={() => {
-              if (isEditable.mobileNumber) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('mobileNumber');
-              }
-            }}
-            aria-label={isEditable.mobileNumber ? 'save' : 'edit'}>
-              {isEditable.mobileNumber ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+            {/* Mobile Number */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Phone color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Mobile Number:</Typography>
+                {isEditable.mobileNum ? (
+                  <TextField fullWidth value={formValues.mobileNum} onChange={handleChange('mobileNum')} />
+                ) : (
+                  <Typography>{formValues.mobileNum}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('mobileNum'); if (isEditable.mobileNum) handleSave(); }}>
+                  {isEditable.mobileNum ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Nationality Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Nationality:</Typography>
-            {isEditable.nationality ? (
-              <TextField
-                sx={{ width: '70%' }}
-                variant="standard"
-                type="text"
-                value={formValues.nationality}
-                onChange={handleChange('nationality')}
-              />
-            ) : (
-              <Typography>{formValues.nationality}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton 
-            //onClick={() => toggleEditMode('nationality')} 
-            onClick={() => {
-              if (isEditable.nationality) {
-                // Save the changes if in edit mode
-                console.log(1)
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('nationality');
-              }
-            }}
-            aria-label={isEditable.nationality ? 'save' : 'edit'}>
-              {isEditable.nationality ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+            {/* Nationality */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Flag color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Nationality:</Typography>
+                {isEditable.nationality ? (
+                  <TextField fullWidth value={formValues.nationality} onChange={handleChange('nationality')} />
+                ) : (
+                  <Typography>{formValues.nationality}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('nationality'); if (isEditable.nationality) handleSave(); }}>
+                  {isEditable.nationality ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Date of Birth Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Date of Birth:</Typography>
-            {isEditable.dob ? (
-              <DatePicker
-                label="Select Date"
-                value={formValues.dob}
-                onChange={handleChange('dob')}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            ) : (
-              <Typography>{formValues.dob ? formValues.dob.format('MM/DD/YYYY') : 'N/A'}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('dob')} aria-label={isEditable.dob ? 'save' : 'edit'}>
-              {isEditable.dob ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
-        {/* Education State Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Education State:</Typography>
-            {isEditable.educationState ? (
-              <TextField
-                sx={{ width: '70%' }}
-                variant="standard"
-                type="text"
-                value={formValues.educationState}
-                onChange={handleChange('educationState')}
-              />
-            ) : (
-              <Typography>{formValues.educationState}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton o
-            //nClick={() => toggleEditMode('educationState')} 
-            onClick={() => {
-              if (isEditable.educationState) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('educationState');
-              }
-            }}
-            aria-label={isEditable.educationState ? 'save' : 'edit'}>
-              {isEditable.educationState ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+            {/* Date of Birth */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Cake color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Date of Birth:</Typography>
+                {isEditable.dob ? (
+                  <DatePicker
+                    label="Select Date"
+                    value={formValues.dob}
+                    onChange={handleChange('dob')}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                ) : (
+                  <Typography>{formValues.dob ? formValues.dob.format('YYYY-MM-DD') : 'N/A'}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('dob'); if (isEditable.dob) handleSave(); }}>
+                  {isEditable.dob ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Wallet Field */}
-        <Divider sx={{ mb: 2 }} />
+            {/* Password */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Lock color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Password:</Typography>
+                {isEditable.password ? (
+                  <TextField
+                    fullWidth
+                    type={showPassword ? 'text' : 'password'}
+                    value={formValues.password}
+                    onChange={handleChange('password')}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={toggleShowPassword}>
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                ) : (
+                  <Typography>******</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('password'); if (isEditable.password) handleSave(); }}>
+                  {isEditable.password ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
-            <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Wallet:</Typography>
-            <Typography>{initialWallet}</Typography>
-          </Box>
-        </Box>
-        <Divider />
+            {/* Profession */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <WorkIcon color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Profession:</Typography>
+                {isEditable.profession ? (
+                  <TextField fullWidth value={formValues.profession} onChange={handleChange('profession')} />
+                ) : (
+                  <Typography>{formValues.profession}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('profession'); if (isEditable.profession) handleSave(); }}>
+                  {isEditable.profession ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Save All Changes Button */}
-        <Button variant="contained" onClick={toggleAllEditMode}>
-          {Object.values(isEditable).some(editable => editable) ? 'Save All Changes' : 'Edit All'}
-        </Button>
-      </Card>
+            {/* Wallet */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Wallet color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Wallet:</Typography>
+                <Typography sx={{ flex: 1, ml: 41 }}>{formValues.wallet}</Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Card>
+      </Box>
     </LocalizationProvider>
   );
 };
