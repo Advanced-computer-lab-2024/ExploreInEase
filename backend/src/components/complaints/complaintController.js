@@ -50,7 +50,6 @@ const AdminViewComplain = async (req, res) => {
 
     const complaints = await complaintService.ViewComplain(adminId);
 
-    console.log(complaints);
 
     if (complaints.length === 0) {
       return res.status(404).json({ message: "No complaints found." });

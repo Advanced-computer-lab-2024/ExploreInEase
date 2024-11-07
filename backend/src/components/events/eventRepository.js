@@ -440,6 +440,17 @@ const getAllHistoricalTags = async () => {
 const getHistoricalTagDetails = async (id) => {
   return await historicalTags.find({ _id: id });
 }
+
+const getTouristEmailById = async (touristId) => {
+  try {
+      const tourist = await Tourist.findById(touristId);
+      return tourist ? tourist.email : null;
+  } catch (error) {
+      console.error(`Error fetching tourist email: ${error.message}`);
+      throw new Error('Could not fetch tourist email');
+  }
+};
+
 module.exports = {
   getHistoricalTagDetails,
   createCategory,
@@ -483,9 +494,13 @@ module.exports = {
   getTypeForTag,
   getAllHistoricalTags,
   getAllActivitiesInDatabase,
+
+  getTouristEmailById
+
   setFlagToZeroForItinerary,
   setFlagToZeroForActivity,
   getAllItineraries2
+
 };
 
 

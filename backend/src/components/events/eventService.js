@@ -1,6 +1,8 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const HistoricalPlace = require('../../models/historicalPlace');
+const nodemailer = require('nodemailer');
+
 
 
 
@@ -542,6 +544,37 @@ const getAllHistoricalTags = async () => {
 const getHistoricalTagDetails = async (tagId) => {
   return await eventRepository.getHistoricalTagDetails(tagId);
 }
+
+const sendEventEmail = async (touristId, receiverEmail, eventDetails) => {
+    
+  const touristEmail = await eventRepository.getTouristEmailById(touristId);
+  if (!touristEmail) {
+    throw new Error('Tourist not found');
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail', 
+    auth: {
+      user: "aclproject7@gmail.com", 
+      pass: "qodo imkr adxs jred", 
+    },
+  });
+
+  const formattedDetails = Object.entries(eventDetails)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n');
+
+  const mailOptions = {
+    from: touristEmail,
+    to: receiverEmail,
+    subject: 'Event Details',
+    text: `Hello!\nYour friend with email ${touristEmail} sent you an event!!\n\nHere are the event details:\n\n${formattedDetails}`, // Including tourist email in the message
+  };
+
+  await transporter.sendMail(mailOptions);
+  return { message: 'Email sent successfully' };
+};
+
 module.exports = {
   getHistoricalTagDetails,
   getUserEvents,
@@ -577,7 +610,11 @@ module.exports = {
   getFilteredHistoricalPlaces,
   getAllHistoricalTags,
   getAllActivitiesInDatabase,
+
+  sendEventEmail
+
   updateEventFlag,
   getAllEvents
+
 };
 

@@ -238,9 +238,27 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+
+const redeemPoints = async (userId, points) => {
+    console.log(points);
+    const user = await userRepository.findUserById(userId);
+    console.log(user)
+    if (!user) {
+        return {status: 400, response: {message: "User is not a tourist"} };
+    }
+    const amount = points/100;
+    const userNewPoints = user.points - amount;
+    const userAfterRedeemed = userRepository.redeemPoints(userId, amount);
+    return {
+      status: 200, response:{message: "Redeemed Points successfully", leftPoints: userNewPoints, redeemedPoints: amount, user: userAfterRedeemed}
+    };
+}
+
+
 const updatingStatusUser = async (userId, status) => {
     const newUser = await userRepository.updateUserStatus(userId, status);
     return {status: 200, response: { message: "Status updated successfully", user: newUser } };
+
 }
 
 
@@ -268,7 +286,11 @@ module.exports = {
   registerTourist,
   registerUser,
   login,
+
+  redeemPoints
+
   fetchUsersForDeletion,
     getNotAcceptedUsers
+
 };
 

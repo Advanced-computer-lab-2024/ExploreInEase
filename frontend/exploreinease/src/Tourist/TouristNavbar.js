@@ -14,6 +14,7 @@ const TouristNavbar = () => {
     const initialUsername = User?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=User?._id;
+     console.log(userId);
      
     async function handleRegisterClick(title) {
         if (title == "View Products") {
@@ -56,7 +57,7 @@ const TouristNavbar = () => {
             }
           }
       }
-      else {
+      else if (title=="Explore Activities and Itineraries and Historical Places"){
         try {
             const options = {
               apiPath: `/upcomingEvents`,
@@ -65,7 +66,7 @@ const TouristNavbar = () => {
             setSuccess(response.message); // Set success message
             console.log(response);
             const events=response;
-            navigate(`/explore`,{state:{events}});          
+            navigate(`/explore`,{state:{events,User:User}});          
           } catch (err) {
             if (err.response) {
                 console.log(err.message);
@@ -76,7 +77,34 @@ const TouristNavbar = () => {
           }
         // navigate('/explore');
       }
+    
+
+
+    // FOR COMPLAINTS INTEGRATION
+
+      else{
+        try {
+          const options = {
+            apiPath: `/myComplaints/${userId}`,
+            urlParam:userId
+
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const events=response.data;
+          console.log(events)
+          navigate(`/Complaints`,{state:{events,User:User}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
       }
+    }
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -96,6 +124,9 @@ const TouristNavbar = () => {
           <button 
           onClick={() => handleRegisterClick("My Profile")}
           className="small-button">My Profile</button>
+          <button 
+          onClick={() => handleRegisterClick("Complaints")}
+          className="small-button">Complaints</button>
         </div>
         <div className="currency-selector">
           <span className="currency-symbol"></span>

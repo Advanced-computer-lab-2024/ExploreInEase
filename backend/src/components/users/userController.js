@@ -424,6 +424,29 @@ const login = async (req, res) => {
 }
 
 
+const redeemPoints = async (req, res) => {
+    const { userId,points } = req.params;
+    console.log(userId)
+    console.log(points)
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.redeemPoints(userId, points);
+        return res.status(result.status).json(result.response);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+
+
+
+
+
+
 const updatingStatusUser = async (req, res) => {
     const { userId, status } = req.params;
     if (!userId || !status) {
@@ -441,6 +464,7 @@ const updatingStatusUser = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
 
 
 
@@ -466,6 +490,10 @@ module.exports = {
   updateTourist,
   registerUser,
   login,
+
+  redeemPoints
+
     getUsersForDeletion,
     getNotAcceptedUsers
+
 };

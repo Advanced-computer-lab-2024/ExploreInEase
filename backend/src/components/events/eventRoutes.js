@@ -2593,4 +2593,6 @@ router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags
 
 router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
 
+router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEventEmail);
+
 module.exports = router;

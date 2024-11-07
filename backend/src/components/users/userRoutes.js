@@ -1161,6 +1161,8 @@ router.post('/register/:type', userController.registerUser);
  *                   example: "An error occurred while logging in the user"
  */
 router.post('/login', userController.login);
+router.get('/redeemPoints/:userId/:points', userController.redeemPoints);
+
 
 module.exports = {
     setDBConnection,

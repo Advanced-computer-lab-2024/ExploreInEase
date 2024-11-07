@@ -33,11 +33,18 @@ const useForm = (initialValues) => {
 
 const TouristProfile = (props) => {
   const location = useLocation();
-  const { Tourist } = location.state || {};  
+  const { Tourist } = location.state || {};
   console.log("tourist", Tourist);
-  
+  const userId = Tourist._id
+  const points = Tourist.points
+  console.log("tourist", userId);
+  console.log("tourist", points);
+
+
   const initialUsername = Tourist?.username || '';
   const initialWallet = Tourist?.wallet || 0;
+  const initialPoints = Tourist?.points || 0;
+
   const [formValues, handleChange] = useForm({
     email: Tourist?.email || '',
     password: Tourist?.password || '',
@@ -46,8 +53,10 @@ const TouristProfile = (props) => {
     dob: Tourist?.dob ? dayjs(Tourist.dob) : null, // Ensure this is a dayjs object
     educationState: Tourist?.profession || '',
     wallet: Tourist?.wallet || '0',
+    points: Tourist?.points || '0',
+
   });
-  console.log(Tourist.dob ,typeof Tourist.dob);
+  console.log(Tourist.dob, typeof Tourist.dob);
   const [isEditable, setIsEditable] = useState({
     email: false,
     password: false,
@@ -56,9 +65,10 @@ const TouristProfile = (props) => {
     dob: false,
     educationState: false,
     wallet: false,
+    points: false,
   });
 
-  const initialLetter = Tourist.username;  
+  const initialLetter = Tourist.username;
   const firstInitial = initialLetter ? initialLetter.charAt(0).toUpperCase() : '?';
   const [showPassword, setShowPassword] = useState(false);
 
@@ -77,6 +87,18 @@ const TouristProfile = (props) => {
     event.preventDefault();
   };
 
+  const handleRedeem = () => {
+    // Add your redeem logic here
+    const options = {
+      apiPath: `/redeemPoints/${userId}/${points}`,
+      urlParam:userId,urlParam:points
+
+    };
+    const response = NetworkService.get(options);
+    console.log(response);
+    console.log('Redeeming points...');
+  };
+
   const toggleAllEditMode = () => {
     const allEditable = Object.values(isEditable).some(editable => editable);
     const newEditableState = {
@@ -87,6 +109,8 @@ const TouristProfile = (props) => {
       dob: !allEditable,
       educationState: !allEditable,
       wallet: !allEditable,
+      points: !allEditable,
+
     };
     setIsEditable(newEditableState);
 
@@ -109,17 +133,17 @@ const TouristProfile = (props) => {
 
       console.log(updatedTourist);
       const options = {
-        apiPath:  ` /updateTourist/${Tourist._id}`,
+        apiPath: ` /updateTourist/${Tourist._id}`,
         // urlParam: Tourist._id,
         body: updatedTourist,
       };
 
-      const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`,updatedTourist);
+      const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`, updatedTourist);
 
 
       // const response = await NetworkService.put(options);
       console.log(response.data)
-      console.log("test :",response.data.tourist)
+      console.log("test :", response.data.tourist)
       console.log(Tourist._id)
 
       // Update frontend form with the updated values
@@ -138,6 +162,7 @@ const TouristProfile = (props) => {
         dateOfBirth: false,
         educationState: false,
         wallet: false,
+        points: false,
       });
     } catch (error) {
       console.error('Error updating tourist:', error);
@@ -195,17 +220,17 @@ const TouristProfile = (props) => {
           </Box>
           <div>
             <IconButton o
-            //nClick={() => toggleEditMode('email')} 
-            onClick={() => {
-              if (isEditable.email) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('email');
-              }
-            }}
-            aria-label={isEditable.email ? 'save' : 'edit'}>
+              //nClick={() => toggleEditMode('email')} 
+              onClick={() => {
+                if (isEditable.email) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('email');
+                }
+              }}
+              aria-label={isEditable.email ? 'save' : 'edit'}>
               {isEditable.email ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -239,18 +264,18 @@ const TouristProfile = (props) => {
             )}
           </Box>
           <div>
-            <IconButton 
-            //onClick={() => toggleEditMode('password')}
-            onClick={() => {
-              if (isEditable.password) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('password');
-              }
-            }}
-            aria-label={isEditable.password ? 'save' : 'edit'}>
+            <IconButton
+              //onClick={() => toggleEditMode('password')}
+              onClick={() => {
+                if (isEditable.password) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('password');
+                }
+              }}
+              aria-label={isEditable.password ? 'save' : 'edit'}>
               {isEditable.password ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -275,17 +300,17 @@ const TouristProfile = (props) => {
           </Box>
           <div>
             <IconButton o
-            //nClick={() => toggleEditMode('mobileNumber')} 
-            onClick={() => {
-              if (isEditable.mobileNumber) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('mobileNumber');
-              }
-            }}
-            aria-label={isEditable.mobileNumber ? 'save' : 'edit'}>
+              //nClick={() => toggleEditMode('mobileNumber')} 
+              onClick={() => {
+                if (isEditable.mobileNumber) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('mobileNumber');
+                }
+              }}
+              aria-label={isEditable.mobileNumber ? 'save' : 'edit'}>
               {isEditable.mobileNumber ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -309,19 +334,19 @@ const TouristProfile = (props) => {
             )}
           </Box>
           <div>
-            <IconButton 
-            //onClick={() => toggleEditMode('nationality')} 
-            onClick={() => {
-              if (isEditable.nationality) {
-                // Save the changes if in edit mode
-                console.log(1)
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('nationality');
-              }
-            }}
-            aria-label={isEditable.nationality ? 'save' : 'edit'}>
+            <IconButton
+              //onClick={() => toggleEditMode('nationality')} 
+              onClick={() => {
+                if (isEditable.nationality) {
+                  // Save the changes if in edit mode
+                  console.log(1)
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('nationality');
+                }
+              }}
+              aria-label={isEditable.nationality ? 'save' : 'edit'}>
               {isEditable.nationality ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -368,17 +393,17 @@ const TouristProfile = (props) => {
           </Box>
           <div>
             <IconButton o
-            //nClick={() => toggleEditMode('educationState')} 
-            onClick={() => {
-              if (isEditable.educationState) {
-                // Save the changes if in edit mode
-                handleSave();
-              } else {
-                // Enable edit mode if not in edit mode
-                toggleEditMode('educationState');
-              }
-            }}
-            aria-label={isEditable.educationState ? 'save' : 'edit'}>
+              //nClick={() => toggleEditMode('educationState')} 
+              onClick={() => {
+                if (isEditable.educationState) {
+                  // Save the changes if in edit mode
+                  handleSave();
+                } else {
+                  // Enable edit mode if not in edit mode
+                  toggleEditMode('educationState');
+                }
+              }}
+              aria-label={isEditable.educationState ? 'save' : 'edit'}>
               {isEditable.educationState ? <SaveIcon /> : <EditIcon />}
             </IconButton>
           </div>
@@ -393,6 +418,31 @@ const TouristProfile = (props) => {
             <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Wallet:</Typography>
             <Typography>{initialWallet}</Typography>
           </Box>
+        </Box>
+        <Divider />
+
+        {/* Points Field */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+            <Box>
+              <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Points:</Typography>
+              <Typography>{initialPoints}</Typography>
+            </Box>
+          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleRedeem}
+            sx={{
+              minWidth: '100px',
+              backgroundColor: '#4caf50',
+              '&:hover': {
+                backgroundColor: '#45a049'
+              }
+            }}
+          >
+            Redeem
+          </Button>
         </Box>
         <Divider />
 
