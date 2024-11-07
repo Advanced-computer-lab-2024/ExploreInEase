@@ -5,6 +5,30 @@ const getUserById = async (id) => {
     return await userRepository.findUserById(id);
 };
 
+
+
+
+
+const getNotAcceptedUsers = async () => {
+    return await userRepository.getNotAcceptedUsers();
+};
+
+
+
+
+const fetchUsersForDeletion = async () => {
+    try {
+        const { users, tourists } = await userRepository.getAllUsersForDeletion();
+        return { users, tourists };
+    } catch (error) {
+        throw new Error('Error fetching users for deletion');
+    }
+};
+
+
+
+
+
 const deleteUserByIdAndType = async (_id, userType) => {
     let result = false;
 
@@ -169,8 +193,6 @@ const updateTourist = async (_id, updateData) => {
     return await userRepository.updateTourist(_id, updateData);
 };
 
-
-
 const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession) => {
     const touristExists = await userRepository.checkTouristExists(username);
     if (touristExists) {
@@ -216,6 +238,7 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+
 const redeemPoints = async (userId, points) => {
     console.log(points);
     const user = await userRepository.findUserById(userId);
@@ -226,13 +249,23 @@ const redeemPoints = async (userId, points) => {
     const amount = points/100;
     const userNewPoints = user.points - amount;
     const userAfterRedeemed = userRepository.redeemPoints(userId, amount);
-    return {status: 200, response:{message: "Redeemed Points successfully", leftPoints: userNewPoints, redeemedPoints: amount, user: userAfterRedeemed}};
+    return {
+      status: 200, response:{message: "Redeemed Points successfully", leftPoints: userNewPoints, redeemedPoints: amount, user: userAfterRedeemed}
+    };
+}
+
+
+const updatingStatusUser = async (userId, status) => {
+    const newUser = await userRepository.updateUserStatus(userId, status);
+    return {status: 200, response: { message: "Status updated successfully", user: newUser } };
+
 }
 
 
 
 
 module.exports = {
+    updatingStatusUser,
   deleteUserByIdAndType,
   addGovernorOrAdmin,
   fetchAllUsersAndTourists,
@@ -253,6 +286,11 @@ module.exports = {
   registerTourist,
   registerUser,
   login,
+
   redeemPoints
+
+  fetchUsersForDeletion,
+    getNotAcceptedUsers
+
 };
 

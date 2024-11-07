@@ -9,6 +9,48 @@ const mongoose = require('mongoose');
 const historicalTags = require('../../models/historicalTag');
 const historicalPlace = require('../../models/historicalPlace');
 
+
+
+
+const getAllActivities = async () => {
+  return Activity.find()
+    .populate('tags')           
+    .populate('category');      
+};
+
+const getAllItineraries2 = async () => {
+  return Itinerary.find()
+    .populate({
+      path: 'activities',
+      populate: { path: 'category tags' } 
+    });
+};
+
+const getAllHistoricalPlaces = async () => {
+  return HistoricalPlace.find().populate('tags');
+};
+
+// const getAllItineraries2 = async () => {
+//   return Itinerary.find();
+// };
+
+// const getAllHistoricalPlaces = async () => {
+//   return HistoricalPlace.find();
+// };
+
+
+
+const setFlagToZeroForItinerary = async (_id) => {
+  return await Itinerary.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+const setFlagToZeroForActivity = async (_id) => {
+  return await Activity.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+
+
+
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
     .populate('category', 'categoryName') // Get categoryName from ActivityCategory
@@ -282,9 +324,9 @@ const deleteActivity = async (_id) => {
   return deletedActivity; // Return the deleted activity for confirmation
 };
 
-const getAllActivities = async (userId) => {
-  return await Activity.find();
-};
+// const getAllActivities = async (userId) => {
+//   return await Activity.find();
+// };
 
 const getAllActivitiesAdvertiser = async (userId) => {
   return await Activity.find({ created_by: userId });
@@ -358,10 +400,11 @@ const checkTourismGovernor = async (userId) => {
 };
 
 
+
 // Get all Historical Places
-const getAllHistoricalPlaces = async () => {
-  return await HistoricalPlace.find();
-};
+// const getAllHistoricalPlaces = async () => {
+//   return await HistoricalPlace.find();
+// };
 
 // Get a Historical Place by ID
 const getHistoricalPlaceById = async (id) => {
@@ -451,7 +494,13 @@ module.exports = {
   getTypeForTag,
   getAllHistoricalTags,
   getAllActivitiesInDatabase,
+
   getTouristEmailById
+
+  setFlagToZeroForItinerary,
+  setFlagToZeroForActivity,
+  getAllItineraries2
+
 };
 
 

@@ -29,6 +29,8 @@ const ViewComplain = async (adminId) => {
 
     return complaints.map((complaint) => ({
       _id: complaint._id,
+
+      title:complaint.title,
       touristId: complaint.touristId._id,
       touristName: complaint.touristId.username,
       touristEmail: complaint.touristId.email,

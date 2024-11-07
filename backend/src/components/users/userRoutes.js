@@ -2,6 +2,24 @@ const express = require('express')
 const mongoose = require('mongoose')
 const router = express.Router()
 const userController = require('../users/userController');
+const multer = require('multer');
+const { bucket } = require('../../../main'); // Import bucket directly from main.js
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+let db;
+
+const setDBConnection = (database) => {
+    db = database;
+};
+
+
+router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
+
+router.get('/deletionrequests', userController.getUsersForDeletion);
+
+router.put('/user/updatingStatus/:userId/:status', userController.updatingStatusUser)
+
 
 /**
  * @swagger
@@ -1063,7 +1081,6 @@ router.put('/updateTourist/:_id', userController.updateTourist);
  *                   type: string
  *                   example: "Error message here"
  */
-
 router.post('/register/:type', userController.registerUser);
 
 /**
@@ -1147,4 +1164,7 @@ router.post('/login', userController.login);
 router.get('/redeemPoints/:userId/:points', userController.redeemPoints);
 
 
-module.exports = router;
+module.exports = {
+    setDBConnection,
+    router,
+};
