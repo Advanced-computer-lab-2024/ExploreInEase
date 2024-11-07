@@ -51,17 +51,19 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Upload Document Endpoint
 ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) => {
-    try {        
+    try {
         const { userId } = req.params;
-        const { uploadData } = req.body; // Document type from request body
-        console.log(uploadData);
+        const { docType } = req.body; // Document type from request body
+        const file = req.file; // File from Multer
+        console.log(req.body);
+        console.log(docType, file)
         // Validate that both 'docType' and 'file' are provided
-        if (!uploadData.docType || !uploadData.file) {
+        if (!docType || !file) {
             return res.status(400).json({ error: 'Both docType and file are required' });
         }
 
         // Find user by ID
-        const user = await Users.findById(userId); // Use async/await for MongoDB operations
+        const user = await Users.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -69,12 +71,10 @@ ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) =
         if (!bucket) {
             return res.status(500).json({ error: 'GridFSBucket not initialized' });
         }
-        console.log(uploadData.file.name);
-        // Upload the file using the buffer since Multer is storing it in memory
-        const uploadStream = bucket.openUploadStream(uploadData.file.name);
-        uploadStream.end(uploadData.file.buffer);
 
-        console.log("Upload Stream:", uploadStream);
+        // Upload the file using the buffer from Multer
+        const uploadStream = bucket.openUploadStream(file.originalname);
+        uploadStream.end(file.buffer);
 
         uploadStream
             .on('error', (error) => {
@@ -82,22 +82,21 @@ ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) =
             })
             .on('finish', async () => {
                 // Save the file reference in the user's document based on docType
-                switch (uploadData.docType) {
+                switch (docType) {
                     case 'nationalId':
-                        user.documents.nationalId = uploadStream.id; // Save file ID
+                        user.documents.nationalId = uploadStream.id;
                         break;
                     case 'certificate':
-                        user.documents.certificate = uploadStream.id; // Save file ID
+                        user.documents.certificate = uploadStream.id;
                         break;
                     case 'taxRegistry':
-                        user.documents.taxation = uploadStream.id; // Save file ID
+                        user.documents.taxation = uploadStream.id;
                         break;
                     default:
                         return res.status(400).json({ error: 'Invalid document type' });
                 }
-                console.log(user);
 
-                await user.save(); // Save the updated user document
+                await user.save();
                 return res.status(201).json({ message: 'File uploaded successfully', fileId: uploadStream.id });
             });
     } catch (error) {
@@ -105,6 +104,7 @@ ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) =
         return res.status(500).json({ error: 'Error uploading document' });
     }
 });
+
 
 
 // Download Document Endpoint

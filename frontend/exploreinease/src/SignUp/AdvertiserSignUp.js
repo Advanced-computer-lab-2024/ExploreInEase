@@ -62,22 +62,22 @@ const GuideAdvertiserSignUp = () => {
 
         // Step 4: Upload each document separately
         for (const uploadFile of uploadFiles) {
-            const uploadData = {
-                file: uploadFile.file, // File to upload
-                docType: uploadFile.docType, // Document type
-            };
+          // Create FormData instance and append file and docType
+          const uploadData = new FormData();
+          uploadData.append('file', uploadFile.file);
+          uploadData.append('docType', uploadFile.docType);
 
-            console.log("uploadData:", uploadData);
+          const optionsForUpload = {
+              apiPath: `/uploadDocument/${userId}`,
+              body: uploadData,
+              headers: { 'Content-Type': 'multipart/form-data' }
+          };
 
-            const optionsForUpload = {
-                apiPath: `/uploadDocument/${userId}`,
-                body: {uploadData: uploadData}, // Pass the object directly
-            };
-
-            // Upload the document
-            const uploadResponse = await NetworkService.post(optionsForUpload);
-            console.log(`${uploadFile.docType} uploaded:`, uploadResponse.message);
-        }
+          const uploadResponse = await NetworkService.post(optionsForUpload);
+          console.log(`${uploadFile.docType} uploaded:`, uploadResponse.message);
+      }
+      
+      
 
         // Step 5: Success handling
         setSuccess('Files uploaded successfully');
