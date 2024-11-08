@@ -87,7 +87,6 @@ const getProductsByPriceRange = async (minPrice, maxPrice) => {
 
 const getProductById = async (productId) => {
     try {
-        console.log("id: ", productId)
         const product = await Product.findOne({ _id: productId })
         return product;
     } catch (error) {
