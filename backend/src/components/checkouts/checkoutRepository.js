@@ -2,6 +2,32 @@ const Product = require('../../models/product');
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
 const Order = require('../../models/order');
+
+const exchangeRates = {
+    EGPTodollar: 0.02,   // example rate
+    dollarToEGP: 50.0,
+    EGPToeuro: 0.019,
+    euroToEGP: 55.0,
+    dollarToeuro: 0.91,
+    euroTodollar: 1.10,
+};
+
+const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    const rateKey = `${fromCurrency}To${toCurrency}`;
+    const rate = exchangeRates[rateKey];
+
+    if (fromCurrency == 'EGP' && toCurrency == 'EGP'){
+        return amount;
+    }
+    else if (!rate) {
+        throw new Error(`Conversion rate from ${fromCurrency} to ${toCurrency} not available.`);
+    }
+    else {
+        return amount * rate;
+    }
+};
+
+
 const addProduct = async (productData) => {
     try {
         const newProduct = new Product(productData);
@@ -11,36 +37,35 @@ const addProduct = async (productData) => {
     }
 };
 
-const getAllAvailableProducts = async () => {
+const getAllAvailableProducts = async (currency) => {
     try {
-        // Step 1: Find all available products where takenQuantity is less than originalQuantity
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
         })
-        .select('picture price description ratings reviews name originalQuantity sellerId') // Include sellerId for population
+        .select('picture price description ratings reviews name originalQuantity sellerId')
         .populate({
             path: 'sellerId',
             select: 'type' // Only select the 'type' field from the User (seller)
         });
-
-        // Step 2: Map over the available products and add the sellerType directly
-        const productsWithSellerType = availableProducts.map(product => {
-            const productObj = product.toObject(); // Convert the product document to a plain object
-            const sellerType = product.sellerId?.type || ''; // Retrieve the seller type, fallback to an empty string if not found
+        const productsWithConvertedPrice = availableProducts.map(product => {
+            const productObj = product.toObject(); // Convert to plain object
+            const sellerType = product.sellerId?.type || ''; // Get seller type
+            const priceInRequestedCurrency = convertCurrency(productObj.price, 'EGP', currency); // Convert price
 
             return {
                 ...productObj,
-                sellerType, // Add sellerType directly from the populated field
+                price: priceInRequestedCurrency, // Override price with converted value
+                sellerType,
                 sellerId: undefined // Optionally remove sellerId from the response
             };
         });
 
-        // Return the processed products array with the added sellerType
-        return productsWithSellerType;
+        return productsWithConvertedPrice;
     } catch (error) {
         throw new Error(`Error retrieving product: ${error.message}`);
     }
 };
+
 
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
     try {
@@ -284,5 +309,6 @@ module.exports = {
     addOrder,
     getAllOrders,
     getOrdersByTouristId,
-    getOrderById
+    getOrderById,
+    convertCurrency
 };

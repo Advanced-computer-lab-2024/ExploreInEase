@@ -1,21 +1,26 @@
 const checkoutService = require('../checkouts/checkoutService');
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const addProduct = async (req, res) => {
-    const { productId, price, description, originalQuantity, name } = req.body;
-    console.log(req.body)
+    const { productId, price, description, originalQuantity, name, currency } = req.body;
     const {userId} = req.params;
+    const user = await checkoutRepository.findUserById(userId);
 
-    if (!price || !originalQuantity || !name || !description) {
-        return res.status(400).json({ message: "ProductId, price, picture, original quantity, description, sellerId and name are required." });
+    // Validate user type
+    if (user.type !== 'admin' && user.type !== 'seller') {
+        return res.status(400).json({ message: 'Invalid type' });
+    }
+
+    if (!price || !originalQuantity || !name || !description || !currency) {
+        return res.status(400).json({ message: "ProductId, price, picture, original quantity, description, sellerId, name and currency are required." });
     }
 
     const productData = {
         productId,
         sellerId: userId,
-        price,
+        price: checkoutRepository.convertCurrency(price, currency, 'EGP'),
         description,
         originalQuantity,
-        name,
+        name
     };
 
     try {
@@ -27,6 +32,7 @@ const addProduct = async (req, res) => {
 };
 const getAvailableProducts = async (req, res) => {
     const { userId } = req.params;
+    const { currency } = req.body;
     const user = await checkoutRepository.findUserById(userId);
 
     // Validate user type
@@ -35,7 +41,7 @@ const getAvailableProducts = async (req, res) => {
     }
 
     try {
-        const products = await checkoutService.getAvailableProducts();
+        const products = await checkoutService.getAvailableProducts(currency);
         
         // Include user.type in the response
         res.status(200).json({

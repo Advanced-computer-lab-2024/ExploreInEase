@@ -5,8 +5,8 @@ const addProduct = async (productData) => {
     return await checkoutRepository.addProduct(productData);
 };
 
-const getAvailableProducts = async () => {
-    return await checkoutRepository.getAllAvailableProducts();
+const getAvailableProducts = async (currency) => {
+    return await checkoutRepository.getAllAvailableProducts(currency);
 }
 
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
