@@ -10,6 +10,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import LogoutIcon from '@mui/icons-material/Logout';
 import axios from 'axios';
 import UploadIcon from '@mui/icons-material/Upload';
+import Delete from '@mui/icons-material/Delete';
 
 import '../Guest/GuestHP.css'; 
 import NetworkService from '../NetworkService';
@@ -30,6 +31,7 @@ const TourGuideHP = () => {
     const initialUsername = User.User?.username || User.username;
     const userId = User.User?._id || User._id;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+    const userType = User.User?.type || User.type;
 
     // Retrieve avatar URL from localStorage or fallback to the default avatar
     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
@@ -135,6 +137,27 @@ const TourGuideHP = () => {
         navigate('/createItinerary', {state: { User }});
        }
     };
+
+    const handleDeleteAccount = async () => {
+      try {
+          console.log(userId,userType);
+
+          const options = {
+              apiPath: `/requestDeletion/${userId}/${userType}`,
+              useParams:userId,userType,
+            };
+          const response = await NetworkService.put(options);
+          console.log(response);
+
+          if (response.success) {
+              setSuccess("Account deletion requested successfully.");
+          } else {
+              setError(response.message || "Account deletion request failed.");
+          }
+      } catch (err) {
+          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+      }
+  };
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -191,13 +214,7 @@ const TourGuideHP = () => {
                         <Typography variant="h6" sx={{ padding: '8px 16px', fontWeight: 600 }}>
                             Account
                         </Typography>
-                        <Divider />
-                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
-                            <ListItemIcon>
-                                <LockIcon fontSize="small" />
-                            </ListItemIcon>
-                            Change Password
-                        </MenuItem>
+                        <Divider />   
                         <MenuItem component="label">
                             <ListItemIcon>
                                 <UploadIcon fontSize="small" />
@@ -209,6 +226,18 @@ const TourGuideHP = () => {
                                 style={{ display: 'none' }}
                                 onChange={handleAvatarUpload}
                             />
+                        </MenuItem>                     
+                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
+                            <ListItemIcon>
+                                <LockIcon fontSize="small" />
+                            </ListItemIcon>
+                            Change Password
+                        </MenuItem>
+                        <MenuItem onClick={() => handleDeleteAccount}>
+                            <ListItemIcon>
+                                <Delete fontSize="small" />
+                            </ListItemIcon>
+                            Delete my account
                         </MenuItem>
                         <MenuItem onClick={() => handleMenuClick('logout')}>
                             <ListItemIcon>

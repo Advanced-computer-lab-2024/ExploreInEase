@@ -1163,6 +1163,17 @@ router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
 
 router.get('/redeemPoints/:userId/:points', userController.redeemPoints);
 
+router.put('/pointsAfterPayment/:userId/:amount', userController.pointsAfterPayment);
+
+router.get('/level/:userId', userController.getLevel);
+
+router.put('/acceptTerms/:_id/:type', userController.acceptTerms);
+
+
+router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
+
+router.get('/')
+
 
 module.exports = {
     setDBConnection,

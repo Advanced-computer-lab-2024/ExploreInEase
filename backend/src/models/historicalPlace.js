@@ -12,7 +12,6 @@ const historicalPlaceSchema = new Schema({
   },
   pictures: {
     type: [String], // Array of picture URLs or file paths
-    required: true,
   },
   location: {
     type: {
@@ -49,6 +48,24 @@ const historicalPlaceSchema = new Schema({
       required: true,
     },
   },
+  rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+  },
+  ratingSum: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
+  comments: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }, // Comments related to the itinerary
+    text: { type: String, required: true },
+    date: { type: Date, default: Date.now },
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

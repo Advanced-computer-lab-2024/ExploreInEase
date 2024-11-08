@@ -41,6 +41,9 @@ const Login = () => {
 
     try {
       const response = await NetworkService.post(options);
+      if(response.message === 'Terms and Conditions not accepted') {
+        navigate('/TermsAcceptance', { state: { User: response.user } });
+      }
 
       if (response.message === 'Logged in Successfully') {
         console.log(response);

@@ -2586,4 +2586,7 @@ router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags
 
 router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
 
+router.put('/updateItineraryActivation/:itineraryId/:isActivated/:userId/:userType', eventController.updateItineraryActivation);
+
+
 module.exports = router;

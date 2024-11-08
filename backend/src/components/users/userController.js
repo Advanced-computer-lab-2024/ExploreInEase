@@ -384,6 +384,10 @@ const login = async (req, res) => {
         if(user != 'tourist'){
             imageUrl = await userRepository.getUserProfilePicture(allUser._id);
         }
+        console.log("User: ",allUser);
+        if(!allUser.termsAndConditions){
+            return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
+        }
 
         return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl});
     }catch(error){
@@ -462,8 +466,97 @@ const redeemPoints = async (req, res) => {
     }
 }
 
+const pointsAfterPayment = async (req, res) => {
+    const { userId, points } = req.params;
+    console.log(userId, points);
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.pointsAfterPayment(userId, points);
+        return res.status(result.status).json(result);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+const getLevel = async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'Missing userId parameter.' });
+    }
+    const user = await userRepository.findTouristById(userId);
+
+    if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+    }   
+
+    try {
+        const level = await userService.getLevel(userId);
+        return res.status(200).json({message: "Level fetched successfully", level});
+    } catch (error) {
+        console.error('Error fetching user level:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+
+const acceptTerms = async (req, res) => {
+    const { _id, type } = req.params;
+    
+
+    // Check if username and type are provided
+    if (!_id || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.acceptTerms(_id, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Terms and conditions accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+const requestDeletion = async (req, res) => {
+    const { userId, type } = req.params;
+    
+
+
+    
+    if (!userId || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.requestDeletion(userId, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Request to be deleted accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports = {
+    requestDeletion,
+    acceptTerms,
+    getLevel,
+    pointsAfterPayment,
     redeemPoints,
     getNotAcceptedUsers,
     uploadImage,

@@ -12,6 +12,7 @@ import HomePageLogo from '../HomePageLogo.png';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import { Delete } from '@mui/icons-material';
 const TouristNavbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -23,6 +24,8 @@ const TouristNavbar = () => {
     const initialUsername = tourist?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=tourist._id;
+     const userType = tourist.tourist?.type || tourist.type;
+
 
 
      const handleMenuOpen = (event) => {
@@ -104,6 +107,27 @@ const TouristNavbar = () => {
         // navigate('/explore');
       }
       }
+
+      const handleDeleteAccount = async () => {
+        try {
+          console.log(userId,userType);
+
+          const options = {
+              apiPath: `/requestDeletion/${userId}/${userType}`,
+              useParams:userId,userType,
+            };
+          const response = await NetworkService.put(options);
+          console.log(response);
+
+          if (response.success) {
+              setSuccess("Account deletion requested successfully.");
+          } else {
+              setError(response.message || "Account deletion request failed.");
+          }
+      } catch (err) {
+          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+      }
+    };
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -158,19 +182,25 @@ const TouristNavbar = () => {
                   <Typography variant="h6" sx={{ padding: '8px 16px', fontWeight: 600 }}>
                      Account
                   </Typography>
-                  <Divider />
-                  <MenuItem onClick={() => handleMenuClick('changePassword')}>
-                     <ListItemIcon>
-                        <LockIcon fontSize="small" />
-                     </ListItemIcon>
-                     Change Password
-                  </MenuItem>
-                  <MenuItem onClick={() => handleMenuClick('logout')}>
-                     <ListItemIcon>
-                        <LogoutIcon fontSize="small" />
-                     </ListItemIcon>
-                     Logout
-                  </MenuItem>
+                  <Divider />                    
+                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
+                            <ListItemIcon>
+                                <LockIcon fontSize="small" />
+                            </ListItemIcon>
+                            Change Password
+                        </MenuItem>
+                        <MenuItem onClick={() => handleDeleteAccount}>
+                            <ListItemIcon>
+                                <Delete fontSize="small" />
+                            </ListItemIcon>
+                            Delete my account
+                        </MenuItem>
+                        <MenuItem onClick={() => handleMenuClick('logout')}>
+                            <ListItemIcon>
+                                <LogoutIcon fontSize="small" />
+                            </ListItemIcon>
+                            Logout
+                        </MenuItem>
                </Menu>
             </div>
       </nav>

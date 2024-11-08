@@ -81,7 +81,7 @@ const GuideAdvertiserSignUp = () => {
 
         // Step 5: Success handling
         setSuccess('Files uploaded successfully');
-        navigate(`/${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}HomePage`, { state: { User: registerResponse.User } });
+        navigate(`/Login`);
     } catch (err) {
         if (err.response) {
             setError(err.response.data.message);

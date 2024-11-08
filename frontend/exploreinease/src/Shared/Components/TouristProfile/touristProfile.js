@@ -10,6 +10,10 @@ import NetworkService from '../../../NetworkService';
 import { useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import silver from './silver.png';
+import bronze from './bronze.png';
+import gold from './gold.png';
+
 
 const TouristProfile = (props) => {
   const location = useLocation();
@@ -37,10 +41,15 @@ const TouristProfile = (props) => {
     profession: false,
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [level, setLevel] = useState(1);
 
   useEffect(() => {
     const fetchTouristData = async () => {
       try {
+        const response2 = await axios.get(`http://localhost:3030/level/${Tourist._id}`);
+        console.log('Tourist level:', response2.data);
+        setLevel(response2.data.level);
+
         const response = await axios.get(`http://localhost:3030/getTourist/${Tourist._id}`);
         console.log('Tourist data:', response.data);
         setFormValues({
@@ -125,10 +134,25 @@ const TouristProfile = (props) => {
           <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 1}}>My Profile</Typography>
             </Box>
           <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Avatar sx={{ bgcolor: 'primary.main', width: 80, height: 80, fontSize: 40, margin: 'auto' }}>
-              {Tourist.username?.charAt(0).toUpperCase()}
-            </Avatar>
-            <Box display="flex" alignItems="center" justifyContent="center" sx={{ mt: 1 }}>
+          <Avatar 
+  sx={{ 
+    width: 80, 
+    height: 80, 
+    margin: 'auto', 
+    backgroundColor: 'transparent', // Make the background transparent
+    boxShadow: 'none' // Remove any shadow or outline
+  }}
+>
+  {Tourist.level === 3 ? (
+    <img src={gold} alt="Level 3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  ) : Tourist.level === 2 ? (
+    <img src={silver} alt="Level 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  ) : (
+    <img src={bronze} alt="Level 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  )}
+</Avatar>
+
+            <Box display="flex" alignItems="center" justifyContent="center">
               <Typography variant="h5" fontWeight="bold" sx={{ mt: 1 }}>
                 {Tourist?.username}
               </Typography>
@@ -248,28 +272,32 @@ const TouristProfile = (props) => {
 
             {/* Profession */}
             <Grid item xs={12}>
-              <Box display="flex" alignItems="center">
-                <WorkIcon color="action" />
-                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Profession:</Typography>
-                {isEditable.profession ? (
-                  <TextField fullWidth value={formValues.profession} onChange={handleChange('profession')} />
-                ) : (
-                  <Typography>{formValues.profession}</Typography>
-                )}
-                <IconButton onClick={() => { toggleEdit('profession'); if (isEditable.profession) handleSave(); }}>
-                  {isEditable.profession ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
-                </IconButton>
-              </Box>
-            </Grid>
+  <Box display="flex" alignItems="center">
+    <WorkIcon color="action" />
+    <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Profession:</Typography>
+    {isEditable.profession ? (
+      <TextField fullWidth value={formValues.profession} onChange={handleChange('profession')} />
+    ) : (
+      <Typography>{formValues.profession}</Typography>
+    )}
+    <IconButton onClick={() => { toggleEdit('profession'); if (isEditable.profession) handleSave(); }}>
+      {isEditable.profession ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+    </IconButton>
+  </Box>
+</Grid>
 
-            {/* Wallet */}
-            <Grid item xs={12}>
-              <Box display="flex" alignItems="center">
-                <Wallet color="action" />
-                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Wallet:</Typography>
-                <Typography sx={{ flex: 1, ml: 41 }}>{formValues.wallet}</Typography>
-              </Box>
-            </Grid>
+{/* Wallet */}
+<Grid item xs={12}>
+  <Box display="flex" alignItems="center">
+    <Wallet color="action" />
+    <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Wallet:</Typography>
+    {isEditable.wallet ? (
+      <TextField fullWidth value={formValues.wallet} onChange={handleChange('wallet')} />
+    ) : (
+      <Typography sx={{ mr: 5 }}>{formValues.wallet}</Typography>
+    )}
+  </Box>
+</Grid>
           </Grid>
         </Card>
       </Box>

@@ -33,14 +33,14 @@ const UsersSchema = new Schema({
         min: 0,
         max: 5,
       },
-      ratingSum: {
+    ratingSum: {
         type: Number,
         default: 0,
-      },
-      ratingCount: {
+    },
+    ratingCount: {
         type: Number,
         default: 0,
-      },
+    },
     documents: {
         nationalId: {
             type: String,

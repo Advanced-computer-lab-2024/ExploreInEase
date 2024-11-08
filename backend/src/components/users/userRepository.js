@@ -1,5 +1,6 @@
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const Order = require('../../models/order');
 const fs = require('fs');
 const path = require('path');
 
@@ -291,18 +292,153 @@ const redeemPoints = async (userId, points) => {
     if (!user) {
         throw new Error('User not found');
     }
-    user.redeemedPoints += points;
-    console.log("Before: ",user.wallet);
-    console.log("Points: ",points);
+    user.redeemedPoints = 0;
+
     user.wallet = user.wallet + points;
-    console.log("After: ",user.wallet);
+    
     user.points=0
     await user.save();
     return user;
 }
 
+const getLoyalityLevel = async (totalAmount) => {
+    let level = 0;
+    if(totalAmount < 100000){
+        level = 1;
+    }
+    else{ 
+        if(totalAmount <500000){
+            level = 2;
+        }
+        else{
+            level = 3;
+        }
+    }
+    return level;
+}
+
+const pointsAfterPayment = async (userId, amount) => {
+    const user = await findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    user.points = user.points + amount;
+    user.totalPoints = user.totalPoints + amount;
+    await user.save();
+    return user;
+}
+
+const updateTermsAndConditions = async (_id, type) => {
+    try {
+        // Find the user by username and type
+        const user = await Users.findOneAndUpdate(
+            { _id: _id, type: type },
+            { termsAndConditions: true },
+            { new: true } 
+        );
+        return user;
+    } catch (error) {
+        throw new Error(`Error updating terms and conditions: ${error.message}`);
+    }
+};
+
+const checkTouristDeletionCriteria = async (id) => {
+    const tourist = await Tourist.findById(id)
+        .populate('itineraryId.id') 
+        .populate('activityId.id'); 
+
+    if (!tourist) return false;
+
+    const now = new Date();
+
+    // Check if the itineraryId array is empty
+    if (!tourist.itineraryId || tourist.itineraryId.length === 0) {
+        return true;
+    }
+
+    for (const itineraryObj of tourist.itineraryId) {
+        const itinerary = itineraryObj.id;
+        if (itinerary && itinerary.dateTimeAvailable && itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
+            return false; 
+        }
+    }
+
+    // Check if the activityId array is empty
+    if (!tourist.activityId || tourist.activityId.length === 0) {
+        return true;
+    }
+
+    for (const activityObj of tourist.activityId) {
+        const activity = activityObj.id; 
+        if (activity && activity.date && new Date(activity.date) > now) {
+            return false; 
+        }
+    }
+
+    return true; 
+};
+
+
+
+const checkTourGuideItineraryDates = async (tourGuideId) => {
+    const now = new Date();
+    console.log(tourGuideId);
+    const itineraries = await Itinerary.find({ created_by: tourGuideId });
+    console.log(itineraries)
+    if (itineraries.length==0){
+        return true;
+    }
+
+    for (const itinerary of itineraries) {        
+        if (itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
+            return false; 
+        }
+    }
+    return true; 
+};
+
+
+
+
+const checkSellerProductStatus = async (sellerId) => {
+    const activeProducts = await Product.find({ sellerId: sellerId, isActive: true });
+    return activeProducts.length === 0; // Return true if no active products
+};
+
+
+
+
+const checkAdvertiserActivityStatus = async (advertiserId) => {
+    const now = new Date();
+
+    const futureActivities = await Activity.find({ 
+        created_by: advertiserId, 
+        date: { $gt: now } 
+    });
+
+    return futureActivities.length === 0; 
+};
+
+
+
+
+
+const updateRequestDeletion = async (userId, type) => {
+    const Model = type === 'tourist' ? Tourist : Users;
+    const result = await Model.findByIdAndUpdate(userId, { requestDeletion: true }, { new: true });
+    return result;
+};
+
 
 module.exports = {
+    updateRequestDeletion,
+    checkAdvertiserActivityStatus,
+    checkSellerProductStatus,
+    checkTourGuideItineraryDates,
+    checkTouristDeletionCriteria,
+    updateTermsAndConditions,
+    pointsAfterPayment,
+    getLoyalityLevel,
     findTouristById,
     redeemPoints,
     getUserbyUsername,

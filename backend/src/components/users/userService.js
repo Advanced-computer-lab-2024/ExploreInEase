@@ -270,8 +270,65 @@ const redeemPoints = async (userId, points) => {
     return {status: 200, response:{message: "Redeemed Points successfully", leftPoints: userNewPoints, redeemedPoints: amount, user: userAfterRedeemed}};
 }
 
+const pointsAfterPayment = async (userId, amount) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const addedPoints = amount/100;
+    const userAfterPoints = await userRepository.pointsAfterPayment(userId, addedPoints);
+    return {message: "Points updated successfully", user: userAfterPoints};
+}
+
+const getLevel = async (userId) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const level = await userRepository.getLoyalityLevel(user.totalPoints);
+    return {level: level};
+}
+
+const acceptTerms = async (_id, type) => {
+   
+    return await userRepository.updateTermsAndConditions(_id, type);
+};
+
+
+const requestDeletion = async (userId, type) => {
+    let canDelete = false;
+
+    if (type === 'tourist') {
+        // Check conditions for tourist
+        canDelete = await userRepository.checkTouristDeletionCriteria(userId);
+    } else if (type === 'tourGuide') {
+        console.log('a7a');
+        // Check conditions for tour guide in itinerary
+        canDelete = await userRepository.checkTourGuideItineraryDates(userId);
+    } else if (type === 'seller') {
+        // Check conditions for seller in product table
+        canDelete = await userRepository.checkSellerProductStatus(userId);
+    } else if (type === 'advertiser') {
+        // Check conditions for advertiser in activity table
+        canDelete = await userRepository.checkAdvertiserActivityStatus(userId);
+    } else {
+        throw new Error("Invalid user type");
+    }
+
+    if (!canDelete) {
+        throw new Error("Request deletion rejected due to active records.");
+    }
+
+    // Update requestDeletion in the respective table
+    const updateResult = await userRepository.updateRequestDeletion(userId, type);
+    return updateResult;
+};
 
 module.exports = {
+    acceptTerms,
+    requestDeletion,
+    getLevel,
+    pointsAfterPayment,
     redeemPoints,
     getNotAcceptedUsers,
     uploadImage,

@@ -14,6 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import UploadIcon from '@mui/icons-material/Upload';
+import { Delete } from '@mui/icons-material';
+
 
 const HomePage = () => {
    const location=useLocation();
@@ -26,6 +28,7 @@ const HomePage = () => {
 
         const initialUsername = User.User?.username || User.username;
     const userId = User.User?._id || User._id;
+    const userType = User.User?.type || User.type;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
 
     // Retrieve avatar URL from localStorage or fallback to the default avatar
@@ -149,6 +152,27 @@ const HomePage = () => {
       }
     }
       };
+
+      const handleDeleteAccount = async () => {
+        try {
+          console.log(userId,userType);
+
+          const options = {
+              apiPath: `/requestDeletion/${userId}/${userType}`,
+              useParams:userId,userType,
+            };
+          const response = await NetworkService.put(options);
+          console.log(response);
+
+          if (response.success) {
+              setSuccess("Account deletion requested successfully.");
+          } else {
+              setError(response.message || "Account deletion request failed.");
+          }
+      } catch (err) {
+          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+      }
+    };
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -212,12 +236,6 @@ const HomePage = () => {
                             Account
                         </Typography>
                         <Divider />
-                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
-                            <ListItemIcon>
-                                <LockIcon fontSize="small" />
-                            </ListItemIcon>
-                            Change Password
-                        </MenuItem>
                         <MenuItem component="label">
                             <ListItemIcon>
                                 <UploadIcon fontSize="small" />
@@ -229,6 +247,18 @@ const HomePage = () => {
                                 style={{ display: 'none' }}
                                 onChange={handleAvatarUpload}
                             />
+                        </MenuItem>                     
+                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
+                            <ListItemIcon>
+                                <LockIcon fontSize="small" />
+                            </ListItemIcon>
+                            Change Password
+                        </MenuItem>
+                        <MenuItem onClick={() => handleDeleteAccount}>
+                            <ListItemIcon>
+                                <Delete fontSize="small" />
+                            </ListItemIcon>
+                            Delete my account
                         </MenuItem>
                         <MenuItem onClick={() => handleMenuClick('logout')}>
                             <ListItemIcon>

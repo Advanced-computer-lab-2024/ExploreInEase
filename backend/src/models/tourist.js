@@ -80,7 +80,7 @@ const TouristSchema = new Schema({
         default: 0,
         min: 0 // Ensures points cannot go below zero
     },
-    redeemedPoints: {
+    totalPoints: {
         type: Number,
         default: 0,
         min: 0 // Ensures points cannot go below zero
