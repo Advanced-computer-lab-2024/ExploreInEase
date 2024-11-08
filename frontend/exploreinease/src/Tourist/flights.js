@@ -178,7 +178,34 @@ const Flights = () => {
       console.log('Unexpected error fetching Flight data:', error);
     }
   };
+const handleBookFlight=async(selected)=>{
+  // const { bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode } = req.body;
+ const departureTime= formatDate(selected.departure.at);
+ const arrivalTime= formatDate(selected.arrival.at);
 
+  try {
+    const options = { 
+      apiPath: `/bookFlight`,
+      body:{
+        bookedBy:userId,
+        price:selected.price,
+        departureTime:departureTime,
+        arrivalTime:arrivalTime,
+        personCount:searchParams.peopleCount,
+        currency:searchParams.currency,
+        originCode:selected.departure.iataCode,
+        destinationCode:selected.arrival.iataCode
+      }
+     };
+     console.log(options);
+     
+    const response = await NetworkService.post(options);
+    console.log("Book Flight:",response);
+    
+  } catch (error) {
+    console.log('Error fetching historical places:', error);
+  }
+}
 
   const handleDateChange = (date) => {
     setSearchParams((prev) => ({ ...prev, date }));
@@ -188,7 +215,10 @@ const Flights = () => {
     const { name, value } = event.target;
     setSearchParams((prev) => ({ ...prev, [name]: value }));
   };
-
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];  // Get only the 'YYYY-MM-DD' part
+  };
   const handleSearch = () => {
       handlegetCities();  
       handleGetFlightData();
@@ -287,37 +317,40 @@ const Flights = () => {
                     height="120"
                     sx={{ width: 'auto', maxWidth: '50%' }}  // Optional: controls the width
                     image={flightsImage[0]}
-                    alt={`${flight.departure.city} to ${flight.arrival.city} flight`}
+                    alt={`flight`}
                   />
                   <CardContent>
                     <Typography variant="h7" gutterBottom>
-                     <strong>Flight from {flight.departure.city} to {flight.arrival.city}</strong> 
+                     <strong>Flight from {flight.departure.iataCode} to {flight.arrival.iataCode}</strong> 
                     </Typography>
                     <Box display="flex" justifyContent="space-between" mb={2} mt={2}>
                       <Box>
-                        <Typography variant="body2" color="black">
+                        <Typography variant="h7" color="black">
                           <strong>Departure</strong><br />
-                         <strong>Country:</strong> {flight.departure.city}, {flight.departure.country} <br />
-                         <strong>Date:</strong> {flight.departure.date} <br />
-                         <strong>Terminal: </strong> {flight.departure.terminal}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="black">
-                          <strong>Arrival</strong><br />
-                          <strong>Country:</strong>  {flight.arrival.city}, {flight.arrival.country} <br />
-                          <strong>Date:</strong>   {flight.arrival.date} <br />
-                          <strong>Terminal: </strong> {flight.arrival.terminal}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Typography variant="body1" color="black">
+                         <strong>Date:</strong> {formatDate(flight.departure.at)} <br />
+                         <Typography variant="body1" color="black">
                       <strong>Price:</strong> {flight.price} {searchParams.currency.toUpperCase()}
                     </Typography>
+                        </Typography>
+                        
+                      </Box>
+                      <Box>
+                        <Typography variant="h7" color="black">
+                          <strong>Arrival</strong><br />
+                          <strong>Date:</strong>  {formatDate(flight.arrival.at)} <br />
+                        </Typography>
+                        <Typography variant="body1" color="black">
+                    <strong>Terminal: </strong> 
+                    {flight.departure.terminal}     
+                   </Typography>
+                      </Box>
+                    </Box>
+                  
+                 
                   </CardContent>
                   <CardActions >
                     <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                      <Button variant="contained" color="primary">
+                      <Button   onClick={() =>handleBookFlight(flight)} variant="contained" color="primary">
                         Book Now
                       </Button>
                     </Box>

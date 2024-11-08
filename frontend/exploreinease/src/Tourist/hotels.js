@@ -108,7 +108,6 @@ const handleGetHotels = async () => {
 
 const handleBookHotels=async(selected)=>{
   // const { bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency } = req.body;
-
   try {
     const options = { 
       apiPath: `/bookHotel`,
@@ -252,7 +251,7 @@ const handleBookHotels=async(selected)=>{
           <CardContent>
             <Typography variant="h6">{hotel.name}</Typography>
             <Typography variant="body1" color="text.secondary">
-              Price: {hotel.price}
+              Price: {hotel.price} {searchParams.currency.toUpperCase()}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Start Date: {hotel.startDate}

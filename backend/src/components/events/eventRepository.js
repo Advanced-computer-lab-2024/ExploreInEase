@@ -9,6 +9,8 @@ const mongoose = require('mongoose');
 const historicalTags = require('../../models/historicalTag');
 const historicalPlace = require('../../models/historicalPlace');
 const Transportation = require('../../models/transportation');
+const BookedFlight = require('../../models/bookedFlights');
+const BookedHotel = require('../../models/bookedHotels');
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
     .populate('category', 'categoryName') // Get categoryName from ActivityCategory

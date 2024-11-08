@@ -938,7 +938,16 @@ const bookFlight = async (req, res) => {
 
   
   if (!bookedBy || !price || !departureTime || !arrivalTime || !personCount || !currency || !originCode || !destinationCode) {
-      return res.status(400).json({ message: "All fields are required." });
+    console.log("bookedBy",bookedBy);
+    console.log("price",price);
+    console.log("departureTime",departureTime);
+    console.log("arrivalTime",arrivalTime);
+    console.log("personCount",personCount);
+    console.log("currency",currency);
+    console.log("originCode",originCode);
+    console.log("destinationCode",destinationCode);
+    console.log("currency",currency);
+    return res.status(400).json({ message: "All fields are required." });
   }
 
   try {
@@ -978,18 +987,11 @@ const getHotelsByCityCode = async (req, res) => {
 
 const bookHotel = async (req, res) => {
   const { bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency } = req.body;
-
+ 
   
   if (!bookedBy || !price || !iataCode || !hotelName || !hotelId || !startDate || !endDate || !personCount || !currency) {
-        console.log("bookedBy",bookedBy);
-        console.log("price",price);
-        console.log("iataCode",iataCode);
-        console.log("hotelName",hotelName);
-        console.log("hotelId",hotelId);
-        console.log("startDate",startDate);
-        console.log("endDate",endDate);
-        console.log("personCount",personCount);
-        console.log("currency",currency);
+       
+
 
 
     return res.status(400).json({ message: "All fields are required." });
