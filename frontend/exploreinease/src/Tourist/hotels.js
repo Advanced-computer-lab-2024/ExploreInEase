@@ -31,16 +31,6 @@ const hotelImages =
   Hotel9, Hotel10, Hotel11, Hotel12, Hotel13, Hotel14, Hotel15, Hotel16
 ];
 
-const hotelData = [
-  { id: 1, name: "Hotel Sunshine", price: 150, startDate: "2024-11-10", endDate: "2024-11-15" },
-  { id: 2, name: "Grand Palace", price: 200, startDate: "2024-11-12", endDate: "2024-11-18" },
-  { id: 3, name: "Ocean View Resort", price: 180, startDate: "2024-11-20", endDate: "2024-11-25" },
-  { id: 4, name: "City Center Hotel", price: 120, startDate: "2024-11-22", endDate: "2024-11-28" },
-  { id: 5, name: "Mountain Lodge", price: 160, startDate: "2024-11-18", endDate: "2024-11-22" },
-  { id: 6, name: "Mountain Lodge", price: 160, startDate: "2024-11-18", endDate: "2024-11-22" },
-
-];
-
 const Hotels = () => {
   const location = useLocation();
   const { userId } = location.state || {};
