@@ -4,7 +4,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const { router: userRoutes, setDBConnection } = require('./src/components/users/userRoutes');
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
-
 const complaintRoutes = require('./src/components/complaints/complaintRoutes');
 
 
