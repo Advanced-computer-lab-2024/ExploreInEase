@@ -80,39 +80,31 @@ const getProductsByPriceRange = async (req, res) => {
 };
  
 const updateProduct = async (req, res) => {
-    const { userId, productId } = req.params; // Extract both parameters
+    const { userId, productId } = req.params;
     const updatedProductData = req.body;
-    console.log(req.params, req.body);
-    // Basic validation
-    // if (!productId || !updatedProductData) {
-    //     return res.status(400).json({ message: "Product ID and updated data are required." });
-    // }
+    const { currency } = req.body; // Assume currency is optional in the update request
 
     // Fetch the user's type (admin or seller)
     const type = await checkoutRepository.getType(userId);
     
-    // Validate user type
     if (type !== 'admin' && type !== 'seller') {
         return res.status(403).json({ message: 'Invalid user type. Only admins and sellers can update products.' });
     }
 
     try {
-        // Fetch the current product using productId
         const currentProduct = await checkoutService.getProductById(productId);
-
         if (!currentProduct) {
             return res.status(404).json({ message: "Product not found" });
         }
-        // Check if sellerId is being changed
-        // if (updatedProductData.sellerId && updatedProductData.sellerId !== currentProduct.sellerId.toString()) {
-        //     return res.status(403).json({ message: "You cannot change the sellerId of a product." });
-        // }
 
-        // Remove sellerId from the updated data if it exists
-        delete updatedProductData.sellerId;
+        // Convert price to EGP only if price is provided in the update
+        if (updatedProductData.price && currency) {
+            updatedProductData.price = checkoutRepository.convertCurrency(updatedProductData.price, currency, 'EGP');
+        }
+
+        delete updatedProductData.sellerId; // Prevent sellerId updates
 
         const updatedProduct = await checkoutService.updateProduct(productId, updatedProductData);
-        console.log("hello")
         if (updatedProduct) {
             return res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
         } else {
@@ -122,6 +114,7 @@ const updateProduct = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 

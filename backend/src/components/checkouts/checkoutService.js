@@ -29,7 +29,6 @@ const getProductById = async (productId) => {
 
 const updateProduct = async (productId, updatedProductData) => {
     try {
-        console.log(updatedProductData);
         const updatedProduct = await Product.findOneAndUpdate(
             { _id: productId },  // Keep this to search by productId
             { $set: updatedProductData },
