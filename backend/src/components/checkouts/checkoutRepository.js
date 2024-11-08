@@ -155,13 +155,15 @@ const isPurchased = async (TouristId, ProductId) => {
 const updateProductRating = async (productId, updatedFields) => {
     try {
         // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
-        const updatedProduct = await Products.findByIdAndUpdate(
+        const updatedProduct = await Product.findByIdAndUpdate(
             productId,
             { $set: updatedFields },
             { new: true, runValidators: true } // `new: true` returns the updated document
         );
 
         if (!updatedProduct) {
+            console.log("error in update Rating");
+            
             throw new Error("Product not found or could not be updated.");
         }
 
@@ -175,7 +177,7 @@ const updateProductRating = async (productId, updatedFields) => {
 const updateProductReviews = async (productId, updatedFields) => {
     try {
         // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
-        const updatedProduct = await Products.findByIdAndUpdate(
+        const updatedProduct = await Product.findByIdAndUpdate(
             productId,
             updatedFields,
             { new: true, runValidators: true } // `new: true` returns the updated document

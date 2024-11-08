@@ -2599,7 +2599,7 @@ router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
 router.get('/city/:city', eventController.getCityCode);
 
 // Route to get hotel IDs by city code
-router.get('/hotels/:cityCode', eventController.getHotelsByCityCode);
+router.get('/hotels/:cityCode/:startDate/:endDate/:currency/:personCount', eventController.getHotelsByCityCode);
 
 //define the route to book hotels 
 router.post('/bookHotel', eventController.bookHotel);

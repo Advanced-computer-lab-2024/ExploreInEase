@@ -76,6 +76,24 @@ const ProductPurchased = () => {
     setReview('');
     setRating('');
   };
+ const handleUpdateStatus=async()=>{
+  try {
+    console.log("selectedProduct",selectedProduct,selectedProduct.productIds[0]._id);    
+    const options = { 
+      apiPath: `/editOrder/${User._id}`,
+      body:
+      {
+        orderId:selectedProduct.productIds[0]._id,
+        updatedOrderData:selectedProduct
+      }
+     };
+    const response = await NetworkService.put(options);
+      console.log("UpdateOrder",response);
+      
+  } catch (error) {
+    console.log('Error fetching historical places:', error);
+  }
+ };
   const handleRatingValuesChange=(event)=>{
     setRating(event.target.value);
 }
@@ -84,26 +102,25 @@ const handleReviewChange=(event)=>{
 }
 const handleSaveRating =async(Product,rating)=>{
   try {
-    // touristId, productIds, quantities
-    console.log("selectedProduct",selectedProduct);
-    
+    console.log("selectedProduct",selectedProduct,selectedProduct.productIds[0]._id);
+    console.log("UserId",User._id);
+        
     const options = { 
       apiPath: `/rateProduct/${User._id}`,
       body:
       {
-       productId:selectedProduct.productIds[0]._id,
+        productId:selectedProduct.productIds[0]._id,
        rating:rating
       }
      };
-     
     const response = await NetworkService.post(options);
       console.log(response);
-      
   } catch (error) {
     console.log('Error fetching historical places:', error);
   }
+  handleClose();
 }
-const handleSaveReview =async(Product,review)=>{
+const handleSaveReview =async(review)=>{
   try {
     // productId, reviewText    
     const options = { 
@@ -121,6 +138,8 @@ const handleSaveReview =async(Product,review)=>{
   } catch (error) {
     console.log('Error fetching historical places:', error);
   }
+  handleClose();
+
 }
 
   const filteredProducts = products.filter((product) => {
@@ -226,7 +245,7 @@ onClose={handleClose}>
     </div>
   </DialogContent>
   <DialogActions>
-    <Button onClick={handleSaveReview} color="primary">
+    <Button onClick={() => handleSaveReview(review)} color="primary">
       Save
     </Button>
     <Button onClick={handleClose} color="primary">

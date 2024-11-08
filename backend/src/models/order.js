@@ -12,7 +12,7 @@ const orderSchema = new Schema(
     status: {
       type: String,
       enum: ["delivered", "pending", "canceled"],
-      default: "pending",
+      default: "delivered",
       required: true,
     },
     productIds: [

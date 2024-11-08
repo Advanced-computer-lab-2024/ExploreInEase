@@ -54,13 +54,17 @@ const rateProduct = async (touristId, productId, rating) => {
     try {
         // Check if the tourist has completed the itinerary with the specified tour guide
         const purchased = await checkoutRepository.isPurchased(touristId, productId);
-        
+
         if (!purchased) {
+            console.log("error in purchase");
+            
             throw new Error("You cannot rate this product because you didnt purchase it yet.");
         }
 
         const product = await Product.findOne({ _id: productId });
         if (!product) {
+            console.log("error in product found");
+
             throw new Error("activity not found.");
         }
 
@@ -103,7 +107,9 @@ const reviewProduct = async (touristId, productId, reviewText) => {
         const product = await Product.findOne({ _id: productId});
         if (!product) {
             throw new Error("product not found.");
-        }   
+        }
+        console.log("ReviewText",reviewText);
+           
         // Create the new comment
         const newReview = {
             userId: touristId,

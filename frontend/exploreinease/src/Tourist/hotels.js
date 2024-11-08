@@ -44,82 +44,95 @@ const hotelData = [
 const Hotels = () => {
   const location = useLocation();
   const { userId } = location.state || {};
-
-  const [iatCode,setIatCode]=useState('');
+  const [iatCode,setIatCode]=useState([]);
+  const [hotelDataa,sethotelDataa]=useState([]);
   const [searchParams, setSearchParams] = useState({
-    country:'',
+    country:"",
     startDate: null,
     endDate: null,
     peopleCount: null,
-    currency: '',
+    currency: "",
   });
 
 const handlegetCities=async()=>{
-  try {
-    // touristId, productIds, quantities
-    
+  console.log("Country",searchParams.country);
+  
+  try {    
     const options = { 
       apiPath: `/city/${searchParams.country}`,
      };
-     
     const response = await NetworkService.get(options);
-  
       console.log(response);
-  
-      setIatCode(response.iatCode);
-  } catch (error) {
-    console.log('Error fetching historical places:', error);
-  }
-}
-const handleGetHotels=async()=>{
-  try {
-    // touristId, productIds, quantities
-    
-    const options = { 
-      apiPath: `/hotels/${iatCode}`,
-      body:{
-        startDate:searchParams.startDate,
-         endDate:searchParams.endDate,
-          currency:searchParams.currency,
-           personCount:searchParams.peopleCount
-      }
-     };
-     
-    const response = await NetworkService.get(options);
-  
-      console.log(response);
-  
+      setIatCode(response.map(city => city.iataCode));
+      
   } catch (error) {
     console.log('Error fetching historical places:', error);
   }
 }
 
-const handleBookHotels=async(selected)=>{
+const handleGetHotels = async () => {
   try {
-    // touristId, productIds, quantities
-    // bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency
+    const startDate = new Date(searchParams.startDate).toISOString().slice(0, 10);
+    const endDate = new Date(searchParams.endDate).toISOString().slice(0, 10);
+    const allHotelData = await Promise.allSettled(
+      iatCode.map(async (code) => {
+        console.log("seatchParam",searchParams,startDate,endDate);
+        
+        const options = { 
+          apiPath: `/hotels/${code}/${startDate}/${endDate}/${searchParams.currency}/${searchParams.peopleCount}`,
+        };
+        console.log("options send",options);
+
+        // Fetch data for each iataCode
+        const response = await NetworkService.get(options);
+        console.log("Hotel data for", code, ":", response);
+        
+        return response; // Return each response to be collected
+      })
+    );
+
+    // Filter out any rejected promises and keep only successful responses
+    const combinedHotelData = allHotelData
+      .filter(result => result.status === 'fulfilled')  // Only keep successful responses
+      .map(result => result.value)                      // Extract value from successful responses
+      .flat();                                          // Flatten if responses are arrays
+    
+    console.log("Combined hotel data:", combinedHotelData);
+    sethotelDataa(combinedHotelData);
+
+  } catch (error) {
+    console.log('Unexpected error fetching hotel data:', error);
+  }
+};
+
+
+const handleBookHotels=async(selected)=>{
+  // const { bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency } = req.body;
+
+  try {
     const options = { 
       apiPath: `/bookHotel`,
       body:{
         bookedBy:userId,
         price:selected.price,
-        hotelName:selected.hotelName,
+        iataCode:selected.iataCode,
+        hotelName:selected.name,
         hotelId:selected.hotelId,
-        startDate:searchParams.startDate,
-        endDate:searchParams.endDate,
+        startDate:selected.startDate,
+        endDate:selected.endDate,
+        personCount:searchParams.peopleCount,
         currency:searchParams.currency,
-        personCount:searchParams.peopleCount
       }
      };
+     console.log(options);
      
     const response = await NetworkService.post(options);
-  
-      console.log(response);
-  
-      setIatCode(response.iatCode);
+    console.log("Book Hotel:",response);
+    
   } catch (error) {
     console.log('Error fetching historical places:', error);
   }
+
 }
   const handleDateChange = (field) => (date) => {
     setSearchParams((prev) => ({ ...prev, [field]: date }));
@@ -127,18 +140,23 @@ const handleBookHotels=async(selected)=>{
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setSearchParams((prev) => ({ ...prev, [name]: value }));
+    
+    setSearchParams(prevParams => ({
+      ...prevParams,
+      [name]: name === "peopleCount" ? parseInt(value, 10) || 1 : value // Parse as integer or default to 1
+    }));
   };
 
   const handleSearch = () => {
-
-    console.log("Search parameters:", searchParams);
-    setSearchParams({
-      startDate: null,
-      endDate: null,
-      peopleCount: null,
-      currency: '',
-    });
+    handlegetCities();
+    handleGetHotels();
+    // setSearchParams({
+    //   country:'',
+    //   startDate: null,
+    //   endDate: null,
+    //   peopleCount: '',
+    //   currency: '',
+    // });
   };
 
   const getRandomImage = () => hotelImages[Math.floor(Math.random() * hotelImages.length)];
@@ -156,8 +174,8 @@ const handleBookHotels=async(selected)=>{
               </Typography>
               <Box display="flex" flexDirection="column" gap={2}>
               <TextField
-                  label="Country"
-                  name="Country"
+                  label="country"
+                  name="country"
                   value={searchParams.country}
                   onChange={handleInputChange}
                   fullWidth
@@ -202,7 +220,7 @@ const handleBookHotels=async(selected)=>{
                   >
                     <MenuItem value="dollar">USD</MenuItem>
                     <MenuItem value="euro">EUR</MenuItem>
-                    <MenuItem value="epg">EGP</MenuItem>
+                    <MenuItem value="EGP">EGP</MenuItem>
                   </Select>
                 </FormControl>
                 <Button
@@ -222,12 +240,12 @@ const handleBookHotels=async(selected)=>{
         {/* Right Column - Hotel Cards */}
         <Grid item xs={12} md={8}>
   <Grid container spacing={2}>
-    {hotelData.map((hotel) => (
+    {hotelDataa.map((hotel) => (
       <Grid item xs={12} sm={6} md={4} key={hotel.id}>
-        <Card sx={{ width: '100%', boxShadow: 3, height: 320, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <Card sx={{ width: '100%', boxShadow: 3, height: 400, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <CardMedia
             component="img"
-            height="140"
+            height="180"
             image={getRandomImage()}
             alt={`${hotel.name} image`}
           />
@@ -245,7 +263,7 @@ const handleBookHotels=async(selected)=>{
           </CardContent>
           <CardActions sx={{ paddingBottom: 2 }}> {/* Adjusting paddingBottom here */}
             <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <Button variant="contained" color="primary">
+              <Button onClick={() =>handleBookHotels(hotel)} variant="contained" color="primary">
                 Book Now
               </Button>
             </Box>

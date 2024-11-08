@@ -155,12 +155,16 @@ const searchProductByName = async (req, res) => {
 
 const rateProduct = async (req, res) => {
     const { touristId } = req.params; // Get the userId from the route
+    console.log(touristId);
+    
     const { productId, rating } = req.body;
 
     try {
         const result = await checkoutService.rateProduct(touristId,productId,rating);
         return res.status(200).json(result);
     } catch (error) {
+        console.log(error.message);
+        
         return res.status(400).json({ message: error.message });
     }
 }
@@ -200,7 +204,7 @@ const addOrder = async (req, res) => {
         touristId,
         productIds,
         quantities,
-        status: 'pending', // Default status
+        status: 'delivered', // Default status
         dateDelivered: null // Initially null, can be updated later
     };
 

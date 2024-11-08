@@ -960,13 +960,15 @@ const bookFlight = async (req, res) => {
 
 const getHotelsByCityCode = async (req, res) => {
   try {
-      const { startDate, endDate, currency, personCount } = req.body; 
+      const { startDate, endDate, currency, personCount } = req.params; 
+    
+
       const response = await eventService.fetchHotelsByCityCode(
           req.params.cityCode,
-          startDate,
-          endDate,
-          currency,  
-          parseInt(personCount) || 1  
+          req.params.startDate,
+          req.params.endDate,
+          req.params.currency,  
+          req.params.personCount 
       );
       res.status(200).json(response); 
   } catch (error) {
@@ -979,7 +981,18 @@ const bookHotel = async (req, res) => {
 
   
   if (!bookedBy || !price || !iataCode || !hotelName || !hotelId || !startDate || !endDate || !personCount || !currency) {
-      return res.status(400).json({ message: "All fields are required." });
+        console.log("bookedBy",bookedBy);
+        console.log("price",price);
+        console.log("iataCode",iataCode);
+        console.log("hotelName",hotelName);
+        console.log("hotelId",hotelId);
+        console.log("startDate",startDate);
+        console.log("endDate",endDate);
+        console.log("personCount",personCount);
+        console.log("currency",currency);
+
+
+    return res.status(400).json({ message: "All fields are required." });
   }
 
   try {

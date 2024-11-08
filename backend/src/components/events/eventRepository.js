@@ -673,7 +673,7 @@ const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId, sta
         price = price.toFixed(2);
         break;
       default:
-        throw new Error('Invalid currency');
+        price = price;
     }
 
     

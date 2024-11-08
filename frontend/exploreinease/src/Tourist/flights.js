@@ -9,6 +9,7 @@ import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleIcon from '@mui/icons-material/People';
+import NetworkService from '../NetworkService';
 import flight from "../Hotels Images/flight.png"
 const flightData = [
   {
@@ -96,7 +97,10 @@ const flightData = [
 const Flights = () => {
   const location = useLocation();
   const { userId } = location.state || {};
-
+  const [iatCodeTo,setIatCodeTo]=useState([]);
+  const [iatCodeFrom,setIatCodeFrom]=useState([]);
+  const [iatCode,setIatCode]=useState([]);
+  const[flightDataa,setFlightDataa]=useState([]);
     const flightsImage=[flight];
   const [searchParams, setSearchParams] = useState({
     from: '',
@@ -105,40 +109,77 @@ const Flights = () => {
     peopleCount: null,
     currency: '',
   });
-  const handlegetCities=async()=>{
+  const handlegetCities = async () => {
     try {
-      // touristId, productIds, quantities
-      
-      const options = { 
-        apiPath: `/city/${searchParams.from}`,
-       };
-       
-      const response = await NetworkService.get(options);
-    
-        console.log(response);
-    
-        setIatCode(response.iatCode);
+      // Concurrently fetch data from both endpoints
+      const [response1, response2] = await Promise.all([
+        NetworkService.get({ apiPath: `/city/${searchParams.from}` }),
+        NetworkService.get({ apiPath: `/city/${searchParams.to}` })
+      ]);
+  
+      // Extract iataCodes from each response into separate arrays
+      const iataCodesFrom = response1.map(city => city.iataCode);
+      const iataCodesTo = response2.map(city => city.iataCode);
+  
+      // Set each array to its corresponding state
+      setIatCodeFrom(iataCodesFrom);
+      setIatCodeTo(iataCodesTo);
+  
+      console.log("IATA Codes from:", iataCodesFrom);
+      console.log("IATA Codes to:", iataCodesTo);
+  
     } catch (error) {
-      console.log('Error fetching historical places:', error);
+      console.log('Error fetching cities:', error);
     }
-  }
-  const handlegetCities2=async()=>{
+  };
+  
+  
+  const handleGetFlightData = async () => {
     try {
-      // touristId, productIds, quantities
-      
-      const options = { 
-        apiPath: `/city/${searchParams.to}`,
-       };
-       
-      const response = await NetworkService.get(options);
-    
-        console.log(response);
-    
-        setIatCode(response.iatCode);
+      const date = new Date(searchParams.date).toISOString().slice(0, 10);
+  
+      // Determine the minimum length between iataCodesFrom and iataCodesTo
+      const length = Math.min(iatCodeFrom.length, iatCodeTo.length);
+  
+      // Fetch data for each pair of origin and destination codes up to the shortest list length
+      const allFlightData = await Promise.allSettled(
+        Array.from({ length }, async (_, index) => {
+          const options = { 
+            apiPath: `/flightOffers`,
+            body: {
+              originCode: iatCodeFrom[index],
+              destinationCode: iatCodeTo[index],
+              dateOfDeparture: date,
+              currency: searchParams.currency,
+              personCount: searchParams.peopleCount
+            }
+          };
+  
+          console.log("Options sent", options);
+  
+          // Fetch data for each origin-destination pair
+          const response = await NetworkService.post(options);
+          console.log(`Flight data for ${iatCodeFrom[index]} to ${iatCodeTo[index]}:`, response);
+  
+          return response; // Return each response to be collected
+        })
+      );
+  
+      // Filter out any rejected promises and keep only successful responses
+      const combinedFlightData = allFlightData
+        .filter(result => result.status === 'fulfilled') // Only keep successful responses
+        .map(result => result.value)                     // Extract value from successful responses
+        .flat();                                         // Flatten if responses are arrays
+  
+      console.log("Combined Flight data:", combinedFlightData);
+      setFlightDataa(combinedFlightData);
+  
     } catch (error) {
-      console.log('Error fetching historical places:', error);
+      console.log('Unexpected error fetching Flight data:', error);
     }
-  }
+  };
+
+
   const handleDateChange = (date) => {
     setSearchParams((prev) => ({ ...prev, date }));
   };
@@ -149,14 +190,8 @@ const Flights = () => {
   };
 
   const handleSearch = () => {
-    console.log("Search parameters:", searchParams);
-    setSearchParams({
-      from: '',
-      to: '',
-      date: null,
-      peopleCount: null,
-      currency: '',
-    });
+      handlegetCities();  
+      handleGetFlightData();
   };
 
   return (
@@ -224,7 +259,7 @@ const Flights = () => {
                   >
                     <MenuItem value="dollar">USD</MenuItem>
                     <MenuItem value="euro">EUR</MenuItem>
-                    <MenuItem value="egp">EGP</MenuItem>
+                    <MenuItem value="EGP">EGP</MenuItem>
                   </Select>
                 </FormControl>
                 <Button
@@ -244,7 +279,7 @@ const Flights = () => {
         {/* Right Column - Flight Cards */}
         <Grid item xs={12} md={8}>
           <Grid container spacing={2} marginBottom={3}>
-            {flightData.map((flight) => (
+            {flightDataa.map((flight) => (
               <Grid item xs={12} sm={6} md={4} key={flight.id}>
                 <Card sx={{ width: '100%', boxShadow: 3, height: 400, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <CardMedia
