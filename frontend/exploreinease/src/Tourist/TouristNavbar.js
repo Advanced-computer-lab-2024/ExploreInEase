@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -13,10 +13,11 @@ import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { Delete } from '@mui/icons-material';
+import axios from 'axios';
 const TouristNavbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { tourist } = location.state || {};
+    const { tourist, imageUrl } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const [anchorEl, setAnchorEl] = useState(null);
@@ -26,6 +27,18 @@ const TouristNavbar = () => {
      const userId=tourist._id;
      const userType = tourist.tourist?.type || tourist.type;
 
+     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
+     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+     const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
+ 
+     useEffect(() => {
+         // Update the avatar URL when the component mounts if a new image URL exists
+         if (savedAvatarUrl || imageUrl) {
+             setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+         } else {
+             setAvatarImage(defaultAvatarUrl);
+         }
+     }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
 
 
      const handleMenuOpen = (event) => {
@@ -128,6 +141,30 @@ const TouristNavbar = () => {
           setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
       }
     };
+
+    const handleAvatarUpload = async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+          const formData = new FormData();
+          formData.append('image', file);
+          console.log('Uploading image:', formData);
+          try {
+              const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+                  headers: {
+                      'Content-Type': 'multipart/form-data',
+                  },
+              });
+              console.log('Image uploaded successfully:', response);
+              const uploadedImageUrl = response.data.imageUrl;
+              
+              // Update avatarImage and save the URL in localStorage
+              setAvatarImage(uploadedImageUrl);
+              localStorage.setItem(`${userId}`, uploadedImageUrl);
+          } catch (err) {
+              console.error('Error uploading image:', err);
+          }
+      }
+  };
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -157,12 +194,13 @@ const TouristNavbar = () => {
           </select>
         </div>
         <div className="avatar-container">
-               <Avatar
-                  sx={{ bgcolor: 'darkblue', color: 'white', width: 48, height: 48, fontSize: 20, cursor: 'pointer' }}
-                  onClick={handleMenuOpen}
-               >
-                  {firstInitial}
-               </Avatar> 
+                    <Avatar
+                        sx={{ bgcolor: 'darkblue', color: 'white', width: 48, height: 48, fontSize: 20, cursor: 'pointer' }}
+                        onClick={handleMenuOpen}
+                        src={avatarImage ? avatarImage : undefined}
+                    >
+                        {avatarImage ? '' : defaultAvatarUrl}
+                    </Avatar>
                <Menu
                   anchorEl={anchorEl}
                   open={open}

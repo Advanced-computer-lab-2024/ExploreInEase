@@ -3,7 +3,7 @@ import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, In
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem } from '@mui/icons-material';
+import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
 import { Visibility, VisibilityOff, Email, Phone, Cake, Flag, LocationOn, Wc, Lock } from '@mui/icons-material';
 import WorkIcon from '@mui/icons-material/Work';
 import NetworkService from '../../../NetworkService';
@@ -13,11 +13,14 @@ import axios from 'axios';
 import silver from './silver.png';
 import bronze from './bronze.png';
 import gold from './gold.png';
+import Tooltip from '@mui/material/Tooltip';
+import Sky from '../Sky2.jpeg';
+import { styled } from '@mui/system';
 
 
 const TouristProfile = (props) => {
   const location = useLocation();
-  const { Tourist } = location.state || {}; // Destructure Tourist from location.state
+  const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
   console.log(Tourist);
 
   const initialData = {
@@ -30,6 +33,21 @@ const TouristProfile = (props) => {
     wallet: Tourist?.wallet || 0,
     points: Tourist?.points || 0,
   };
+  const userId = Tourist._id;
+  const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
+  const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
+  const initialUsername = Tourist.username;
+  const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+
+
+  useEffect(() => {
+    // Update the avatar URL when the component mounts if a new image URL exists
+    if (savedAvatarUrl || imageUrl) {
+        setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+    } else {
+        setAvatarImage(defaultAvatarUrl);
+    }
+}, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
 
   const [formValues, setFormValues] = useState(initialData);
   const [isEditable, setIsEditable] = useState({
@@ -42,6 +60,16 @@ const TouristProfile = (props) => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [level, setLevel] = useState(1);
+
+  const BackgroundContainer = styled(Box)({
+    backgroundImage: `url(${Sky})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Align items to the left
+  });
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -114,10 +142,30 @@ const TouristProfile = (props) => {
     }
   };
 
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        console.log('Image uploaded successfully:', response.data);
+        setAvatarImage(response.data.imageUrl);
+        localStorage.setItem(`${userId}`, response.data.imageUrl);
+      } catch (err) {
+        console.error('Error uploading image:', err);
+      }
+    }
+  };
+
   const toggleEdit = (field) => setIsEditable({ ...isEditable, [field]: !isEditable[field] });
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
+    <BackgroundContainer>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       {/* Flex container to center the card */}
       <Box
@@ -125,38 +173,63 @@ const TouristProfile = (props) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100%',  // Full height of the screen
-          padding: 2,
+          height: '100%', // Ensure the box takes full height
+          width: '100%', // Ensure the box takes full width
         }}
       >
-        <Card sx={{ padding: 4, width: '90%', maxWidth: 600, boxShadow: 3, borderRadius: 16 }}>
+        <Card sx={{ padding: 4, width: '90%', maxWidth: 600, borderRadius: 16, boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)', // Slightly transparent
+        animation: 'fadeIn 1s ease-in-out' }}>
           <Box display="flex" alignItems="Left" justifyContent="center">
           <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 1}}>My Profile</Typography>
             </Box>
           <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Avatar 
-  sx={{ 
-    width: 80, 
-    height: 80, 
-    margin: 'auto', 
-    backgroundColor: 'transparent', // Make the background transparent
-    boxShadow: 'none' // Remove any shadow or outline
-  }}
->
-  {Tourist.level === 3 ? (
-    <img src={gold} alt="Level 3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-  ) : Tourist.level === 2 ? (
-    <img src={silver} alt="Level 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-  ) : (
-    <img src={bronze} alt="Level 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-  )}
-</Avatar>
+          <Box sx={{ textAlign: 'center', mb: 3, position: 'relative', display: 'flex', justifyContent: 'center', gap: 2 }}>
+  {/* Avatar with hover effect */}
+  <Tooltip title="Click to change avatar" arrow>
+    <label htmlFor="avatar-upload">
+      <Avatar
+        sx={{
+          width: 80, height: 80, cursor: 'pointer',
+          '&:hover::before': {
+            position: 'absolute',
+            bottom: '5px',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '5px',
+            padding: '2px 8px',
+          },
+        }}
+        src={avatarImage}
+      />
+      <input
+        accept="image/*"
+        style={{ display: 'none' }}
+        id="avatar-upload"
+        type="file"
+        onChange={handleAvatarChange}
+      />
+    </label>
+  </Tooltip>
 
-            <Box display="flex" alignItems="center" justifyContent="center">
-              <Typography variant="h5" fontWeight="bold" sx={{ mt: 1 }}>
-                {Tourist?.username}
-              </Typography>
-            </Box>
+  <Avatar
+    sx={{
+      width: 80,
+      height: 110,
+      backgroundColor: 'transparent', // Make the background transparent
+      boxShadow: 'none', // Remove any shadow or outline
+    }}
+  >
+    {Tourist.level === 3 ? (
+      <img src={gold} alt="Level 3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    ) : Tourist.level === 2 ? (
+      <img src={silver} alt="Level 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    ) : (
+      <img src={bronze} alt="Level 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    )}
+  </Avatar>
+</Box>
+
             <Box display="flex" alignItems="center" justifyContent="center" mt={1}>
               <StarIcon color="warning" />
               <Typography variant="h6" ml={1}>{formValues.points} Points</Typography>
@@ -171,6 +244,14 @@ const TouristProfile = (props) => {
 
           {/* Profile Fields */}
           <Grid container spacing={2}>
+                {/* Username */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <AccountCircleIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
+        <Typography sx={{ mr: 5 }}>{Tourist.username}</Typography>
+      </Box>
+    </Grid>
             {/* Email */}
             <Grid item xs={12}>
               <Box display="flex" alignItems="center">
@@ -224,22 +305,10 @@ const TouristProfile = (props) => {
               <Box display="flex" alignItems="center">
                 <Cake color="action" />
                 <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Date of Birth:</Typography>
-                {isEditable.dob ? (
-                  <DatePicker
-                    label="Select Date"
-                    value={formValues.dob}
-                    onChange={handleChange('dob')}
-                    renderInput={(params) => <TextField {...params} />}
-                  />
-                ) : (
-                  <Typography>{formValues.dob ? formValues.dob.format('YYYY-MM-DD') : 'N/A'}</Typography>
-                )}
-                <IconButton onClick={() => { toggleEdit('dob'); if (isEditable.dob) handleSave(); }}>
-                  {isEditable.dob ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
-                </IconButton>
+                <Typography sx={{ mr: 5 }}>{formValues.dob ? formValues.dob.format('YYYY-MM-DD') : 'N/A'}</Typography>
               </Box>
             </Grid>
-
+            
             {/* Password */}
             <Grid item xs={12}>
               <Box display="flex" alignItems="center">
@@ -302,6 +371,7 @@ const TouristProfile = (props) => {
         </Card>
       </Box>
     </LocalizationProvider>
+    </BackgroundContainer>
   );
 };
 

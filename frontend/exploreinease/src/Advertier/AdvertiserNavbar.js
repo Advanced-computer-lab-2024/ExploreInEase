@@ -77,10 +77,8 @@ const HomePage = () => {
                 // Update avatarImage and save the URL in localStorage
                 setAvatarImage(uploadedImageUrl);
                 localStorage.setItem(`${userId}`, uploadedImageUrl);
-                setSuccess('Image uploaded successfully!');
             } catch (err) {
                 console.error('Error uploading image:', err);
-                setError(err.response ? err.response.data.error : 'Failed to upload image. Please try again.');
             }
         }
     };

@@ -383,11 +383,11 @@ const login = async (req, res) => {
         const allUser = await userRepository.getUserbyUsername(username);
         if(user != 'tourist'){
             imageUrl = await userRepository.getUserProfilePicture(allUser._id);
+            if(!allUser.termsAndConditions){
+                return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
+            }
         }
         console.log("User: ",allUser);
-        if(!allUser.termsAndConditions){
-            return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
-        }
 
         return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl});
     }catch(error){

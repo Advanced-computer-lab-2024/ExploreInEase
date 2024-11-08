@@ -69,7 +69,7 @@ const UsersSchema = new Schema({
     },
     hotline: {
         type: String,
-        
+        default: ''
     },
     companyProfile: {
         type: String,
@@ -133,12 +133,12 @@ const UsersSchema = new Schema({
         default: false
     },
     founded: {
-        type: Number,
+        type: Date,
        
     },
     specialist: {
         type: String,
-        
+        default: ''
     },
     noEmployees: {
         type: Number,

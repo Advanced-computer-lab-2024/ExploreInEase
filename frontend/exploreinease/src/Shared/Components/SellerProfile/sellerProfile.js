@@ -1,242 +1,261 @@
-import React, { useState } from 'react';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import InputAdornment from '@mui/material/InputAdornment';
-import Input from '@mui/material/Input';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import Button from '@mui/material/Button'; // Import Button
+import React, { useState, useEffect } from 'react';
+import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { Edit as EditIcon, Save as SaveIcon, Visibility, VisibilityOff, AccountCircle as AccountCircleIcon, Email as EmailIcon, Lock as LockIcon, Language as LanguageIcon, Phone as PhoneIcon, LinkedIn as LinkedInIcon, Work as WorkIcon, Group as GroupIcon, Event as EventIcon  } from '@mui/icons-material';
+import axios from 'axios';
+import dayjs from 'dayjs';
 import NetworkService from '../../../NetworkService';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Tooltip from '@mui/material/Tooltip';
+import StarIcon from '@mui/icons-material/Star';
+import Sky from '../Sky2.jpeg';
+import { styled } from '@mui/system';
 
-const useForm = (initialValues) => {
-  const [formValues, setFormValues] = useState(initialValues);
 
-  const handleChange = (name) => (valueOrEvent) => {
-    const newValue = name === 'dateOfBirth' ? valueOrEvent : valueOrEvent.target.value;
-    setFormValues({ ...formValues, [name]: newValue });
-  };
-  return [formValues, handleChange];
-};
 
 const SellerProfile = (props) => {
-  const location=useLocation();
-  const { tourist } = location.state || {};  
+  const initialData = {
+    username: '',
+    email: '',
+    password: '',
+    specialist: '',
+  };
+  const location = useLocation();
+  const { tourist, imageUrl } = location.state || {};
   console.log(tourist);
-  
-  const initialUsername = tourist?.username || '';
-  const initialEmail = tourist?.email || '';
-  const initialPassword = tourist?.password || '';
-  const initialSpecialties = tourist?.specialist || '';
+  const userId = tourist.tourist?._id || tourist?._id;
+  console.log(userId);
+  const [formValues, setFormValues] = useState(initialData);
+    // Retrieve avatar URL from localStorage or fallback to the default avatar
+    const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
+    const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
+    const initialUsername = tourist.tourist?.username || tourist?.username;
+    const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
 
-  const [formValues, handleFormChange] = useForm({
-    email: initialEmail || '',
-    password: initialPassword || '',
-    specialties: initialSpecialties || '',
-  });
+
+    useEffect(() => {
+      // Update the avatar URL when the component mounts if a new image URL exists
+      if (savedAvatarUrl || imageUrl) {
+          setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+      } else {
+          setAvatarImage(defaultAvatarUrl);
+      }
+  }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
 
   const [isEditable, setIsEditable] = useState({
+    username: false,
     email: false,
     password: false,
-    specialties: false,
+    specialist: false,
   });
-  const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-  const [showPassword, setShowPassword] = React.useState(initialPassword);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const toggleEditMode = (field) => {
-    setIsEditable((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
-
-  const handleClickShowPassword = () => {
-    setShowPassword((prevShow) => !prevShow);
-  };
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-  const toggleAllEditMode = () => {
-    const allEditable = Object.values(isEditable).some(editable => editable);
-    const newEditableState = {
-      email: true,
-      password: true,
-      specialties: true,
-
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const options = { apiPath: `/getSeller/${userId}`, urlParam: { userId } };
+        const response = await NetworkService.get(options);
+        setFormValues({
+          username: response.seller.username,
+          email: response.seller.email,
+          password: response.seller.password,
+          specialist: response.seller.specialist,
+        });
+        console.log(response.seller.specialist);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
     };
-    setIsEditable(newEditableState);
+    fetchData();
+  }, [userId]);
 
-    if (allEditable) {
-      handleSave(); // Save values if switching to non-editable mode
+  const handleChange = (field) => (event) => {
+    setFormValues({ ...formValues, [field]: event.target ? event.target.value : event });
+  };
+
+  const handleSave = async () => {
+    try {
+      const options = {
+        apiPath: '/updateSeller/{userId}',
+        urlParam: { userId },
+        body: {
+          ...formValues,
+        },
+      };
+      const response = await NetworkService.put(options);
+      console.log(response.message);
+      setIsEditable({
+        username: false,
+        email: false,
+        password: false,
+        specialist: false,
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
     }
   };
-  const handleSave = async () => {
 
-    const updatedSeller = {
-      email: formValues.email,
-      password: formValues.password,
-      specialist: formValues.specialties,
-    };
-    console.log("Updated values: ", updatedSeller);
-    const options = {
-      apiPath: `/updateSeller/${tourist._id}`,
-      urlParam: tourist._id,
-      body: updatedSeller,
-    };
-    const response = await NetworkService.put(options);
-    console.log("Response: ", response);
-    // Update frontend form with the updated values
-    handleFormChange({
-      ...formValues,
-      email: response.seller.email,
-      password: response.seller.password,
-      specialties: response.seller.specialist,
-    });
-    setIsEditable({
-      email: false,
-      password: false,
-      mobileNumber: false,
-      yearExp: false,
-      prevWork: false,
-      languages: false,
-    });
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        console.log('Image uploaded successfully:', response.data);
+        setAvatarImage(response.data.imageUrl);
+        localStorage.setItem(`${userId}`, response.data.imageUrl);
+      } catch (err) {
+        console.error('Error uploading image:', err);
+      }
+    }
   };
 
+  const BackgroundContainer = styled(Box)({
+    backgroundImage: `url(${Sky})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Align items to the left
+  });
+
+  const toggleEdit = (field) => setIsEditable({ ...isEditable, [field]: !isEditable[field] });
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+
   return (
-      
-      <Card sx={{ padding: 3, width: '90%', margin: 'auto',marginTop:2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h4" gutterBottom>
-            Manage Profile
-          </Typography>
-          <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
+    <BackgroundContainer>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%', // Ensure the box takes full height
+          width: '100%', // Ensure the box takes full width
+        }}
+      >
+        <Card sx={{ padding: 4, width: '90%', maxWidth: 600, borderRadius: 16, boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)', // Slightly transparent
+        animation: 'fadeIn 1s ease-in-out' }}>
+        <Box display="flex" alignItems="Left" justifyContent="center">
+          <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 1}}>My Profile</Typography>
+            </Box>
+            {/* Avatar */}
+            <Box sx={{ textAlign: 'center', mb: 3, position: 'relative' }}>
+          {/* Avatar with hover effect */}
+          
+          <Tooltip title="Click to change avatar" arrow>
+            <label htmlFor="avatar-upload">
+              <Avatar
+                sx={{
+                  width: 80, height: 80, margin: 'auto', cursor: 'pointer',
+                  '&:hover::before': {
+                    position: 'absolute',
+                    bottom: '5px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    color: 'white',
+                    borderRadius: '5px',
+                    padding: '2px 8px',
+                  },
+                }}
+                src={avatarImage}
+              />
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="avatar-upload"
+                type="file"
+                onChange={handleAvatarChange}
+              />
+            </label>
+          </Tooltip>
         </Box>
-        <Divider sx={{ mb: 2 }} />
 
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ marginRight: 9 ,fontWeight:"bold"}}>Username:</Typography>
-              <Typography>{initialUsername}</Typography>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 1 }} />
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-              <Typography sx={{ marginRight: 13.5,fontWeight:"bold" }}>Email:</Typography>
-              {isEditable.email ? (
-                <TextField id="email-edit" variant="standard" fullWidth value={formValues.email} onChange={handleFormChange('email')} />
-              ) : (
-                <Typography>{formValues.email}</Typography>
-              )}
-              <div>
-              <IconButton 
-              //onClick={() => toggleEditMode('email')} 
-              
-              onClick={() => {
-                if (isEditable.email) {
-                  // Save the changes if in edit mode
-                  handleSave();
-                } else {
-                  // Enable edit mode if not in edit mode
-                  toggleEditMode('email');
-                }
-              }}aria-label={isEditable.email ? 'save' : 'edit'}>
-                {isEditable.email ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={2}>
+    {/* Username */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <AccountCircleIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
+        <Typography sx={{ mr: 5 }}>{formValues.username}</Typography>
+      </Box>
+    </Grid>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography sx={{ marginRight: 9,fontWeight:"bold" }}>Password:</Typography>
-              {isEditable.password ? (
-                <Input
-                  id="standard-adornment-password"
-                  type={showPassword ? 'text' : 'password'}
-                  fullWidth
-                  value={formValues.password}
-                  onChange={handleFormChange('password')}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                      >
-                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              ) : (
-                <Typography>{formValues.password}</Typography>
-              )}
-              <div>
-              <IconButton 
-              //onClick={() => toggleEditMode('password')} 
-              onClick={() => {
-                if (isEditable.password) {
-                  // Save the changes if in edit mode
-                  handleSave();
-                } else {
-                  // Enable edit mode if not in edit mode
-                  toggleEditMode('password');
-                }
-              }}
-              aria-label={isEditable.password ? 'save' : 'edit'}>
-                {isEditable.password ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
+    {/* Email */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <EmailIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Email:</Typography>
+        {isEditable.email ? (
+          <TextField fullWidth value={formValues.email} onChange={handleChange('email')} />
+        ) : (
+          <Typography>{formValues.email}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('email'); if (isEditable.email) handleSave(); }}>
+          {isEditable.email ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography sx={{ marginRight: 8,fontWeight:"bold" }}>Specialties:</Typography>
-              {isEditable.specialties ? (
-                <TextField id="specialties-edit" fullWidth variant="standard" value={formValues.specialties} onChange={handleFormChange('specialties')} />
-              ) : (
-                <Typography>{formValues.specialties}</Typography>
-              )}
-              <div>
-              <IconButton 
-              //onClick={() => toggleEditMode('specialties')}
-              
-              onClick={() => {
-                if (isEditable.specialties) {
-                  // Save the changes if in edit mode
-                  handleSave();
-                } else {
-                  // Enable edit mode if not in edit mode
-                  toggleEditMode('specialties');
-                }
-              }}aria-label={isEditable.specialties ? 'save' : 'edit'}>
-                {isEditable.specialties ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
+    {/* Password */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <LockIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Password:</Typography>
+        {isEditable.password ? (
+          <TextField
+            fullWidth
+            type={showPassword ? 'text' : 'password'}
+            value={formValues.password}
+            onChange={handleChange('password')}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={toggleShowPassword}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        ) : (
+          <Typography>******</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('password'); if (isEditable.password) handleSave(); }}>
+          {isEditable.password ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
-              <Button variant="contained" color="primary" onClick={toggleAllEditMode}>
-                {Object.values(isEditable).some(editable => editable) ? 'Save All' : 'Edit All'}
-              </Button>
-      </Card>
+    {/* specialist */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <StarIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Specialist:</Typography>
+        {isEditable.specialist ? (
+          <TextField fullWidth value={formValues.specialist} onChange={handleChange('specialist')} />
+        ) : (
+          <Typography>{formValues.specialist}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('specialist'); if (isEditable.specialist) handleSave(); }}>
+          {isEditable.specialist ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
+</Grid>
+        </Card>
+      </Box>
+    </LocalizationProvider>
+    </BackgroundContainer>
   );
 };
 

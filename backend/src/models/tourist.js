@@ -103,6 +103,10 @@ const TouristSchema = new Schema({
         type: Boolean,
         default: false
     },
+    photo:{
+        type: String,
+        default: ""
+    }
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"

@@ -7,7 +7,8 @@ const path = require('path');
 // Find user by ID
 const findUserById = async (id) => {
     try {
-        const user = await Users.findById(id);
+        const user = await Users.findById(id); // This will include the `specialist` field only
+        console.log(user);
         
         return user ? user : null;
     } catch (error) {
@@ -242,17 +243,25 @@ const uploadImage = async (userId, fileName, fileBuffer) => {
 const updateUserProfilePicture = async (userId, fileName) => {
     try {
         const user = await findUserById(userId);
-        console.log("User:",  user.rating);
+        const tourist = await findTouristById(userId);
         if (!user) {
-            throw new Error('User not found');
+            if(!tourist){
+                throw new Error('User not found');
+            }
+            else{
+                tourist.photo = fileName;
+                await tourist.save();
+            }
         }
-        if(user.type === 'tourGuide'){
-            user.photo.selfPicture = fileName;
+        else{
+            if(user.type === 'tourGuide'){
+                user.photo.selfPicture = fileName;
+            }
+            else if(user.type === 'advertiser' || user.type === 'seller'){
+                user.photo.logo = fileName;
+            }
+            await user.save();
         }
-        else if(user.type === 'advertiser' || user.type === 'seller'){
-            user.photo.logo = fileName;
-        }
-        await user.save();
     } catch (error) {
         throw new Error(`Error updating profile picture: ${error.message}`);
     }
