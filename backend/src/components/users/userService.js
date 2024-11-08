@@ -287,7 +287,7 @@ module.exports = {
   registerUser,
   login,
 
-  redeemPoints
+  redeemPoints,
 
   fetchUsersForDeletion,
     getNotAcceptedUsers

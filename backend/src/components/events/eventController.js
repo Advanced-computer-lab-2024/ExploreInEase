@@ -885,7 +885,7 @@ module.exports = {
   getAllHistoricalTags,
   getAllActivitiesInDatabase,
 
-  sendEventEmail
+  sendEventEmail,
 
   updateEventFlagController,
   getAllEvents,

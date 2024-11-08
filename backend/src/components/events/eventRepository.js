@@ -495,7 +495,7 @@ module.exports = {
   getAllHistoricalTags,
   getAllActivitiesInDatabase,
 
-  getTouristEmailById
+  getTouristEmailById,
 
   setFlagToZeroForItinerary,
   setFlagToZeroForActivity,

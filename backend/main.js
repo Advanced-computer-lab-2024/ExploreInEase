@@ -10,7 +10,7 @@ const complaintRoutes = require('./src/components/complaints/complaintRoutes');
 
 const fs = require('fs'); // Import filesystem module
 
-const cors = require('cors');
+// const cors = require('cors');
 
 const eventRoutes = require('./src/components/events/eventRoutes');
 const swaggerJsDoc = require('swagger-jsdoc');

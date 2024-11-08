@@ -491,9 +491,9 @@ module.exports = {
   registerUser,
   login,
 
-  redeemPoints
+  redeemPoints,
 
-    getUsersForDeletion,
-    getNotAcceptedUsers
+getUsersForDeletion,
+getNotAcceptedUsers
 
 };

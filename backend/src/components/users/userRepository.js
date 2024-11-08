@@ -274,7 +274,7 @@ module.exports = {
     checkUserExistsByEmail,
     login,
 
-    redeemPoints
+    redeemPoints,
 
     getAllUsersForDeletion ,
     getNotAcceptedUsers,
