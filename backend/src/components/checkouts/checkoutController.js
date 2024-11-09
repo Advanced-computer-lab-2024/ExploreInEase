@@ -368,6 +368,21 @@ const getArchivedProducts = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+const getAvailableProductsSortedByRatings = async (req, res) => {
+    const {userId} = req.params;
+    const type = await checkoutRepository.getType(userId);
+    if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
+    {
+        return res.status(400).json({ message: 'Invalid type' });
+    }
+    
+    try {
+        const products = await checkoutService.getAvailableProductsSortedByRatings();
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports = {
     uploadImage,
