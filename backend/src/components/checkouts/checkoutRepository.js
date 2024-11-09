@@ -324,7 +324,6 @@ const archiveProduct = async (product) => {
 };
 
 module.exports = {
-    getAvailableProducts,
     getAvailableProductsSortedByRatings,
     addProduct,
     getAllAvailableProducts,
