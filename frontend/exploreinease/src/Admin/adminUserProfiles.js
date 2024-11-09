@@ -2,100 +2,83 @@ import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid2';
 import AdminsCard from '../Shared/Components/AdminCard/adminsCard';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios'; // Ensure Axios is imported
 import NetworkService from '../NetworkService';
+
 const AdminUserProfiles = () => {
+  const adminIdd = localStorage.getItem('UserId');
   const location = useLocation();
-  const { Product, AdminId } = location.state || [];
-  const {checkPersonDelete,setCheckPersonDelete}=useState(false);
-  console.log(Product);
+  const [allproductss, setAllProducts] = useState([]);
+  const Product = location.state?.Product || allproductss;
+  const adminId = location.state?.AdminId || adminIdd;
+  const [checkPersonDelete, setCheckPersonDelete] = useState(true);
   const [userList, setUserList] = useState(Product);
-  console.log("list",userList);
-  
-  React.useEffect(() => {
+
+  // Effect to fetch all users on mount or when deletion check changes
+  useEffect(() => {
     getAllUsers();
-  }, checkPersonDelete);
-    // Function to handle the deletion of a user
-  const getAllUsers =async()=> {
-    try{
-      const  options = { apiPath: `/fetchAllUsersAndTourists/${AdminId}`, urlParam: AdminId };        
-       const  response = await NetworkService.get(options);
-        console.log(response);
-        const allUsers = response;
-        setUserList(allUsers);
-      } 
-      catch (err) {
-        if (err.response) {
-            console.error(err.message);
-        } else {
-            console.error('An unexpected error occurred.', err);
-        }
-      }
-  }
+  }, [checkPersonDelete]);
+
+  // Effect to update userList whenever allproductss is updated
+  useEffect(() => {
+    setUserList(Product);
+  }, [allproductss]);
+
+  const getAllUsers = async () => {
+    try {
+      const options = { apiPath: `/fetchAllUsersAndTourists/${adminId}`, urlParam: adminId };
+      const response = await NetworkService.get(options);
+      console.log("RESPONSE", response);
+      setAllProducts(response); // Updates allproductss, triggering userList update
+    } catch (err) {
+      console.error(err.response ? err.message : 'An unexpected error occurred.', err);
+    }
+  };
 
   const handleDelete = async (id) => {
-    console.log(id);
     setCheckPersonDelete(false);
-    const accountType=userList.find(item=>item._id===id)?.type || 'tourist';
-    console.log(accountType);
-    console.log(AdminId);
-    
-    try{
-      const apiPath=`/deleteUserByIdAndType`;
-       
-        const  body= {
-          _id: id,
-          userType: accountType,
-          selfId: AdminId,      
-          }
-      console.log(body);
+    const accountType = userList.find(item => item._id === id)?.type || 'tourist';
 
-
+    try {
       const options = {
-        apiPath: apiPath,
+        apiPath: `/deleteUserByIdAndType`,
         body: {
           _id: id,
           userType: accountType,
-          selfId: AdminId,
+          selfId: adminId,
         },
         headers: {
-          // Add any custom headers if needed
           'Content-Type': 'application/json'
         }
       };
-      const response = await NetworkService.delete(options);
+      await NetworkService.delete(options);
       const updatedUsers = userList.filter((user) => user._id !== id);
       setUserList(updatedUsers);
       setCheckPersonDelete(true);
+    } catch (err) {
+      console.error('Error during deletion:', err);
     }
-    catch{
-
-    }
-
-      
-    }
-    // Filter out the user with the matching name
-    // const updatedUsers = userList.filter((user) => user.name !== name);
-    // // Update the state with the filtered list
-    // setUserList(updatedUsers);
- 
+  };
 
   return (
     <Grid container spacing={2} sx={{ padding: 2 }}>
-      {userList.map((user) => (
-        <Grid item xs={12} sm={3} md={2} key={user.email}> 
-          <AdminsCard
-            name={user.username}
-            email={user.email}
-            role={user.type||'tourist'}
-            initialStatus={user.initialStatus}
-            mobileNumber={user.mobileNum}
-            nationality={user.nation}
-            dateOfBirth={user.dob}
-            onDelete={() => handleDelete(user._id)} 
-          />
-        </Grid>
-      ))}
+      {userList?.length > 0 ? (
+        userList.map((user) => (
+          <Grid item xs={12} sm={3} md={2} key={user.email}>
+            <AdminsCard
+              name={user.username}
+              email={user.email}
+              role={user.type || 'tourist'}
+              initialStatus={user.initialStatus}
+              mobileNumber={user.mobileNum}
+              nationality={user.nation}
+              dateOfBirth={user.dob}
+              onDelete={() => handleDelete(user._id)}
+            />
+          </Grid>
+        ))
+      ) : (
+        <p>No users found.</p>
+      )}
     </Grid>
   );
 };

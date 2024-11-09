@@ -21,16 +21,15 @@ import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 //component imports
-
 import ComplaintsTable from './AdminComplaintsTable';
 import RegistringUsers from './AdminRegistringUsers';
 import DeletionRequests from './DeletionRequests';
 import EventsAndItineraries from './EventsAndItenararies';
 
-import ActivityCategory from './activityCategories';
-import AddUser from './AddUser';
-import Preferencetags from './preferenceTags';
-import AdminUserProfiles from './adminUserProfiles';
+import ActivityCategory from './activityCategories';//done
+import AddUser from './AddUser';//done
+import Preferencetags from './preferenceTags';//done
+import AdminUserProfiles from './adminUserProfiles';  //done
 import ViwProduct from '../Shared/Components/Product/Product';
 const drawerWidth = 240;
 

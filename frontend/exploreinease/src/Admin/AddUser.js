@@ -36,8 +36,6 @@ const AddUser = () => {
       setShowSuccess(true); // Show success message
       setTimeout(() => setShowSuccess(false), 3000); // Hide after 3 seconds
       setUser({ type: "admin", username: "", password: "" }); // Reset form
-      navigate('/viewAddedUsers');
-
     } catch (error) {
       setShowError('An error occurred while adding the user.');
     }
@@ -98,4 +96,4 @@ const AddUser = () => {
   );
 };
 
-export default AddUser;
+ export default AddUser;

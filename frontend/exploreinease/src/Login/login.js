@@ -41,8 +41,9 @@ const Login = () => {
 
     try {
       const response = await NetworkService.post(options);
+console.log("response User",response);
 
-      if (response.message === 'Logged in Successfully') {
+      if (response.message === 'Logged in Successfully'||response.message ==='Terms and Conditions not accepted') {
         console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
         navigateToHomePage(response.user);
@@ -57,6 +58,7 @@ const Login = () => {
   };
 
   const navigateToHomePage = (user) => {
+    localStorage.setItem('UserId',user._id);
     switch (formData.role) {
       case 'admin':
         navigate('/AdminHomePage', { state: { tourist: user } });

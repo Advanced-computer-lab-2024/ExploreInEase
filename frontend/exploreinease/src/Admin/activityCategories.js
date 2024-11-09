@@ -20,18 +20,22 @@ import EditIcon from '@mui/icons-material/Edit';
 import NetworkService from '../NetworkService';
 
 function ActivityCategory() {
+
+  const adminIdd=localStorage.getItem('UserId');
   const location = useLocation();
-  const { allcategories } = location.state || {};
-  const { adminId } = location.state || {};  
+  const [categoryData, setCategoryData] = React.useState([]);
+  const allcategories = location.state?.allcategories || categoryData;
+  const { adminId } = location.state || adminIdd;  
   const categoryNamesList = allcategories.map(item => item.categoryName); 
-  const [checkCategoryAdd,setCheckCategoryAdd]=React.useState(false);
+  const [checkCategoryAdd,setCheckCategoryAdd]=React.useState(true);
   const [category, setCategory] = React.useState(categoryNamesList);
   const [open, setOpen] = React.useState(false);
   const [newCategory, setNewCategory] = React.useState('');
   const [editingCategoryIndex, setEditingCategoryIndex] = React.useState(null);
   const [previousCategory, setPreviousCategory] = React.useState(''); // Store the value before update
-  
+//   getAllCategories/admin
   useEffect(() => {
+    console.log("here");
     getAllCategory();
   }, checkCategoryAdd);
   
@@ -50,6 +54,9 @@ function ActivityCategory() {
     try {
       const apiPath = `http://localhost:3030/getAllCategories/admin`;  // Ensure this matches your API route
       const response = await axios.get(apiPath);
+      console.log("response aho",response);
+      
+      setCategoryData(response.data);
       console.log("response from internall :",response);
       
       if (Array.isArray(response.data)) {
@@ -235,4 +242,4 @@ function ActivityCategory() {
   );
 }
 
-export default ActivityCategory;
+ export default ActivityCategory;

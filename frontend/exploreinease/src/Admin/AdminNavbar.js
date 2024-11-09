@@ -32,6 +32,7 @@ const AdminNavbar = () => {
                 setSuccess(response.message);
                 console.log("response for activities from navbar",response);
                 const allcategories = response;        
+                // localStorage.setItem('AllCategory',allcategories);
                 navigate('/viewActivityCategory', { state: { allcategories,adminId } });
             } 
             else if (title === "CRUD Preference Tag") {
@@ -40,7 +41,7 @@ const AdminNavbar = () => {
                 setSuccess(response.message);
                 console.log(response);
                 const PreferenceTag = response.tags;
-                console.log(PreferenceTag);
+                // localStorage.setItem('PreferenceTag',);
                 navigate('/viewPreferencatags', { state: { PreferenceTag,adminId } });
             } 
             else if (title === "View Products") {

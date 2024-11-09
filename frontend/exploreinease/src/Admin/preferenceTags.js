@@ -20,7 +20,10 @@ import NetworkService from '../NetworkService';
 import { useLocation } from 'react-router-dom';
 
 function Preferencetags() {
+    // localStorage.setItem('UserId',user._id);
+    const adminIdd=localStorage.getItem('UserId');
   const [tags, setTags] = React.useState([]);
+  const [prefenceTagg, setPreferenceTagg] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [newTag, setNewTag] = React.useState('');
   const [prevTag, setPrevTag] = React.useState('');
@@ -28,13 +31,14 @@ function Preferencetags() {
   const [error, setError] = useState('');
   const [editingTagIndex, setEditingTagIndex] = React.useState(null);
   const location = useLocation();
-  const { PreferenceTag } = location.state || {}; // Use destructuring to access PreferenceTag
- const {adminId}=location.state || {};
- const [checkPreferenceTag, setCheckPreferenceTag] = useState(false);
+ const {adminId}=location.state || adminIdd;
+ const [checkPreferenceTag, setCheckPreferenceTag] = useState(true);
+ const PreferenceTag = location.state?.PreferenceTag || prefenceTagg;
+
 
   React.useEffect(() => {
     getAllPreferenceTags();
-    
+    setCheckPreferenceTag(false);
   }, checkPreferenceTag); // Run the effect when PreferenceTag changes
 
 
@@ -43,10 +47,12 @@ function Preferencetags() {
   const response = await NetworkService.get(options);
   setSuccess(response.message);
   console.log(response);
-  const PreferenceTag = response.tags;
-  console.log(PreferenceTag);
-  setTags(PreferenceTag.map(item =>item.tags));
+  const PreferenceTaggg = response.tags;
+  setPreferenceTagg(PreferenceTaggg);
+  console.log(PreferenceTaggg,prefenceTagg);
+  setTags(PreferenceTaggg.map(item =>item.tags));
 };
+console.log("preference",PreferenceTag);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -61,10 +67,12 @@ function Preferencetags() {
   };
 
   const handleSaveTag = async () => {
-    setCheckPreferenceTag(false);
+    // setCheckPreferenceTag(false);
     if (newTag.trim()) {
       if (editingTagIndex !== null) {
-        const tagId = PreferenceTag.find(item => item.tags === prevTag)?._id;
+        console.log('prefenceTag',PreferenceTag);
+        
+        const tagId = PreferenceTag?.find(item => item.tags === prevTag)?._id;
         try {
             const options = {
               apiPath: `/updatePreferenceTagById/${tagId}`,
