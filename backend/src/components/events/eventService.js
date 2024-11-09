@@ -1,8 +1,31 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const HistoricalPlace = require('../../models/historicalPlace');
+const nodemailer = require('nodemailer');
 require('dotenv').config({ path: "src/.env" });
 
+
+const getAllEvents=async()=> {
+  const activities = await eventRepository.getAllActivities();
+  const itineraries = await eventRepository.getAllItineraries2();
+  const historicalPlaces = await eventRepository.getAllHistoricalPlaces();
+
+  return {
+    activities,
+    itineraries,
+    historicalPlaces
+  };
+}
+const updateEventFlag = async ( eventType, eventID) => {
+  
+  if (eventType === 'itinerary') {
+      return await eventRepository.setFlagToZeroForItinerary(eventID);
+  } else if (eventType === 'activity') {
+      return await eventRepository.setFlagToZeroForActivity(eventID);
+  } else {
+      throw new Error('Invalid event type. Must be "itinerary" or "activity".');
+  }
+};
 const getUserEvents = async (_id, userType) => {
   const user = await User.findById(_id); // Find user by _id
   
@@ -521,7 +544,43 @@ const getAllHistoricalTags = async () => {
 const getHistoricalTagDetails = async (tagId) => {
   return await eventRepository.getHistoricalTagDetails(tagId);
 }
+const sendEventEmail = async (touristId, receiverEmail, eventDetails) => {
+    
+  const touristEmail = await eventRepository.getTouristEmailById(touristId);
+  console.log("error1");
+  
+  if (!touristEmail) {
+    console.log("error2");
+    throw new Error('Tourist not found');
+  }
+  const transporter = nodemailer.createTransport({
+    service: 'gmail', 
+    auth: {
+      user: "aclproject7@gmail.com", 
+      pass: "qodo imkr adxs jred", 
+    },
+    tls: {
+      rejectUnauthorized: false // Allows self-signed certificates
+  }
+  });
+  console.log("error3");
 
+  const formattedDetails = Object.entries(eventDetails)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n');
+    console.log("error4");
+
+  const mailOptions = {
+    from: touristEmail,
+    to: receiverEmail,
+    subject: 'Event Details',
+    text: `Hello!\nYour friend with email ${touristEmail} sent you an event!!\n\nHere are the event details:\n\n${formattedDetails}`, // Including tourist email in the message
+  };
+  console.log("erro5");
+
+  await transporter.sendMail(mailOptions);
+  return { message: 'Email sent successfully' };
+};
 
 
 
@@ -820,10 +879,6 @@ const bookTransportation = async (touristId, transportationId) => {
   return await eventRepository.bookTransportation(touristId, transportationId);
 };
 
-
-
-
-
 module.exports = {
   getHistoricalTagDetails,
   getUserEvents,
@@ -871,6 +926,8 @@ module.exports = {
   createTransportation,
   getTransportations,
   bookTransportation,
-  
+  sendEventEmail,
+  updateEventFlag,
+  getAllEvents
 };
 

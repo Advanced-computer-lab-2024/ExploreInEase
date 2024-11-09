@@ -30,10 +30,12 @@ function Preferencetags() {
   const location = useLocation();
   const { PreferenceTag } = location.state || {}; // Use destructuring to access PreferenceTag
  const {adminId}=location.state || {};
+ const [checkPreferenceTag, setCheckPreferenceTag] = useState(false);
+
   React.useEffect(() => {
     getAllPreferenceTags();
     
-  }, []); // Run the effect when PreferenceTag changes
+  }, checkPreferenceTag); // Run the effect when PreferenceTag changes
 
 
  const getAllPreferenceTags =async() => {
@@ -59,35 +61,53 @@ function Preferencetags() {
   };
 
   const handleSaveTag = async () => {
+    setCheckPreferenceTag(false);
     if (newTag.trim()) {
       if (editingTagIndex !== null) {
-        // Edit existing tags
         const tagId = PreferenceTag.find(item => item.tags === prevTag)?._id;
-        const options = {
-          apiPath: `/updatePreferenceTagById/${tagId}`,
-          body: {
-            tags: newTag
-          }
-        }
-        const response = await NetworkService.put(options);
-        console.log(response);  // Success message from backend
+        try {
+            const options = {
+              apiPath: `/updatePreferenceTagById/${tagId}`,
+              body: {
+                tags: newTag
+              }
+            }
+              const response = await NetworkService.put(options);
+              console.log(response);  // Success message from backend
 
-        // Edit existing tag
-        setTags((prevTags) => {
-          const updatedTags = [...prevTags];
-          updatedTags[editingTagIndex] = newTag;
-          return updatedTags;
-        });
+              // Edit existing tag
+              setTags((prevTags) => {
+                const updatedTags = [...prevTags];
+                updatedTags[editingTagIndex] = newTag;
+                return updatedTags;
+              });
+              setCheckPreferenceTag(true);
+            }catch (err) {
+              if (err.response) {
+                console.error('API Error:', err.message);
+              } else {
+                console.error('Unexpected Error:', err);
+              }
+            }
       } else {
-        const options = {
-          apiPath: '/createPreferenceTag/${adminId}',
-          body: {
-            tags: newTag
+            try{
+              const options = {
+                apiPath: '/createPreferenceTag/${adminId}',
+                body: {
+                  tags: newTag
+                }
+              }
+              const response = await NetworkService.post(options);
+              // Add new tag
+              setTags((prevTags) => [...prevTags, newTag]);
+              setCheckPreferenceTag(true);
+            }catch (err) {
+              if (err.response) {
+                console.error('API Error:', err.message);
+              } else {
+                console.error('Unexpected Error:', err);
+              }
           }
-        }
-        const response = await NetworkService.post(options);
-        // Add new tag
-        setTags((prevTags) => [...prevTags, newTag]);
       }
     }
     handleClose();

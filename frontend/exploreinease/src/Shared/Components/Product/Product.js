@@ -59,7 +59,8 @@ const ProductCard = () => {
   const [errors, setErrors] = useState({});
   const [nextId, setNextId] = useState(0);
   const [selectedReviews, setSelectedReviews] = useState([]);
-  
+  const [checkProduct, setCheckProduct] = useState(true);
+
   useEffect(() => {
     if (Product && Array.isArray(Product)) {
       // console.log("Received Product data:", Product);
@@ -77,6 +78,26 @@ const ProductCard = () => {
   useEffect(() => {
     // console.log("Current products state:", products);
   }, [products]);
+useEffect(()=>{
+  getAllProduct();
+  setCheckProduct(false);
+},checkProduct);
+  
+const getAllProduct= async()=>{
+  try{
+    const options = { apiPath: `/getAvailableProducts/${userId}`, urlParam: userId };
+    const response = await NetworkService.get(options);
+    setProducts(response.Products);
+    productId=response.Products._id;
+    // setSuccess(response.message);
+    console.log(response.message);
+    console.log(response);
+    const Product = response.Products;
+  }catch{
+
+  }
+}
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -183,7 +204,7 @@ const ProductCard = () => {
       console.log(response);
       setProducts((prev) => [...prev, newProduct]);
       console.log(products);
-      
+      setCheckProduct(true);
       setNextId((prev) => prev + 1);
       handleClose();
       }

@@ -11,6 +11,7 @@ const historicalPlace = require('../../models/historicalPlace');
 const Transportation = require('../../models/transportation');
 const BookedFlight = require('../../models/bookedFlights');
 const BookedHotel = require('../../models/bookedHotels');
+
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
     .populate('category', 'categoryName') // Get categoryName from ActivityCategory
@@ -289,6 +290,13 @@ const deleteActivity = async (_id) => {
 const getAllActivities = async (userId) => {
   return await Activity.find();
 };
+const getAllItineraries2 = async () => {
+  return Itinerary.find()
+    .populate({
+      path: 'activities',
+      populate: { path: 'category tags' } 
+    });
+};
 
 const getAllActivitiesAdvertiser = async (userId) => {
   return await Activity.find({ created_by: userId });
@@ -402,7 +410,15 @@ const getAllHistoricalTags = async () => {
 const getHistoricalTagDetails = async (id) => {
   return await historicalTags.find({ _id: id });
 }
-
+const getTouristEmailById = async (touristId) => {
+  try {
+      const tourist = await Tourist.findById(touristId);
+      return tourist ? tourist.email : null;
+  } catch (error) {
+      console.error(`Error fetching tourist email: ${error.message}`);
+      throw new Error('Could not fetch tourist email');
+  }
+};
 
 //Mohamed Apis
 const bookedEvents = async ({ touristId }) => {
@@ -804,7 +820,13 @@ const bookTransportation = async (touristId, transportationId) => {
   return { message: 'Transportation booked successfully', tourist };
 };
 
+const setFlagToZeroForItinerary = async (_id) => {
+  return await Itinerary.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
 
+const setFlagToZeroForActivity = async (_id) => {
+  return await Activity.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
 
 
 
@@ -857,13 +879,16 @@ module.exports = {
   createTransportation,
   getTransportations,
   bookTransportation,
- 
   bookedEvents,
   bookEvent,
   cancelEvent,
   flightBooking,
   bookingHotel,
-  getTypeForTag
+  getTypeForTag,
+  setFlagToZeroForItinerary,
+  setFlagToZeroForActivity,
+  getAllItineraries2,
+  getTouristEmailById
   
 };
 

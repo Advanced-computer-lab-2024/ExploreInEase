@@ -3,6 +3,9 @@ const mongoose = require('mongoose')
 const router = express.Router()
 const eventController = require('../events/eventController');
 
+router.put('/inappropriate', eventController.updateEventFlagController);
+
+router.get('/getAllEvents', eventController.getAllEvents);
 /**
  * @swagger
  * /GetMyEvents/{_id}/{userType}:
@@ -2584,6 +2587,7 @@ router.delete('/historical-places/:_id/:userId', eventController.deleteHistorica
 router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags);
 router.get('/allActivities', eventController.getAllActivitiesInDatabase);
 router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
+router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEventEmail);
 
 
 

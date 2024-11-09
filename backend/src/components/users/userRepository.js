@@ -4,6 +4,37 @@ const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const HistoricalPlace = require('../../models/historicalPlace');
 
+
+const updateUserStatus = async (userId, status) => {
+    try {
+        const user = await findUserById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if(status === 'accepted'){
+            user.docStatus = 'approved'
+        }
+        else{
+            if(status === 'rejected'){
+                user.docStatus = 'rejected';
+            }
+        }
+        await user.save();
+        return user;
+    } catch (error) {
+        throw new Error(`Error updating user status: ${error.message}`);
+    }
+};
+
+const getNotAcceptedUsers = async () => {
+    try {
+        return await Users.find({ docStatus: "pending" });
+    } catch (error) {
+        throw new Error(`Error fetching not accepted users: ${error.message}`);
+    }
+};
+
+
 // Find user by ID
 const findUserById = async (id) => {
     try {
@@ -14,6 +45,13 @@ const findUserById = async (id) => {
         console.error(`Error finding user: ${error.message}`);
         return null;
     }
+};
+
+// Find all users with requestDeletion set to true
+const getAllUsersForDeletion = async () => {
+    const usersToDelete = await Users.find({ requestDeletion: true });
+    const touristsToDelete = await Tourist.find({ requestDeletion: true });
+    return { users: usersToDelete, tourists: touristsToDelete };
 };
 
 // Delete user from Users table by ID
@@ -178,6 +216,18 @@ const login = async (username, password) => {
         console.error(`Error logging in: ${error.message}`);
         return null;
     }
+}
+
+const redeemPoints = async (userId, points) => {
+    const user = await findUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    user.redeemedPoints += points;
+    user.wallet = user.wallet + points;
+    user.points=0
+    await user.save();
+    return user;
 }
 
 // Check if the itinerary was completed by the tourist (after date passed and booked)
@@ -428,5 +478,9 @@ module.exports = {
     updateActivityRatings,
     updateActivityComments,
     updateHistoricalPlacesComments,
-    updateHistoricalPlacesRatings
+    updateHistoricalPlacesRatings,
+    redeemPoints,
+    getAllUsersForDeletion,
+    getNotAcceptedUsers,
+    updateUserStatus
 };

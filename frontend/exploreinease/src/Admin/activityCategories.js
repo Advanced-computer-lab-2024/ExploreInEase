@@ -24,6 +24,7 @@ function ActivityCategory() {
   const { allcategories } = location.state || {};
   const { adminId } = location.state || {};  
   const categoryNamesList = allcategories.map(item => item.categoryName); 
+  const [checkCategoryAdd,setCheckCategoryAdd]=React.useState(false);
   const [category, setCategory] = React.useState(categoryNamesList);
   const [open, setOpen] = React.useState(false);
   const [newCategory, setNewCategory] = React.useState('');
@@ -32,7 +33,7 @@ function ActivityCategory() {
   
   useEffect(() => {
     getAllCategory();
-  }, []);
+  }, checkCategoryAdd);
   
   const handleClickOpen = () => {
     setOpen(true);
@@ -71,6 +72,8 @@ function ActivityCategory() {
   }
 
   const handleSaveCategory = async () => {
+    setCheckCategoryAdd(false);
+
     if (newCategory.trim()) {
       const categoryId = allcategories.find(item => item.categoryName === previousCategory)?._id;
       console.log("categories:", allcategories);
@@ -94,6 +97,7 @@ function ActivityCategory() {
             updatedCategory[editingCategoryIndex] = newCategory;
             return updatedCategory;
           });
+          setCheckCategoryAdd(true);
         } catch (error) {
           console.error('Error updating category:', error);
         }
@@ -108,6 +112,7 @@ function ActivityCategory() {
           const response = await NetworkService.post(options);
           console.log(response);
           setCategory((prevCategory) => [...prevCategory, newCategory]);
+          setCheckCategoryAdd(true);
         } catch (error) {
           console.error('Error creating category:', error);
         }

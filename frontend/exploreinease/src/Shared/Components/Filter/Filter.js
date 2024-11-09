@@ -27,6 +27,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import debounce from 'lodash.debounce';
 import NetworkService from "../../../NetworkService";
+import TravelItemsShareDialog from './TravelItemsShareDialog';
 // Sample data with 'type' field added
 const itemList = [];
 const addressCache = {};
@@ -40,10 +41,11 @@ const roleFields = {
 
 const Filter = () => {
   const location = useLocation();
-  const { events,userId } = location.state || {};
+  const { events,userId,User } = location.state || {};
   const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
   console.log(events);
   console.log(itemList);
+  console.log("User:",User);
 
   const [filters, setFilters] = useState({
     budget: '',
@@ -64,13 +66,18 @@ const Filter = () => {
   const [historicalTags, setHistoricalTags] = useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [type, setType] = useState(''); 
   const [budget, setBudget] = useState('');
   const [currency, setCurrency] = useState('');
   const [success,setSuccess]=useState(false);
-
-
-
+  const handleShareClick = (item) => {
+    setSelectedItem(item);
+    setShareDialogOpen(true);
+  };
+  const handleShareDialogClose = () => {
+    setShareDialogOpen(false);
+  };
   const showSuccess=()=>{
       setSuccess(true);
       return true;
@@ -695,7 +702,18 @@ const Filter = () => {
                  <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
                  Book a ticket 
                   </Button> 
+                  <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleShareClick(item)}
+                      style={{ marginLeft: '10px' }}
+                    >
+                      Share
+                    </Button>
                    </div>
+                   {shareDialogOpen && (
+                    <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
+                  )}
                   </CardContent>
                   </Card>    
                 </Grid>

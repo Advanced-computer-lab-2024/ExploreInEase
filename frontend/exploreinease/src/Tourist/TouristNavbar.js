@@ -11,6 +11,8 @@ const TouristNavbar = () => {
     const { User } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
+    console.log("User1",User);
+    
     const initialUsername = User?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=User?._id;
@@ -112,6 +114,28 @@ const TouristNavbar = () => {
           console.log('Error:', error);
         }
       }
+      else if (title =="Complaints"){
+        try { 
+          const options = {
+            apiPath: `/myComplaints/${userId}`,
+            urlParam:userId
+
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const events=response.data;
+          console.log(events)
+          navigate(`/Complaints`,{state:{events,User:User}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
+      }
       else {
         try {
           const options = {
@@ -121,7 +145,7 @@ const TouristNavbar = () => {
           setSuccess(response.message); // Set success message
           console.log(response);
           const events=response;
-          navigate(`/explore`,{state:{events:events,userId:userId}});          
+          navigate(`/explore`,{state:{events:events,userId:userId,User:User}});          
         } catch (err) {
           if (err.response) {
               console.log(err.message);
@@ -157,12 +181,15 @@ const TouristNavbar = () => {
           <button 
           onClick={() => handleRegisterClick("View/Rate Purchased Product")}
           className="small-button">View/Rate Purchased Product</button>
-                     <button 
+           <button 
           onClick={() => handleRegisterClick("Book Hotels")}
           className="small-button">Book Hotels</button>
-                     <button 
+          <button 
           onClick={() => handleRegisterClick("Book Flights")}
           className="small-button">Book Flights</button>
+          <button 
+          onClick={() => handleRegisterClick("Complaints")}
+          className="small-button">Complaints</button>
            <button 
           onClick={() => handleRegisterClick("My Profile")}
           className="small-button">My Profile</button>

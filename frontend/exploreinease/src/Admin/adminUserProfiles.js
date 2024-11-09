@@ -7,13 +7,14 @@ import NetworkService from '../NetworkService';
 const AdminUserProfiles = () => {
   const location = useLocation();
   const { Product, AdminId } = location.state || [];
+  const {checkPersonDelete,setCheckPersonDelete}=useState(false);
   console.log(Product);
   const [userList, setUserList] = useState(Product);
   console.log("list",userList);
   
   React.useEffect(() => {
     getAllUsers();
-  }, []);
+  }, checkPersonDelete);
     // Function to handle the deletion of a user
   const getAllUsers =async()=> {
     try{
@@ -34,6 +35,7 @@ const AdminUserProfiles = () => {
 
   const handleDelete = async (id) => {
     console.log(id);
+    setCheckPersonDelete(false);
     const accountType=userList.find(item=>item._id===id)?.type || 'tourist';
     console.log(accountType);
     console.log(AdminId);
@@ -61,12 +63,10 @@ const AdminUserProfiles = () => {
           'Content-Type': 'application/json'
         }
       };
-      
       const response = await NetworkService.delete(options);
       const updatedUsers = userList.filter((user) => user._id !== id);
       setUserList(updatedUsers);
-          console.log(response);
-          
+      setCheckPersonDelete(true);
     }
     catch{
 

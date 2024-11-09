@@ -41,19 +41,21 @@ const AdminNavbar = () => {
                 console.log(response);
                 const PreferenceTag = response.tags;
                 console.log(PreferenceTag);
-
                 navigate('/viewPreferencatags', { state: { PreferenceTag,adminId } });
             } 
             else if (title === "View Products") {
-                console.log(adminId)
-                options = { apiPath: `/getAvailableProducts/${adminId}`, urlParam: adminId };
-                response = await NetworkService.get(options);
-                setSuccess(response.message);
-                console.log(response);
-                const Product = response.Products;
-                const Type = 'admin';
-                console.log(tourist)
-                navigate('/viewProduct', { state: { Product, Type ,User:tourist} });
+                try{
+                    options = { apiPath: `/getAvailableProducts/${adminId}`, urlParam: adminId };
+                    response = await NetworkService.get(options);
+                    setSuccess(response.message);
+                    console.log(response);
+                    const Product = response.Products;
+                    const Type = 'admin';
+                    console.log(tourist)
+                    navigate('/viewProduct', { state: { Product, Type ,User:tourist} });
+                }catch{
+                    
+                }
             } 
             else if (title === "Add User") {
                 navigate('/AddUser');

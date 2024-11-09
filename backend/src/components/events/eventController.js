@@ -2,6 +2,38 @@ const eventService = require('../events/eventService');
 const { validationResult } = require('express-validator');
 const eventRepository = require('../events/eventRepository');
 
+
+
+
+const getAllEvents= async(req, res) => {
+  try {
+    const data = await eventService.getAllEvents();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ message: 'Failed to fetch events' });
+  }
+}
+
+const updateEventFlagController = async (req, res) => {
+  const { userType, eventType, eventID } = req.body;
+
+  try {
+        if (userType !== 'admin') {
+          throw new Error('Only admins can update the flag.');
+      }
+
+      const updatedEvent = await eventService.updateEventFlag(eventType, eventID);
+      if (!updatedEvent) {
+          return res.status(404).json({ message: 'Event not found.' });
+      }
+      return res.status(200).json({ message: 'Event flag updated successfully.', updatedEvent });
+  } catch (error) {
+      console.error('Error updating event flag:', error.message);
+      return res.status(400).json({ message: error.message });
+  }
+};
+
 // Get all user events by _id and userType
 const getUserEvents = async (req, res) => {
   const { _id, userType } = req.body;
@@ -820,6 +852,21 @@ const getHistoricalTagDetails = async (req, res) => {
   }
 }
 
+const sendEventEmail = async (req, res) => {
+  const { touristId, receiverEmail } = req.params;
+  const eventDetails = req.body;
+
+  try {
+      const result = await eventService.sendEventEmail(touristId, receiverEmail, eventDetails);
+      console.log(true);
+      
+      res.status(200).json(result);
+  } catch (error) {
+    console.log("error",error);
+      res.status(500).json({ error: error.message });
+  }
+};
+
 //Mohamed Apis
 
 
@@ -1107,7 +1154,9 @@ module.exports = {
   bookHotel,
   createTransportation,
   getTransportations,
-  bookTransportation
-  
+  bookTransportation,
+  sendEventEmail,
+  updateEventFlagController,
+  getAllEvents
   };
   

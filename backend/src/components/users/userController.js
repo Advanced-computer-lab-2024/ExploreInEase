@@ -2,6 +2,26 @@ const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 
+
+
+// Controller to handle request for users with requestDeletion set to true
+const getUsersForDeletion = async (req, res) => {
+    try {
+        const result = await userService.fetchUsersForDeletion();
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+const getNotAcceptedUsers = async (req, res) => {
+    try {
+        const users = await userService.getNotAcceptedUsers();
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error.message);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
 // Delete user by _id and userType, ensuring self-id check
 const deleteUserByIdAndType = async (req, res) => {
     const { _id, userType, selfId } = req.body;
@@ -387,6 +407,23 @@ const login = async (req, res) => {
     }
 }
 
+const redeemPoints = async (req, res) => {
+    const { userId,points } = req.params;
+    console.log(userId)
+    console.log(points)
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.redeemPoints(userId, points);
+        return res.status(result.status).json(result.response);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
 const rateTourGuide = async (req, res) => {
     const { touristId } = req.params; // Get the userId from the route
     const { tourGuideId, itineraryId, rating } = req.body;
@@ -482,7 +519,23 @@ const commentOnHistoricalPlace = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 }
+const updatingStatusUser = async (req, res) => {
+    const { userId, status } = req.params;
+    if (!userId || !status) {
+        return res.status(400).json({ message: "Missing inputs" });
+    }
+    const user = await userRepository.findUserById(userId);
 
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+    try {
+        const result = await userService.updatingStatusUser(userId, status);
+        res.status(result.status).json(result.response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 
 module.exports = {
   deleteUserByIdAndType,
@@ -509,5 +562,9 @@ module.exports = {
   rateItinerary,
   commentOnItinerary,
   rateHistoricalPlace,
-  commentOnHistoricalPlace
+  commentOnHistoricalPlace,
+  redeemPoints,
+  getUsersForDeletion,
+  getNotAcceptedUsers,
+  updatingStatusUser
 };

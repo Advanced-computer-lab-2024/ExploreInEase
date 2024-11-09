@@ -38,6 +38,9 @@ const Transportion= React.lazy(() => import("./Advertier/transportation"));
 const BookTransportation= React.lazy(() => import("./Tourist/bookTransportation"));
 const BookHotel= React.lazy(() => import("./Tourist/hotels"));
 const BookFlight= React.lazy(() => import("./Tourist/flights"));
+const Complaints = React.lazy(() => import('./Tourist/Complaints'));
+ const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
+
 const App = () => {
   return (
     <Router>
@@ -66,7 +69,7 @@ const App = () => {
           <Route path="/TouristHomePage" element={<TouristNavbar />} />
           <Route path="/SellerHomePage" element={<SellerNavbar />} />
           <Route path="/TourGuideHomePage" element={<TourGuideNavbar />} />
-          <Route path="/AdminHomePage" element={<AdminNavbar />} />
+          <Route path="/AdminHomePage" element={<AdminSideMenu/>} />
           <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} />
           <Route path="/GovernorHomePage" element={<GovernorNavbar />} />
           <Route path="/Activities" element={<Activity />} />
@@ -80,6 +83,7 @@ const App = () => {
           <Route path="/BookTransportation" element={<BookTransportation/>} />
           <Route path="/BookHotel" element={<BookHotel/>} />
           <Route path="/BookFlight" element={<BookFlight/>} />
+          <Route path="/Complaints" element={<Complaints />} />
         </Routes>
       </Suspense>
     </Router>
