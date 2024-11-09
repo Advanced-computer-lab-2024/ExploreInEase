@@ -224,7 +224,6 @@ const updateOrder = async (orderId, updatedOrderData) => {
 
 module.exports = {
     uploadImage,
-    availableQuantityAndSales,
     archiveProduct,
     calculateSalesAndAvailability,
     addProduct,
