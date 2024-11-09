@@ -25,20 +25,20 @@ const orderSchema = new Schema(
     quantities: [
       {
         type: Number,
-        min: [1, "Quantity cannot be less than 1"], // Minimum validation in Mongoose
+        min: [1, "Quantity cannot be less than 1"], //haga 2esmha min validation in mongoo
         required: true,
       },
     ],
     dateDelivered: {
       type: Date,
-      default: null, // Initially null; set when status is 'delivered'
+      default: null, // Initially null; set when status is 'delivered' bas when delivered
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields
+    timestamps: true, // bey7ot adds createdAt and updatedAt fields beta3 el order
   }
 );
 
-const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
+const Order = mongoose.models.Order ||mongoose.model("Order", orderSchema);
 
 module.exports = Order;

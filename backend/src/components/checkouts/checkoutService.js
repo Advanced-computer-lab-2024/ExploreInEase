@@ -1,6 +1,8 @@
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const Product = require('../../models/product'); 
 const Order = require('../../models/order');
+const path = require('path');
+
 const addProduct = async (productData) => {
     return await checkoutRepository.addProduct(productData);
 };
@@ -92,6 +94,71 @@ const rateProduct = async (touristId, productId, rating) => {
         console.error("Error adding rating to product:", error);
         throw error;
     }
+};
+
+
+//Saif, Tasnim
+
+const uploadImage = async (productId, file) => {
+    console.log('Service');
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+        throw new Error('Only image files are allowed (jpg, jpeg, png).');
+    }
+
+    const fileName = `${productId}-${Date.now()}${fileExtension}`;
+    const fileBuffer = file.buffer;
+
+    await checkoutRepository.uploadImage(productId, fileName, fileBuffer); 
+    const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+    await checkoutRepository.updateProductImage(productId, fileName);
+
+    return { message: 'Image uploaded successfully', imageUrl: imageUrl };
+};
+
+const archiveProduct = async (product) => {
+     await checkoutRepository.archiveProduct(product);
+};
+
+const calculateSalesAndAvailability = async (userType, productId, currency) => {
+
+    const product = await checkoutRepository.getProductById2(productId);
+    
+
+    if (!product) {
+        throw new Error('Product not found'); 
+    }
+
+    const { price, originalQuantity, takenQuantity } = product;
+    const availableQuantity = originalQuantity - takenQuantity; 
+
+    
+    let sales = price * takenQuantity;
+
+    switch (currency) {
+        case 'euro':
+            sales = (sales / 55).toFixed(2); 
+            break;
+        case 'dollar':
+            sales = (sales / 50).toFixed(2); 
+            break;
+        case 'EGP':
+            sales = sales.toFixed(2); 
+            break;
+        default:
+            throw new Error('Invalid currency'); 
+    }
+    
+    
+    sales = parseFloat(sales);
+
+    return {
+        sales,
+        availableQuantity,
+    };
 };
 
 const reviewProduct = async (touristId, productId, reviewText) => {

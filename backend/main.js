@@ -4,14 +4,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const { router: userRoutes, setDBConnection } = require('./src/components/users/userRoutes');
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
-const complaintRoutes = require('./src/components/complaints/complaintRoutes');
-
-
-const fs = require('fs'); // Import filesystem module
-
-// const cors = require('cors');
-
 const eventRoutes = require('./src/components/events/eventRoutes');
+const complaintRoutes = require('./src/components/complaints/complaintRoutes');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config({ path: 'src/.env' });
@@ -19,7 +13,6 @@ const { GridFSBucket, ObjectId } = require('mongodb'); // Ensure ObjectId is imp
 const multer = require('multer'); // Import multer for file uploads
 const Users = require('./src/models/user'); // Import Users model
 const path = require('path');
-
 
 
 // Initialize Express app
@@ -30,21 +23,12 @@ ACLapp.use(cors());
 ACLapp.use(express.json());
 
 
-
-// Routes
-ACLapp.use(userRoutes);
-ACLapp.use(eventRoutes);
-ACLapp.use(checkoutRoutes);
-ACLapp.use(complaintRoutes);
-
-
 // MongoDB connection string from environment variables
 const mongoURI = process.env.MONGO_URI;
 
 // Variables to store MongoDB connection and GridFS bucket
 let db;
 let bucket;
-
 
 // Set up multer for file uploads
 const storage = multer.memoryStorage(); // Store files in memory
@@ -155,6 +139,7 @@ ACLapp.use('/images', express.static(path.join(__dirname, 'src', 'components', '
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);
+ACLapp.use(complaintRoutes);
 
 // Swagger configuration options
 const swaggerOptions = {

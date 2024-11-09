@@ -988,178 +988,6 @@ router.put('/updateSeller/:_id', userController.updateSeller);
 router.get('/getTourist/:_id', userController.getTourist);
 router.put('/updateTourist/:_id', userController.updateTourist);
 
-/**
- * @swagger
- * /register/{type}:
- *   post:
- *     summary: Register a new user
- *     description: Registers a new user based on the user type (tourist, tourGuide, advertiser, seller).
- *     tags: [Users]
- *     parameters:
- *       - name: type
- *         in: path
- *         required: true
- *         description: The type of user to register (tourist, tourGuide, advertiser, seller).
- *         schema:
- *           type: string
- *           enum: [tourist, tourGuide, advertiser, seller]
- *       - name: body
- *         in: body
- *         required: true
- *         description: User registration details.
- *         schema:
- *           type: object
- *           properties:
- *             email:
- *               type: string
- *               format: email
- *               description: The user's email address.
- *             username:
- *               type: string
- *               description: The username for the user.
- *             password:
- *               type: string
- *               description: The password for the user.
- *             mobileNum:
- *               type: string
- *               description: The mobile number of the tourist (only for type `tourist`).
- *             nation:
- *               type: string
- *               description: The nationality of the tourist (only for type `tourist`).
- *             dob:
- *               type: string
- *               format: date
- *               description: The date of birth of the tourist (only for type `tourist`).
- *             profession:
- *               type: string
- *               description: The profession of the tourist (only for type `tourist`).
- *     responses:
- *       200:
- *         description: User registered successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "User registered successfully"
- *                 User:
- *                   type: object
- *                   additionalProperties: true
- *       400:
- *         description: Bad request due to missing input.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Missing Input"
- *       409:
- *         description: Conflict due to existing username or email.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Username already exists"
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error message here"
- */
-
-router.post('/register/:type', userController.registerUser);
-
-/**
- * @swagger
- * /login:
- *   post:
- *     summary: User login
- *     description: Log in with a username and password to get user details.
- *     tags:
- *       - [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *                 example: "john_doe"
- *                 description: The username of the user
- *               password:
- *                 type: string
- *                 example: "password123"
- *                 description: The password of the user
- *     responses:
- *       200:
- *         description: Successful login
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Logged in Successfully"
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                       example: "613b1f1fcf1a4b2f3856b3a1"
- *                     username:
- *                       type: string
- *                       example: "john_doe"
- *                     email:
- *                       type: string
- *                       example: "john@example.com"
- *       400:
- *         description: Bad Request - Missing or invalid parameters
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Missing parameters"
- *       404:
- *         description: Not Found - Invalid username or password
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Invalid username or password"
- *       500:
- *         description: Internal Server Error - An error occurred during login
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "An error occurred while logging in the user"
- */
-router.post('/login', userController.login);
-
 router.post('/rateTourGuide/:touristId', userController.rateTourGuide);
 
 router.post('/commentTourGuide/:touristId', userController.commentOnTourGuide);
@@ -1176,7 +1004,28 @@ router.post('/rateHistoricalPlace/:touristId', userController.rateHistoricalPlac
 
 router.post('/commentHistoricalPlace/:touristId', userController.commentOnHistoricalPlace);
 
+
+
+// Saif ,Tasnim
+router.put('/changePassword/:userId', userController.changePassword);
+
+router.post('/uploadImage/:userId', upload.single('image'), userController.uploadImage);
+
+router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
+
 router.get('/redeemPoints/:userId/:points', userController.redeemPoints);
+
+router.put('/pointsAfterPayment/:userId/:amount', userController.pointsAfterPayment);
+
+router.get('/level/:userId', userController.getLevel);
+
+router.put('/acceptTerms/:_id/:type', userController.acceptTerms);
+
+router.post('/register/:type', userController.registerUser);
+
+router.post('/login', userController.login);
+
+router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
 
 module.exports = {
     router,

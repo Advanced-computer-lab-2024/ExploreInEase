@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const checkoutController = require('../checkouts/checkoutController');
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 /**
  * @swagger
@@ -545,6 +548,9 @@ router.post('/reviewProduct/:touristId', checkoutController.reviewProduct);
 
 router.post('/addOrder', checkoutController.addOrder);
 router.get('/getOrders/:userId', checkoutController.getOrders);
-router.put('/editOrder/:userId', checkoutController.updateOrder)
+router.put('/editOrder/:userId', checkoutController.updateOrder);
+
+router.post('/product/uploadImage/:productId/:userId', upload.single('image'), checkoutController.uploadImage);
+
 
 module.exports = router;

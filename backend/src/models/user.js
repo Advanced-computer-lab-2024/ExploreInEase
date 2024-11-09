@@ -27,31 +27,34 @@ const UsersSchema = new Schema({
             return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
         }
         
-},
-rating: {
-    type: Number,
-    min: 0,
-    max: 5,
-  },
-  ratingSum: {
-    type: Number,
-    default: 0,
-  },
-  ratingCount: {
-    type: Number,
-    default: 0,
-  },
-documents: {
-    nationalId: {
-        type: String,
     },
-    certificate: {
-        type: String,
+    rating: {
+        type: Number,
+        min: 0,
+        max: 5,
+      },
+    ratingSum: {
+        type: Number,
+        default: 0,
     },
-    taxation: {
-        type: String,
-    },  
-},
+    ratingCount: {
+        type: Number,
+        default: 0,
+    },
+    documents: {
+        nationalId: {
+            type: String,
+           
+        },
+        certificate: {
+            type: String,
+            
+        },
+        taxation: {
+            type: String,
+            
+        },  
+    },
     experience: {
         type: String,
        
@@ -66,7 +69,7 @@ documents: {
     },
     hotline: {
         type: String,
-        
+        default: ''
     },
     companyProfile: {
         type: String,
@@ -84,18 +87,17 @@ documents: {
     photo: {
         selfPicture: {
             type: String,
-            
+            default: ""
         },
         logo: {
             type: String,
-            
+            default: ""
         }
     },
     comment: {
-        type: [String]
+        type: [String],
+        
     },
-
-   
     industry: {
         type: String,
         
@@ -108,7 +110,7 @@ documents: {
         type: String,
         enum: ['VTP', 'External',''], // Seller types
         default: function() {
-            return this.sellerType === 'seller' ? 'External' : '';
+            return this.type === 'seller' ? 'External' : '';
         }
     },
     docStatus: {
@@ -128,24 +130,26 @@ documents: {
     },
     requestDeletion: {
         type: Boolean,
-        default: false
-    },
-     founded: {
-        type: Number,
+        default: false
+    },
+    founded: {
+        type: Date,
        
     },
     specialist: {
         type: String,
-        
+        default: ''
     },
     noEmployees: {
         type: Number,
       
-    }, 
+    },
+    
     status: {
         type: Boolean,
         default: false
     },
+    
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

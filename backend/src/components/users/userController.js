@@ -330,54 +330,6 @@ const updateTourist = async (req, res) => {
 const checkUsername = (username) => {
     return /^[a-zA-Z0-9]+$/.test(username);
 }
-const registerUser = async (req, res) => {
-    const { type } = req.params;
-    const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
-    if (!type) {
-        return res.status(400).json({ message: "User type is required" });
-    }
-    if (!checkUsername(username)) {
-        return res.status(400).json({ message: "Username can only contain letters and numbers" });
-    }
-
-    const usernameExists = await userRepository.checkUserExists(username);
-    if (usernameExists) {
-        return res.status(409).json({ message: "Username already exists" });
-    }
-
-    const emailExists = await userRepository.checkUserExistsByEmail(email);
-    if (emailExists) {
-        return res.status(409).json({ message: "Email already exists" });
-    }
-
-    if(type == 'tourist') {
-        if (!email||!username||!password||!mobileNum||!nation||!dob||!profession) {
-            return res.status(400).json({ message: "Missing Input" });
-        }
-        try {
-            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob,  profession);
-            res.status(result.status).json(result.response);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-    else{
-        if(type == 'tourGuide' || type == 'advertiser' || type == 'seller'){
-            if (!email||!username||!password) {
-                return res.status(400).json({ message: "Missing Input" });
-            }
-            try {
-                const result = await userService.registerUser(type, email, username, password);
-                res.status(result.status).json(result.response);
-            } catch (error) {
-                res.status(500).json({ message: error.message });
-            }
-        }
-        else{
-            res.status(400).json({ message: "Invalid usertype" });
-        }
-    }
-};
 
 const calculateAge = (dob) => {
     const birthDate = new Date(dob);
@@ -386,43 +338,6 @@ const calculateAge = (dob) => {
 
     return Math.abs(ageDate.getUTCFullYear() - 1970); // Calculate age
 };
-
-const login = async (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Missing parameters' });
-    }
-
-    if (typeof username !== 'string' || typeof password !== 'string') {
-        return res.status(400).json({ error: 'Invalid parameter types' });
-    }
-    try{
-        const user = await userService.login(username, password);
-        if (!user) {
-            return res.status(404).json({ error: 'Invalid username or password' });
-        }
-        return res.status(200).json({message: "Logged in Successfully", user: user});
-    }catch(error){
-        return res.status(500).json({ error: 'An error occurred while logging in the user' });
-    }
-}
-
-const redeemPoints = async (req, res) => {
-    const { userId,points } = req.params;
-    console.log(userId)
-    console.log(points)
-
-    if (!userId || !points) {
-        return res.status(400).json({ message: 'Missing userId or points parameter.' });
-    }
-    try {
-        const result = await userService.redeemPoints(userId, points);
-        return res.status(result.status).json(result.response);
-    } catch (error) {
-        console.error('Error redeeming points:', error);
-        return res.status(500).json({ message: 'Internal server error.' });
-    }
-}
 
 const rateTourGuide = async (req, res) => {
     const { touristId } = req.params; // Get the userId from the route
@@ -537,7 +452,243 @@ const updatingStatusUser = async (req, res) => {
     }
 }
 
+//Saif, Tasnim
+
+const changePassword = async (req, res) => {
+    const { userId } = req.params;
+    const { oldPassword, newPassword } = req.body;
+    console.log(userId);
+    console.log(oldPassword, newPassword);
+
+    if (!userId) {
+        return res.status(400).json({ message: "Missing userId" });
+    }
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: "Missing Input" });
+    }
+
+    try {
+        const result = await userService.changePassword(userId, oldPassword, newPassword);
+        res.status(result.status).json(result.response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+const uploadImage = async (req, res) => {
+    const { userId } = req.params;
+    const file = req.file;
+
+    try {
+        if (!file) {
+            return res.status(400).send('No file uploaded.');
+        }
+
+        // Call service to upload image
+        const result = await userService.uploadImage(userId, file);
+
+        // Return the image URL in the response
+        return res.status(200).send({
+            message: result.message,
+            imageUrl: result.imageUrl // Send back the image URL
+        });
+
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return res.status(500).send({ error: 'Error uploading image.' });
+    }
+};
+
+const redeemPoints = async (req, res) => {
+    const { userId,points } = req.params;
+    console.log(userId)
+    console.log(points)
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.redeemPoints(userId, points);
+        return res.status(result.status).json(result.response);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+const pointsAfterPayment = async (req, res) => {
+    const { userId, points } = req.params;
+    console.log(userId, points);
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.pointsAfterPayment(userId, points);
+        return res.status(result.status).json(result);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+const getLevel = async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'Missing userId parameter.' });
+    }
+    const user = await userRepository.findTouristById(userId);
+
+    if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+    }   
+
+    try {
+        const level = await userService.getLevel(userId);
+        return res.status(200).json({message: "Level fetched successfully", level});
+    } catch (error) {
+        console.error('Error fetching user level:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+const acceptTerms = async (req, res) => {
+    const { _id, type } = req.params;
+    
+
+    // Check if username and type are provided
+    if (!_id || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.acceptTerms(_id, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Terms and conditions accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const requestDeletion = async (req, res) => {
+    const { userId, type } = req.params;
+    
+
+
+    
+    if (!userId || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.requestDeletion(userId, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Request to be deleted accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const registerUser = async (req, res) => {
+    const { type } = req.params;
+    const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
+    if (!type) {
+        return res.status(400).json({ message: "User type is required" });
+    }
+    if (!checkUsername(username)) {
+        return res.status(400).json({ message: "Username can only contain letters and numbers" });
+    }
+
+    const usernameExists = await userRepository.checkUserExists(username);
+    if (usernameExists) {
+        return res.status(409).json({ message: "Username already exists" });
+    }
+
+    const emailExists = await userRepository.checkUserExistsByEmail(email);
+    if (emailExists) {
+        return res.status(409).json({ message: "Email already exists" });
+    }
+
+    if(type == 'tourist') {
+        if (!email||!username||!password||!mobileNum||!nation||!dob||!profession) {
+            return res.status(400).json({ message: "Missing Input" });
+        }
+        try {
+            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob,  profession);
+            res.status(result.status).json(result.response);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+    else{
+        if(type == 'tourGuide' || type == 'advertiser' || type == 'seller'){
+            if (!email||!username||!password) {
+                return res.status(400).json({ message: "Missing Input" });
+            }
+            try {
+                const result = await userService.registerUser(type, email, username, password);
+                res.status(result.status).json(result.response);
+            } catch (error) {
+                res.status(500).json({ message: error.message });
+            }
+        }
+        else{
+            res.status(400).json({ message: "Invalid usertype" });
+        }
+    }
+};
+
+const login = async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
+
+    if (typeof username !== 'string' || typeof password !== 'string') {
+        return res.status(400).json({ error: 'Invalid parameter types' });
+    }
+    try{
+        const user = await userService.login(username, password);
+        if (!(user == "user") && !(user == "tourist")) {
+            return res.status(404).json({ error: 'Invalid username or password' });
+        }
+        let imageUrl;
+        const allUser = await userRepository.getUserbyUsername(username);
+        if(user != 'tourist'){
+            imageUrl = await userRepository.getUserProfilePicture(allUser._id);
+            if(!allUser.termsAndConditions){
+                return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
+            }
+        }
+        console.log("User: ",allUser);
+
+        return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl});
+    }catch(error){
+        return res.status(500).json({ error: 'An error occurred while logging in the user' });
+    }
+}
+
+
 module.exports = {
+    changePassword,
+    uploadImage,
+    acceptTerms,
+    requestDeletion,
+    pointsAfterPayment,
+    getLevel,
   deleteUserByIdAndType,
   addGovernorOrAdmin,
   fetchAllUsersAndTourists,

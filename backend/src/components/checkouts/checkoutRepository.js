@@ -2,6 +2,8 @@ const Product = require('../../models/product');
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
 const Order = require('../../models/order');
+const path = require('path');
+const fs = require('fs');
 
 const addProduct = async (productData) => {
     try {
@@ -9,37 +11,6 @@ const addProduct = async (productData) => {
         return await newProduct.save(); 
     } catch (error) {
         throw new Error(`Error adding product: ${error.message}`);
-    }
-};
-
-const getAllAvailableProducts = async () => {
-    try {
-        // Step 1: Find all available products where takenQuantity is less than originalQuantity
-        const availableProducts = await Product.find({
-            $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
-        })
-        .select('picture price description ratings reviews name originalQuantity sellerId') // Include sellerId for population
-        .populate({
-            path: 'sellerId',
-            select: 'type' // Only select the 'type' field from the User (seller)
-        });
-
-        // Step 2: Map over the available products and add the sellerType directly
-        const productsWithSellerType = availableProducts.map(product => {
-            const productObj = product.toObject(); // Convert the product document to a plain object
-            const sellerType = product.sellerId?.type || ''; // Retrieve the seller type, fallback to an empty string if not found
-
-            return {
-                ...productObj,
-                sellerType, // Add sellerType directly from the populated field
-                sellerId: undefined // Optionally remove sellerId from the response
-            };
-        });
-
-        // Return the processed products array with the added sellerType
-        return productsWithSellerType;
-    } catch (error) {
-        throw new Error(`Error retrieving product: ${error.message}`);
     }
 };
 
@@ -271,7 +242,93 @@ const getOrdersByTouristId = async (touristId) => {
     }
 };
 
+//Saif, Tasnim
+
+const getAllAvailableProducts = async () => {
+    try {
+        // Step 1: Find all available products where takenQuantity is less than originalQuantity
+        const availableProducts = await Product.find({
+            $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
+        })
+        .select('picture price description ratings reviews name originalQuantity sellerId isActive')
+        .populate({
+            path: 'reviews.userId', // Populate userId in each review
+            select: 'username mobileNum email nation dob profession', // Specify fields to include from the Tourist model
+        })
+        .populate({
+            path: 'sellerId', // Populate sellerId if you want more details about the seller
+            select: 'type name' // Select fields to show for the seller, such as type or name
+        });
+
+        // Step 2: Map over the available products and add the sellerType directly
+        const productsWithSellerType = availableProducts.map(product => {
+            const productObj = product.toObject(); // Convert the product document to a plain object
+            const sellerType = product.sellerId?.type || ''; // Retrieve the seller type, fallback to an empty string if not found
+
+            return {
+                ...productObj,
+                sellerType, // Add sellerType directly from the populated field
+                sellerId: undefined // Optionally remove sellerId from the response
+            };
+        });
+
+        // Return the processed products array with the added sellerType
+        return productsWithSellerType;
+    } catch (error) {
+        throw new Error(`Error retrieving product: ${error.message}`);
+    }
+};
+
+const updateProductImage = async (productId, fileName) => {
+    try {
+        const product = await Product.findById(productId);
+        if (!product) {
+            throw new Error('product not found');
+        }
+        product.picture = fileName;
+        await product.save();
+    } catch (error) {
+        throw new Error(`Error updating profile picture: ${error.message}`);
+    }
+};
+
+
+
+const uploadImage = async (productId, fileName, fileBuffer) => {
+    try {
+        const imagesDir = path.join(__dirname, '../images');
+        
+        // Check if the 'images' directory exists, and create it if it doesn't
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
+        const filePath = path.join(imagesDir, fileName);
+        
+        // Write the file to the filesystem
+        await fs.promises.writeFile(filePath, fileBuffer);
+
+        return { message: 'Image uploaded successfully', fileName: fileName };
+    } catch (error) {
+        throw new Error(`Error uploading image: ${error.message}`);
+    }
+};
+
+const archiveProduct = async (product) => {
+    if (product.isActive == true) {
+        product.isActive = false;
+    } else {
+        product.isActive = true;
+    }
+    await product.save();
+};
+
 module.exports = {
+    findUserById,
+    archiveProduct,
+    uploadImage,
+    updateProductImage,
+    getAvailableProductsSortedByRatings,
     addProduct,
     getAllAvailableProducts,
     getProductsByPriceRange,

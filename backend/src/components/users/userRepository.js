@@ -3,7 +3,8 @@ const Tourist = require('../../models/tourist');
 const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const HistoricalPlace = require('../../models/historicalPlace');
-
+const fs = require('fs');
+const path = require('path');
 
 const updateUserStatus = async (userId, status) => {
     try {
@@ -25,15 +26,6 @@ const updateUserStatus = async (userId, status) => {
         throw new Error(`Error updating user status: ${error.message}`);
     }
 };
-
-const getNotAcceptedUsers = async () => {
-    try {
-        return await Users.find({ docStatus: "pending" });
-    } catch (error) {
-        throw new Error(`Error fetching not accepted users: ${error.message}`);
-    }
-};
-
 
 // Find user by ID
 const findUserById = async (id) => {
@@ -143,26 +135,6 @@ const findUserByUsername = async (username) => {
     return await Users.findOne({ username });
 };
 
-// Save a new user
-const saveUser = async (userData) => {
-    const newUser = new Users(userData);
-    const savedUser = await newUser.save();
-    return savedUser; // Return the entire user document
-};
-
-
-const saveTourist = async (tourist) => {
-    try {
-        console.log(tourist);
-        const newTourist = new Tourist(tourist);
-        const savedTourist = await newTourist.save();
-        return { status: 201, tourist: savedTourist }; // Return the entire tourist document
-    } catch (error) {
-        throw new Error(`Error saving tourist: ${error.message}`);
-    }
-};
-
-
 const checkUserExists = async (username) => {
     try {
         const existsUser = await Users.findOne({ username });
@@ -188,47 +160,7 @@ const checkUserExistsByEmail = async (email) => {
         return false;
     }
 };
-const login = async (username, password) => {
-    try {
-        const user = await Users.findOne({ username });
-        const tourist = await Tourist.findOne({ username });
-        if (user !== null) {
-            const isMatch = await password === user.password;
-            if (!isMatch) {
-                throw new Error('Incorrect username or password');
-            }
-            return user;
-        }
-        else{
-            if(tourist !== null){
-                const isMatch = await password === tourist.password;
-                if (!isMatch) {
-                    throw new Error('Incorrect username or password');
-                }
-                return tourist;
-            }
-            else{
-                throw new Error('Incorrect username or password');
-            }
-        }
-        
-    } catch (error) {
-        console.error(`Error logging in: ${error.message}`);
-        return null;
-    }
-}
 
-const redeemPoints = async (userId, points) => {
-    const user = await findUserById(userId);
-    if (!user) {
-        throw new Error('User not found');
-    }
-    user.redeemedPoints += points;
-    user.wallet = user.wallet + points;
-    user.points=0
-    await user.save();
-    return user;
-}
 
 // Check if the itinerary was completed by the tourist (after date passed and booked)
 const hasCompletedItinerary = async (touristId, ItineraryId, guideId) => {
@@ -452,7 +384,226 @@ const updateHistoricalPlacesComments = async (historicalPlaceId, updateOperation
     }
 };
 
+
+//Saif, Tasnim
+
+const login = async (username, password) => {
+    try {
+        const user = await Users.findOne({ username });
+        const tourist = await Tourist.findOne({ username });
+        console.log(tourist);
+        if (user !== null) {
+            const isMatch = await password === user.password;
+            if (!isMatch) {
+                throw new Error('Incorrect username or password');
+            }
+            return "user";
+        }
+        else{
+            if(tourist !== null){
+                const isMatch = await password === tourist.password;
+                if (!isMatch) {
+                    throw new Error('Incorrect username or password');
+                }
+                console.log("Tourist: ",tourist);
+                return "tourist";
+            }
+            else{
+                throw new Error('Incorrect username or password');
+            }
+        }
+        
+    } catch (error) {
+        console.error(`Error logging in: ${error.message}`);
+        return null;
+    }
+}
+
+const getUserbyUsername = async (username) => {
+        const user = await Users.findOne({ username: username });
+        if(user){
+            return user;
+        }
+        else{
+            const tourist = await Tourist.findOne({ username: username });
+            if(tourist){
+                return tourist;
+            }
+            else{
+                return null;
+            }
+        }
+}
+
+const updateUserPassword = async (user, password) => {
+    try {
+        user.password = password;
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error updating user password: ${error.message}`);
+    }
+}
+
+const uploadImage = async (userId, fileName, fileBuffer) => {
+    try {
+        const imagesDir = path.join(__dirname, '../images');
+        
+        // Check if the 'images' directory exists, and create it if it doesn't
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
+        const filePath = path.join(imagesDir, fileName);
+        
+        // Write the file to the filesystem
+        await fs.promises.writeFile(filePath, fileBuffer);
+
+        return { message: 'Image uploaded successfully', fileName: fileName };
+    } catch (error) {
+        throw new Error(`Error uploading image: ${error.message}`);
+    }
+};
+
+
+const updateUserProfilePicture = async (userId, fileName) => {
+    try {
+        const user = await findUserById(userId);
+        const tourist = await findTouristById(userId);
+        if (!user) {
+            if(!tourist){
+                throw new Error('User not found');
+            }
+            else{
+                tourist.photo = fileName;
+                await tourist.save();
+            }
+        }
+        else{
+            if(user.type === 'tourGuide'){
+                user.photo.selfPicture = fileName;
+            }
+            else if(user.type === 'advertiser' || user.type === 'seller'){
+                user.photo.logo = fileName;
+            }
+            await user.save();
+        }
+    } catch (error) {
+        throw new Error(`Error updating profile picture: ${error.message}`);
+    }
+};
+
+const getUserProfilePicture = async (userId) => {
+    try {
+        const user = await findUserById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if(user.type === 'tourGuide'){
+            return user.photo.selfPicture;
+        }
+        else if(user.type === 'advertiser' || user.type === 'seller'){
+            return user.photo.logo;
+        }
+        else{
+            return null;
+        }
+    } catch (error) {
+        throw new Error(`Error getting profile picture: ${error.message}`);
+    }
+}
+
+const getNotAcceptedUsers = async () => {
+    try {
+        return await Users.find({ docStatus: "pending" });
+    } catch (error) {
+        throw new Error(`Error fetching not accepted users: ${error.message}`);
+    }
+};
+
+
+const redeemPoints = async (userId, points) => {
+    const user = await findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    user.redeemedPoints = 0;
+
+    user.wallet = user.wallet + points;
+    
+    user.points=0
+    await user.save();
+    return user;
+}
+
+const getLoyalityLevel = async (totalAmount) => {
+    let level = 0;
+    if(totalAmount < 100000){
+        level = 1;
+    }
+    else{ 
+        if(totalAmount <500000){
+            level = 2;
+        }
+        else{
+            level = 3;
+        }
+    }
+    return level;
+}
+
+const pointsAfterPayment = async (userId, amount) => {
+    const user = await findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    user.points = user.points + amount;
+    user.totalPoints = user.totalPoints + amount;
+    await user.save();
+    return user;
+}
+
+const updateTermsAndConditions = async (_id, type) => {
+    try {
+        // Find the user by username and type
+        const user = await Users.findOneAndUpdate(
+            { _id: _id, type: type },
+            { termsAndConditions: true },
+            { new: true } 
+        );
+        return user;
+    } catch (error) {
+        throw new Error(`Error updating terms and conditions: ${error.message}`);
+    }
+};
+
+const saveUser = async (userData) => {
+    const newUser = new Users(userData);
+    const savedUser = await newUser.save();
+    return savedUser; // Return the entire user document
+};
+
+
+const saveTourist = async (tourist) => {
+    try {
+        console.log(tourist);
+        const newTourist = new Tourist(tourist);
+        const savedTourist = await newTourist.save();
+        return { status: 201, tourist: savedTourist }; // Return the entire tourist document
+    } catch (error) {
+        throw new Error(`Error saving tourist: ${error.message}`);
+    }
+};
+
 module.exports = {
+    getLoyalityLevel,
+    pointsAfterPayment,
+    updateTermsAndConditions,
+    getUserProfilePicture,
+    updateUserProfilePicture,
+    uploadImage,
+    updateUserPassword,
+    getUserbyUsername,
     addGovernorOrAdmin,
     fetchAllUsers,
     fetchAllTourists,

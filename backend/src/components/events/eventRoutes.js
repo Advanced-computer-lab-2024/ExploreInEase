@@ -2621,4 +2621,11 @@ router.get('/getTransportations/:currency', eventController.getTransportations);
 // Route to book transportation
 router.post('/bookTransportation', eventController.bookTransportation);
 
+
+
+//Saif, Tasnim 
+
+router.put('/updateItineraryActivation/:itineraryId/:isActivated/:userId/:userType', eventController.updateItineraryActivation);
+
+
 module.exports = router;

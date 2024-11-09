@@ -4,12 +4,12 @@ const Users = require('../../models/user');
 const HistoricalPlace = require('../../models/historicalPlace');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
+const path = require('path');
+
+
 const getUserById = async (id) => {
     // Retrieve the user from the Users table based on id
     return await userRepository.findUserById(id);
-};
-const getNotAcceptedUsers = async () => {
-    return await userRepository.getNotAcceptedUsers();
 };
 const fetchUsersForDeletion = async () => {
     try {
@@ -184,67 +184,6 @@ const updateTourist = async (_id, updateData) => {
     return await userRepository.updateTourist(_id, updateData);
 };
 
-
-
-const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession) => {
-    const touristExists = await userRepository.checkTouristExists(username);
-    if (touristExists) {
-        return { status: 409, response: {message: "Tourist already exists"} };
-    }
-
-    const newTourist = {
-        email: email,
-        username: username,
-        password: password,
-        mobileNum: mobileNum,
-        nation: nation,
-        dob: dob,
-        profession: profession
-    };
-    const tourist = await userRepository.saveTourist(newTourist);
-    return { status: tourist.status, response: {message: "Turist registered successfully", tourist: tourist.tourist, type: 'tourist'} };
-    
-}
-
-const registerUser = async (type, email, username, password) => {
-    try {
-        // Check if a user with the same email or username already exists
-        const existingUser = await userRepository.findUserByUsername(username);
-        if (existingUser) {
-            return { status: 400, response: { message: "User already exists" } };
-        }
-
-        // Create user data object to be passed to the repository
-        const userData = {
-            email,
-            username,
-            password: password,
-            type
-        };
-
-        // Save the user using the repository
-        const savedUser = await userRepository.saveUser(userData);
-        console.log(savedUser)
-        return { status: 200, response: { message: "User registered successfully", User: savedUser } };
-    } catch (error) {
-        return { status: 500, response: { message: error.message } };
-    }
-};
-
-const redeemPoints = async (userId, points) => {
-    console.log(points);
-    const user = await userRepository.findUserById(userId);
-    console.log(user)
-    if (!user) {
-        return {status: 400, response: {message: "User is not a tourist"} };
-    }
-    const amount = points/100;
-    const userNewPoints = user.points - amount;
-    const userAfterRedeemed = userRepository.redeemPoints(userId, amount);
-    return {
-      status: 200, response:{message: "Redeemed Points successfully", leftPoints: userNewPoints, redeemedPoints: amount, user: userAfterRedeemed}
-    };
-}
 
 const rateTourGuide = async (touristId, tourGuideId, itineraryId, rating) => {
     try {
@@ -538,7 +477,168 @@ const updatingStatusUser = async (userId, status) => {
 
 }
 
+
+//Saif, Tasnim
+
+const changePassword = async (userId, oldPassword, newPassword) => {
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+        return { status: 404, response: { message: "User not found" } };
+    }
+    if(user.password !== oldPassword) {
+        return { status: 400, response: { message: "Incorrect password" } };
+    }
+    const newUser = await userRepository.updateUserPassword(user, newPassword);
+    return {status: 200, response: { message: "Password updated successfully", user: newUser } };
+};
+
+const uploadImage = async (userId, file) => {
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+        throw new Error('Only image files are allowed (jpg, jpeg, png).');
+    }
+
+    const fileName = `${userId}-${Date.now()}${fileExtension}`;
+    const fileBuffer = file.buffer;
+
+    await userRepository.uploadImage(userId, fileName, fileBuffer); 
+    const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+    await userRepository.updateUserProfilePicture(userId, fileName);
+
+    return { message: 'Image uploaded successfully', imageUrl: imageUrl };
+};
+
+
+const getNotAcceptedUsers = async () => {
+    return await userRepository.getNotAcceptedUsers();
+};
+
+const redeemPoints = async (userId, points) => {
+    const user = await userRepository.findTouristById(userId);
+    console.log(user);
+    if (!user) {
+        return {status: 400, response: {message: "User is not a tourist"} };
+    }
+    if(user.points < points){
+        return {status: 400, response: {message: "Not enough points"} };
+    }
+    const amount = points/100;
+    const userNewPoints = user.points - amount;
+    const userAfterRedeemed = userRepository.redeemPoints(userId, amount);
+    return {status: 200, response:{message: "Redeemed Points successfully", leftPoints: userNewPoints, redeemedPoints: amount, user: userAfterRedeemed}};
+}
+
+const pointsAfterPayment = async (userId, amount) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const addedPoints = amount/100;
+    const userAfterPoints = await userRepository.pointsAfterPayment(userId, addedPoints);
+    return {message: "Points updated successfully", user: userAfterPoints};
+}
+
+const getLevel = async (userId) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const level = await userRepository.getLoyalityLevel(user.totalPoints);
+    return {level: level};
+}
+
+const acceptTerms = async (_id, type) => {
+   
+    return await userRepository.updateTermsAndConditions(_id, type);
+};
+
+
+const requestDeletion = async (userId, type) => {
+    let canDelete = false;
+
+    if (type === 'tourist') {
+        // Check conditions for tourist
+        canDelete = await userRepository.checkTouristDeletionCriteria(userId);
+    } else if (type === 'tourGuide') {
+        console.log('a7a');
+        // Check conditions for tour guide in itinerary
+        canDelete = await userRepository.checkTourGuideItineraryDates(userId);
+    } else if (type === 'seller') {
+        // Check conditions for seller in product table
+        canDelete = await userRepository.checkSellerProductStatus(userId);
+    } else if (type === 'advertiser') {
+        // Check conditions for advertiser in activity table
+        canDelete = await userRepository.checkAdvertiserActivityStatus(userId);
+    } else {
+        throw new Error("Invalid user type");
+    }
+
+    if (!canDelete) {
+        throw new Error("Request deletion rejected due to active records.");
+    }
+
+    // Update requestDeletion in the respective table
+    const updateResult = await userRepository.updateRequestDeletion(userId, type);
+    return updateResult;
+};
+
+const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession) => {
+    const touristExists = await userRepository.checkTouristExists(username);
+    if (touristExists) {
+        return { status: 409, response: {message: "Tourist already exists"} };
+    }
+
+    const newTourist = {
+        email: email,
+        username: username,
+        password: password,
+        mobileNum: mobileNum,
+        nation: nation,
+        dob: dob,
+        profession: profession,
+        wallet: 1000000
+    };
+    const tourist = await userRepository.saveTourist(newTourist);
+    return { status: tourist.status, response: {message: "Turist registered successfully", tourist: tourist.tourist, type: 'tourist'} };
+    
+}
+
+const registerUser = async (type, email, username, password) => {
+    try {
+        // Check if a user with the same email or username already exists
+        const existingUser = await userRepository.findUserByUsername(username);
+        if (existingUser) {
+            return { status: 400, response: { message: "User already exists" } };
+        }
+
+        // Create user data object to be passed to the repository
+        const userData = {
+            email,
+            username,
+            password: password,
+            type,
+            docStatus: 'pending',
+        };
+
+        // Save the user using the repository
+        const savedUser = await userRepository.saveUser(userData);
+        console.log(savedUser)
+        return { status: 200, response: { message: "User registered successfully", User: savedUser } };
+    } catch (error) {
+        return { status: 500, response: { message: error.message } };
+    }
+};
+
 module.exports = {
+    changePassword,
+    uploadImage,
+    acceptTerms,
+    requestDeletion,
+    pointsAfterPayment,
+    getLevel,
   deleteUserByIdAndType,
   addGovernorOrAdmin,
   fetchAllUsersAndTourists,

@@ -60,14 +60,6 @@ const activitySchema = new Schema({
     min: 0,
     max: 5,
   },
-  ratingSum: {
-    type: Number,
-    default: 0,
-  },
-  ratingCount: {
-    type: Number,
-    default: 0,
-  },
   comments: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' },
     text: { type: String, required: true },
@@ -82,8 +74,6 @@ const activitySchema = new Schema({
     ref: 'PreferenceTags',
     required: true,
   }],
-
-
 });
 
 // Create and export the model

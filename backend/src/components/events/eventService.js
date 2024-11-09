@@ -879,7 +879,13 @@ const bookTransportation = async (touristId, transportationId) => {
   return await eventRepository.bookTransportation(touristId, transportationId);
 };
 
+//Saif, Tasnim
+const updateItineraryActivation = async (itineraryId, isActivated, userId, userType) => {
+  return await eventRepository.updateItineraryActivation(itineraryId, isActivated, userId);
+};
+
 module.exports = {
+  updateItineraryActivation,
   getHistoricalTagDetails,
   getUserEvents,
   createCategory,

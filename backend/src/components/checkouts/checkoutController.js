@@ -1,16 +1,15 @@
 const checkoutService = require('../checkouts/checkoutService');
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const addProduct = async (req, res) => {
-    const { productId, price, description, originalQuantity, name } = req.body;
+    const { price, description, originalQuantity, name } = req.body;
     console.log(req.body)
     const {userId} = req.params;
 
     if (!price || !originalQuantity || !name || !description) {
-        return res.status(400).json({ message: "ProductId, price, picture, original quantity, description, sellerId and name are required." });
+        return res.status(400).json({ message: "Products price, picture, original quantity, description, sellerId and name are required." });
     }
 
     const productData = {
-        productId,
         sellerId: userId,
         price,
         description,
@@ -21,29 +20,6 @@ const addProduct = async (req, res) => {
     try {
         const newProduct = await checkoutService.addProduct(productData);
         res.status(201).json({ message: "Product added successfully", product: newProduct });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-const getAvailableProducts = async (req, res) => {
-    const { userId } = req.params;
-    const user = await checkoutRepository.findUserById(userId);
-
-    // Validate user type
-    if (user.type !== 'admin' && user.type !== 'seller' && user.type !== 'tourist') {
-        return res.status(400).json({ message: 'Invalid type' });
-    }
-
-    try {
-        const products = await checkoutService.getAvailableProducts();
-        
-        // Include user.type in the response
-        res.status(200).json({
-            message: "Fetched successfully!",
-            userType: user.type, // Add user.type to the response
-            Products: products
-        });
-        
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -112,24 +88,6 @@ const updateProduct = async (req, res) => {
         } else {
             return res.status(404).json({ message: "Product not found" });
         }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-
-
-const getAvailableProductsSortedByRatings = async (req, res) => {
-    const {userId} = req.params;
-    const type = await checkoutRepository.getType(userId);
-    if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
-    {
-        return res.status(400).json({ message: 'Invalid type' });
-    }
-    
-    try {
-        const products = await checkoutService.getAvailableProductsSortedByRatings();
-        res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -283,7 +241,133 @@ const updateOrder = async (req, res) => {
     }
 };
 
+//Saif, Tasim
 
+const uploadImage = async (req, res) => {
+    const { productId, userId } = req.params;
+    console.log('Controller');
+    console.log(req);
+    const file = req.file;
+
+    if (!productId) {
+        return res.status(400).json({ message: 'Missing productId' });
+    }
+
+    const product = await checkoutRepository.getProductById(productId);
+    if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+    }
+
+    try {
+        if (!file) {
+            return res.status(400).send('No file uploaded.');
+        }
+
+        // Call service to upload image
+        const result = await checkoutService.uploadImage(productId, file);
+        return res.status(200).send(result);
+
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return res.status(500).send({ error: 'Error uploading image.' });
+    }
+};
+
+const archiveProduct = async (req, res) => {
+    const { productId, userId } = req.params;
+    const type = await checkoutRepository.getType(userId);
+    if (type !== 'admin' && type !== 'seller') {
+        return res.status(400).json({ message: 'Invalid user type' });
+    }
+
+    try {
+        const product = await checkoutService.getProductById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        await checkoutService.archiveProduct(product);
+        return res.status(200).json({message: "Product archived/unarchived"});
+    }
+    catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+
+const availableQuantityAndSales = async (req, res) => {
+    const { userType, productId, currency } = req.params;
+    console.log(req.params);
+
+    if (!userType || !["admin", "seller"].includes(userType)) {
+        return res.status(400).json({
+            success: false,
+            message: 'User type must be "admin" or "seller".',
+        });
+    }
+
+    if (!productId || typeof productId !== 'string') {
+        return res.status(400).json({
+            success: false,
+            message: 'Product ID is required and must be a valid string.',
+        });
+    }
+
+    const validCurrencies = ["euro", "dollar", "EGP"];
+    if (!currency || !validCurrencies.includes(currency)) {
+        return res.status(400).json({
+            success: false,
+            message: `Currency must be one of the following: ${validCurrencies.join(', ')}.`,
+        });
+    }
+
+    try {
+        const result = await checkoutService.calculateSalesAndAvailability(userType, productId, currency);
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+const getAvailableProducts = async (req, res) => {
+    const {userId} = req.params;
+    const type = await checkoutRepository.getType(userId);
+    console.log(type);
+    if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
+    {
+        return res.status(400).json(type);
+    }
+
+    try {
+        const products = await checkoutService.getAvailableProducts();
+        console.log(products);
+        const allActiveProducts = products.filter(product => product.isActive === true);
+        res.status(200).json({message: "Fetched successfully!",Products: allActiveProducts});
+        } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getArchivedProducts = async (req, res) => {
+    const {userId} = req.params;
+    const type = await checkoutRepository.getType(userId);
+    if (type !== 'admin' && type !== 'seller') 
+    {
+        return res.status(400).json(type);
+    }
+
+    try {
+        const products = await checkoutService.getAvailableProducts();
+        const allArchivedProducts = products.filter(product => product.isActive === false);
+        res.status(200).json({message: "Fetched Archived Products successfully!",Products: allArchivedProducts});
+        } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports = {
     addProduct,

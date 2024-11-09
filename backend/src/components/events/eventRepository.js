@@ -830,10 +830,20 @@ const setFlagToZeroForActivity = async (_id) => {
 
 
 
+// Saif, Tasnim
 
+const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
+  const updatedItinerary = await Itinerary.findOneAndUpdate(
+      { _id: itineraryId, created_by: userId }, 
+      { isActivated: isActivated },
+      { new: true } 
+  );
 
+  return updatedItinerary; 
+};
 
 module.exports = {
+  updateItineraryActivation,
   getHistoricalTagDetails,
   createCategory,
   getAllCategories,
