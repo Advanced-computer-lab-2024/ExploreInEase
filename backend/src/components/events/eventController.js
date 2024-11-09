@@ -1140,6 +1140,7 @@ const updateItineraryActivation = async (req, res) => {
 
 
 module.exports = {
+  updateItineraryActivation,
   getHistoricalTagDetails,
   getUserEvents,
   createCategory,

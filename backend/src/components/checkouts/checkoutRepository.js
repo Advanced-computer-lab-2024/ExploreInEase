@@ -324,6 +324,15 @@ const archiveProduct = async (product) => {
 };
 
 module.exports = {
+    getAvailableProducts,
+    getAvailableProductsSortedByRatings,
+    addProduct,
+    getAllAvailableProducts,
+    getProductsByPriceRange,
+    getProductById,
+    updateProduct,
+    searchByName,
+    getType,
     findUserById,
     archiveProduct,
     uploadImage,

@@ -370,10 +370,14 @@ const getArchivedProducts = async (req, res) => {
 };
 
 module.exports = {
+    uploadImage,
+    availableQuantityAndSales,
+    archiveProduct,
+    getProductsByPriceRange,
     addProduct,
     getAvailableProducts,
-    getProductsByPriceRange,
     updateProduct,
+    getArchivedProducts,
     getAvailableProductsSortedByRatings,
     searchProductByName,
     rateProduct,
