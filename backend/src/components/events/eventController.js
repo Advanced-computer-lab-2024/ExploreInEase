@@ -532,9 +532,25 @@ const getItineraryById = async (req, res) => {
 
 const createItinerary = async (req, res) => {
   try {
-    const {activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
+    const {name,activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
     
-    if(!activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
+    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag ) {
+    console.log("name",name);
+    console.log("activities",activities);
+    console.log("locations",locations);
+    console.log("timeline",timeline);
+    console.log("directions",directions);
+    console.log("language",language);
+    console.log("price",price);
+    console.log("dateTimeAvailable",dateTimeAvailable);
+    console.log("accessibility",accessibility);
+
+    console.log("pickupLocation",pickupLocation);
+    console.log("dropoffLocation",dropoffLocation);
+    console.log("isActivated",isActivated);
+    console.log("created_by",created_by);
+    console.log("flag",flag);
+
       return res.status(400).json({ message: 'Missing required fields' });
     }
     if(!flag){

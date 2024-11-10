@@ -465,7 +465,15 @@ const uploadImage = async (userId, fileName, fileBuffer) => {
         throw new Error(`Error uploading image: ${error.message}`);
     }
 };
-
+const findTouristById = async (userId) => {
+    try {
+        const user = await findUserById(userId); // Assuming Mongoose is used
+        return user;
+    } catch (error) {
+        console.error('Error fetching user by ID:', error);
+        throw error; // Let the calling function handle it
+    }
+};
 
 const updateUserProfilePicture = async (userId, fileName) => {
     try {
@@ -634,5 +642,6 @@ module.exports = {
     redeemPoints,
     getAllUsersForDeletion,
     getNotAcceptedUsers,
-    updateUserStatus
+    updateUserStatus,
+    findTouristById
 };

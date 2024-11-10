@@ -537,7 +537,7 @@ const ProductCard = () => {
   }}
 >
 
-{(userType||User?.type === 'seller' || User?.type === 'admin') && (
+{/* {(userType||User?.type === 'seller' || User?.type === 'admin') && (
       <Tooltip title="Details" placement="top" arrow>
       <IconButton 
         onClick={() => { 
@@ -550,7 +550,7 @@ const ProductCard = () => {
         <InfoIcon />
       </IconButton>
     </Tooltip>
-)}
+)} */}
 </Box>
 
 <Box
@@ -562,7 +562,7 @@ const ProductCard = () => {
     gap: 2, // Space between icons
   }}
 >
-  {userType || User?.type === 'seller' || User?.type === 'admin'  ? (
+  {userType==='seller'||userType==='admin' || User?.type === 'seller' || User?.type === 'admin'  ? (
     <>
       <Tooltip title="Reviews" placement="top" arrow>
         <IconButton onClick={
@@ -593,13 +593,13 @@ const ProductCard = () => {
   ) : ( 
     <>
       <Tooltip title="Reviews" placement="top" arrow>
-        <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'3px' }}>
+        <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
           <RateReviewIcon />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Purchase" placement="top" arrow>
-        <IconButton onClick={() => handleClickPurchase(product._id)} sx={{ color: '#1976d2',width:'3px' }}>
+        <IconButton onClick={() => handleClickPurchase(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
           <ShoppingBasket />
         </IconButton>
       </Tooltip>
@@ -819,7 +819,7 @@ const ProductCard = () => {
 
 
 
-      {(userType || User?.type === 'seller' || User?.type === 'admin') && (
+      {(userType ==='seller'||userType==='admin'|| User?.type === 'seller' || User?.type === 'admin') && (
   <Tooltip title="Create" placement="top" arrow>
     <Fab
       color="primary"

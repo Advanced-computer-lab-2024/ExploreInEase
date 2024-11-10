@@ -159,9 +159,11 @@ const getAllUpcomingEvents = async () => {
     // Format activities
      const formattedActivities= activities.map((activity)=>{
       console.log(1)
+      console.log(activity);
+      
       lat=activity.location.latitude
       long=activity.location.longitude
-      category=activity.category.categoryName
+      category=activity.category?.categoryName
       loc=[lat,long]
       console.log(2)
 

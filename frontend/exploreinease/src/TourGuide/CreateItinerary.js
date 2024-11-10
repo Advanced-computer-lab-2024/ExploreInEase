@@ -53,8 +53,15 @@ const CreateItinerary = () => {
   // Fetch activities from backend on component mount
   useEffect(() => {
     const fetchActivities = async () => {
-      const response = await NetworkService.get({ apiPath: '/getAllActivities' });
-      setActivities(response); // Store the full activity objects, including id and name
+      try{
+        const response = await NetworkService.get({ apiPath: '/getAllActivities' });
+        console.log(response.activities);
+      setActivities(response.activities); 
+      }      
+      catch(error){
+
+      }
+        // Store the full activity objects, including id and name
     };
 
     fetchActivities();
@@ -172,7 +179,7 @@ const CreateItinerary = () => {
               input={<OutlinedInput label="Activities" />}
               MenuProps={MenuProps}
             >
-              {activities.map((activity) => (
+              {activities?.map((activity) => (
                 <MenuItem
                   key={activity.id}
                   value={activity.name}
