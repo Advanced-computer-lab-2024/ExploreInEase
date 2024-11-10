@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import React, { Suspense } from 'react';
   
 // Lazy load components
+const ArchiveProduct = React.lazy(() => import("./Shared/Components/Product/ArchiveProduct"));
+const TermsAcceptance = React.lazy(() => import('./TermsAcceptance'));
+const ChangePassword=React.lazy(()=>import("./TouristGovernor/changePassword"))
+
 const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
 const TourGuideProfile = React.lazy(() => import('./Shared/Components/TourGuideProfile/TourGuideProfile'));
 const AdvertiserProfile = React.lazy(() => import('./Shared/Components/advertiserProfile/advertiserProfile'));
@@ -84,6 +88,10 @@ const App = () => {
           <Route path="/BookHotel" element={<BookHotel/>} />
           <Route path="/BookFlight" element={<BookFlight/>} />
           <Route path="/Complaints" element={<Complaints />} />
+          <Route path="/TermsAcceptance" element={<TermsAcceptance />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/unArchiveProduct" element={<ArchiveProduct />} />
+
         </Routes>
       </Suspense>
     </Router>

@@ -2,11 +2,13 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
+import { useNavigate } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
+import LogoutIcon from '@mui/icons-material/Logout';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -30,13 +32,17 @@ import ActivityCategory from './activityCategories';//done
 import AddUser from './AddUser';//done
 import Preferencetags from './preferenceTags';//done
 import AdminUserProfiles from './adminUserProfiles';  //done
-import ViwProduct from '../Shared/Components/Product/Product';
+import ArchiveProduct from '../Shared/Components/Product/ArchiveProduct';
+import ViewProduct from '../Shared/Components/Product/Product';
+import ChangePassword from '../TouristGovernor/changePassword';
+import Login from '../Login/login';
 const drawerWidth = 240;
 
 
 
 function ResponsiveDrawer(props) {
   const { window } = props;
+  const navigate = useNavigate(); // Use useNavigate hook
   const [mobileOpen, setMobileOpen] =useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [collapseOpen, setCollapseOpen] = useState(false);
@@ -81,28 +87,29 @@ function ResponsiveDrawer(props) {
         case 'RegistringUsers':
           setTab(<RegistringUsers />);
           return <RegistringUsers />
-
-          case 'ViwProduct':
-            setTab(<ViwProduct />);
-            return <ViwProduct />
-
+          case 'ViewProduct':
+            setTab(<ViewProduct />);
+            return <ViewProduct />
             case 'AdminUserProfiles':
               setTab(<AdminUserProfiles />);
               return <AdminUserProfiles />
-
               case 'Preferencetags':
                 setTab(<Preferencetags/>);
                 return <Preferencetags/>
-
                 case 'AddUser':
                   setTab(<AddUser />);
                   return <AddUser />
-
                   case 'ActivityCategory':
                     setTab(<ActivityCategory />);
                     return <ActivityCategory />
+                    case 'ArchiveProduct':
+                      setTab(<ArchiveProduct />);
+                      return <ArchiveProduct />
+                      case 'ChangePassword':
+                        setTab(<ChangePassword />);
+                        return <ChangePassword />
 
-        default:
+                        default:
           setTab(<ComplaintsTable />);
           return <ComplaintsTable />
       }
@@ -120,7 +127,9 @@ function ResponsiveDrawer(props) {
 
     console.log('openTab', openTab);
   }
-
+  const handleLogOut = () => {
+    navigate('/Login');
+  };
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -149,7 +158,7 @@ function ResponsiveDrawer(props) {
         </ListItemButton>
         <Collapse in={UsercollapseOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers','ViwProduct','AdminUserProfiles','Preferencetags','AddUser','ActivityCategory'].map((text) => (
+            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers','AdminUserProfiles','AddUser','ChangePassword'].map((text) => (
               <ListItemButton
                 key={text}
                 sx={{ pl: 4 }}
@@ -167,7 +176,7 @@ function ResponsiveDrawer(props) {
         </ListItemButton>
         <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers','ViwProduct','AdminUserProfiles','Preferencetags','AddUser','ActivityCategory'].map((text) => (
+            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries','ViewProduct','Preferencetags','ActivityCategory','ArchiveProduct'].map((text) => (
               <ListItemButton
                 key={text}
                 sx={{ pl: 4 }}
@@ -184,10 +193,10 @@ function ResponsiveDrawer(props) {
       </List>
       <Divider />
       <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
+        {['All mail', 'Trash', 'Spam','LogOut'].map((text, index) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+            <ListItemButton button onClick={text === 'LogOut' ? handleLogOut : undefined}>
+              <ListItemIcon>{text ==='LogOut'? <LogoutIcon /> : (index % 2 === 0 ? <InboxIcon /> : <MailIcon /> )}</ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
           </ListItem>

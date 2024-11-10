@@ -20,7 +20,6 @@ import NetworkService from '../NetworkService';
 import { useLocation } from 'react-router-dom';
 
 function Preferencetags() {
-    // localStorage.setItem('UserId',user._id);
     const adminIdd=localStorage.getItem('UserId');
   const [tags, setTags] = React.useState([]);
   const [prefenceTagg, setPreferenceTagg] = React.useState([]);

@@ -54,8 +54,14 @@ const AdminNavbar = () => {
                     const Type = 'admin';
                     console.log(tourist)
                     navigate('/viewProduct', { state: { Product, Type ,User:tourist} });
-                }catch{
-                    
+                }catch (err) {
+                    if (err.response) {
+                        console.error(err.message);
+                        setError(err.response.data.message);
+                    } else {
+                        console.error('An unexpected error occurred.', err);
+                        setError('An unexpected error occurred.'); // Generic error message
+                    }
                 }
             } 
             else if (title === "Add User") {

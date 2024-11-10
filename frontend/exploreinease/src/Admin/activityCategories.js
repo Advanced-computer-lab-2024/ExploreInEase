@@ -20,7 +20,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import NetworkService from '../NetworkService';
 
 function ActivityCategory() {
-
   const adminIdd=localStorage.getItem('UserId');
   const location = useLocation();
   const [categoryData, setCategoryData] = React.useState([]);

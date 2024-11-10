@@ -551,6 +551,8 @@ router.get('/getOrders/:userId', checkoutController.getOrders);
 router.put('/editOrder/:userId', checkoutController.updateOrder);
 
 router.post('/product/uploadImage/:productId/:userId', upload.single('image'), checkoutController.uploadImage);
-
+router.get('/getArchivedProducts/:userId', checkoutController.getArchivedProducts);
+router.put('/archiveProduct/:userId/:productId', checkoutController.archiveProduct);
+router.get('/availableQuantityAndSales/:userType/:productId/:currency', checkoutController.availableQuantityAndSales);
 
 module.exports = router;

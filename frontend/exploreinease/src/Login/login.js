@@ -41,12 +41,14 @@ const Login = () => {
 
     try {
       const response = await NetworkService.post(options);
-console.log("response User",response);
+      if(response.message === 'Terms and Conditions not accepted') {
+        navigate('/TermsAcceptance', { state: { User: response.user } });
+      }
 
-      if (response.message === 'Logged in Successfully'||response.message ==='Terms and Conditions not accepted') {
+      if (response.message === 'Logged in Successfully') {
         console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-        navigateToHomePage(response.user);
+        navigateToHomePage(response.user, response.imageUrl);
       }
     } catch (error) {
       setError(
@@ -57,8 +59,9 @@ console.log("response User",response);
     }
   };
 
-  const navigateToHomePage = (user) => {
+  const navigateToHomePage = (user, imageUrl) => {
     localStorage.setItem('UserId',user._id);
+    localStorage.setItem('UserType',user.type);
     switch (formData.role) {
       case 'admin':
         navigate('/AdminHomePage', { state: { tourist: user } });
@@ -67,16 +70,16 @@ console.log("response User",response);
         navigate('/TouristGovernorHP', { state: { tourist: user } });
         break;
       case 'seller':
-        navigate('/SellerHomePage', { state: { User: user } });
+        navigate('/SellerHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'tourGuide':
-        navigate('/TourGuideHomePage', { state: { User: user } });
+        navigate('/TourGuideHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'advertiser':
-        navigate('/AdvertiserHomePage', { state: { User: user } });
+        navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
-        navigate('/TouristHomePage', { state: { User: user } });
+        navigate('/TouristHomePage', { state: { tourist: user } });
     }
   };
 
