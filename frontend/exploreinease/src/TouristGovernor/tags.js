@@ -27,7 +27,7 @@ function Tags() {
   const [tags, setTags] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [tagType, setTagType] = React.useState('');  // State for tag type
-  const [period, setPeriod] = React.useState('');    // State for period
+  const [Name, setName] = React.useState('');    // State for Name
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -62,7 +62,7 @@ function Tags() {
         const tags = response.data.tags.map(tag => ({
           id: tag._id,
           tagType: tag.type,
-        period:tag.period
+        Name:tag.type 
         }));
         setTags(tags);    
           
@@ -90,14 +90,14 @@ function Tags() {
   const handleClose = () => {
     setOpen(false);
     setTagType('');
-    setPeriod('');
+    setName('');
   };
 
   const handleSaveTag = async () => {
-    if (tagType && period.trim()) {
+    if (tagType && Name.trim()) {
       const body = {
         type: tagType,
-        period: period
+        Name: Name
       };
       console.log(body);
       console.log(governorId);
@@ -162,14 +162,14 @@ function Tags() {
             <TextField
               required
               margin="normal"
-              id="period"
-              name="period"
-              label="Period"
+              id="Name"
+              name="Name"
+              label="Name"
               type="text"
               fullWidth
               variant="outlined"
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
+              value={Name}
+              onChange={(e) => setName(e.target.value)}
             />
           </DialogContent>
           <DialogActions>
@@ -195,7 +195,7 @@ function Tags() {
                   <ListItemButton>
                     <ListItemText
                       primary={`Type: ${tag.tagType}`}
-                      secondary={`Period: ${tag.period}`}
+                      secondary={`Name: ${tag.Name}`}
                     />
                   </ListItemButton>
                 </ListItem>
