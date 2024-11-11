@@ -93,6 +93,9 @@ const HomePage = () => {
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
+            // else if (){
+
+            // }
         } else {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
@@ -136,6 +139,8 @@ const HomePage = () => {
                     <button onClick={() => handleRegisterClick("Activities")} style={{ width: 160 }}>
                         CRUD Activities
                     </button>
+                    <button  onClick={() => handleRegisterClick("Transportation")}
+               style={{width:160}}>Create transportation</button>
                     <button onClick={() => handleRegisterClick("My profile")} style={{ width: 160 }}>
                         My profile
                     </button>
