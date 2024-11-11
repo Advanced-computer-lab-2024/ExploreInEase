@@ -393,6 +393,7 @@ const addActivity = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
 const getAllActivitiesInDatabase = async (req, res) => {
   try {
     const activities = await eventService.getAllActivitiesInDatabase();
@@ -532,25 +533,10 @@ const getItineraryById = async (req, res) => {
 
 const createItinerary = async (req, res) => {
   try {
-    const {name,activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
-    
-    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag ) {
-    console.log("name",name);
-    console.log("activities",activities);
-    console.log("locations",locations);
-    console.log("timeline",timeline);
-    console.log("directions",directions);
-    console.log("language",language);
-    console.log("price",price);
-    console.log("dateTimeAvailable",dateTimeAvailable);
-    console.log("accessibility",accessibility);
-
-    console.log("pickupLocation",pickupLocation);
-    console.log("dropoffLocation",dropoffLocation);
-    console.log("isActivated",isActivated);
-    console.log("created_by",created_by);
-    console.log("flag",flag);
-
+    const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
+    console.log("      ");
+    console.log(req.body);
+    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !pickupLocation || !dropoffLocation) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
     if(!flag){
@@ -839,6 +825,8 @@ const getAllHistoricalTags = async (req, res) => {
   const type = await eventRepository.getType(userId);
   console.log("type:",type);
   if (type !== 'tourGuide' && type !== 'tourist' && type != 'guest' && type != 'tourismGovernor') {
+   console.log("henaaa",type);
+   
     return res.status(400).json({ message: 'Invalid type' });
   }
   try {

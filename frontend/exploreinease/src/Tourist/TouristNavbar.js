@@ -101,15 +101,19 @@ const TouristNavbar = () => {
           }
       }
       else {
+        console.log("heree");
+        
         try {
             const options = {
               apiPath: `/upcomingEvents`,
             };
             const response = await NetworkService.get(options);
             setSuccess(response.message); // Set success message
-            console.log(response);
+            console.log("response",response);
             const events=response;
-            navigate(`/explore`,{state:{events}});          
+            console.log(userId);
+            
+            navigate(`/explore`,{state:{events:events,userId:userId}});          
           } catch (err) {
             if (err.response) {
                 console.log(err.message);

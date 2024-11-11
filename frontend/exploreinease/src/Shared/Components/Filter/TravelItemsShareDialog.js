@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import MailIcon from '@mui/icons-material/Mail';
 import LinkIcon from '@mui/icons-material/Link';
+import { Alert } from '@mui/material'; 
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../../../NetworkService';
 const TravelItemsShareDialog = ({ item, onClose }) => {
-
+  const [address,setAddress]=useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const location = useLocation();
-  const { User } = location.state || {};
-  console.log("admin ", User);
-  const userId = User._id;
-  console.log(User.username);
+  const { userId } = location.state || {};
   const price = item.budget;
   console.log(item);
   const item2 = {
@@ -44,7 +46,6 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
       handleShareByEmail3();
     }
   }
-
   const handleShareMethodChange = (e) => {
     setShareMethod(e.target.value);
   };
@@ -56,51 +57,52 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
   const handleShareByEmail = () => {
 
     // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
-    const option = {
-      apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
-      urlParam: userId, email: emailAddress,
-      body: item2
-    }
-    console.log("userId",userId);
-    
-    const response = NetworkService.post(option);
-    console.log(response);
-
-
-    // Implement email sharing logic here
-    // console.log('Sharing by email:', emailAddress, item);
-    onClose();
+        const option = {
+          apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
+          urlParam: userId, email: emailAddress,
+          body: item2
+        }
+        console.log("userId",userId);
+        const response = NetworkService.post(option);
+        console.log(response);
+        setSuccessMessage("Share Successfully!");
+        setShowSuccessMessage(true);        
+      onClose();
   };
   const handleShareByEmail2 = () => {
 
     // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
-    const option = {
-      apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
-      urlParam: userId, email: emailAddress,
-      body: item3
-    }
-    const response = NetworkService.post(option);
-    console.log(response);
+
+    
+      const option = {
+        apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
+        urlParam: userId, email: emailAddress,
+        body: item3
+      }
+      const response = NetworkService.post(option);
+      console.log("response",response);
+      setSuccessMessage("Email sent Successfully!");
+      setShowSuccessMessage(true);
+    onClose();
 
     // Implement email sharing logic here
     // console.log('Sharing by email:', emailAddress, item);
-    onClose();
   };
   const handleShareByEmail3 = () => {
 
     // lama agy a-integrate hab3at el tourist id w attributes mo3yana men el item mesh kolo
-    const option = {
-      apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
-      urlParam: userId, email: emailAddress,
-      body: item4
-    }
-    const response = NetworkService.post(option);
-    console.log(response);
-
-
+      const option = {
+        apiPath: `/sendEventEmail/${userId}/${emailAddress}`,
+        urlParam: userId, email: emailAddress,
+        body: item4
+      }
+      const response = NetworkService.post(option);
+      console.log(response);
+      setSuccessMessage("Email sent Successfully!");
+      setShowSuccessMessage(true);
+      onClose();
     // Implement email sharing logic here
     // console.log('Sharing by email:', emailAddress, item);
-    onClose();
   };
 
   const handleShareByLink = () => {
@@ -109,15 +111,30 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
     setTimeout(() => setCopySuccess(false), 3000);
     onClose();
   };
-
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
   return (
-    <Dialog open onClose={onClose} style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
+    <Dialog open onClose={onClose} style={{ backgroundColor: 'transparent', boxShadow: 'none',height:"700px"}}>
       <DialogTitle>Share Travel Item</DialogTitle>
-      <DialogContent>
+      <DialogContent style={{height:"100px",width:"300px"}}>
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" style={{marginBottom:"25px"}}>
             <label htmlFor="share-method">Share Method:</label>
-            <div className="flex items-center gap-2">
               <input
                 id="share-method"
                 type="radio"
@@ -136,19 +153,22 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
                 onChange={handleShareMethodChange}
               />
               <label htmlFor="share-method-link">Copy Link</label>
-            </div>
           </div>
           {shareMethod === 'email' && (
-            <div className="flex flex-col gap-2">
-              <label htmlFor="email-address">Email Address:</label>
-              <TextField
-                id="email-address"
-                type="email"
-                value={emailAddress}
-                onChange={handleEmailChange}
-                placeholder="Enter email address"
-              />
-            </div>
+            <div className="flex flex-col items-center gap-2 w-48"> {/* Adjust width for smaller size */}
+                <label htmlFor="email-address" className="text-center">Email Address:</label> {/* Center-align label */}
+                <TextField
+                  id="email-address"
+                  type="email"
+                  variant="standard" 
+                  fullWidth
+                  value={emailAddress}
+                  onChange={handleEmailChange}
+                  placeholder="Enter email address"
+                  className="w-full text-sm p-2" 
+                />
+              </div>
+
           )}
           {shareMethod === 'link' && (
             <div className="flex items-center gap-2">
@@ -177,6 +197,34 @@ const TravelItemsShareDialog = ({ item, onClose }) => {
           </Button>
         )}
       </DialogActions>
+      {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
     </Dialog>
   );
 };

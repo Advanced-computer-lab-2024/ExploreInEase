@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NetworkService from '../../../NetworkService';
 import axios from 'axios';
+import { Alert } from '@mui/material'; 
 import { useLocation } from 'react-router-dom';
 import {
   TextField, InputAdornment, IconButton, Grid, Card, CardMedia, CardContent,
@@ -51,6 +52,10 @@ const ProductCard = () => {
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
   const [productInterval,setProductInterval]=useState([]);
   const  Product = location.state?.Product || productInterval||[];
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 //   const {currency } = location.state || {};
   const [productData, setProductData] = useState({
     _id: null,
@@ -87,7 +92,23 @@ const ProductCard = () => {
     }
   }, [Product]);
 
-
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
 
   const handleGetAllProduct = async () => {
     try {
@@ -121,8 +142,14 @@ const ProductCard = () => {
        
       const response = await NetworkService.post(options);
         console.log(response);
-        
+        setSuccessMessage(" Successfully!");
+        setShowSuccessMessage(true);
+        setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productt));
+
+
     } catch (error) {
+      setErrorMessage(error.message || 'An error occurred');
+      setShowErrorMessage(true);
       console.log('Error fetching historical places:', error);
     }
   }
@@ -180,9 +207,14 @@ const ProductCard = () => {
       }
       const response = await NetworkService.put(options);
       console.log(response);
+      setSuccessMessage("Successfully!");
+      setShowSuccessMessage(true);
+
       setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
       handleCloseArchiveDialog();
     } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'An error occurred');
+      setShowErrorMessage(true);
       console.error('Failed to archive product:', error);
     }
   };
@@ -265,15 +297,17 @@ const ProductCard = () => {
         };
         const response = await NetworkService.post(options);
         console.log(response);
+
         const newProduct = { ...productData, _id: response.product._id, picture: productData.picture ? URL.createObjectURL(productData.picture) : '' };
         setProducts([...products, newProduct]);
-        setMessageContent('Product added successfully!');
-        setMessageType('success');
+        setSuccessMessage("Successfully!");
+        setShowSuccessMessage(true);
         handleCloseDialogs();
       } catch (error) {
+        setErrorMessage(error.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);
         console.error("Error during API request:", error);
-        setMessageContent('Error occurred while adding product.');
-        setMessageType('error');
+       
       } finally {
         setMessageDialogOpen(true);
       }
@@ -606,7 +640,36 @@ const ProductCard = () => {
     </>
   )}
 </Box>
-
+<div>
+{showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+</div>
           </Card>
           {/* Archive Confirmation Dialog */}
         <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
@@ -815,9 +878,6 @@ const ProductCard = () => {
     </Button>
   </DialogActions>
 </Dialog>
-
-
-
 
       {(userType ==='seller'||userType==='admin'|| User?.type === 'seller' || User?.type === 'admin') && (
   <Tooltip title="Create" placement="top" arrow>

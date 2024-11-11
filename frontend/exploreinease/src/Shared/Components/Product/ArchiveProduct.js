@@ -13,6 +13,7 @@ import {
   Edit as EditIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
+import { Alert } from '@mui/material'; 
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
 import ArchiveIcon from '@mui/icons-material/Unarchive';
 import Avatar from '@mui/material/Avatar';
@@ -49,6 +50,10 @@ const ArchiveProduct = () => {
   const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
   const [productInterval,setProductInterval]=useState([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [checkProductArchived,setCheckProductArchived]=useState(true);
   const Product = location.state?.Product || productInterval;
 
@@ -83,7 +88,23 @@ const ArchiveProduct = () => {
       setPriceRange([0, maxProductPrice]);
     }
   }, [Product]);
-
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
   const handleRatingMinChange = (event) => setRatingFilter([Number(event.target.value), ratingFilter[1]]);
@@ -106,8 +127,14 @@ const ArchiveProduct = () => {
       const response = await NetworkService.put(options);
       console.log(response);
       setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
+      setSuccessMessage("Successfully!");
+      setShowSuccessMessage(true);
       handleCloseArchiveDialog();
+
+
     } catch (error) {
+      setErrorMessage('An error occurred');
+      setShowErrorMessage(true);
       console.error('Failed to UnArchive product:', error);
     }
   };
@@ -465,7 +492,36 @@ const ArchiveProduct = () => {
           <Button onClick={() => setMessageDialogOpen(false)} color="primary">Close</Button>
         </DialogActions>
       </Dialog>
-
+<div>
+{showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+</div>
     </Box>
   );
 };

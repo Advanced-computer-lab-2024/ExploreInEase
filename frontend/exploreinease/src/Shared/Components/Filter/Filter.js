@@ -41,12 +41,14 @@ const roleFields = {
 
 const Filter = () => {
   const location = useLocation();
-  const { events,userId,User } = location.state || {};
+  const { events,userId } = location.state || {};
+  console.log("userId",userId);
+  
   const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
   console.log(events);
   console.log(itemList);
-  console.log("User:",User);
-
+  // console.log("User:",User);
+  const [tagsList, setTagsList] = useState([]);
   const [filters, setFilters] = useState({
     budget: '',
     price: '',
@@ -71,6 +73,29 @@ const Filter = () => {
   const [budget, setBudget] = useState('');
   const [currency, setCurrency] = useState('');
   const [success,setSuccess]=useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
+
   const handleShareClick = (item) => {
     setSelectedItem(item);
     setShareDialogOpen(true);
@@ -317,11 +342,44 @@ const Filter = () => {
       const response = await axios.get(apiPath);
       const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
       setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
+      console.log("Historical Tags",historicalTags);
+      
     } catch (err) {
       console.log(err.response ? err.message : 'An unexpected error occurred.');
     }
   };
+  // const getAllTags=async ()=>{
+  //   try {
+  //     const apiPath = `http://localhost:3030/getAllPreferenceTags/${id}`;  // Ensure this matches your API route
+  //     const response = await axios.get(apiPath);
+  //     // console.log(response);
+      
+  //     if (Array.isArray(response.data.tags)) {
+  //       const tags = response.data.tags.map(tag => ({
+  //         id: tag._id,
+  //         name: tag.tags
+  //       }));
+  //       setTagsList(tags);    
+  //       console.log("tags",tagsList);
+          
+  //     } else {
+  //       console.error('Unexpected data format from API');
+  //     }
+      
+  //   } catch (err) {
+  //     // Check if there is a response from the server and handle error
+  //     if (err.response) {
+  //       console.error('API Error:', err.message);
+  //       // setError(err.response.data.message);  // Display error message from the server
+  //     } else {
+  //       console.error('Unexpected Error:', err);
+  //       // setError('An unexpected error occurred.');  // Display generic error message
+  //     }
+  //   }
+  // }
   const renderTags = (tagId) => {
+    console.log("Historical Tags",historicalTags);
+    
     if (!historicalTags[tagId]) {
       // Fetch tags only if they haven't been fetched yet
       getHistoricalTags(tagId);
@@ -373,8 +431,12 @@ const Filter = () => {
           console.log(response);
           setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
           setSuccess(true);
+          setSuccessMessage(response.data.message||"Save Successfully!");
+          setShowSuccessMessage(true);
           
       } catch (error) {
+        setErrorMessage(error.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);
         console.log('Error fetching historical places:', error);
       }
     }
@@ -488,6 +550,8 @@ const Filter = () => {
   //   });
   // }, [filteredData, historicalTags]);
 // getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
+console.log("filteredData",filteredData);
+
   return (
 
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
@@ -652,50 +716,45 @@ const Filter = () => {
                   </Typography>
                   {item.type === 'Activity' && (
                     <>
-                      <Typography color="text.secondary">Budget: {item.budget}</Typography>
-                      <Typography color="text.secondary">Date: {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
-                      <Typography color="text.secondary">Category: {item.category}</Typography>
-                      <Typography color="text.secondary">
-                          Locations: { 
+                      <Typography ><strong>Budget:</strong>{item.budget}</Typography>
+                      <Typography ><strong>Date:</strong> {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
+                      <Typography><strong>Category:</strong> {item.category}</Typography>
+                      <Typography><strong>Locations:</strong>
+                           { 
                               <LocationDisplay coordinates={item.location} />
                          }
                       </Typography> 
-                      <Typography color="text.secondary">
-                        Tags: {item.tags[0] ? renderTags(item.tags[0]) : 'No tags available'}
-                      </Typography>                        {item.specialDiscount && (
-                        <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
+                       {item.specialDiscount && (
+                        <Typography ><strong>Special Discount:</strong> {item.specialDiscount}%</Typography>
                       )}
                     </>
                   )}
                   {item.type === 'Itinerary' && (
                     <>
-                      <Typography color="text.secondary">Activities: {item.activities.join(', ')}</Typography>
-                      <Typography color="text.secondary">Locations: {item.locations.join(', ')}</Typography>
-                      <Typography color="text.secondary">
-                        Tags: {item.tags ? renderTags(item.tags) : 'No tags available'}
-                      </Typography>      
-                      <Typography color="text.secondary">Price: {item.price}</Typography>
-                      <Typography color="text.secondary">Rating: {item.rating.length ==0 ?0:item.rating}</Typography>
-                      <Typography color="text.secondary">Language: {item.language}</Typography>
-                      <Typography color="text.secondary">Dropoff location: {item.dropoffLocation}</Typography>
-                      <Typography color="text.secondary">Pickup location: {item.pickupLocation}</Typography>
-                      <Typography color="text.secondary">Directions: {item.directions}</Typography>
+                      <Typography ><strong>Activities:</strong> {item.activities.join(', ')}</Typography>
+                      <Typography ><strong>Locations:</strong> {item.locations.join(', ')}</Typography>   
+                      <Typography><strong>Price: </strong>{item.price}</Typography>
+                      <Typography><strong>Rating:</strong> {item.rating.length ==0 ?0:item.rating}</Typography>
+                      <Typography><strong>Language:</strong> {item.language}</Typography>
+                      <Typography><strong>Dropoff location:</strong> {item.dropoffLocation}</Typography>
+                      <Typography><strong>Pickup location:</strong>{item.pickupLocation}</Typography>
+                      <Typography><strong>Directions:</strong> {item.directions}</Typography>
                     </>
                   )}
                   {item.type === 'HistoricalPlace' && (
                     <>
-                      <Typography color="text.secondary">Description: {item.description}</Typography>
-                      <Typography color="text.secondary">
-                          Locations: { 
+                      <Typography><strong>Description:</strong> {item.description}</Typography>
+                      <Typography><strong>Locations:</strong>
+                          { 
                               <LocationDisplay coordinates={item.location} />
                          }
                       </Typography>
-                      <Typography color="text.secondary">Opening Hours: {item.openingHours}</Typography>
-                      <Typography color="text.secondary">Students ticket price: {item.ticketPrice[0]}</Typography>
-                      <Typography color="text.secondary">Native ticket price: {item.ticketPrice[1]}</Typography>
-                      <Typography color="text.secondary">Foreign ticket price: {item.ticketPrice[2]}</Typography>
-                      <Typography color="text.secondary">
-                          Tags: {item.tags ? renderTags(item.tags) : 'No tags available'}
+                      <Typography><strong>Opening Hours:</strong> {item.openingHours}</Typography>
+                      <Typography><strong>Students ticket price: </strong> {item.ticketPrice[0]}</Typography>
+                      <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
+                      <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography>
+                      <Typography><strong> Tags:</strong>
+                          {item.tags ? renderTags(item.tags) : 'No tags available'}
                       </Typography>                      </>
                   )}
                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
@@ -808,7 +867,34 @@ const Filter = () => {
               </Dialog>
 
               </div>
-
+{showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {/* {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )} */}
             </div>
           );
         };

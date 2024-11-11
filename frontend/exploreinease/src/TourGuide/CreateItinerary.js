@@ -5,6 +5,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { Alert } from '@mui/material'; 
 import NetworkService from "../NetworkService";
 import { useLocation } from "react-router-dom";
  import "./CreateItinerary.css"; // Import your CSS for styling
@@ -45,6 +46,10 @@ const CreateItinerary = () => {
   const [directions, setDirections] = useState("");
   const [activate, setActivate] = useState(false);
   const [special, setSpecial] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const location = useLocation();
   const { User } = location.state || {};
   const userId = User._id;
@@ -66,6 +71,24 @@ const CreateItinerary = () => {
 
     fetchActivities();
   }, []);
+
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
 
   // Handle selection of activities by names
   const handleActivityChange = (event) => {
@@ -145,8 +168,24 @@ const CreateItinerary = () => {
     };
 
     // Make an API call to create the itinerary
-    const response = await NetworkService.post({ apiPath: '/itinerary', body: itineraryData });
-    console.log(response.message);
+    try{
+
+      const response = await NetworkService.post({ apiPath: '/itinerary', body: itineraryData });
+      console.log(response);
+      console.log("weslt henaa");
+
+      setSuccessMessage(response.message||"save Successfully!");
+      console.log("weslt henaa");
+      setShowSuccessMessage(true);
+        console.log("weslt henaa123");
+        
+    }catch(error){
+      console.log("d5alt henaa");
+      
+      setErrorMessage(error.response?.data?.message || 'An error occurred');
+      setShowErrorMessage(true);
+    }
+
     // Handle success/failure here
   };
 
@@ -352,6 +391,34 @@ const CreateItinerary = () => {
           </button>
         </div>
       </form>
+      {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
     </div>
   );
 };

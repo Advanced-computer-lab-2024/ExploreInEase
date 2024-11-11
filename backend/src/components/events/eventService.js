@@ -302,6 +302,7 @@ const getActivityById = async (id) => {
 const getAllActivitiesInDatabase = async () => {
   return await eventRepository.getAllActivitiesInDatabase();
 }
+
 const addActivity = async ({ name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by }) => {
   // Check if the category exists
   const categoryExists = await eventRepository.findCategoryById(category);
@@ -333,6 +334,8 @@ const addActivity = async ({ name, date, time, location, price, category, tags, 
   
   return createdActivity;
 };
+
+
 const updateActivity = async (id, updateData) => {
   // You can add additional validation or processing here if needed
   return await eventRepository.updateActivity(id, updateData);

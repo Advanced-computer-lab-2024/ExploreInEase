@@ -1,7 +1,7 @@
 import React, { useState, useCallback,useEffect } from 'react';
 import {
   Button,
-  Dialog, DialogActions, DialogContent, TextField,DialogTitle,Card, CardContent,Typography,CardActions,ListItemText,
+  Dialog, DialogActions, DialogContent, TextField,DialogTitle,Card, CardContent,CardMedia,Typography,CardActions,ListItemText,
 } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
@@ -20,7 +20,22 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import NetworkService from '../NetworkService';
-const containerStyle = {
+import { Alert } from '@mui/material'; 
+  import Basketball from './ActivityImage/Basketball.jpg';
+  import Bowling from './ActivityImage/Bowling.jpg';
+  import Cycling from './ActivityImage/Cycling.webp';
+  import Fishing from './ActivityImage/Fishing.jpg';
+  import Football from './ActivityImage/FootBall.jpg';
+  import Handball from './ActivityImage/Handball.jpg';
+  import Hiking from './ActivityImage/Hiking.jpg';
+  import JetSki from './ActivityImage/JetSki.jpg';
+  import Mountain from './ActivityImage/Mountain.jpg';
+  import Skater from './ActivityImage/Skater.jpg';
+
+
+  const activityImage =[Basketball,Bowling,Fishing,Cycling,Football,Handball,Hiking,JetSki,Mountain,Skater];
+
+  const containerStyle = {
   width: '100%',
   height: '400px',
 };
@@ -51,6 +66,12 @@ function Activity() {
   const [markerPosition, setMarkerPosition] = useState(null);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
+ 
+ const [address,setAddress]=useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [activityForm, setActivityForm] = useState({
     _id: '',
     name: '',
@@ -64,12 +85,11 @@ function Activity() {
     category: '',
     categoryId: '',
     tags: [],
-    specialDiscounts: 0,
+    specialDiscounts: null,
     isOpen: true,
   });
   const [searchInput, setSearchInput] = useState('');
   const [isApiLoaded, setIsApiLoaded] = useState(false);
-console.log(id);
 
   useEffect(() => {
     getAllTags();
@@ -83,7 +103,31 @@ useEffect(()=>
   getAllActivities();
 },[]
 );
+useEffect(() => {
+  if (showSuccessMessage) {
+    const timer = setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [showSuccessMessage]);
 
+useEffect(() => {
+  if (showErrorMessage) {
+    const timer = setTimeout(() => {
+      setShowErrorMessage(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [showErrorMessage]);
+
+
+
+
+const getRandomImage = () => {
+  const randomIndex = Math.floor(Math.random() * activityImage.length);
+  return activityImage[randomIndex];
+};
 const getAllActivities =async()=>{
   try {
     // Construct the API path
@@ -92,11 +136,11 @@ const getAllActivities =async()=>{
     const response = await axios.get(apiPath);
 
     // Log the response data
-    console.log('API Response:', response);
+    // console.log('API Response:', response);
 
     // Pass the fetched activities to the Activities page
         setActivities(response.data);
-        console.log("Activities:",activities);
+        // console.log("Activities:",activities);
             
   } catch (err) {
     // Check if there is a response from the server and handle error
@@ -119,7 +163,7 @@ const getAllActivities =async()=>{
       price: [0, 100],
       category: '',
       tags: [],
-      specialDiscounts: 0,
+      specialDiscounts: null,
       isOpen: false,
     });
     setCurrentActivity(null);
@@ -158,7 +202,7 @@ const getAllTags=async ()=>{
   try {
     const apiPath = `http://localhost:3030/getAllPreferenceTags/${id}`;  // Ensure this matches your API route
     const response = await axios.get(apiPath);
-    console.log(response);
+    // console.log(response);
     
     if (Array.isArray(response.data.tags)) {
       const tags = response.data.tags.map(tag => ({
@@ -186,7 +230,7 @@ const getAllCategory=async ()=>{
   try {
     const apiPath = `http://localhost:3030/getAllCategories/advertiser`;  // Ensure this matches your API route
     const response = await axios.get(apiPath);
-    console.log(response);
+    // console.log(response);
     
     if (Array.isArray(response.data)) {
       const categories = response.data.map(category => ({
@@ -194,7 +238,7 @@ const getAllCategory=async ()=>{
         name: category.categoryName
       }));
       setCategoryList(categories);
-      console.log(categories);
+      // console.log(categories);
       
     } else {
       console.error('Unexpected data format from API');
@@ -227,15 +271,14 @@ function convertTimeToFullDate(timeString) {
 
   // Step 4: Set the time on the current date
   currentDate.setHours(hours, minutes, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
-  console.log("Current Date",currentDate);
+  // console.log("Current Date",currentDate);
 
   return currentDate;
   
 }
-console.log("Data",activities);
+// console.log("Data",activities);
 
 const handleSaveActivity = async () => {
-
   try {
     const updatedPrice =
       activityForm.price[0] === activityForm.price[1]
@@ -249,91 +292,118 @@ const handleSaveActivity = async () => {
     };
     
     if (currentActivity !== null) {
+      console.log("Activity",updatedActivity);
+      
+      const tagIds = tagsList.filter(tag => updatedActivity.tags.includes(tag.name)).map(tag => tag.id);
+      const rangeArray = updatedActivity.price;
+      // const priceObject = rangeArray.join('-');
       // console.log("Activity",currentActivity);
       console.log("Updated activity:",updatedActivity);
-      // Updating existing activity
-      const apiPath=`http://localhost:3030/activity/${updatedActivity._id}/${id}`;
-      const body= {
-          date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-          time: typeof updatedActivity.time === 'string' 
-          ? updatedActivity.time 
-          : dayjs(updatedActivity.time).format('hh:mm'),
-          location: updatedActivity.location,
-          price: updatedActivity.price,
-          category: updatedActivity.categoryId,
-          tags: updatedActivity.tags || [],
-          specialDiscounts: updatedActivity.specialDiscounts,
-          isOpen: updatedActivity.isOpen || false,
-        };
-        console.log("body:",body);
+      // console.log("priceObject:",priceObject);
+            try{
+            // Updating existing activity
+            const apiPath=`http://localhost:3030/activity/${updatedActivity._id}/${id}`;
+            const body= {
+                date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
+                time: typeof updatedActivity.time === 'string' 
+                ? updatedActivity.time 
+                : dayjs(updatedActivity.time).format('hh:mm'),
+                location: updatedActivity.location,
+                price:rangeArray,
+                category: updatedActivity.categoryId,
+                tags: tagIds || [],
+                specialDiscounts: updatedActivity.specialDiscounts||0,
+                isOpen: updatedActivity.isOpen || false,
+              };
+              console.log("body:",body);
 
-        const response = await axios.put(apiPath,body);
-        console.log("response:",response.data.activity);
-        
-      // setActivities((prevActivities) =>
-      //   prevActivities.map((activity) =>
-      //     activity.id === activityForm.id ? response.data.activity : activity
-      //   )
-      // );
-      getAllActivities();
-
+                const response = await axios.put(apiPath,body);
+                console.log("response:",response);
+                getAllActivities();
+                handleClose();
+              setSuccessMessage(response.data.message||"Edit Successfully!");
+                setShowSuccessMessage(true);
+            }catch(error){
+              setErrorMessage(error.response?.data?.message || 'An error occurred');
+              setShowErrorMessage(true); 
+            }
     } else {
-      console.log("hehhe");
-      
-      // Creating new activity
-      const apiPath = `http://localhost:3030/activity`;
-      const body = {
-        name: updatedActivity.name,
-        date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-        time: dayjs(updatedActivity.time).format('hh:mm'),
-        location: updatedActivity.location,
-        price: updatedActivity.price[1],
-        category: updatedActivity.categoryId,
-        tags: updatedActivity.tags,
-        specialDiscounts: updatedActivity.specialDiscounts,
-        isOpen: updatedActivity.isOpen || false,
-        created_by: id
-      }
-      // console.log(updatedActivity.time);
-      
-      // console.log(body);
-      
-      const response = await axios.post(apiPath, body);
-      // console.log(response);
-      console.log("save",response.data);
-      getAllActivities();
-    }
 
-    handleClose();
+      const tagIds = tagsList.filter(tag => updatedActivity.tags.includes(tag.name)).map(tag => tag.id);
+      const rangeArray = updatedActivity.price;
+      const priceObject = Array.isArray(rangeArray) ? rangeArray.join('-') : "0-0"; // Default to "0-0" or any other fallback
+      // console.log("hehhe");
+      try{
+        const apiPath = `http://localhost:3030/activity`;
+        const body = {
+          name: updatedActivity.name,
+          date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
+          // dayjs(updatedActivity.date).format('YYYY-MM-DD'),
+          time: dayjs(updatedActivity.time).format('hh:mm A'),
+          location: updatedActivity.location,
+          price: priceObject,
+          category: updatedActivity.categoryId,
+          tags: tagIds ||[],
+          specialDiscounts: updatedActivity.specialDiscounts||0,
+          isOpen: updatedActivity.isOpen || false,
+          created_by: id
+        }
+        const response = await axios.post(apiPath, body);
+        console.log(response);
+        getAllActivities();
+        handleClose();
+        setSuccessMessage(response.data.message||"Edit Successfully!");
+        setShowSuccessMessage(true); 
+      }catch(error){
+        setErrorMessage(error.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);
+      }
+    }
   } catch (err) {
     if (err.response) {
       console.error('API Error:', err);
+      setErrorMessage(err);
+      setShowErrorMessage(true);
     } else {
       console.error('Unexpected Error:', err);
+      setErrorMessage(err);
+      setShowErrorMessage(true);
     }
   }
 };
 
-  const handleEditActivity = (activity) => {
-      setCurrentActivity(activity);
-      if (activity.location) {        
-      setActivityForm({
-        ...activity,
-        time:convertTimeToFullDate(activity.time),
-        category: categoryList.find(item =>item.id===activity.category)?.name,
-          location:{
-          latitude:activity.location.latitude||mapCenter.lat,
-          longitude:activity.location.longitude||mapCenter.lng
-        },
-        tags: Array.isArray(activity.tags) ? activity.tags : [], // Ensure tags is always an array of objects
+const handleEditActivity = (activity) => {
+  console.log("Activity", activity);
 
-      });     
-    }else {
-      console.error('Activity location is undefined');
+  setCurrentActivity(activity);
 
-    }
-       setOpen(true); 
-  };
+  // Parse the price range to get min and max values
+  const [minPrice, maxPrice] = activity.price.split('-').map(Number);
+
+  setActivityForm({
+    ...activity,
+    time: convertTimeToFullDate(activity.time),
+    category: categoryList.find(item => item.id === activity.category)?.name,
+    location: {
+      latitude: activity.location?.latitude || mapCenter.lat,
+      longitude: activity.location?.longitude || mapCenter.lng,
+    },
+    tags: Array.isArray(activity.tags)
+      ? activity.tags
+          .map(tagId => {
+            const tag = tagsList.find(t => t.id === tagId);
+            return tag ? tag.name : null;
+          })
+          .filter(Boolean)
+      : [],
+    minPrice, // Set min value for the slider
+    maxPrice, // Set max value for the slider
+  });
+
+  setOpen(true); 
+};
+
+
 
   const handleDeleteActivity = async (index) => {  
     const activityid=activities[index]._id;
@@ -342,17 +412,19 @@ const handleSaveActivity = async () => {
          apiPath:`/activity/${activityid}/${id}`,
       };
       const response = NetworkService.delete(options);
+      setSuccessMessage(response.data.message||"Edit Successfully!");
+      setShowSuccessMessage(true);
        setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
 
     } catch (err) {
       if (err.response) {
         console.error('API Error:', err);
-        // You might want to set an error state here to display to the user
-        // setError(err.response.data.message);
+        setErrorMessage(err.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);  
       } else {
         console.error('Unexpected Error:', err);
-        // setError('An unexpected error occurred.');
-      }
+        setErrorMessage(err.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);      }
     }
   };
 
@@ -416,7 +488,12 @@ const handleSaveActivity = async () => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
     const geocoder = new window.google.maps.Geocoder();
-    
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const address = results[0].formatted_address;
+        setAddress(address);
+      }
+    })
     setActivityForm((prev) => {
       return {
         ...prev,
@@ -447,6 +524,7 @@ const handleSaveActivity = async () => {
   const handleCheckboxChange = (event) => {
     setActivityForm((prev) => ({ ...prev, isOpen: event.target.checked }));
   };
+console.log("Address mn Map",address);
 
   return (
     <div>
@@ -459,20 +537,27 @@ const handleSaveActivity = async () => {
         <Dialog open={open} onClose={handleClose} sx={{ minWidth: 1000 }}>
           <DialogTitle>{currentActivity !== null ? 'Edit Activity' : 'Add Activity'}</DialogTitle>
           <DialogContent>
-            <DatePicker
-              labelId="date"
-              id="date"
-              name="date"
-              value={activityForm.date ? dayjs(activityForm.date) : null} // Ensure it's a Day.js object
-              onChange={handleDateChange}
-              label="Date"
-            />
-            <TimePicker
-              name="time"
-              value={activityForm.time ? dayjs(activityForm.time) : null} // Ensure it's a Day.js object
-              onChange={handleTimeChange}
-              label="Time"
-            />
+          <FormControl  margin="normal" sx={{ marginTop: 2,marginRight:2 }}>
+                <DatePicker
+                  labelId="date"
+                  id="date"
+                  name="date"
+                  value={activityForm.date ? dayjs(activityForm.date) : null} // Ensure it's a Day.js object
+                  onChange={handleDateChange}
+                  label="Date"
+                  sx={{ marginTop: 2 }}
+                />
+              </FormControl>
+
+              <FormControl  margin="normal" sx={{ marginTop: 2 }}>
+                <TimePicker
+                  name="time"
+                  value={activityForm.time ? dayjs(activityForm.time) : null} // Ensure it's a Day.js object
+                  onChange={handleTimeChange}
+                  label="Time"
+                  sx={{ marginTop: 2 }}
+                />
+              </FormControl>
             <TextField
               fullWidth
               margin="normal"
@@ -508,27 +593,37 @@ const handleSaveActivity = async () => {
                 multiple
                 value={activityForm.tags}
                 onChange={handleInputChange}
-                renderValue={(selected) => selected.map(tag => tag).join(', ')}
+                renderValue={(selected) => selected.join(', ')} // Now selected is an array of tag names
                 label="Tags"
               >
                 {tagsList.map((tag) => (
                   <MenuItem key={tag.id} value={tag.name}>
-                  <Checkbox checked={activityForm.tags.indexOf(tag) > -1} />
-                        <ListItemText primary={tag.name} />
-                   </MenuItem>
+                    <Checkbox checked={activityForm.tags.includes(tag.name)} />
+                    <ListItemText primary={tag.name} />
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            <Typography gutterBottom>Price Range</Typography>
-            <Slider
-              value={activityForm.price}
-              onChange={handlePriceChange}
-              valueLabelDisplay="auto"
-              min={0}
-              max={1000}
-              name="price"
-            />
+            <FormControl fullWidth margin="normal">
+              <Typography>Price Range: {activityForm.price}</Typography>
+              <Slider
+                value={[activityForm.minPrice, activityForm.maxPrice]}
+                onChange={(event, newValue) => {
+                  const [newMin, newMax] = newValue;
+                  setActivityForm(prev => ({
+                    ...prev,
+                    minPrice: newMin,
+                    maxPrice: newMax,
+                    price: `${newMin}-${newMax}`, // Update the price string as well
+                  }));
+                }}
+                valueLabelDisplay="auto"
+                min={0}
+                max={1000}
+                name="price"
+              />
+            </FormControl>
 
             <FormControlLabel
               control={
@@ -573,31 +668,67 @@ const handleSaveActivity = async () => {
           </DialogActions>
         </Dialog>
 
-        <Grid container spacing={2} style={{ marginTop: 20 }}>
+        <Grid container style={{ marginTop: 10}}>
           {activities.map((activity, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card>
+            
+            <Grid item xs={12} sm={6} md={4} key={index} >
+              <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
+              <CardMedia
+                  component="img"
+                  height="180"
+                  image={getRandomImage()}
+                  alt={activityImage?.name||"Image"}
+                />
                 <CardContent>
                   <Typography variant="h5">{activity.name}</Typography>
-                  <Typography variant="body2">Date: {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
-                  <Typography variant="body2">Time: {activity.time}</Typography>
-                  <Typography variant="body2">Price: {activity.price}</Typography>
-                  <Typography variant="body2">Category: {categoryList.find(item =>item.id===activity.category)?.name}</Typography>
-                  <Typography variant="body2"> Tags: {activity.tags||'no tags fetched'}</Typography>  
-                    <Typography variant="body2">Discounts: {activity.specialDiscounts}</Typography>
-                  <Typography variant="body2">Location longitude: {activity.location?.longitude || mapCenter.lng}</Typography>
-                  <Typography variant="body2">Location latitude: {activity.location?.latitude|| mapCenter.lat}</Typography>
-                  <Typography variant="body2">Booking: {activity.isOpen?"true":"false"}</Typography>
+                  <Typography variant="body2"><strong>Date:</strong> {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
+                  <Typography variant="body2"><strong>Time:</strong> {activity.time}</Typography>
+                  <Typography variant="body2"><strong>Price: </strong>{activity.price}</Typography>
+                  <Typography variant="body2"><strong>Category:</strong> {categoryList.find(item =>item.id===activity.category)?.name}</Typography> 
+                  <Typography variant="body2"><strong>Tags:</strong> { activity.tags.map(tagId => { const tag = tagsList.find(t => t.id === tagId); return tag ? tag.name : 'No tag';}).filter(Boolean).join(', ') }</Typography>  
+                  <Typography variant="body2"><strong>Discounts:</strong> {activity.specialDiscounts}</Typography>
+                  <Typography variant="body2"><strong></strong>Location longitude: {activity.location?.longitude || mapCenter.lng}</Typography>
+                  <Typography variant="body2"><strong></strong>Location latitude: {activity.location?.latitude|| mapCenter.lat}</Typography>
+                  <Typography variant="body2"><strong>Booking:</strong> {activity.isOpen?"true":"false"}</Typography>
 
                 </CardContent>
-                <CardActions>
-                  <Button size="small" onClick={() => handleEditActivity(activity)}>Edit</Button>
-                  <Button size="small" color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
+                <CardActions style={{ justifyContent: 'center' }}>
+                  <Button size="meduim" onClick={() => handleEditActivity(activity)}>Edit</Button>
+                  <Button container='filled' color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
                 </CardActions>
               </Card>
             </Grid>
           ))}
+        {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
         </Grid>
+
       </div>
     </LocalizationProvider>
     </LoadScript>

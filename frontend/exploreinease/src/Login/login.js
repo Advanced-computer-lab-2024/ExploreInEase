@@ -67,7 +67,7 @@ const Login = () => {
         navigate('/AdminHomePage', { state: { tourist: user } });
         break;
       case 'touristGovern':
-        navigate('/TouristGovernorHP', { state: { tourist: user } });
+        navigate('/GovernorHomePage', { state: { tourist: user } });
         break;
       case 'seller':
         navigate('/SellerHomePage', { state: { User: user, imageUrl: imageUrl } });

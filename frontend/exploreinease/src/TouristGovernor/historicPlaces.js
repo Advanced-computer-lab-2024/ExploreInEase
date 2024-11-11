@@ -28,17 +28,22 @@ function HistoricalPlaces() {
   const location = useLocation();
   const governorId = location.state?.governorId || '';
   const response = location.state?.response || [];  
+  console.log("data",governorId,response);
+  
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [historicPlaces, setHistoricPlaces] = useState([]);
   const [open, setOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [mapCenter, setMapCenter] = useState({lat:defaultCenter.lat, lng: defaultCenter.lng});
   const [markerPosition, setMarkerPosition] = useState(null);
   const [map, setMap] = useState(null);
   const [placesService, setPlacesService] = useState(null);
   const [currentPlace, setCurrentPlace] = useState(null);
   const [tags, setTags] = React.useState([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [newHistoricPlace, setNewHistoricPlace] = useState({
     name: '',
     description: '',
@@ -52,11 +57,26 @@ function HistoricalPlaces() {
   });
 
   useEffect(() => {
-    // Fetch historical places when the component mounts
     getAllHistoricalPlaces();
     getAllTags();
   }, []);
-
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
   const getAllHistoricalPlaces = async () => {
     try {
       const options = { apiPath: `/historical-places/${governorId}/allHistoricalPlaces` };
@@ -180,11 +200,15 @@ function HistoricalPlaces() {
       try {
         const response = await axios.post(`http://localhost:3030/historical-places`, body);
         console.log(response);
+        setSuccessMessage(response.data.message||"Edit Successfully!");
+        setShowSuccessMessage(true);
+
         handleClose();
         getAllHistoricalPlaces();
       } catch (error) {
         console.error('Error creating historical place:', error);
-        setErrorMessage('Error: Something went wrong. Please try again.');
+        setErrorMessage( 'An error occurred');
+        setShowErrorMessage(true);
       }
     }
     
@@ -222,8 +246,12 @@ function HistoricalPlaces() {
     
       console.log(response);
       getAllHistoricalPlaces();
+      setSuccessMessage(response.data.message||"Create Successfully!");
+      setShowSuccessMessage(true);
       handleClose();
     }catch (error) {
+      setErrorMessage( 'An error occurred');
+      setShowErrorMessage(true);
       console.error('Error creating historical place:', error);
       setErrorMessage('Error: Something went wrong. Please try again.');
     }
@@ -304,14 +332,19 @@ const handleDeletePlace = async (place) => {
     };
     const response = NetworkService.delete(options);
       console.log(response);
+      setSuccessMessage("Delete Successfully!");
+      setShowSuccessMessage(true);
     setHistoricPlaces((prevPlaces) => prevPlaces.filter((p) => p._id !== placeId));
 
   } catch (err) {
     if (err.response) {
+      setSuccessMessage("Delete Successfully!");
+      setShowSuccessMessage(true);
       console.error('API Error:', err);
-      // You might want to set an error state here to display to the user
-      // setError(err.response.data.message);
+      
     } else {
+      setErrorMessage(err.response?.data?.message || 'An error occurred');
+      setShowErrorMessage(true);
       console.error('Unexpected Error:', err);
       // setError('An unexpected error occurred.');
     }
@@ -570,6 +603,34 @@ const getAllTags=async ()=>{
           </Card>
         ))}
         </Grid>
+        {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
     </div>
     </LoadScript>
     </div>

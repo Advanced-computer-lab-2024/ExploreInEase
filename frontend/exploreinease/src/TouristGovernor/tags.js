@@ -1,4 +1,4 @@
-import React ,{useEffect} from 'react';
+import React ,{useEffect,useState} from 'react';
 import { useLocation } from "react-router-dom";
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -7,6 +7,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
+import { Alert } from '@mui/material'; 
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -21,20 +22,41 @@ import axios from 'axios'; // Ensure Axios is imported
 function Tags() {
   const location = useLocation();
   const { governorId } = location.state || {};
+  console.log("daa",governorId);
+  
   const [tags, setTags] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [tagType, setTagType] = React.useState('');  // State for tag type
   const [period, setPeriod] = React.useState('');    // State for period
-
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   useEffect(() => {
     getAllTags();
   }, []);
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
   
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
   const getAllTags=async ()=>{
     try {
       const apiPath = `http://localhost:3030/getAllHistoricalTags/${governorId}`;  // Ensure this matches your API route
       const response = await axios.get(apiPath);
-      console.log(response.data.tags);
+      console.log(response);
       
       if (Array.isArray(response.data.tags)) {
         const tags = response.data.tags.map(tag => ({
@@ -86,8 +108,12 @@ function Tags() {
         const response = await axios.post(apiPath, body);
         console.log(response);
         getAllTags();
+        setSuccessMessage(response.data.message||"Successfully!");
+        setShowSuccessMessage(true);
         handleClose();
       } catch (error) {
+        setErrorMessage('An error occurred');
+        setShowErrorMessage(true); 
         console.error('Error while saving the tag:', error);
       }
     }
@@ -179,6 +205,36 @@ function Tags() {
           </List>
         </nav>
       </Box>
+      <div>
+      {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+      </div>
     </div>
   );
 }

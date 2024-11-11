@@ -160,6 +160,25 @@ const checkUserExistsByEmail = async (email) => {
         return false;
     }
 };
+const createActivity = async (activityData) => {
+    const activity = new Activity(activityData);
+    const newActivity = await activity.save();
+    const createdActivity = {
+      _id: newActivity._id,
+      name: newActivity.name,
+      date: newActivity.date,
+      time: newActivity.time,
+      location: newActivity.location,
+      price: newActivity.price,
+      category: newActivity.category,
+      tags: newActivity.tags,
+      specialDiscounts: newActivity.specialDiscounts,
+      isOpen: newActivity.isOpen,
+      created_by: newActivity.created_by,
+    }
+    console.log(createdActivity);
+    return createdActivity;
+  };
 
 
 // Check if the itinerary was completed by the tourist (after date passed and booked)
@@ -643,5 +662,6 @@ module.exports = {
     getAllUsersForDeletion,
     getNotAcceptedUsers,
     updateUserStatus,
-    findTouristById
+    findTouristById,
+    createActivity
 };

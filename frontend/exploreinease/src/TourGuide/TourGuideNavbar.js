@@ -122,7 +122,7 @@ const TourGuideHP = () => {
           setSuccess(response.message); // Set success message
           const TourGuideItinerary=response;
           console.log(TourGuideItinerary);
-          navigate(`/viewCreatedItineraryList`,{state:{TourGuideItinerary, userId}});          
+          navigate(`/viewCreatedItineraryList`,{state:{TourGuideItinerary:TourGuideItinerary, User:User}});          
         } catch (err) {
           if (err.response) {
               console.log(err.message);

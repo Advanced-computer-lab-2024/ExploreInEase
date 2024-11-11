@@ -5,13 +5,21 @@ import NetworkService from "../NetworkService";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from "react-datepicker";
+import { Alert } from '@mui/material'; 
  import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
  import "./ItineraryList.css"; 
 
 const ItineraryList = () => {
   const location = useLocation();
-  const TourGuideItinerary = location.state?.TourGuideItinerary || { Itineraries: [] };
-  const userId = location.state?.userId || null;
+  const { TourGuideItinerary,User } = location.state || {};
+  console.log("User",User)
+  console.log(TourGuideItinerary)
+
+  const userId = User._id
+  const userType = User.type
+  const itineraryId = TourGuideItinerary.Itineraries[0]._id
+  console.log(itineraryId)
+
   const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary.Itineraries);
   const [activitiesData, setActivitiesData] = useState({});
   const [selectedActivity, setSelectedActivity] = useState(null);
@@ -20,20 +28,43 @@ const ItineraryList = () => {
   const [newDate, setNewDate] = useState(null);
   const [removeDateModalOpen, setRemoveDateModalOpen] = useState(false);
   const [dateToRemove, setDateToRemove] = useState(null);
+  const [error, setError] = useState();
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
 
   const getLocationName = async (lat, lng) => {
     const provider = new OpenStreetMapProvider();
     const result = await provider.search({ query: `${lat}, ${lng}` });
     return result && result.length > 0 ? result[0].label : "Unknown location";
   };
-
+console.log(itinerariesData[0].isActivated)
   useEffect(() => {
     const fetchActivities = async () => {
       const allActivitiesPromises = [];
       itinerariesData.forEach((itinerary) => {
         if (itinerary.activities && itinerary.activities.length > 0) {
           itinerary.activities.forEach((activityId) => {
-            allActivitiesPromises.push(getActivityDetails(activityId, itinerary._id));
+             allActivitiesPromises.push(getActivityDetails(activityId, itinerary._id));
           });
         }
       });
@@ -76,15 +107,22 @@ const ItineraryList = () => {
       UrlParam: _id,
       userId
     };
-    const response = await NetworkService.get(options);
+    try{
+      const response = await NetworkService.get(options);
+      console.log("response bta3aa m3la2aa",response);
+      return {
+        itineraryId,
+        name: response.name,
+        location: { lat: response.location.latitude, lng: response.location.longitude },
+        duration: { date: response.date, time: response.time },
+        price: response.price
+      };
+    }
+   catch(error){
+    getActivityDetails(_id,itineraryId);
+   }
     
-    return {
-      itineraryId,
-      name: response.name,
-      location: { lat: response.location.latitude, lng: response.location.longitude },
-      duration: { date: response.date, time: response.time },
-      price: response.price
-    };
+
   };
 
   const openEditModal = (itinerary) => {
@@ -104,6 +142,8 @@ const ItineraryList = () => {
       ...prevData,
       [name]: value,
     }));
+    
+    toggleStatus(itineraryId,itinerariesData[0].isActivated)
   };
 
   const handleDateChange = (dates) => {
@@ -136,13 +176,20 @@ const ItineraryList = () => {
           userId
         };
         const response = await NetworkService.put(options); // Adjust the API call for updating
-        console.log("Itinerary updated successfully:", response);
+        console.log("Itinerary updated successfully", response);
+        setSuccessMessage("Itinerary updated successfully!");
+        setShowSuccessMessage(true);
         setItinerariesData((prev) => 
           prev.map(itinerary => itinerary._id === editItineraryData._id ? editItineraryData : itinerary)
         );
         closeEditModal();
+
+        
+
       } catch (error) {
-        console.error("Error updating itinerary:", error);
+        setErrorMessage(error.Response.message||'An error occurred');
+        setShowErrorMessage(true);
+        console.error("Error updating itinerary", error);
       }
   };
 
@@ -178,12 +225,29 @@ const ItineraryList = () => {
         }
         const response = await NetworkService.delete(options);
         console.log("Itinerary deleted successfully:", response);
+        setSuccessMessage("Itinerary deleted successfully");
+        setShowSuccessMessage(true);
         setItinerariesData((prev) => prev.filter(itinerary => itinerary._id !== itineraryId));
       } catch (error) {
+        setErrorMessage(error.message||'An error occurred');
+        setShowErrorMessage(true);
         console.error("Error deleting itinerary:", error);
       }
 
   };
+
+  const toggleStatus = async (itineraryId, currentStatus) => {
+    const newStatus = currentStatus == 0 ? 1 : 0;
+    try {
+      const options = {
+          apiPath: `/updateItineraryActivation/${itineraryId}/${newStatus}/${userId}/${userType}`,
+      };
+      const response = await NetworkService.put(options);
+  } catch (err) {
+      setError(err.response?.data?.message || 'An unexpected error occurred.');
+  }
+  };
+  
 
   return (
     <div className="itinerary-list-container">
@@ -204,6 +268,7 @@ const ItineraryList = () => {
             <p><strong>Drop Off Location:</strong> {itinerary.dropoffLocation}</p>
             <p><strong>Price:</strong> {itinerary.price}</p>
             <p><strong>Ratings:</strong> {itinerary.ratings || "0"}</p>
+            <p><strong>Active:</strong> {itinerary.isActivated}</p>
             <br />
             <h4>Activities:</h4>
             <div className="activity-details">
@@ -303,6 +368,33 @@ const ItineraryList = () => {
                 onChange={handleInputChange} 
               />
             </label>
+            
+<label>
+  isActivated:
+  <div>
+    <label>
+      <input
+        type="radio"
+        name="isActivated"
+        value="0"
+        checked={editItineraryData.isActivated === "0"}
+        onChange={handleInputChange}
+      />
+      Deactivated
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="isActivated"
+        value="1"
+        checked={editItineraryData.isActivated === "1"}
+        onChange={handleInputChange}
+      />
+      Activated
+    </label>
+  </div>
+</label>
+
             <button onClick={submitEdit}>Submit</button>
           </div>
         </div>
@@ -337,6 +429,36 @@ const ItineraryList = () => {
           </div>
         </div>
       )}
+<div>
+{showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+</div>
     </div>
   );
 };
