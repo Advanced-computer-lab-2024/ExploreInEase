@@ -9,9 +9,16 @@ import LockIcon from '@mui/icons-material/Lock';
 import LogoutIcon from '@mui/icons-material/Logout';
 import '../Guest/GuestHP.css'; 
 import HomePageLogo from '../HomePageLogo.png';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import Drawer from '@mui/material/Drawer';
+import MenuIcon from '@mui/icons-material/Menu';
 import { Delete } from '@mui/icons-material';
 import axios from 'axios';
 const TouristNavbar = () => {
@@ -20,6 +27,8 @@ const TouristNavbar = () => {
     const { tourist, imageUrl } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const initialUsername = tourist?.username;
@@ -247,103 +256,90 @@ const TouristNavbar = () => {
           }
       }
   };
-  return (
-    <div className="homepage">
-      <nav className="navbar">
-        <div className="logo-container">
-          <img
-            src={HomePageLogo} // Use the imported logo
-            alt="ExploreInEase Logo"
-            className="logo"
-          />
-          <span className="website-name">ExploreInEase</span>
-        </div>
-        <div className="nav-links">
-          <button onClick={() => handleRegisterClick("Explore Activities and Itineraries and Historical Places")}
-              className="small-button">Explore Activities and Itineraries and Historical Places</button>
-          <button onClick={() => handleRegisterClick("View Products")}
-              className="small-button">View Products</button>
-          <button 
-          onClick={() => handleRegisterClick("Book transportation")}
-          className="small-button">Book transportation</button>
-          <button 
-          onClick={() => handleRegisterClick("View Booked items")}
-          className="small-button">View Booked items</button>
-          <button 
-          onClick={() => handleRegisterClick("View/Rate Purchased Product")}
-          className="small-button">View/Rate Purchased Product</button>
-           <button 
-          onClick={() => handleRegisterClick("Book Hotels")}
-          className="small-button">Book Hotels</button>
-          <button 
-          onClick={() => handleRegisterClick("Book Flights")}
-          className="small-button">Book Flights</button>
-          <button 
-          onClick={() => handleRegisterClick("Complaints")}
-          className="small-button">Complaints</button>
-           <button 
-          onClick={() => handleRegisterClick("My Profile")}
-          className="small-button">My Profile</button>
-        </div>  
-        <div className="currency-selector">
-          <span className="currency-symbol"></span>
-          <select>
-            <option value="usd">USD ($)</option>
-            <option value="eur">EUR (€)</option>
-            <option value="egp">EGP (ج.م)</option>
-          </select>
-        </div>
-        <div className="avatar-container">
-                    <Avatar
-                        sx={{ bgcolor: 'darkblue', color: 'white', width: 48, height: 48, fontSize: 20, cursor: 'pointer' }}
-                        onClick={handleMenuOpen}
-                        src={avatarImage ? avatarImage : undefined}
-                    >
-                        {avatarImage ? '' : defaultAvatarUrl}
-                    </Avatar>
-               <Menu
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleMenuClose}
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                  PaperProps={{
-                     elevation: 3,
-                     sx: {
-                        mt: 1.5,
-                        minWidth: 180,
-                        borderRadius: 2,
-                        boxShadow: '0px 4px 10px rgba(0,0,0,0.1)',
-                     },
-                  }}
-               >
-                  <Typography variant="h6" sx={{ padding: '8px 16px', fontWeight: 600 }}>
-                     Account
-                  </Typography>
-                  <Divider />                    
-                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
-                            <ListItemIcon>
-                                <LockIcon fontSize="small" />
-                            </ListItemIcon>
-                            Change Password
-                        </MenuItem>
-                        <MenuItem onClick={() => handleDeleteAccount}>
-                            <ListItemIcon>
-                                <Delete fontSize="small" />
-                            </ListItemIcon>
-                            Delete my account
-                        </MenuItem>
-                        <MenuItem onClick={() => handleMenuClick('logout')}>
-                            <ListItemIcon>
-                                <LogoutIcon fontSize="small" />
-                            </ListItemIcon>
-                            Logout
-                        </MenuItem>
-               </Menu>
-            </div>
-      </nav>
-    </div>
-  );
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
 };
+return (
+  <div className="homepage">
+      <nav className="navbar">
+          <div className="logo-container">
+              <img src={HomePageLogo} alt="ExploreInEase Logo" className="logo" />
+              <span className="website-name">ExploreInEase</span>
+          </div>
+          <div className="currency-selector"  >
+      <select className="currency-dropdown" >
+        <option value="usd">USD ($)</option>
+        <option value="eur">EUR (€)</option>
+        <option value="egp">EGP (ج.م)</option>
+      </select>
+    </div>
+          <IconButton 
+  onClick={toggleDrawer(true)} 
+  className="menu-button" 
+  style={{ 
+    position: 'absolute', 
+    right: '40px', 
+    color: 'white',      // Icon color
+    backgroundColor: '#3f51b5' // Background color
+  }}
+>
+  <MenuIcon />
+</IconButton>
+       
+      </nav>
+      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{width: drawerOpen ? '700px' : '300px'}}>
+          <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
+              <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
+                  {avatarImage ? '' : firstInitial}
+              </Avatar>
+              <Typography variant="h6" style={{ marginLeft: '10px' }}>{tourist.username}</Typography>
+          </div>
+          <Divider />
+          <List>
+  <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
+  <ListItem button onClick={() => handleMenuClick('changePassword')}>
+    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+      <LockIcon fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary="Change Password" />
+  </ListItem>
+  <ListItem button onClick={handleDeleteAccount}>
+    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+      <Delete fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary="Delete Account" />
+  </ListItem>
+  <ListItem button onClick={() => handleMenuClick('logout')}>
+    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+      <LogoutIcon fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary="Logout" />
+  </ListItem>
+</List>
 
+          <Divider />
+          <List>
+              <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
+              {[
+                  "Explore Activities",
+                  "View Products",
+                  "Book Transportation",
+                  "View Booked items",
+                  "View/Rate Products",
+                  "Book Hotels",
+                  "Book Flights",
+                  "Complaints",
+                  "My Profile"
+              ].map((text) => (
+                  <ListItem key={text} disablePadding>
+                      <ListItemButton onClick={() => handleRegisterClick(text)}>
+                          <ListItemText primary={text} />
+                      </ListItemButton>
+                  </ListItem>
+              ))}
+          </List>
+      </Drawer>
+  </div>
+);
+};
 export default TouristNavbar;
