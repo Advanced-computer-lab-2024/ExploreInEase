@@ -9,16 +9,18 @@ import LockIcon from '@mui/icons-material/Lock';
 import LogoutIcon from '@mui/icons-material/Logout';
 import '../Guest/GuestHP.css'; 
 import HomePageLogo from '../HomePageLogo.png';
+
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
+import Drawer from '@mui/material/Drawer';
+import MenuIcon from '@mui/icons-material/Menu';
+
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import Drawer from '@mui/material/Drawer';
-import MenuIcon from '@mui/icons-material/Menu';
 import { Delete } from '@mui/icons-material';
 import axios from 'axios';
 const TouristNavbar = () => {
@@ -266,13 +268,22 @@ return (
               <img src={HomePageLogo} alt="ExploreInEase Logo" className="logo" />
               <span className="website-name">ExploreInEase</span>
           </div>
-          <div className="currency-selector"  >
-      <select className="currency-dropdown" >
-        <option value="usd">USD ($)</option>
-        <option value="eur">EUR (€)</option>
-        <option value="egp">EGP (ج.م)</option>
-      </select>
-    </div>
+          <div 
+                    className="currency-selector" 
+                    style={{ 
+                        position: 'absolute', 
+                        left: '80%', 
+                        transform: 'translateX(-50%)' 
+                    }}
+                >
+                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
+
+                    <select id="currency-select" className="currency-dropdown">
+                        <option value="usd">USD ($)</option>
+                        <option value="eur">EUR (€)</option>
+                        <option value="egp">EGP (ج.م)</option>
+                    </select>
+                </div>
           <IconButton 
   onClick={toggleDrawer(true)} 
   className="menu-button" 

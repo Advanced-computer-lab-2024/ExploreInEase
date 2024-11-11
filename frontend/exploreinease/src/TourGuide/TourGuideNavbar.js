@@ -11,7 +11,13 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import axios from 'axios';
 import UploadIcon from '@mui/icons-material/Upload';
 import Delete from '@mui/icons-material/Delete';
-
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
+import Drawer from '@mui/material/Drawer';
+import MenuIcon from '@mui/icons-material/Menu';
 import '../Guest/GuestHP.css'; 
 import NetworkService from '../NetworkService';
 import HomePageLogo from '../HomePageLogo.png';
@@ -26,6 +32,7 @@ const TourGuideHP = () => {
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const [anchorEl, setAnchorEl] = useState(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const open = Boolean(anchorEl);
     
     const initialUsername = User.User?.username || User.username;
@@ -90,7 +97,7 @@ const TourGuideHP = () => {
     }
 };
 
-    async function handleClick(title) {
+    async function handleRegisterClick(title) {
         if (title == "My Profile"){
           try {
             const options = {
@@ -157,7 +164,11 @@ const TourGuideHP = () => {
       } catch (err) {
           setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
       }
+
   };
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
+};
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -169,85 +180,81 @@ const TourGuideHP = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
-        <div className="nav-links">
-          <button  
-          onClick={() => handleClick("My Profile")}
-          className="small-button">My Profile</button>
-          <button onClick={() => handleClick("View My Created Itineraries")}
-              className="small-button">View My Created Itineraries</button>
-          <button onClick={() => handleClick("Create/Read/Update/Delete Itineraries")}
-              className="small-button">Create an Itinerary</button>
-     
-        <div style={{marginRight:5,marginTop:30,marginLeft:60}}>
-          <select>
-            <option value="usd">USD ($)</option>
-            <option value="eur">EUR (€)</option>
-            <option value="egp">EGP (ج.م)</option>
-          </select>
-        </div>
-      </div>
-      <div className="avatar-container">
-                    <Avatar
-                        sx={{ bgcolor: 'darkblue', color: 'white', width: 48, height: 48, fontSize: 20, cursor: 'pointer' }}
-                        onClick={handleMenuOpen}
-                        src={avatarImage ? avatarImage : undefined}
-                    >
-                        {avatarImage ? '' : defaultAvatarUrl}
-                    </Avatar>
+        <div 
+                    className="currency-selector" 
+                    style={{ 
+                        position: 'absolute', 
+                        left: '70%', 
+                        transform: 'translateX(-50%)' 
+                    }}
+                >
+                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
 
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleMenuClose}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        PaperProps={{
-                            elevation: 3,
-                            sx: {
-                                mt: 1.5,
-                                minWidth: 180,
-                                borderRadius: 2,
-                                boxShadow: '0px 4px 10px rgba(0,0,0,0.1)',
-                            },
-                        }}
-                    >
-                        <Typography variant="h6" sx={{ padding: '8px 16px', fontWeight: 600 }}>
-                            Account
-                        </Typography>
-                        <Divider />   
-                        <MenuItem component="label">
-                            <ListItemIcon>
-                                <UploadIcon fontSize="small" />
-                            </ListItemIcon>
-                            Upload Image
-                            <input
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                onChange={handleAvatarUpload}
-                            />
-                        </MenuItem>                     
-                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
-                            <ListItemIcon>
-                                <LockIcon fontSize="small" />
-                            </ListItemIcon>
-                            Change Password
-                        </MenuItem>
-                        <MenuItem onClick={() => handleDeleteAccount}>
-                            <ListItemIcon>
-                                <Delete fontSize="small" />
-                            </ListItemIcon>
-                            Delete my account
-                        </MenuItem>
-                        <MenuItem onClick={() => handleMenuClick('logout')}>
-                            <ListItemIcon>
-                                <LogoutIcon fontSize="small" />
-                            </ListItemIcon>
-                            Logout
-                        </MenuItem>
-                    </Menu>
+                    <select id="currency-select" className="currency-dropdown">
+                        <option value="usd">USD ($)</option>
+                        <option value="eur">EUR (€)</option>
+                        <option value="egp">EGP (ج.م)</option>
+                    </select>
                 </div>
-    </nav>
+          <IconButton 
+  onClick={toggleDrawer(true)} 
+  className="menu-button" 
+  style={{ 
+    position: 'absolute', 
+    right: '40px', 
+    color: 'white',      // Icon color
+    backgroundColor: '#3f51b5' // Background color
+  }}
+>
+<MenuIcon />
+</IconButton>
+</nav>
+<Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{width: drawerOpen ? '700px' : '300px'}}>
+          <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
+              <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
+                  {avatarImage ? '' :defaultAvatarUrl }
+              </Avatar>
+              <Typography variant="h6" style={{ marginLeft: '10px' }}>{initialUsername}</Typography>
+          </div>
+          <Divider />
+          <List>
+  <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
+  <ListItem button onClick={() => handleMenuClick('changePassword')}>
+    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+      <LockIcon fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary="Change Password" />
+  </ListItem>
+  <ListItem button onClick={handleDeleteAccount}>
+    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+      <Delete fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary="Delete Account" />
+  </ListItem>
+  <ListItem button onClick={() => handleMenuClick('logout')}>
+    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+      <LogoutIcon fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary="Logout" />
+  </ListItem>
+</List>
+
+          <Divider />
+          <List>
+              <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
+              {[
+                  "Create an Itinerary",
+                  "View My Created Itineraries",
+                  "My Profile"
+              ].map((text) => (
+                  <ListItem key={text} disablePadding>
+                      <ListItemButton onClick={() => handleRegisterClick(text)}>
+                          <ListItemText primary={text} />
+                      </ListItemButton>
+                  </ListItem>
+              ))}
+          </List>
+      </Drawer>
   </div>
   );
 };
