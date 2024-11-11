@@ -623,6 +623,95 @@ const saveTourist = async (tourist) => {
     }
 };
 
+
+
+const checkTouristDeletionCriteria = async (id) => {
+    const tourist = await Tourist.findById(id)
+        .populate('itineraryId.id') 
+        .populate('activityId.id'); 
+
+    if (!tourist) return false;
+
+    const now = new Date();
+
+    // Check if the itineraryId array is empty
+    if (!tourist.itineraryId || tourist.itineraryId.length === 0) {
+        return true;
+    }
+
+    for (const itineraryObj of tourist.itineraryId) {
+        const itinerary = itineraryObj.id;
+        if (itinerary && itinerary.dateTimeAvailable && itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
+            return false; 
+        }
+    }
+
+    // Check if the activityId array is empty
+    if (!tourist.activityId || tourist.activityId.length === 0) {
+        return true;
+    }
+
+    for (const activityObj of tourist.activityId) {
+        const activity = activityObj.id; 
+        if (activity && activity.date && new Date(activity.date) > now) {
+            return false; 
+        }
+    }
+
+    return true; 
+};
+
+
+
+const checkTourGuideItineraryDates = async (tourGuideId) => {
+    const now = new Date();
+    console.log(tourGuideId);
+    const itineraries = await Itinerary.find({ created_by: tourGuideId });
+    console.log(itineraries)
+    if (itineraries.length==0){
+        return true;
+    }
+
+    for (const itinerary of itineraries) {        
+        if (itinerary.dateTimeAvailable.some(date => new Date(date) > now)) {
+            return false; 
+        }
+    }
+    return true; 
+};
+
+
+
+
+const checkSellerProductStatus = async (sellerId) => {
+    const activeProducts = await Product.find({ sellerId: sellerId, isActive: true });
+    return activeProducts.length === 0; // Return true if no active products
+};
+
+
+
+
+const checkAdvertiserActivityStatus = async (advertiserId) => {
+    const now = new Date();
+
+    const futureActivities = await Activity.find({ 
+        created_by: advertiserId, 
+        date: { $gt: now } 
+    });
+
+    return futureActivities.length === 0; 
+};
+
+
+
+
+
+const updateRequestDeletion = async (userId, type) => {
+    const Model = type === 'tourist' ? Tourist : Users;
+    const result = await Model.findByIdAndUpdate(userId, { requestDeletion: true }, { new: true });
+    return result;
+};
+
 module.exports = {
     getLoyalityLevel,
     pointsAfterPayment,
@@ -663,5 +752,10 @@ module.exports = {
     getNotAcceptedUsers,
     updateUserStatus,
     findTouristById,
-    createActivity
+    createActivity,
+    updateRequestDeletion,
+    checkTouristDeletionCriteria,
+    checkTourGuideItineraryDates,
+    checkSellerProductStatus,
+    checkAdvertiserActivityStatus
 };
