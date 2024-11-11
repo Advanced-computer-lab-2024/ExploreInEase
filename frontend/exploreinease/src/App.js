@@ -6,7 +6,7 @@ import React, { Suspense } from 'react';
 const ArchiveProduct = React.lazy(() => import("./Shared/Components/Product/ArchiveProduct"));
 const TermsAcceptance = React.lazy(() => import('./TermsAcceptance'));
 const ChangePassword=React.lazy(()=>import("./TouristGovernor/changePassword"))
-
+const Signup = React.lazy(() => import('./SignUp/Signup'));
 const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
 const TourGuideProfile = React.lazy(() => import('./Shared/Components/TourGuideProfile/TourGuideProfile'));
 const AdvertiserProfile = React.lazy(() => import('./Shared/Components/advertiserProfile/advertiserProfile'));
@@ -52,7 +52,7 @@ const App = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
           <Route path="/" element={<GuestNavbar />} />
-          <Route path="/register" element={<RoleSelection />} />
+          <Route path="/register" element={<Signup />} />
           <Route path="/explore" element={<Filter />} />
           <Route path="/viewProduct" element={<Product />} />
           <Route path="/viewTouristProfile" element={<TouristProfile />} />

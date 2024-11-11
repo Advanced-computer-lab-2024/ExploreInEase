@@ -1,6 +1,8 @@
+// src/components/TouristSignUp.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NetworkService from '../NetworkService';
+import './Signup.css';
 
 const TouristSignUp = () => {
   const navigate = useNavigate();
@@ -32,12 +34,12 @@ const TouristSignUp = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     const age = calculateAge(formData.dob);
     
     if (age < 18) {
       setError('You must be at least 18 years old to register as a tourist.');
-      return; // Stop execution if age is less than 18
+      return;
     }
 
     try {
@@ -47,100 +49,48 @@ const TouristSignUp = () => {
           email: formData.email,
           username: formData.username,
           password: formData.password,
-          mobileNum: formData.mobileNumber, // API field mapping
-          nation: formData.nationality, // API field mapping
+          mobileNum: formData.mobileNumber,
+          nation: formData.nationality,
           dob: formData.dob,
-          profession: formData.jobOrStudent // API field mapping
+          profession: formData.jobOrStudent
         }
       };
+      console.log(options);
       
       const response = await NetworkService.post(options);
-      const User=response.tourist;
-      setSuccess(response.message); // Set success message
-      console.log(response.tourist);
-      navigate(`/TouristHomePage`,{state:{User:User}});
+      const tourist = response.tourist;
+      setSuccess(response.message);
+      navigate(`/TouristHomePage`, { state: { tourist } });
+
     } catch (err) {
       if (err.response) {
-          console.log(err.message);
-        setError(err.response.data.message); // Set error message from server response if exists
+        setError(err.response.data.message);
       } else {
-        setError('An unexpected error occurred.'); // Generic error message
+        setError('An unexpected error occurred.');
       }
     }
   };
 
   return (
-    <div className="signup-form">
-      <h2>Tourist Sign Up</h2>
+    <form onSubmit={handleSubmit}>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
-        <label>Email:</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Username:</label>
-        <input
-          type="text"
-          name="username"
-          value={formData.username}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Password:</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Mobile Number:</label>
-        <input
-          type="tel"
-          name="mobileNumber"
-          value={formData.mobileNumber}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Nationality:</label>
-        <input
-          type="text"
-          name="nationality"
-          value={formData.nationality}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Date of Birth:</label>
-        <input
-          type="date"
-          name="dob"
-          value={formData.dob}
-          onChange={handleInputChange}
-          required
-        />
-
-        <label>Job/Student:</label>
-        <input
-          type="text"
-          name="jobOrStudent"
-          value={formData.jobOrStudent}
-          onChange={handleInputChange}
-          required
-        />
-
-        <button type="submit">Register as Tourist</button>
-      </form>
-    </div>
+      <label>Email:</label>
+      <input type="email" name="email" value={formData.email} onChange={handleInputChange} required />
+      <label>Username:</label>
+      <input type="text" name="username" value={formData.username} onChange={handleInputChange} required />
+      <label>Password:</label>
+      <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
+      <label>Mobile Number:</label>
+      <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} required />
+      <label>Nationality:</label>
+      <input type="text" name="nationality" value={formData.nationality} onChange={handleInputChange} required />
+      <label>Date of Birth:</label>
+      <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} required />
+      <label>Job/Student:</label>
+      <input type="text" name="jobOrStudent" value={formData.jobOrStudent} onChange={handleInputChange} required />
+      <button type="submit">Register as Tourist</button>
+    </form>
   );
 };
 
