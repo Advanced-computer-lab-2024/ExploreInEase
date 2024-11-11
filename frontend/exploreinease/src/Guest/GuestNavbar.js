@@ -59,20 +59,7 @@ const HomePage = () => {
             <option value="egp">EGP (ج.م)</option>
           </select>
         </div>
-        {/* <div className="avatar-container">
-          <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
-        </div> */}
+  
       </nav>
       {/* Other homepage content goes here */}
     </div>

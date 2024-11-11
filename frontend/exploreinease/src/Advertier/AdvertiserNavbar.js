@@ -8,12 +8,19 @@ import Typography from '@mui/material/Typography';
 import LockIcon from '@mui/icons-material/Lock';
 import LogoutIcon from '@mui/icons-material/Logout';
 import UploadIcon from '@mui/icons-material/Upload';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Delete from '@mui/icons-material/Delete';
 import '../Guest/GuestHP.css';
 import HomePageLogo from '../HomePageLogo.png';
+import Drawer from '@mui/material/Drawer';
 import axios from 'axios';
 import NetworkService from '../NetworkService';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Delete } from '@mui/icons-material';
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -23,7 +30,7 @@ const HomePage = () => {
     const { User, imageUrl } = location.state || {};
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const initialUsername = User.User?.username || User.username;
     const userId = User.User?._id || User._id;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
@@ -64,14 +71,12 @@ const HomePage = () => {
         if (file) {
             const formData = new FormData();
             formData.append('image', file);
-            console.log('Uploading image:', formData);
             try {
                 const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 });
-                console.log('Image uploaded successfully:', response);
                 const uploadedImageUrl = response.data.imageUrl;
                 
                 // Update avatarImage and save the URL in localStorage
@@ -93,33 +98,15 @@ const HomePage = () => {
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
-
-        } 
-        else if (title === "Transportation"){
-          try {
-            // Construct the API path
-            const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;  // Ensure this matches your API route
-            // Make the GET request using Axios
-            const response = await axios.get(apiPath);
-        
-            // Log the response data
-            console.log('API Response:', response);
-        
-            // Pass the fetched activities to the Activities page
-            navigate(`/transportion`, { state: { allActivity: response.data ,id:userId} });
-            
-          } catch (err) {
-            // Check if there is a response from the server and handle error
-            if (err.response) {
-              console.error('API Error:', err.message);
-              setError(err.response.data.message);  // Display error message from the server
-            } else {
-              console.error('Unexpected Error:', err);
-              setError('An unexpected error occurred.');  // Display generic error message
+        } else if (title === "Transportation") {
+            try {
+                const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
+                const response = await axios.get(apiPath);
+                navigate(`/transportion`, { state: { allActivity: response.data ,id:userId} });
+            } catch (err) {
+                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
-          }
-        }
-        else {
+        } else {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
@@ -132,114 +119,109 @@ const HomePage = () => {
 
     const handleDeleteAccount = async () => {
         try {
-          console.log(userId,userType);
-
-          const options = {
-              apiPath: `/requestDeletion/${userId}/${userType}`,
-              useParams:userId,userType,
+            const options = {
+                apiPath: `/requestDeletion/${userId}/${userType}`,
             };
-          const response = await NetworkService.put(options);
-          console.log(response);
+            const response = await NetworkService.put(options);
 
-          if (response.success) {
-              setSuccess("Account deletion requested successfully.");
-          } else {
-              setError(response.message || "Account deletion request failed.");
-          }
-      } catch (err) {
-          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
-      }
+            if (response.success) {
+                setSuccess("Account deletion requested successfully.");
+            } else {
+                setError(response.message || "Account deletion request failed.");
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+        }
     };
-
+    const toggleDrawer = (open) => () => {
+        setDrawerOpen(open);
+    };
+       
     return (
         <div className="homepage">
             <nav className="navbar">
+                
                 <div className="logo-container">
                     <img src={HomePageLogo} alt="ExploreInEase Logo" className="logo" />
                     <span className="website-name">ExploreInEase</span>
                 </div>
-                <div className="nav-links">
-                    <button onClick={() => handleRegisterClick("Activities")} style={{ width: 160 }}>
-                        CRUD Activities
-                    </button>
-                    <button  onClick={() => handleRegisterClick("Transportation")}
-               style={{width:160}}>Create transportation</button>
-                    <button onClick={() => handleRegisterClick("My profile")} style={{ width: 160 }}>
-                        My profile
-                    </button>
-                    <div style={{ marginRight: 5, marginTop: 30, marginLeft: 30 }}>
-                        <span className="currency-symbol"></span>
-                        <select>
-                            <option value="usd">USD ($)</option>
-                            <option value="eur">EUR (€)</option>
-                            <option value="egp">EGP (ج.م)</option>
-                        </select>
-                    </div>
-                </div>
-                <div className="avatar-container">
-                    <Avatar
-                        sx={{ bgcolor: 'darkblue', color: 'white', width: 48, height: 48, fontSize: 20, cursor: 'pointer' }}
-                        onClick={handleMenuOpen}
-                        src={avatarImage ? avatarImage : undefined}
-                    >
-                        {avatarImage ? '' : defaultAvatarUrl}
-                    </Avatar>
+                <div 
+                    className="currency-selector" 
+                    style={{ 
+                        position: 'absolute', 
+                        left: '80%', 
+                        transform: 'translateX(-50%)' 
+                    }}
+                >
+                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
 
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleMenuClose}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        PaperProps={{
-                            elevation: 3,
-                            sx: {
-                                mt: 1.5,
-                                minWidth: 180,
-                                borderRadius: 2,
-                                boxShadow: '0px 4px 10px rgba(0,0,0,0.1)',
-                            },
-                        }}
-                    >
-                        <Typography variant="h6" sx={{ padding: '8px 16px', fontWeight: 600 }}>
-                            Account
-                        </Typography>
-                        <Divider />
-                        <MenuItem component="label">
-                            <ListItemIcon>
-                                <UploadIcon fontSize="small" />
-                            </ListItemIcon>
-                            Upload Image
-                            <input
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                onChange={handleAvatarUpload}
-                            />
-                        </MenuItem>                     
-                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
-                            <ListItemIcon>
-                                <LockIcon fontSize="small" />
-                            </ListItemIcon>
-                            Change Password
-                        </MenuItem>
-                        <MenuItem onClick={() => handleDeleteAccount}>
-                            <ListItemIcon>
-                                <Delete fontSize="small" />
-                            </ListItemIcon>
-                            Delete my account
-                        </MenuItem>
-                        <MenuItem onClick={() => handleMenuClick('logout')}>
-                            <ListItemIcon>
-                                <LogoutIcon fontSize="small" />
-                            </ListItemIcon>
-                            Logout
-                        </MenuItem>
-                    </Menu>
+                    <select id="currency-select" className="currency-dropdown">
+                        <option value="usd">USD ($)</option>
+                        <option value="eur">EUR (€)</option>
+                        <option value="egp">EGP (ج.م)</option>
+                    </select>
                 </div>
+              
+                <IconButton 
+                    onClick={toggleDrawer(true)} 
+                    className="menu-button" 
+                    style={{ position: 'absolute', right: '40px', color: 'white', backgroundColor: '#3f51b5' }}>
+                    <MenuIcon />
+                </IconButton>
             </nav>
-            {success && <Typography color="green">{success}</Typography>}
-            {error && <Typography color="red">{error}</Typography>}
+        
+
+            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{ width: drawerOpen ? '700px' : '300px' }}>
+                <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
+                        {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Typography variant="h6" style={{ marginLeft: '10px' }}>{initialUsername}</Typography>
+                </div>
+                <Divider />
+                <List>
+                    <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
+                    <ListItem button onClick={() => handleMenuClick('changePassword')}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <LockIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Change Password" />
+                    </ListItem>
+                    <ListItem button onClick={handleDeleteAccount}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <Delete fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Delete Account" />
+                    </ListItem>
+                    <ListItem button onClick={() => handleMenuClick('logout')}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <LogoutIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Logout" />
+                    </ListItem>
+                </List>
+
+                <Divider />
+                <Divider />
+                <List>
+                    <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
+                    {[
+                        "Activities",
+                        "Transportation",               
+                        "My Profile"
+                    ].map((text) => (
+                        <ListItem key={text} disablePadding>
+                            <ListItemButton onClick={() => handleRegisterClick(text)}>
+                                <ListItemText primary={text} />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Drawer>
+
+            {/* Display Error or Success Message */}
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
         </div>
     );
 };
