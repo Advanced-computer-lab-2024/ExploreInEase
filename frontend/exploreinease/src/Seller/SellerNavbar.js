@@ -13,6 +13,7 @@ import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { Alert } from '@mui/material'; 
 import UploadIcon from '@mui/icons-material/Upload';
 import { Delete } from '@mui/icons-material';
 import List from '@mui/material/List';
@@ -29,7 +30,10 @@ const HomePage = () => {
     const [success,setSuccess]=useState();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [error,setError]=useState();
-    
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const { User, imageUrl } = location.state || {};
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -50,6 +54,23 @@ const HomePage = () => {
           setAvatarImage(defaultAvatarUrl);
       }
   }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
    
     const handleMenuOpen = (event) => {
       setAnchorEl(event.currentTarget);
@@ -170,6 +191,8 @@ const HomePage = () => {
             };
           const response = await NetworkService.put(options);
           console.log(response);
+          setSuccessMessage(response.data.message||"Delete Successfully!");
+          setShowSuccessMessage(true);
 
           if (response.success) {
               setSuccess("Account deletion requested successfully.");
@@ -177,6 +200,8 @@ const HomePage = () => {
               setError(response.message || "Account deletion request failed.");
           }
       } catch (err) {
+        setErrorMessage(err.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);
           setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
       }
     };
@@ -240,26 +265,25 @@ const HomePage = () => {
                         </ListItemIcon>
                         <ListItemText primary="Delete Account" />
                     </ListItem>
+                    <ListItem component="label" sx={{ alignItems: 'center', padding: 0 , marginLeft: '8px'}}>
+                        <ListItemIcon sx={{ minWidth: 0, marginRight: '8px' }}>
+                            <UploadIcon />
+                        </ListItemIcon>
+                        Upload Image
+                        <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleAvatarUpload}
+                        />
+                    </ListItem>
                     <ListItem button onClick={() => handleMenuClick('logout')}>
                         <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
                             <LogoutIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText primary="Logout" />
                     </ListItem>
-                    <ListItem component="label">
-                            <ListItemIcon>
-                                <UploadIcon fontSize="small" />
-                            </ListItemIcon>
-                            Upload Image
-                            <input
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                onChange={handleAvatarUpload}
-                            />
-                        </ListItem>  
                 </List>
-
                 <Divider />
                 <Divider />
                 <List>
@@ -277,6 +301,36 @@ const HomePage = () => {
                     ))}
                 </List>
             </Drawer>
+            <div>
+      {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+      </div>
       {/* Other homepage content goes here */}
     </div>
   );

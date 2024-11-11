@@ -486,7 +486,7 @@ const uploadImage = async (userId, fileName, fileBuffer) => {
 };
 const findTouristById = async (userId) => {
     try {
-        const user = await findUserById(userId); // Assuming Mongoose is used
+        const user = await Tourist.findById(userId); // Assuming Mongoose is used
         return user;
     } catch (error) {
         console.error('Error fetching user by ID:', error);

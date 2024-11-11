@@ -26,7 +26,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 
 
-let adminid = '672bf691f67cfb02edc244bc';
+let adminid = localStorage.getItem('UserId');
 
 
 const DeletionRequests = () => {

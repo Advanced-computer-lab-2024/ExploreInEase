@@ -10,6 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { Alert } from '@mui/material'; 
 import { Tooltip, IconButton } from '@mui/material';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Menu, MenuItem } from '@mui/material';
 import dayjs from 'dayjs';
@@ -31,7 +32,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 
 
-let adminid = '672bf691f67cfb02edc244bc';
+let adminid = localStorage.getItem('UserId');
 
 
 const RegistringUsers = () => {
@@ -57,12 +58,16 @@ const RegistringUsers = () => {
 
 
     const [optionsAnchorEl, setOptionsAnchorEl] = useState(null);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
 
         const getReqs = async () => {
 
-            const res = await axios.get(`http://localhost:3030/notAcceptedUsers`)
+            const res = await axios.get(`http://localhost:3030/notAcceptedUsers`)            
                 .then(response => {
                     setUsers(response.data);
                     console.log(response.data);
@@ -74,7 +79,23 @@ const RegistringUsers = () => {
         getReqs()
 
     }, [loaded]);
-
+    useEffect(() => {
+        if (showSuccessMessage) {
+          const timer = setTimeout(() => {
+            setShowSuccessMessage(false);
+          }, 5000);
+          return () => clearTimeout(timer);
+        }
+      }, [showSuccessMessage]);
+      
+      useEffect(() => {
+        if (showErrorMessage) {
+          const timer = setTimeout(() => {
+            setShowErrorMessage(false);
+          }, 5000);
+          return () => clearTimeout(timer);
+        }
+      }, [showErrorMessage]);
 
     const [selectedUserId, setSelectedUserId] = useState(null);
 
@@ -94,13 +115,13 @@ const RegistringUsers = () => {
 
         await axios.put(`http://localhost:3030/user/updatingStatus/${selectedUserId}/accepted`).then(response => {
             console.log(response.data);
+            console.log(response);
+            setSuccessMessage("Complaint accepted Successfully!");
+            setShowSuccessMessage(true);
             setLoaded(false);
-        }).catch(err => console.log(err));
-    
-
-
-
-
+        }).catch(err => {console.log(err);
+            setErrorMessage(err.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);});
         handleClose(); // Close the menu after action
     };
 
@@ -110,7 +131,13 @@ const RegistringUsers = () => {
         await axios.put(`http://localhost:3030/user/updatingStatus/${selectedUserId}/rejected`).then(response => {
             console.log(response.data);
             setLoaded(false);
-        }).catch(err => console.log(err));
+            setSuccessMessage("Complaint rejected Successfully!");
+            setShowSuccessMessage(true);
+        }).catch(err => {
+            console.log(err);
+            setErrorMessage(err.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+        });
 
     };
 
@@ -176,15 +203,15 @@ const RegistringUsers = () => {
                                      <Button
                                     onClick={(event)=>{
 
-                                        if(user.documents.taxation){
-                                            handleOpenFile(event, user.documents.taxation)
+                                        if(user?.documents?.taxation ){
+                                            handleOpenFile(event, user?.documents?.taxation)
                                         }else{
                                         
-                                        handleOpenFile(event, user.documents.certificate)
+                                        handleOpenFile(event, user?.documents?.certificate)
                                     
                                         }
                                     }}
-                                    >{user.documents.taxation?  "View Taxation" : "View Certificate"}</Button>
+                                    >{user.documents?.taxation?  "View Taxation" : "View Certificate"}</Button>
 
 
 
@@ -216,9 +243,37 @@ const RegistringUsers = () => {
 
                         </TableBody>
                     </Table>
+
                 </TableContainer> : <h1>Loading...</h1>}
 
-
+            <div> {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}</div>
 
         </div>
 

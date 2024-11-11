@@ -1,5 +1,7 @@
 const checkoutService = require('../checkouts/checkoutService');
 const checkoutRepository = require('../checkouts/checkoutRepository');
+const userRepository = require('../users/userRepository');
+
 const addProduct = async (req, res) => {
     const { price, description, originalQuantity, name } = req.body;
     console.log(req.body)
@@ -140,7 +142,8 @@ const reviewProduct = async (req, res) => {
 }
 
 const addOrder = async (req, res) => {
-    const { touristId, productIds, quantities } = req.body;
+    const { touristId, productIds, quantities, totalPrice } = req.body;
+    console.log("BODY: ",req.body);
 
     // Ensure all required fields are provided
     if (!touristId || !productIds || !quantities || productIds.length === 0 || quantities.length === 0) {
@@ -169,6 +172,9 @@ const addOrder = async (req, res) => {
     try {
         // Call the service function to add the order
         const newOrder = await checkoutService.addOrder(orderData);
+        const tourist = await userRepository.findTouristById(touristId);
+        tourist.wallet = tourist.wallet - totalPrice;
+        tourist.save();
         res.status(201).json({ message: "Order added successfully", order: newOrder });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -346,8 +352,12 @@ const getAvailableProducts = async (req, res) => {
         const products = await checkoutService.getAvailableProducts();
         console.log(products);
         const allActiveProducts = products.filter(product => product.isActive === true);
-        const finalProducts = allActiveProducts.filter(product => product.sellerId.toString() === userId);
-        console.log(finalProducts);
+        let finalProducts = allActiveProducts;
+        if(type === 'admin' || type === 'seller'){
+            finalProducts = allActiveProducts.filter(product => product.sellerId.toString() === userId);
+            console.log(finalProducts);
+        }
+
         res.status(200).json({message: "Fetched successfully!",Products: finalProducts});
         } catch (error) {
         res.status(500).json({ message: error.message });

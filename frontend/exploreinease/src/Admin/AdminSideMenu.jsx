@@ -41,6 +41,8 @@ const drawerWidth = 240;
 
 
 function ResponsiveDrawer(props) {
+  const adminId = localStorage.getItem('UserId');
+
   const { window } = props;
   const navigate = useNavigate(); // Use useNavigate hook
   const [mobileOpen, setMobileOpen] =useState(false);
@@ -77,36 +79,57 @@ function ResponsiveDrawer(props) {
       switch(openTab){
         case 'ComplaintsTable':
           setTab(<ComplaintsTable />);
+          console.log("1");
           return <ComplaintsTable />
         case 'DeletionRequests':
           setTab(<DeletionRequests />);
+          console.log("2");
+
           return <DeletionRequests />
         case 'EventsAndItineraries':
           setTab(<EventsAndItineraries />);
+          console.log("3");
+
           return <EventsAndItineraries />
         case 'RegistringUsers':
           setTab(<RegistringUsers />);
+          console.log("4");
+
           return <RegistringUsers />
           case 'ViewProduct':
             setTab(<ViewProduct />);
+            console.log("5");
+
             return <ViewProduct />
             case 'AdminUserProfiles':
               setTab(<AdminUserProfiles />);
+              console.log("6");
+
               return <AdminUserProfiles />
               case 'Preferencetags':
                 setTab(<Preferencetags/>);
+                console.log("7");
+
                 return <Preferencetags/>
                 case 'AddUser':
                   setTab(<AddUser />);
+                  console.log("8");
+
                   return <AddUser />
                   case 'ActivityCategory':
                     setTab(<ActivityCategory />);
+                    console.log("9");
+
                     return <ActivityCategory />
                     case 'ArchiveProduct':
                       setTab(<ArchiveProduct />);
+                      console.log("10");
+
                       return <ArchiveProduct />
                       case 'ChangePassword':
                         setTab(<ChangePassword />);
+                        console.log("1");
+
                         return <ChangePassword />
 
                         default:
@@ -158,7 +181,7 @@ function ResponsiveDrawer(props) {
         </ListItemButton>
         <Collapse in={UsercollapseOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers','AdminUserProfiles','AddUser','ChangePassword'].map((text) => (
+            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers','AddUser','ChangePassword'].map((text) => (
               <ListItemButton
                 key={text}
                 sx={{ pl: 4 }}

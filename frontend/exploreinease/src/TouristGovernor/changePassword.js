@@ -18,7 +18,7 @@ const ChangePassword = () => {
    const [error, setError] = useState('');
    const [success, setSuccess] = useState('');
    const location = useLocation();
-   const { userId } = location.state ||adminIdd;
+   const userId  = adminIdd || location.state;
    console.log(userId);
 
    const handleSubmit = async (event) => {

@@ -17,6 +17,7 @@ import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Alert } from '@mui/material'; 
 
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +39,10 @@ const TouristNavbar = () => {
      const userId=tourist._id;
      const userType = tourist.tourist?.type || tourist.type||'tourist';
 
+     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+     const [showErrorMessage, setShowErrorMessage] = useState(false);
+     const [errorMessage, setErrorMessage] = useState('');
+     const [successMessage, setSuccessMessage] = useState('');
 
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
@@ -52,6 +57,24 @@ const TouristNavbar = () => {
          }
      }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
 
+     
+     useEffect(() => {
+      if (showSuccessMessage) {
+        const timer = setTimeout(() => {
+          setShowSuccessMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showSuccessMessage]);
+    
+    useEffect(() => {
+      if (showErrorMessage) {
+        const timer = setTimeout(() => {
+          setShowErrorMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showErrorMessage]);
 
      const handleMenuOpen = (event) => {
       setAnchorEl(event.currentTarget);
@@ -70,8 +93,8 @@ const TouristNavbar = () => {
       }
    };
 
-    async function handleRegisterClick(title) {
-       if(title =="Book Transportation") {
+    const  handleRegisterClick=async(title)=> {
+       if(title =="Book a Transportation") {
         try {
           const touristId=userId;
           const options = { 
@@ -192,7 +215,7 @@ const TouristNavbar = () => {
           }
         }
       }
-      else if("Explore Activities"){
+      else{
         try {
             const options = {
               apiPath: `/upcomingEvents`,
@@ -225,13 +248,18 @@ const TouristNavbar = () => {
             };
           const response = await NetworkService.put(options);
           console.log(response);
+          setSuccessMessage(response.message||"Delete Successfully!");
+          setShowSuccessMessage(true);
 
           if (response.success) {
+
               setSuccess("Account deletion requested successfully.");
           } else {
               setError(response.message || "Account deletion request failed.");
           }
       } catch (err) {
+        setErrorMessage(error.response.message || 'An error occurred');
+        setShowErrorMessage(true);
           setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
       }
     };
@@ -319,6 +347,7 @@ return (
     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
       <Delete fontSize="small" />
     </ListItemIcon>
+    
     <ListItemText primary="Delete Account" />
   </ListItem>
   <ListItem button onClick={() => handleMenuClick('logout')}>
@@ -335,7 +364,7 @@ return (
               {[
                   "Explore Activities",
                   "View Products",
-                  "Book Transportation",
+                  "Book a Transportation",
                   "View Booked items",
                   "View/Rate Purchased Product",
                   "Book Hotels",
@@ -351,6 +380,36 @@ return (
               ))}
           </List>
       </Drawer>
+      <div>
+      {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+      </div>
   </div>
 );
 };

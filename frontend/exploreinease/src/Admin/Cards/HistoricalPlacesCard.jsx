@@ -179,11 +179,11 @@ const HistoricalPlaceCard = ({ item }) => {
                 </Typography>
 
                 <Typography color="text.secondary">
-                    Type: {item.tags? item.tags.type : 'N/A'}
+                    Tag: {item.tags}
                 </Typography>
-                <Typography color="text.secondary">
-                Period: {item.tags? item.tags.period : 'N/A'}
-                </Typography>
+                {/* <Typography color="text.secondary">
+                Period: {item.tags}
+                </Typography> */}
             </CardContent>
         </Card>
     );

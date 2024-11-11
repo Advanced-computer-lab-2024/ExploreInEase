@@ -60,7 +60,8 @@ const ComplaintsTable = () => {
 
   // Filter complaints based on the selected filter
 
-  const adminid = "672bf691f67cfb02edc244bc";
+  const adminid = localStorage.getItem('UserId');
+  console.log("Admin ID:", adminid);
 
 
   const [reply, setReply] = useState('');

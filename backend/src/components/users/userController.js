@@ -543,7 +543,6 @@ const getLevel = async (req, res) => {
         return res.status(400).json({ message: 'Missing userId parameter.' });
     }
     const user = await userRepository.findTouristById(userId);
-
     if (!user) {
         return res.status(404).json({ message: 'User not found.' });
     }   

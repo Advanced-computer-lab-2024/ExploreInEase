@@ -29,11 +29,10 @@ const ViewComplain = async (adminId) => {
 
     return complaints.map((complaint) => ({
       _id: complaint._id,
-
-      title:complaint.title,
-      touristId: complaint.touristId._id,
-      touristName: complaint.touristId.username,
-      touristEmail: complaint.touristId.email,
+      title: complaint.title,
+      touristId: complaint.touristId ? complaint.touristId._id : null,
+      touristName: complaint.touristId ? complaint.touristId.username : "Unknown",
+      touristEmail: complaint.touristId ? complaint.touristId.email : "Unknown",
       problem: complaint.problem,
       dateOfComplaint: complaint.dateOfComplaint,
       status: complaint.status,
@@ -42,7 +41,7 @@ const ViewComplain = async (adminId) => {
   } catch (error) {
     console.error("Error in ViewComplain:", error);
     throw new Error("Failed to retrieve complaints.");
-  }
+  }
 };
 
 const getComplaintDetails = async (adminId, complaintId) => {

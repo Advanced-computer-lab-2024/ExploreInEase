@@ -15,7 +15,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-
+import { Alert } from '@mui/material'; 
 import Delete from '@mui/icons-material/Delete';
 import '../Guest/GuestHP.css';
 import HomePageLogo from '../HomePageLogo.png';
@@ -42,6 +42,10 @@ const HomePage = () => {
     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
     const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
 
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     useEffect(() => {
         // Update the avatar URL when the component mounts if a new image URL exists
         if (savedAvatarUrl || imageUrl) {
@@ -50,6 +54,25 @@ const HomePage = () => {
             setAvatarImage(defaultAvatarUrl);
         }
     }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
+
+         useEffect(() => {
+      if (showSuccessMessage) {
+        const timer = setTimeout(() => {
+          setShowSuccessMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showSuccessMessage]);
+    
+    useEffect(() => {
+      if (showErrorMessage) {
+        const timer = setTimeout(() => {
+          setShowErrorMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showErrorMessage]);
+
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -97,7 +120,7 @@ const HomePage = () => {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
-                navigate(`/transportion`, { state: { allActivity: response.data ,id:userId} });
+                navigate(`/transportion`, { state: { allActivity: response.data ,advertiserId:userId} });
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
@@ -129,13 +152,16 @@ const HomePage = () => {
                 apiPath: `/requestDeletion/${userId}/${userType}`,
             };
             const response = await NetworkService.put(options);
-
+            setSuccessMessage(response.message||"Delete Successfully!");
+            setShowSuccessMessage(true);
             if (response.success) {
                 setSuccess("Account deletion requested successfully.");
             } else {
                 setError(response.message || "Account deletion request failed.");
             }
         } catch (err) {
+            setErrorMessage(err.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
             setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
         }
     };
@@ -200,24 +226,24 @@ const HomePage = () => {
                         </ListItemIcon>
                         <ListItemText primary="Delete Account" />
                     </ListItem>
+                    <ListItem component="label" sx={{ alignItems: 'center', padding: 0 , marginLeft: '8px'}}>
+                        <ListItemIcon sx={{ minWidth: 0, marginRight: '8px' }}>
+                            <UploadIcon />
+                        </ListItemIcon>
+                        Upload Image
+                        <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleAvatarUpload}
+                        />
+                    </ListItem>
                     <ListItem button onClick={() => handleMenuClick('logout')}>
                         <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
                             <LogoutIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText primary="Logout" />
                     </ListItem>
-                    <ListItem component="label">
-                            <ListItemIcon>
-                                <UploadIcon fontSize="small" />
-                            </ListItemIcon>
-                            Upload Image
-                            <input
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                onChange={handleAvatarUpload}
-                            />
-                        </ListItem>  
                 </List>
 
                 <Divider />
@@ -237,10 +263,37 @@ const HomePage = () => {
                     ))}
                 </List>
             </Drawer>
-
-            {/* Display Error or Success Message */}
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
+      <div>
+      {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+      </div>
+      
         </div>
     );
 };

@@ -64,33 +64,34 @@ function BookTransportation() {
     }
     const handleClose = () => setOpen(false);
 
-    const handleBookTransportation=async()=>{
-      console.log("selected",selectedTransportation);
+    const handleBookTransportation = async () => {
+      console.log("selected", selectedTransportation);
       try {
-        const options = { apiPath: `/bookTransportation`,
-        body:{
-          touristId:userId,
-          transportationId:selectedTransportation._id,
-          
-        }
+        const options = {
+          apiPath: `/bookTransportation`,
+          body: {
+            touristId: userId,
+            transportationId: selectedTransportation._id,
+          }
         };
+        
         const response = await NetworkService.post(options);
-          console.log(response);
-
-          setTransportion(prevData => prevData.filter(item => item._id !== transportation._id));
-          setSuccessMessage("Created Successfully!");
-          setShowSuccessMessage(true);
-
-          setSuccess(true);
-          
+        console.log(response);
+    
+        // Remove the booked transportation from the list
+        setTransportion(prevData => prevData.filter(item => item._id !== selectedTransportation._id));
+        setSuccessMessage("Booked Successfully!");
+        setSuccess(true);
+        
       } catch (error) {
-        console.log('Error fetching historical places:', error);
-        setError(true);
-        setErrorMessage('An error occurred');
+        console.log('Error booking transportation:', error);
+        setErrorMessage(error.response?.data?.message || 'An error occurred');
         setShowErrorMessage(true);
       }
+      
       handleClose();
-    }
+    };
+    
     useEffect(() => {
       if (success) {
         const timer = setTimeout(() => {
@@ -107,6 +108,7 @@ function BookTransportation() {
       }
       
     }, [success,error]);
+
   return (
     <div>
      <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>

@@ -6,8 +6,11 @@ require('dotenv').config({ path: "src/.env" });
 
 
 const getAllEvents=async()=> {
-  const activities = await eventRepository.getAllActivities();
-  const itineraries = await eventRepository.getAllItineraries2();
+  // Assuming 'flag' is a property in the items of activities and itineraries
+const activities = (await eventRepository.getAllActivities()).filter(activity => activity.flag === 1);
+const itineraries = (await eventRepository.getAllItineraries2()).filter(itinerary => itinerary.flag === 1);
+
+console.log(itineraries);
   const historicalPlaces = await eventRepository.getAllHistoricalPlaces();
 
   return {
@@ -156,8 +159,11 @@ const getAllUpcomingEvents = async () => {
     const { activities, itineraries, historicalPlaces } =
       await eventRepository.getAllUpcomingEvents();
 
+      const filteredActivities = activities.filter(activity => activity.flag === 1);
+      const filteredItineraries = itineraries.filter(itinerary => itinerary.flag === 1);
+
     // Format activities
-     const formattedActivities= activities.map((activity)=>{
+     const formattedActivities= filteredActivities.map((activity)=>{
       console.log(1)
       console.log(activity);
       
@@ -211,7 +217,7 @@ const getAllUpcomingEvents = async () => {
     // }));
 
     // Format itineraries
-    const formattedItineraries = itineraries.map((itinerary) => ({
+    const formattedItineraries = filteredItineraries.map((itinerary) => ({
       id: itinerary._id,
       name:itinerary.name,
       activities: itinerary.activities.map((activity) => activity.name), // Get activity names within the itinerary

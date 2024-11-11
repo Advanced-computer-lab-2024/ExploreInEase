@@ -228,13 +228,8 @@ const ActivityCard = ({ item }) => {
                               <LocationDisplay coordinates={location} />
                          }
         </Typography>
-
-        <Typography color="text.secondary">Tags: {item.tags.map((tag, index) => (
-    <span key={tag._id}>
-      {tag.tags}
-      {index < item.tags.length - 1 && ', '}
-    </span>
-  ))}</Typography>
+       
+        <Typography color="text.secondary">Tags: {item.tags} </Typography>
 
         {item.specialDiscount && (
           <Typography color="text.secondary">
