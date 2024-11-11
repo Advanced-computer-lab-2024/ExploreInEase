@@ -99,11 +99,13 @@ const Complaints = () => {
                 urlParam: userId
             };
             const response = await NetworkService.get(options);
-            setComplaints(response.data);
+            setComplaints(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
             console.error('Error fetching complaints:', err);
+            setComplaints([]); // Set to an empty array in case of error
         }
     };
+    
 
     return (
         <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>

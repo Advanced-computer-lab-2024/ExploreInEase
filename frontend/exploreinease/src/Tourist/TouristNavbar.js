@@ -36,7 +36,8 @@ const TouristNavbar = () => {
     const initialUsername = tourist?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=tourist._id;
-     const userType = tourist.tourist?.type || tourist.type;
+     const userType = tourist.tourist?.type || tourist.type||'tourist';
+
 
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
@@ -70,6 +71,21 @@ const TouristNavbar = () => {
    };
 
     async function handleRegisterClick(title) {
+       if(title =="Book Transportation") {
+        try {
+          const touristId=userId;
+          const options = { 
+            apiPath: `/getTransportations/EGP`
+           };
+          const response = await NetworkService.get(options);
+          console.log(response);
+          
+           const transportationData=response;
+          navigate(`/BookTransportation`,{state:{userId:userId,transportationData:transportationData}});          
+          } catch (error) {
+          console.log('Error:', error);
+        }
+      }
         if (title == "View Products") {
             try {
                 const options = {
@@ -154,21 +170,6 @@ const TouristNavbar = () => {
       else if(title =="Book Flights") {
         navigate(`/BookFlight`,{state:{userId}});          
       }
-      else if(title =="Book transportation") {
-        try {
-          const touristId=userId;
-          const options = { 
-            apiPath: `/getTransportations/EGP`
-           };
-          const response = await NetworkService.get(options);
-          console.log(response);
-          
-           const transportationData=response;
-          navigate(`/BookTransportation`,{state:{userId:userId,transportationData:transportationData}});          
-          } catch (error) {
-          console.log('Error:', error);
-        }
-      }
       else if (title =="Complaints"){
         try { 
           const options = {
@@ -191,8 +192,7 @@ const TouristNavbar = () => {
           }
         }
       }
-      else {
-        
+      else if("Explore Activities"){
         try {
             const options = {
               apiPath: `/upcomingEvents`,
@@ -212,7 +212,6 @@ const TouristNavbar = () => {
               setError('An unexpected error occurred.'); // Generic error message
             }
           }
-        // navigate('/explore');
       }
       }
 
