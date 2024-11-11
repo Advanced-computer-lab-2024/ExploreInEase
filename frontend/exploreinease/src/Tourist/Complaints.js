@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     TextField,
     Button,
@@ -7,36 +7,55 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Alert
 } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../NetworkService';
 
-const Complaints = () => {  
+const Complaints = () => {
     const location = useLocation();
-    const { events, User } = location.state || {};
-    console.log("admin", User);
-    const userId = User._id;
-    console.log(events)
-    // Separate state for form data and complaints list
+    const { userId } = location.state || {};
+
     const [formData, setFormData] = useState({
         title: '',
         problem: '',
         date: new Date().toISOString().split('T')[0]
     });
-    // State for list of complaints
     const [complaints, setComplaints] = useState([]);
-    const [eventss, setEventss] = useState([]);
-    const [shouldFetchComplaints, setShouldFetchComplaints] = useState(false);
     const [openCreate, setOpenCreate] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const [errors, setErrors] = useState({});
+
     useEffect(() => {
         fetchComplaints();
-      }, shouldFetchComplaints);
+    }, []);
+
+    useEffect(() => {
+        if (showSuccessMessage) {
+            const timer = setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessMessage]);
+
+    useEffect(() => {
+        if (showErrorMessage) {
+            const timer = setTimeout(() => {
+                setShowErrorMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showErrorMessage]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-        console.log(formData.problem)
     };
+
     const handleClose = () => {
         setOpenCreate(false);
         setFormData({
@@ -46,56 +65,45 @@ const Complaints = () => {
         });
         setErrors({});
     };
-    const handleComplaintSubmit =async()=> {
-        setShouldFetchComplaints(false);
+
+    const handleComplaintSubmit = async () => {
         const newComplaint = {
             ...formData,
             date: new Date().toISOString().split('T')[0]
         };
-        console.log(formData.problem)
-        console.log(formData)
-        console.log(newComplaint.title)
+        
         const option = {
             apiPath: `/fileComplaint/${userId}/${newComplaint.problem}/${newComplaint.title}`,
-            urlParam: userId, urlParam: newComplaint.problem, urlParam: newComplaint.title
-        }
+            urlParam: userId
+        };
+
         try {
             const response = await NetworkService.post(option);
-            console.log(response);
+            setSuccessMessage("Complaint added successfully!");
+            setShowSuccessMessage(true);
 
-            
-                // Toggle the `shouldFetchComplaints` state to re-trigger useEffect
-                setShouldFetchComplaints((prev) => !prev);
-                handleClose();
-            
+            // Directly add the new complaint to the list
+            setComplaints(prevComplaints => [...prevComplaints, newComplaint]);
+            handleClose();
         } catch (error) {
+            setErrorMessage('An error occurred');
+            setShowErrorMessage(true);
             console.error("Error filing complaint:", error);
-            // Handle errors here if needed
-        }                    
+        }
     };
-    const fetchComplaints=async()=>{
-        try { 
+
+    const fetchComplaints = async () => {
+        try {
             const options = {
-              apiPath: `/myComplaints/${userId}`,
-              urlParam:userId
-  
+                apiPath: `/myComplaints/${userId}`,
+                urlParam: userId
             };
             const response = await NetworkService.get(options);
-            // setSuccess(response.message); // Set success message
-            console.log(response);
-            const events=response.data;
-            setEventss(events);
-            console.log("event",events)
-          } catch (err) {
-            if (err.response) {
-                console.log(err.message);
-            //   setError(err.response.data.message); // Set error message from server response if exists
-            } else {
-              console.log('An unexpected error occurred.');
-               // Generic error message
-            }
-          }
-    }
+            setComplaints(response.data);
+        } catch (err) {
+            console.error('Error fetching complaints:', err);
+        }
+    };
 
     return (
         <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -117,12 +125,12 @@ const Complaints = () => {
             </div>
 
             <div style={{ display: 'grid', gap: '16px' }}>
-                {eventss === 0 ? (
+                {complaints.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '32px', color: '#666' }}>
                         No complaints available.
                     </div>
                 ) : (
-                    eventss.map((complaint, index) => (
+                    complaints.map((complaint, index) => (
                         <div key={index} style={{
                             backgroundColor: 'white',
                             borderRadius: '8px',
@@ -134,20 +142,14 @@ const Complaints = () => {
                                     {complaint.title}
                                 </h3>
                                 <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.problem}</p>
-
-                                <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.dateOfComplaint}</p>
-
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.date}</p>
                             </div>
                             <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.status}</p>
-
                         </div>
                     ))
                 )}
-
-
             </div>
 
-            {/* File Complaint Dialog */}
             <Dialog open={openCreate} onClose={handleClose}>
                 <DialogTitle>File New Complaint</DialogTitle>
                 <DialogContent>
@@ -164,7 +166,6 @@ const Complaints = () => {
                         error={!!errors.title}
                         helperText={errors.title}
                     />
-
                     <TextField
                         margin="dense"
                         label="Problem"
@@ -187,6 +188,16 @@ const Complaints = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            {showSuccessMessage && (
+                <Alert severity="success" sx={{ position: 'fixed', top: 80, right: 20, width: 'auto', fontSize: '1.2rem', padding: '16px', zIndex: 9999 }}>
+                    {successMessage}
+                </Alert>
+            )}
+            {showErrorMessage && (
+                <Alert severity="error" sx={{ position: 'fixed', top: 60, right: 20, width: 'auto', fontSize: '1.2rem', padding: '16px', zIndex: 9999 }}>
+                    {errorMessage}
+                </Alert>
+            )}
         </div>
     );
 };

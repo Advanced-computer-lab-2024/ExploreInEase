@@ -124,7 +124,7 @@ const TouristNavbar = () => {
           console.log("get Purchased Product",Product);
 
           const Type='tourist';
-          navigate(`/ViewPurchasedProduct`,{ state: { Product:Product, Type:Type ,User:User} });          
+          navigate(`/ViewPurchasedProduct`,{ state: { Product:Product, Type:Type ,userId:userId} });          
         } catch (err) {
           if (err.response) {
               console.log(err.message);
@@ -167,7 +167,7 @@ const TouristNavbar = () => {
           console.log(response);
           const events=response.data;
           console.log(events)
-          navigate(`/Complaints`,{state:{events,User:User}});          
+          navigate(`/Complaints`,{state:{events,userId:userId}});          
         } catch (err) {
           if (err.response) {
               console.log(err.message);

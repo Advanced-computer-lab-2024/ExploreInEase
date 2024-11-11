@@ -27,7 +27,7 @@ import {
 
 const ProductPurchased = () => {
   const location = useLocation();
-  const { Product,Type, User } = location.state || {};
+  const { Product,Type, userId } = location.state || {};
   const isSellerOrAdmin = Type === 'seller' || Type === 'admin';
   const [initialProductList, setInitialProductList] = useState(Product);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -80,7 +80,7 @@ const ProductPurchased = () => {
   try {
     console.log("selectedProduct",selectedProduct,selectedProduct.productIds[0]._id);    
     const options = { 
-      apiPath: `/editOrder/${User._id}`,
+      apiPath: `/editOrder/${userId}`,
       body:
       {
         orderId:selectedProduct.productIds[0]._id,
@@ -103,10 +103,10 @@ const handleReviewChange=(event)=>{
 const handleSaveRating =async(Product,rating)=>{
   try {
     console.log("selectedProduct",selectedProduct,selectedProduct.productIds[0]._id);
-    console.log("UserId",User._id);
+    console.log("UserId",userId);
         
     const options = { 
-      apiPath: `/rateProduct/${User._id}`,
+      apiPath: `/rateProduct/${userId}`,
       body:
       {
         productId:selectedProduct.productIds[0]._id,
@@ -124,7 +124,7 @@ const handleSaveReview =async(review)=>{
   try {
     // productId, reviewText    
     const options = { 
-      apiPath: `/reviewProduct/${User._id}`,
+      apiPath: `/reviewProduct/${userId}`,
       body:
       {
         productId:selectedProduct.productIds[0]._id,
