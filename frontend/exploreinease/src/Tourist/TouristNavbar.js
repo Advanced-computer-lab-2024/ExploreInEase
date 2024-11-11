@@ -187,9 +187,27 @@ const TouristNavbar = () => {
           <button onClick={() => handleRegisterClick("View Products")}
               className="small-button">View Products</button>
           <button 
+          onClick={() => handleRegisterClick("Book transportation")}
+          className="small-button">Book transportation</button>
+          <button 
+          onClick={() => handleRegisterClick("View Booked items")}
+          className="small-button">View Booked items</button>
+          <button 
+          onClick={() => handleRegisterClick("View/Rate Purchased Product")}
+          className="small-button">View/Rate Purchased Product</button>
+           <button 
+          onClick={() => handleRegisterClick("Book Hotels")}
+          className="small-button">Book Hotels</button>
+          <button 
+          onClick={() => handleRegisterClick("Book Flights")}
+          className="small-button">Book Flights</button>
+          <button 
+          onClick={() => handleRegisterClick("Complaints")}
+          className="small-button">Complaints</button>
+           <button 
           onClick={() => handleRegisterClick("My Profile")}
           className="small-button">My Profile</button>
-        </div>
+        </div>  
         <div className="currency-selector">
           <span className="currency-symbol"></span>
           <select>
