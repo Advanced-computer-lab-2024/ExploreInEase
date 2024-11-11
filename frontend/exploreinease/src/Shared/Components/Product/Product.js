@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NetworkService from '../../../NetworkService';
 import axios from 'axios';
-import { Alert } from '@mui/material'; 
 import { useLocation } from 'react-router-dom';
 import {
   TextField, InputAdornment, IconButton, Grid, Card, CardMedia, CardContent,
@@ -20,14 +19,14 @@ import InfoIcon from '@mui/icons-material/Info';
 import ShoppingBasket from '@mui/icons-material/ShoppingBasket';
 import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
 import Avatar from '@mui/material/Avatar';
-const ProductCard = () => {
-   const adminIdd = localStorage.getItem('UserId');
-   const userType= localStorage.getItem('UserType');
-   console.log(userType);
 
+
+
+const ProductCard = () => {
   const location = useLocation();
-  const { User } = location.state || {};
-  const userId = User ? User._id : adminIdd;
+  const { Product, User, currency } = location.state || {};
+  const userId = User ? User._id : null;
+  
   const [products, setProducts] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,19 +43,15 @@ const ProductCard = () => {
   const [messageType, setMessageType] = useState('success');
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [sortOrder, setSortOrder] = useState('desc'); // Initial sort order
+
+
   const [selectedProductName, setSelectedProductName] = useState('');
   const [selectedProductPrice, setSelectedProductPrice] = useState('');
   const [selectedProductSales, setSelectedProductSales] = useState('');
-  const [checkProductAdd,setCheckProductAdd]=useState(true);
   const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
-  const [productInterval,setProductInterval]=useState([]);
-  const  Product = location.state?.Product || productInterval||[];
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-//   const {currency } = location.state || {};
+
+
   const [productData, setProductData] = useState({
     _id: null,
     name: '',
@@ -70,13 +65,7 @@ const ProductCard = () => {
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
 
-  useEffect(()=>{
-    handleGetAllProduct();
-  },[checkProductAdd]);
-
   useEffect(() => {
-    console.log("hehhehe");
-    
     if (Product && Array.isArray(Product)) {
       const loadedProducts = Product.map(product => {
         const savedImageUrl = localStorage.getItem(`product-image-${product._id}`);
@@ -91,68 +80,10 @@ const ProductCard = () => {
       setPriceRange([0, maxProductPrice]);
     }
   }, [Product]);
-
-  useEffect(() => {
-    if (showSuccessMessage) {
-      const timer = setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSuccessMessage]);
-  
-  useEffect(() => {
-    if (showErrorMessage) {
-      const timer = setTimeout(() => {
-        setShowErrorMessage(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showErrorMessage]);
-
-  const handleGetAllProduct = async () => {
-    try {
-        const options = { apiPath: `/getAvailableProducts/${userId}`, urlParam: userId };
-        const response = await NetworkService.get(options);
-        console.log(response);
-        if (response && response.Products) {
-            setProductInterval(response.Products);
-            console.log("Products",productInterval);
-        } else {
-            console.warn('Product data is not available in the response');
-        }
-    } catch (error) {
-        console.error('Error fetching products:', error);
-    }
-};
-  const handleClickPurchase=async(productt)=>{
-    try {
-      // touristId, productIds, quantities
-      console.log("Product",productt);
-      
-      const options = { 
-        apiPath: `/addOrder`,
-        body:
-        {
-          touristId:userId,
-          productIds:[productt],
-          quantities:[1],
-        }
-       };
-       
-      const response = await NetworkService.post(options);
-        console.log(response);
-        setSuccessMessage(" Successfully!");
-        setShowSuccessMessage(true);
-        setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productt));
-
-
-    } catch (error) {
-      setErrorMessage(error.message || 'An error occurred');
-      setShowErrorMessage(true);
-      console.log('Error fetching historical places:', error);
-    }
-  }
+  const handlePurchase = (productId) => {
+    // Your purchase logic here
+    console.log(`Purchasing product with ID: ${productId}`);
+  };
   
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
@@ -173,12 +104,11 @@ const ProductCard = () => {
 
   const handleSalesDetails = async (productId) => {
     try {
-    //   console.log(User.type);
+      console.log(User.type);
       // Replace with your API endpoint
-      
       const options = {
         apiPath: '/availableQuantityAndSales/{userType}/{productId}/{currency}',
-        urlParam: { userType: userType , productId: productId, currency: "EGP"},
+        urlParam: { userType: User.type , productId: productId, currency: "EGP"},
       }
       const response = await NetworkService.get(options);
       console.log(response);
@@ -207,14 +137,9 @@ const ProductCard = () => {
       }
       const response = await NetworkService.put(options);
       console.log(response);
-      setSuccessMessage("Successfully!");
-      setShowSuccessMessage(true);
-
       setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
       handleCloseArchiveDialog();
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'An error occurred');
-      setShowErrorMessage(true);
       console.error('Failed to archive product:', error);
     }
   };
@@ -281,7 +206,6 @@ const ProductCard = () => {
   };
 
   const handleCreateSubmit = async () => {
-    setCheckProductAdd(false);
     if (validateForm()) {
       try {
         const productDataToSend = {
@@ -297,17 +221,15 @@ const ProductCard = () => {
         };
         const response = await NetworkService.post(options);
         console.log(response);
-
         const newProduct = { ...productData, _id: response.product._id, picture: productData.picture ? URL.createObjectURL(productData.picture) : '' };
         setProducts([...products, newProduct]);
-        setSuccessMessage("Successfully!");
-        setShowSuccessMessage(true);
+        setMessageContent('Product added successfully!');
+        setMessageType('success');
         handleCloseDialogs();
       } catch (error) {
-        setErrorMessage(error.response?.data?.message || 'An error occurred');
-        setShowErrorMessage(true);
         console.error("Error during API request:", error);
-       
+        setMessageContent('Error occurred while adding product.');
+        setMessageType('error');
       } finally {
         setMessageDialogOpen(true);
       }
@@ -420,9 +342,7 @@ const ProductCard = () => {
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
-      <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}   
-      sx={{
-         gap: 1,  }}>
+      <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}>
   <TextField
     label="Search Products"
     variant="outlined"
@@ -437,8 +357,8 @@ const ProductCard = () => {
       ),
       endAdornment: (
         <InputAdornment position="end">
-          <Tooltip title="Filter" placement="top" arrow >
-            <IconButton onClick={handleOpenFilterDialog} >
+          <Tooltip title="Filter" placement="top" arrow>
+            <IconButton onClick={handleOpenFilterDialog}>
               <FilterListIcon />
             </IconButton>
           </Tooltip>
@@ -449,26 +369,10 @@ const ProductCard = () => {
   />
   
   {/* Tooltip for sorting by rating */}
-  <Tooltip title="Sort by Rating" placement="top" sx={{width:'15px'}} arrow>
+  <Tooltip title="Sort by Rating" placement="top" arrow>
     <IconButton onClick={handleSortByRating}>
       <SwapVert />
     </IconButton>
-  </Tooltip>
-  <Tooltip title="Reset" placement="top" sx={{width:'15px'}} arrow>
-  <button 
-  onClick={handleGetAllProduct} 
-  style={{
-    width: '120px',         // Makes width auto to fit content
-    height:'40px',
-    padding: '5px 10px',   // Adjusts padding for smaller button
-    fontSize: '12px',      // Reduces font size for a smaller button
-    border: '1px solid',   // Optional: adds a border for visibility
-    borderRadius: '4px',   // Optional: gives rounded corners
-    cursor: 'pointer'      // Optional: adds a pointer cursor on hover
-  }}
->
-  Reset filter
-</button>
   </Tooltip>
 </Box>
 
@@ -571,7 +475,7 @@ const ProductCard = () => {
   }}
 >
 
-{/* {(userType||User?.type === 'seller' || User?.type === 'admin') && (
+{(User.type === 'seller' || User.type === 'admin') && (
       <Tooltip title="Details" placement="top" arrow>
       <IconButton 
         onClick={() => { 
@@ -584,7 +488,7 @@ const ProductCard = () => {
         <InfoIcon />
       </IconButton>
     </Tooltip>
-)} */}
+)}
 </Box>
 
 <Box
@@ -593,22 +497,22 @@ const ProductCard = () => {
     bottom: 8,
     right: 8,
     display: 'flex',
-    gap: 2, // Space between icons
+    gap: 1, // Space between icons
   }}
 >
-  {userType==='seller'||userType==='admin' || User?.type === 'seller' || User?.type === 'admin'  ? (
+  {User.type === 'seller' || User.type === 'admin' ? (
     <>
       <Tooltip title="Reviews" placement="top" arrow>
         <IconButton onClick={
           () => { 
           setSelectedProductId(product._id); 
           handleViewReviews(product._id);
-          }} sx={{ color: '#1976d2',width:'3px' }}>
+          }} sx={{ color: '#1976d2' }}>
           <RateReviewIcon />
         </IconButton>
       </Tooltip>
       <Tooltip title="Edit" placement="top" arrow>
-        <IconButton onClick={() => handleOpenEditDialog(product)} sx={{ color: '#1976d2',width:'3px' }}>
+        <IconButton onClick={() => handleOpenEditDialog(product)} sx={{ color: '#1976d2' }}>
           <EditIcon />
         </IconButton>
       </Tooltip>
@@ -618,58 +522,29 @@ const ProductCard = () => {
             setSelectedProductId(product._id); 
             handleOpenArchiveDialog(); 
           }} 
-          sx={{ color: 'red',width:'3px' }}
+          sx={{ color: 'red' }}
         >
           <ArchiveIcon />
         </IconButton>
       </Tooltip>
     </>
-  ) : ( 
+  ) : (
     <>
       <Tooltip title="Reviews" placement="top" arrow>
-        <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
+        <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2' }}>
           <RateReviewIcon />
         </IconButton>
       </Tooltip>
 
       <Tooltip title="Purchase" placement="top" arrow>
-        <IconButton onClick={() => handleClickPurchase(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
+        <IconButton onClick={() => handlePurchase(product._id)} sx={{ color: '#1976d2' }}>
           <ShoppingBasket />
         </IconButton>
       </Tooltip>
     </>
   )}
 </Box>
-<div>
-{showSuccessMessage && (
-        <Alert severity="success" 
-        sx={{
-          position: 'fixed',
-          top: 80, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-      {showErrorMessage && (
-        <Alert severity="error" 
-        sx={{
-          position: 'fixed',
-          top: 60, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {errorMessage}
-        </Alert>
-      )}
-</div>
+
           </Card>
           {/* Archive Confirmation Dialog */}
         <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
@@ -846,7 +721,7 @@ const ProductCard = () => {
             sx={{ display: 'flex', gap: 2, padding: 2, borderBottom: '1px solid #eee' }}
           >
             <Avatar sx={{ bgcolor: '#1976d2' }}>
-              {review.userId?.username.charAt(0).toUpperCase()}
+              {review.userId.username.charAt(0).toUpperCase()}
             </Avatar>
             
             <Box sx={{ flex: 1 }}>
@@ -879,7 +754,10 @@ const ProductCard = () => {
   </DialogActions>
 </Dialog>
 
-      {(userType ==='seller'||userType==='admin'|| User?.type === 'seller' || User?.type === 'admin') && (
+
+
+
+      {(User.type === 'seller' || User.type === 'admin') && (
   <Tooltip title="Create" placement="top" arrow>
     <Fab
       color="primary"

@@ -346,7 +346,9 @@ const getAvailableProducts = async (req, res) => {
         const products = await checkoutService.getAvailableProducts();
         console.log(products);
         const allActiveProducts = products.filter(product => product.isActive === true);
-        res.status(200).json({message: "Fetched successfully!",Products: allActiveProducts});
+        const finalProducts = allActiveProducts.filter(product => product.sellerId.toString() === userId);
+        console.log(finalProducts);
+        res.status(200).json({message: "Fetched successfully!",Products: finalProducts});
         } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -363,7 +365,9 @@ const getArchivedProducts = async (req, res) => {
     try {
         const products = await checkoutService.getAvailableProducts();
         const allArchivedProducts = products.filter(product => product.isActive === false);
-        res.status(200).json({message: "Fetched Archived Products successfully!",Products: allArchivedProducts});
+        const finalProducts = allArchivedProducts.filter(product => product.sellerId.toString() === userId);
+
+        res.status(200).json({message: "Fetched Archived Products successfully!",Products: finalProducts});
         } catch (error) {
         res.status(500).json({ message: error.message });
     }

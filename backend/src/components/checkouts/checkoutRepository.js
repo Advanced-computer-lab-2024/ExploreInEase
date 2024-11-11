@@ -244,6 +244,15 @@ const getOrdersByTouristId = async (touristId) => {
 
 //Saif, Tasnim
 
+const getProductById2 = async (productId) => {
+    try {
+        const product = await Product.findById(productId);
+        return product;
+    } catch (error) {
+        throw new Error(`Error fetching product by ID: ${error.message}`);
+    }
+};
+
 const getAllAvailableProducts = async () => {
     try {
         // Step 1: Find all available products where takenQuantity is less than originalQuantity
@@ -255,10 +264,6 @@ const getAllAvailableProducts = async () => {
             path: 'reviews.userId', // Populate userId in each review
             select: 'username mobileNum email nation dob profession', // Specify fields to include from the Tourist model
         })
-        .populate({
-            path: 'sellerId', // Populate sellerId if you want more details about the seller
-            select: 'type name' // Select fields to show for the seller, such as type or name
-        });
 
         // Step 2: Map over the available products and add the sellerType directly
         const productsWithSellerType = availableProducts.map(product => {
@@ -267,8 +272,6 @@ const getAllAvailableProducts = async () => {
 
             return {
                 ...productObj,
-                sellerType, // Add sellerType directly from the populated field
-                sellerId: undefined // Optionally remove sellerId from the response
             };
         });
 
@@ -352,5 +355,6 @@ module.exports = {
     addOrder,
     getAllOrders,
     getOrdersByTouristId,
-    getOrderById
+    getOrderById,
+    getProductById2
 };
