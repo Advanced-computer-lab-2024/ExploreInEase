@@ -93,10 +93,33 @@ const HomePage = () => {
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
-            // else if (){
 
-            // }
-        } else {
+        } 
+        else if (title === "Transportation"){
+          try {
+            // Construct the API path
+            const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;  // Ensure this matches your API route
+            // Make the GET request using Axios
+            const response = await axios.get(apiPath);
+        
+            // Log the response data
+            console.log('API Response:', response);
+        
+            // Pass the fetched activities to the Activities page
+            navigate(`/transportion`, { state: { allActivity: response.data ,id:userId} });
+            
+          } catch (err) {
+            // Check if there is a response from the server and handle error
+            if (err.response) {
+              console.error('API Error:', err.message);
+              setError(err.response.data.message);  // Display error message from the server
+            } else {
+              console.error('Unexpected Error:', err);
+              setError('An unexpected error occurred.');  // Display generic error message
+            }
+          }
+        }
+        else {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);

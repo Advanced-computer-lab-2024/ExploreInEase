@@ -66,7 +66,6 @@ function Activity() {
   const [markerPosition, setMarkerPosition] = useState(null);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
- 
  const [address,setAddress]=useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);

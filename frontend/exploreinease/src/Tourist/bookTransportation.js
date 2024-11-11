@@ -28,6 +28,7 @@ const MenuProps = {
     },
   },
 };
+
 function BookTransportation() {
     const location = useLocation();
     const {userId,transportationData} = location.state || {};
@@ -35,7 +36,28 @@ function BookTransportation() {
     const [open, setOpen] = useState(false);
     const [success,setSuccess]=useState(false);
     const [error,setError]=useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const [selectedTransportation,setSelectedTransportation]=useState();
+    useEffect(() => {
+      if (showSuccessMessage) {
+        const timer = setTimeout(() => {
+          setShowSuccessMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showSuccessMessage]);
+    
+    useEffect(() => {
+      if (showErrorMessage) {
+        const timer = setTimeout(() => {
+          setShowErrorMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showErrorMessage]);
     const handleClickOpen = (item) => {
       setSelectedTransportation(item);
       setOpen(true);
@@ -54,13 +76,18 @@ function BookTransportation() {
         };
         const response = await NetworkService.post(options);
           console.log(response);
+
           setTransportion(prevData => prevData.filter(item => item._id !== transportation._id));
+          setSuccessMessage("Created Successfully!");
+          setShowSuccessMessage(true);
+
           setSuccess(true);
           
       } catch (error) {
         console.log('Error fetching historical places:', error);
         setError(true);
-
+        setErrorMessage('An error occurred');
+        setShowErrorMessage(true);
       }
       handleClose();
     }
@@ -94,6 +121,36 @@ function BookTransportation() {
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>
           Booked Failed
+        </Alert>
+      )}
+    </div> 
+    <div>
+    {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
         </Alert>
       )}
     </div>
