@@ -24,6 +24,8 @@ import {
   ListItem,
   ListItemText,Divider,
 } from '@mui/material';
+import { Alert } from '@mui/material'; 
+
 
 const ProductPurchased = () => {
   const location = useLocation();
@@ -39,6 +41,10 @@ const ProductPurchased = () => {
   const [openReview, setOpenReview] = useState(false);
   const [rating, setRating] = useState('');
   const [review,setReview]=useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [productData, setProductData] = useState({
     productIds: [
      { description: '',
@@ -61,7 +67,23 @@ const ProductPurchased = () => {
 //   const handleSearchChange = (event) => {
 //     setSearchTerm(event.target.value);
 //   };
+useEffect(() => {
+  if (showSuccessMessage) {
+    const timer = setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [showSuccessMessage]);
 
+useEffect(() => {
+  if (showErrorMessage) {
+    const timer = setTimeout(() => {
+      setShowErrorMessage(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [showErrorMessage]);
   const handleClickOpenRate = (Product) => {
     setSelectedProduct(Product); // Set the reviews of the selected product
     setOpenRate(true);
@@ -88,9 +110,13 @@ const ProductPurchased = () => {
       }
      };
     const response = await NetworkService.put(options);
+    setSuccessMessage("Edit Successfully!");
+    setShowSuccessMessage(true);
       console.log("UpdateOrder",response);
       
   } catch (error) {
+    setErrorMessage( 'An error occurred');
+    setShowErrorMessage(true);
     console.log('Error fetching historical places:', error);
   }
  };
@@ -114,8 +140,12 @@ const handleSaveRating =async(Product,rating)=>{
       }
      };
     const response = await NetworkService.post(options);
+    setSuccessMessage("Save Rating Successfully!");
+    setShowSuccessMessage(true);
       console.log(response);
   } catch (error) {
+    setErrorMessage('An error occurred');
+    setShowErrorMessage(true);
     console.log('Error fetching historical places:', error);
   }
   handleClose();
@@ -133,9 +163,13 @@ const handleSaveReview =async(review)=>{
      };
      
     const response = await NetworkService.post(options);
+    setSuccessMessage("Review added Successfully!");
+    setShowSuccessMessage(true);
       console.log(response);
       
   } catch (error) {
+    setErrorMessage( 'An error occurred');
+    setShowErrorMessage(true);
     console.log('Error fetching historical places:', error);
   }
   handleClose();
@@ -253,6 +287,34 @@ onClose={handleClose}>
     </Button>
   </DialogActions>
 </Dialog>
+{showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
     </Box>
   );
 };

@@ -75,12 +75,17 @@ const Flights = () => {
           };
   
           console.log("Options sent", options);
+  console.log("i reached heree");
   
           // Fetch data for each origin-destination pair
           const response = await NetworkService.post(options);
+          console.log("RESOPONSE ALE MSH ZAHR",response);
+          
           console.log(`Flight data for ${iatCodeFrom[index]} to ${iatCodeTo[index]}:`, response);
-  
-          return response; // Return each response to be collected
+                    if (response.message==="No flights are available"){
+                  return;
+                    }else{ return response;}
+          // Return each response to be collected
         })
       );
   
@@ -140,7 +145,11 @@ const handleBookFlight=async(selected)=>{
   };
   const handleSearch = () => {
       handlegetCities();  
+      console.log("1");
+      
       handleGetFlightData();
+      console.log("last");
+
   };
 
   return (
