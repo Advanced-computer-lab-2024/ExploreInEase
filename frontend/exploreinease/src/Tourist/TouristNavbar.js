@@ -99,6 +99,83 @@ const TouristNavbar = () => {
               setError('An unexpected error occurred.'); // Generic error message
             }
           }
+      }      else if(title =="View Booked items") {
+        try {
+          const touristId=userId;
+          const options = { 
+            apiPath: `/bookedEvents/${touristId}`
+           };
+          const response = await NetworkService.get(options);
+          navigate(`/ViewListofBooked`,{state:{events:response,userId:userId}});          
+  
+        } catch (error) {
+          console.log('Error:', error);
+        }
+      }
+      else if(title =="View/Rate Purchased Product") {
+        try {
+          const options = {
+            apiPath: `/getOrders/${userId}`,
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log("get Purchased Product",response);
+          const Product=response.orders;
+          console.log("get Purchased Product",Product);
+
+          const Type='tourist';
+          navigate(`/ViewPurchasedProduct`,{ state: { Product:Product, Type:Type ,User:User} });          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
+      }
+      else if(title =="Book Hotels") {
+       navigate(`/BookHotel`,{state:{userId}});          
+      }
+      else if(title =="Book Flights") {
+        navigate(`/BookFlight`,{state:{userId}});          
+      }
+      else if(title =="Book transportation") {
+        try {
+          const touristId=userId;
+          const options = { 
+            apiPath: `/getTransportations/EGP`
+           };
+          const response = await NetworkService.get(options);
+          console.log(response);
+          
+           const transportationData=response;
+          navigate(`/BookTransportation`,{state:{userId:userId,transportationData:transportationData}});          
+          } catch (error) {
+          console.log('Error:', error);
+        }
+      }
+      else if (title =="Complaints"){
+        try { 
+          const options = {
+            apiPath: `/myComplaints/${userId}`,
+            urlParam:userId
+
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          console.log(response);
+          const events=response.data;
+          console.log(events)
+          navigate(`/Complaints`,{state:{events,User:User}});          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
       }
       else {
         console.log("heree");
