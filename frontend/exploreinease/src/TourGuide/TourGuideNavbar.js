@@ -231,6 +231,18 @@ const TourGuideHP = () => {
     </ListItemIcon>
     <ListItemText primary="Delete Account" />
   </ListItem>
+  <ListItem component="label">
+                            <ListItemIcon>
+                                <UploadIcon fontSize="small" />
+                            </ListItemIcon>
+                            Upload Image
+                            <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={handleAvatarUpload}
+                            />
+                        </ListItem> 
   <ListItem button onClick={() => handleMenuClick('logout')}>
     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
       <LogoutIcon fontSize="small" />

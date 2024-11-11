@@ -36,6 +36,11 @@ const GovernorNavbar = () => {
        if (title=="Create Historical Locations Tags") {
           navigate(`/viewHistoricalTags`,{state:{governorId}});          
        }
+       else if (title === 'changePassword') {
+        navigate('/change-password', { state: { userId: governorId } });;
+     } else if (title === 'logout') {
+        navigate('/login');
+     }
       else {
         try{
             const options = 

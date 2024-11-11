@@ -15,17 +15,24 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import UploadIcon from '@mui/icons-material/Upload';
 import { Delete } from '@mui/icons-material';
-
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Drawer from '@mui/material/Drawer';
 
 const HomePage = () => {
    const location=useLocation();
     const navigate = useNavigate();
     const [success,setSuccess]=useState();
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const [error,setError]=useState();
+    
     const { User, imageUrl } = location.state || {};
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-
         const initialUsername = User.User?.username || User.username;
     const userId = User.User?._id || User._id;
     const userType = User.User?.type || User.type;
@@ -173,6 +180,9 @@ const HomePage = () => {
           setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
       }
     };
+    const toggleDrawer = (open) => () => {
+      setDrawerOpen(open);
+  };
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -184,54 +194,59 @@ const HomePage = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
-        <div className="nav-links">
-        <button onClick={() => handleClick("View Archived Products")}
-              className="small-button">View Archived Products</button>
-          <button onClick={() => handleClick("View List of Available Products")}
-              className="small-button">View List of Available Products</button>
-          <button 
-          onClick={() => handleClick("My Profile")}
-          className="small-button">My Profile</button>
-       
-        <div style={{marginRight:5,marginTop:30,marginLeft:30}}>
-          <span className="currency-symbol"></span>
-          <select>
-            <option value="usd">USD ($)</option>
-            <option value="eur">EUR (€)</option>
-            <option value="egp">EGP (ج.م)</option>
-          </select>
-        </div>
-        </div>
-        <div className="avatar-container">
-                    <Avatar
-                        sx={{ bgcolor: 'darkblue', color: 'white', width: 48, height: 48, fontSize: 20, cursor: 'pointer' }}
-                        onClick={handleMenuOpen}
-                        src={avatarImage ? avatarImage : undefined}
-                    >
-                        {avatarImage ? '' : defaultAvatarUrl}
-                    </Avatar>
+        <div 
+                    className="currency-selector" 
+                    style={{ 
+                        position: 'absolute', 
+                        left: '80%', 
+                        transform: 'translateX(-50%)' 
+                    }}
+                >
+                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
 
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleMenuClose}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        PaperProps={{
-                            elevation: 3,
-                            sx: {
-                                mt: 1.5,
-                                minWidth: 180,
-                                borderRadius: 2,
-                                boxShadow: '0px 4px 10px rgba(0,0,0,0.1)',
-                            },
-                        }}
-                    >
-                        <Typography variant="h6" sx={{ padding: '8px 16px', fontWeight: 600 }}>
-                            Account
-                        </Typography>
-                        <Divider />
-                        <MenuItem component="label">
+                    <select id="currency-select" className="currency-dropdown">
+                        <option value="usd">USD ($)</option>
+                        <option value="eur">EUR (€)</option>
+                        <option value="egp">EGP (ج.م)</option>
+                    </select>
+                </div>
+              
+                <IconButton 
+                    onClick={toggleDrawer(true)} 
+                    className="menu-button" 
+                    style={{ position: 'absolute', right: '40px', color: 'white', backgroundColor: '#3f51b5' }}>
+                    <MenuIcon />
+                </IconButton>
+            </nav>
+            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{ width: drawerOpen ? '700px' : '300px' }}>
+                <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
+                        {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Typography variant="h6" style={{ marginLeft: '10px' }}>{initialUsername}</Typography>
+                </div>
+                <Divider />
+                <List>
+                    <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
+                    <ListItem button onClick={() => handleMenuClick('changePassword')}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <LockIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Change Password" />
+                    </ListItem>
+                    <ListItem button onClick={handleDeleteAccount}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <Delete fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Delete Account" />
+                    </ListItem>
+                    <ListItem button onClick={() => handleMenuClick('logout')}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <LogoutIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Logout" />
+                    </ListItem>
+                    <ListItem component="label">
                             <ListItemIcon>
                                 <UploadIcon fontSize="small" />
                             </ListItemIcon>
@@ -242,28 +257,26 @@ const HomePage = () => {
                                 style={{ display: 'none' }}
                                 onChange={handleAvatarUpload}
                             />
-                        </MenuItem>                     
-                        <MenuItem onClick={() => handleMenuClick('changePassword')}>
-                            <ListItemIcon>
-                                <LockIcon fontSize="small" />
-                            </ListItemIcon>
-                            Change Password
-                        </MenuItem>
-                        <MenuItem onClick={() => handleDeleteAccount}>
-                            <ListItemIcon>
-                                <Delete fontSize="small" />
-                            </ListItemIcon>
-                            Delete my account
-                        </MenuItem>
-                        <MenuItem onClick={() => handleMenuClick('logout')}>
-                            <ListItemIcon>
-                                <LogoutIcon fontSize="small" />
-                            </ListItemIcon>
-                            Logout
-                        </MenuItem>
-                    </Menu>
-                </div>
-      </nav>
+                        </ListItem>  
+                </List>
+
+                <Divider />
+                <Divider />
+                <List>
+                    <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
+                    {[
+                        "View List of Available Products",
+                        "View Archived Product",               
+                        "My Profile"
+                    ].map((text) => (
+                        <ListItem key={text} disablePadding>
+                            <ListItemButton onClick={() => handleClick(text)}>
+                                <ListItemText primary={text} />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Drawer>
       {/* Other homepage content goes here */}
     </div>
   );

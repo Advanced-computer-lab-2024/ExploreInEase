@@ -124,6 +124,9 @@ const TouristNavbar = () => {
         }
       }
       else if(title =="View/Rate Purchased Product") {
+        console.log("hereeeee");
+        console.log("heree");
+
         try {
           const options = {
             apiPath: `/getOrders/${userId}`,
@@ -189,7 +192,6 @@ const TouristNavbar = () => {
         }
       }
       else {
-        console.log("heree");
         
         try {
             const options = {
@@ -336,7 +338,7 @@ return (
                   "View Products",
                   "Book Transportation",
                   "View Booked items",
-                  "View/Rate Products",
+                  "View/Rate Purchased Product",
                   "Book Hotels",
                   "Book Flights",
                   "Complaints",

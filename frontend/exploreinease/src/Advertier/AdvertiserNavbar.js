@@ -5,6 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+
 import LockIcon from '@mui/icons-material/Lock';
 import LogoutIcon from '@mui/icons-material/Logout';
 import UploadIcon from '@mui/icons-material/Upload';
@@ -14,6 +15,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+
 import Delete from '@mui/icons-material/Delete';
 import '../Guest/GuestHP.css';
 import HomePageLogo from '../HomePageLogo.png';
@@ -89,16 +91,9 @@ const HomePage = () => {
     };
 
     const handleRegisterClick = async (title) => {
-        if (title === "My profile") {
-            try {
-                const options = { apiPath: `/getAdvertiser/${userId}` };
-                const response = await NetworkService.get(options);
-                setSuccess(response.message);
-                navigate(`/viewAdvertiserProfile`, { state: { advertiser: response } });
-            } catch (err) {
-                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
-            }
-        } else if (title === "Transportation") {
+        console.log(title);
+        
+     if (title === "Transportation") {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
@@ -106,11 +101,22 @@ const HomePage = () => {
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
-        } else {
+        } else if(title ==="Activities") {
+            console.log("heree");
+            
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
                 navigate(`/Activities`, { state: { allActivity: response.data, id: userId } });
+            } catch (err) {
+                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+            }
+        }else {
+            try {
+                const options = { apiPath: `/getAdvertiser/${userId}` };
+                const response = await NetworkService.get(options);
+                setSuccess(response.message);
+                navigate(`/viewAdvertiserProfile`, { state: { advertiser: response } });
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
@@ -133,6 +139,7 @@ const HomePage = () => {
             setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
         }
     };
+    
     const toggleDrawer = (open) => () => {
         setDrawerOpen(open);
     };
@@ -199,6 +206,18 @@ const HomePage = () => {
                         </ListItemIcon>
                         <ListItemText primary="Logout" />
                     </ListItem>
+                    <ListItem component="label">
+                            <ListItemIcon>
+                                <UploadIcon fontSize="small" />
+                            </ListItemIcon>
+                            Upload Image
+                            <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={handleAvatarUpload}
+                            />
+                        </ListItem>  
                 </List>
 
                 <Divider />
