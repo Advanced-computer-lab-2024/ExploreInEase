@@ -6,19 +6,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from "react-datepicker";
 import { Alert } from '@mui/material'; 
- import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
- import "./ItineraryList.css"; 
+import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
+import "./ItineraryList.css"; 
 
 const ItineraryList = () => {
   const location = useLocation();
-  const { TourGuideItinerary,User } = location.state || {};
-  console.log("User",User)
-  console.log(TourGuideItinerary)
+  const { TourGuideItinerary, User } = location.state || {};
+  console.log("User", User);
+  console.log(TourGuideItinerary);
 
-  const userId = User._id
-  const userType = User.type
-  const itineraryId = TourGuideItinerary.Itineraries[0]._id
-  console.log(itineraryId)
+  const userId = User._id;
+  const userType = User.type;
 
   const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary.Itineraries);
   const [activitiesData, setActivitiesData] = useState({});
@@ -42,7 +40,7 @@ const ItineraryList = () => {
       return () => clearTimeout(timer);
     }
   }, [showSuccessMessage]);
-  
+
   useEffect(() => {
     if (showErrorMessage) {
       const timer = setTimeout(() => {
@@ -57,7 +55,7 @@ const ItineraryList = () => {
     const result = await provider.search({ query: `${lat}, ${lng}` });
     return result && result.length > 0 ? result[0].label : "Unknown location";
   };
-console.log(itinerariesData[0].isActivated)
+
   useEffect(() => {
     const fetchActivities = async () => {
       const allActivitiesPromises = [];
@@ -109,7 +107,7 @@ console.log(itinerariesData[0].isActivated)
     };
     try{
       const response = await NetworkService.get(options);
-      console.log("response bta3aa m3la2aa",response);
+      console.log("response", response);
       return {
         itineraryId,
         name: response.name,
@@ -119,10 +117,8 @@ console.log(itinerariesData[0].isActivated)
       };
     }
    catch(error){
-    getActivityDetails(_id,itineraryId);
+    getActivityDetails(_id, itineraryId);
    }
-    
-
   };
 
   const openEditModal = (itinerary) => {
@@ -142,8 +138,6 @@ console.log(itinerariesData[0].isActivated)
       ...prevData,
       [name]: value,
     }));
-    
-    toggleStatus(itineraryId,itinerariesData[0].isActivated)
   };
 
   const handleDateChange = (dates) => {
@@ -184,10 +178,8 @@ console.log(itinerariesData[0].isActivated)
         );
         closeEditModal();
 
-        
-
       } catch (error) {
-        setErrorMessage(error.Response.message||'An error occurred');
+        setErrorMessage(error.Response.message || 'An error occurred');
         setShowErrorMessage(true);
         console.error("Error updating itinerary", error);
       }
@@ -222,30 +214,29 @@ console.log(itinerariesData[0].isActivated)
           apiPath: `/itinerary/${itineraryId}/${userId}`,
           UrlParam: itineraryId,
           userId
-        }
+        };
         const response = await NetworkService.delete(options);
         console.log("Itinerary deleted successfully:", response);
         setSuccessMessage("Itinerary deleted successfully");
         setShowSuccessMessage(true);
         setItinerariesData((prev) => prev.filter(itinerary => itinerary._id !== itineraryId));
       } catch (error) {
-        setErrorMessage(error.message||'An error occurred');
+        setErrorMessage(error.message || 'An error occurred');
         setShowErrorMessage(true);
         console.error("Error deleting itinerary:", error);
       }
-
   };
 
   const toggleStatus = async (itineraryId, currentStatus) => {
-    const newStatus = currentStatus == 0 ? 1 : 0;
+    const newStatus = currentStatus === 0 ? 1 : 0;
     try {
       const options = {
-          apiPath: `/updateItineraryActivation/${itineraryId}/${newStatus}/${userId}/${userType}`,
+        apiPath: `/updateItineraryActivation/${itineraryId}/${newStatus}/${userId}/${userType}`,
       };
       const response = await NetworkService.put(options);
-  } catch (err) {
+    } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred.');
-  }
+    }
   };
   
 

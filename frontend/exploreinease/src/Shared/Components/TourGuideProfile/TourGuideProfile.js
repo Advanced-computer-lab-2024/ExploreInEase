@@ -54,16 +54,6 @@ const TourGuideProdile = (props) => {
     });
   const [showPassword, setShowPassword] = useState(false);
 
-  const BackgroundContainer = styled(Box)({
-    backgroundImage: `url(${Sky})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start', // Align items to the left
-  });
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -137,7 +127,17 @@ const TourGuideProdile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
-    <BackgroundContainer>
+    <Box
+      sx={{
+        backgroundImage: `url(${Sky})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
     <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Box
         sx={{
@@ -300,7 +300,7 @@ const TourGuideProdile = (props) => {
         </Card>
       </Box>
     </LocalizationProvider>
-  </BackgroundContainer>
+  </Box>
   );
 };
 

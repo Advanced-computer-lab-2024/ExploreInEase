@@ -61,16 +61,6 @@ const TouristProfile = (props) => {
   const [showPassword, setShowPassword] = useState(false);
   const [level, setLevel] = useState(1);
 
-  const BackgroundContainer = styled(Box)({
-    backgroundImage: `url(${Sky})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start', // Align items to the left
-  });
-
   useEffect(() => {
     const fetchTouristData = async () => {
       try {
@@ -165,7 +155,17 @@ const TouristProfile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
-    <BackgroundContainer>
+    <Box
+    sx={{
+      backgroundImage: `url(${Sky})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       {/* Flex container to center the card */}
       <Box
@@ -371,7 +371,7 @@ const TouristProfile = (props) => {
         </Card>
       </Box>
     </LocalizationProvider>
-    </BackgroundContainer>
+    </Box>
   );
 };
 

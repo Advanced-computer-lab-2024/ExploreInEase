@@ -132,23 +132,21 @@ const AdvertiserProfile = (props) => {
       }
     }
   };
-
-  
-  const BackgroundContainer = styled(Box)({
-    backgroundImage: `url(${Sky})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start', // Align items to the left
-  });
-
   const toggleEdit = (field) => setIsEditable({ ...isEditable, [field]: !isEditable[field] });
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
-    <BackgroundContainer>
+    <Box
+    sx={{
+      backgroundImage: `url(${Sky})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
     <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Box
         sx={{
@@ -357,7 +355,7 @@ const AdvertiserProfile = (props) => {
         </Card>
       </Box>
     </LocalizationProvider>
-    </BackgroundContainer>
+    </Box>
   );
 };
 
