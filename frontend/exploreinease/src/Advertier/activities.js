@@ -138,8 +138,8 @@ const getAllActivities =async()=>{
     // console.log('API Response:', response);
 
     // Pass the fetched activities to the Activities page
-        setActivities(response.data);
-        // console.log("Activities:",activities);
+      setActivities(response.data);
+      console.log("Activities:",response.data);
             
   } catch (err) {
     // Check if there is a response from the server and handle error
@@ -303,6 +303,7 @@ const handleSaveActivity = async () => {
             // Updating existing activity
             const apiPath=`http://localhost:3030/activity/${updatedActivity._id}/${id}`;
             const body= {
+                name: updatedActivity.name,
                 date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
                 time: typeof updatedActivity.time === 'string' 
                 ? updatedActivity.time 
@@ -314,7 +315,7 @@ const handleSaveActivity = async () => {
                 specialDiscounts: updatedActivity.specialDiscounts||0,
                 isOpen: updatedActivity.isOpen || false,
               };
-              console.log("body:",body);
+              console.log("body:",updatedActivity);
 
                 const response = await axios.put(apiPath,body);
                 console.log("response:",response);
@@ -411,7 +412,7 @@ const handleEditActivity = (activity) => {
          apiPath:`/activity/${activityid}/${id}`,
       };
       const response = NetworkService.delete(options);
-      setSuccessMessage(response.data.message||"Edit Successfully!");
+      setSuccessMessage("Deleted Activity Successfully!");
       setShowSuccessMessage(true);
        setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
 

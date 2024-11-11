@@ -406,6 +406,9 @@ const getAllActivitiesInDatabase = async (req, res) => {
 const updateActivity = async (req, res) => {
   const { _id, userId } = req.params;
   const updateData = req.body; 
+  console.log("_id:",_id);
+  console.log("userId:",userId);
+  console.log("Update data:",updateData);
   if(!_id || !userId) {
     return res.status(400).json({ message: 'Missing inputs' });
   }
@@ -414,7 +417,7 @@ const updateActivity = async (req, res) => {
     return res.status(400).json({ message: 'Invalid type' });
   }
 
-  const allowedUpdates = ['date', 'time', 'location', 'price', 'category', 'tags', 'specialDiscounts', 'isOpen'];
+  const allowedUpdates = ['date', 'time', 'location', 'price', 'category', 'tags', 'specialDiscounts', 'isOpen', 'name'];
   const invalidUpdates = Object.keys(updateData).filter(key => !allowedUpdates.includes(key));
 
   if (invalidUpdates.length) {
@@ -472,7 +475,7 @@ const deleteActivity = async (req, res) => {
       return res.status(404).json({ message: 'Activity not found.' });
     }
 
-    return res.status(200).json({ message: 'Activity deleted successfully.' });
+    return res.status(200).json({ message: 'Activity deleted successfully.', deletedActivity: deletedActivity });
   } catch (error) {
     console.error('Error deleting activity:', error.message);
     return res.status(500).json({ message: error.message });
