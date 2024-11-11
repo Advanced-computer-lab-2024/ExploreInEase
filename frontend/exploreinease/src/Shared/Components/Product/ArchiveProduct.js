@@ -13,7 +13,6 @@ import {
   Edit as EditIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { Alert } from '@mui/material'; 
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
 import ArchiveIcon from '@mui/icons-material/Unarchive';
 import Avatar from '@mui/material/Avatar';
@@ -23,11 +22,10 @@ import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
 
 
 
-const ArchiveProduct = () => {
-  const adminIdd = localStorage.getItem('UserId');
+const UnarchiveProduct = () => {
   const location = useLocation();
-  const {User} = location.state || {};
-  const userId = User ? User._id : adminIdd;
+  const { Product, User } = location.state || {};
+  const userId = User ? User._id : null;
   
   const [products, setProducts] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -49,13 +47,6 @@ const ArchiveProduct = () => {
   const [selectedProductSales, setSelectedProductSales] = useState('');
   const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
-  const [productInterval,setProductInterval]=useState([]);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [checkProductArchived,setCheckProductArchived]=useState(true);
-  const Product = location.state?.Product || productInterval;
 
 
   const [productData, setProductData] = useState({
@@ -67,12 +58,10 @@ const ArchiveProduct = () => {
     ratings: '',
     originalQuantity: '',
     picture: null,
-  },);
+  });
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
-  useEffect(()=>{
-    handleGetAllProduct();
-  },[checkProductArchived]);
+
   useEffect(() => {
     if (Product && Array.isArray(Product)) {
       const loadedProducts = Product.map(product => {
@@ -88,23 +77,7 @@ const ArchiveProduct = () => {
       setPriceRange([0, maxProductPrice]);
     }
   }, [Product]);
-  useEffect(() => {
-    if (showSuccessMessage) {
-      const timer = setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSuccessMessage]);
-  
-  useEffect(() => {
-    if (showErrorMessage) {
-      const timer = setTimeout(() => {
-        setShowErrorMessage(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showErrorMessage]);
+
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
   const handleRatingMinChange = (event) => setRatingFilter([Number(event.target.value), ratingFilter[1]]);
@@ -127,30 +100,11 @@ const ArchiveProduct = () => {
       const response = await NetworkService.put(options);
       console.log(response);
       setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
-      setSuccessMessage("Successfully!");
-      setShowSuccessMessage(true);
       handleCloseArchiveDialog();
-
-
     } catch (error) {
-      setErrorMessage('An error occurred');
-      setShowErrorMessage(true);
       console.error('Failed to UnArchive product:', error);
     }
   };
-
-  const handleGetAllProduct=async()=>{
-    try{
-     const options = { apiPath: `/getArchivedProducts/${userId}` };
-      const response = await NetworkService.get(options);
-      console.log(response);
-      
-      // setSuccess(response.message);
-      setProductInterval(response.Products);
-    }catch(error){
-      console.error('Error uploading image:', error);
-    }
-}
   const handleViewReviews = async (productId) => {
     console.log('Viewing reviews for product:', productId);
     const product = products.find((product) => product._id === productId);
@@ -242,8 +196,7 @@ const ArchiveProduct = () => {
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
-      <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}       sx={{
-         gap: 1,  }}>
+      <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}>
         <TextField
           label="Search Products"
           variant="outlined"
@@ -269,26 +222,10 @@ const ArchiveProduct = () => {
           sx={{ mr: 2 }}
         />
         {/* Tooltip for sorting by rating */}
-   <Tooltip title="Sort by Rating" placement="top" sx={{width:'15px'}} arrow>
+  <Tooltip title="Sort by Rating" placement="top" arrow>
     <IconButton onClick={handleSortByRating}>
       <SwapVert />
     </IconButton>
-  </Tooltip>
-  <Tooltip title="Reset" placement="top" sx={{width:'15px'}} arrow>
-  <button 
-  onClick={handleGetAllProduct} 
-  style={{
-    width: '120px',         // Makes width auto to fit content
-    height:'40px',
-    padding: '5px 10px',   // Adjusts padding for smaller button
-    fontSize: '12px',      // Reduces font size for a smaller button
-    border: '1px solid',   // Optional: adds a border for visibility
-    borderRadius: '4px',   // Optional: gives rounded corners
-    cursor: 'pointer'      // Optional: adds a pointer cursor on hover
-  }}
->
-  Reset filter
-</button>
   </Tooltip>
       </Box>
 
@@ -492,38 +429,9 @@ const ArchiveProduct = () => {
           <Button onClick={() => setMessageDialogOpen(false)} color="primary">Close</Button>
         </DialogActions>
       </Dialog>
-<div>
-{showSuccessMessage && (
-        <Alert severity="success" 
-        sx={{
-          position: 'fixed',
-          top: 80, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-      {showErrorMessage && (
-        <Alert severity="error" 
-        sx={{
-          position: 'fixed',
-          top: 60, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {errorMessage}
-        </Alert>
-      )}
-</div>
+
     </Box>
   );
 };
 
-export default ArchiveProduct;
+export default UnarchiveProduct;
