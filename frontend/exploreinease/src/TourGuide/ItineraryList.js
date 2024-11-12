@@ -1,146 +1,455 @@
-// src/Shared/Components/ItineraryList.js
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"; // Import React Leaflet components
-import { OpenStreetMapProvider } from 'leaflet-geosearch'; // Import geocoding provider
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import { useLocation } from "react-router-dom";
-import L from "leaflet"; // Import Leaflet
-import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
-import "./ItineraryList.css"; // Import the CSS for styling
-
-// Custom red marker icon
-const redMarkerIcon = new L.Icon({
-  iconUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Map_marker_icon_red.svg/1024px-Map_marker_icon_red.svg.png",
-  iconSize: [25, 41], // Size of the icon
-  iconAnchor: [12, 41], // Anchor point of the icon
-  popupAnchor: [1, -34], // Popup anchor point
-});
+import NetworkService from "../NetworkService"; 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import DatePicker from "react-datepicker";
+import { Alert } from '@mui/material'; 
+import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
+import "./ItineraryList.css"; 
 
 const ItineraryList = () => {
-  const location=useLocation();
-  // const TourGuideItinerary=location.useState()||'';
-  // console.log(TourGuideItinerary);
-  
-  const [itinerariesData]=useState([]);
+  const location = useLocation();
+  const { TourGuideItinerary, User } = location.state || {};
+  console.log("User", User);
+  console.log(TourGuideItinerary);
 
-  // const [itinerariesData] = useState([
-  //   {
-  //     id: 1,
-  //     title: "Historical London Tour",
-  //     activities: [
-  //       {
-  //         name: "Visit the Tower of London",
-  //         location: { lat: 51.5081, lng: -0.0759 },
-  //         duration: "2 hours",
-  //         language: "English",
-  //       },
-  //       {
-  //         name: "Walk through Westminster",
-  //         location: { lat: 51.4995, lng: -0.1248 },
-  //         duration: "1 hour",
-  //         language: "English",
-  //       },
-  //     ],
-  //     timeline: "10:00 AM - 1:00 PM",
-  //     price: "£100",
-  //     availableDates: ["2024-10-01", "2024-10-02"],
-  //     accessibility: "Wheelchair accessible",
-  //     pickupLocation: "Central London",
-  //     dropOffLocation: "Central London",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Paris Adventure Tour",
-  //     activities: [
-  //       {
-  //         name: "Explore the Eiffel Tower",
-  //         location: { lat: 48.8584, lng: 2.2941 },
-  //         duration: "1.5 hours",
-  //         language: "French",
-  //       },
-  //       {
-  //         name: "Seine River Cruise",
-  //         location: { lat: 48.8566, lng: 2.3522 },
-  //         duration: "1 hour",
-  //         language: "French",
-  //       },
-  //     ],
-  //     timeline: "2:00 PM - 5:00 PM",
-  //     price: "€120",
-  //     availableDates: ["2024-10-05", "2024-10-06"],
-  //     accessibility: "Not wheelchair accessible",
-  //     pickupLocation: "Eiffel Tower",
-  //     dropOffLocation: "Louvre Museum",
-  //   },
-  // ]);
+  const userId = User._id;
+  const userType = User.type;
 
-  const [locationNames, setLocationNames] = useState({}); // State to store location names
+  const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary.Itineraries);
+  const [activitiesData, setActivitiesData] = useState({});
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [editItineraryData, setEditItineraryData] = useState(null);
+  const [newDateModalOpen, setNewDateModalOpen] = useState(false);
+  const [newDate, setNewDate] = useState(null);
+  const [removeDateModalOpen, setRemoveDateModalOpen] = useState(false);
+  const [dateToRemove, setDateToRemove] = useState(null);
+  const [error, setError] = useState();
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Function to get place names from coordinates
-  const getLocationName = async (lat, lng, id) => {
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
+
+  const getLocationName = async (lat, lng) => {
     const provider = new OpenStreetMapProvider();
     const result = await provider.search({ query: `${lat}, ${lng}` });
-    if (result && result.length > 0) {
-      setLocationNames((prev) => ({ ...prev, [id]: result[0].label })); // Save the location name
+    return result && result.length > 0 ? result[0].label : "Unknown location";
+  };
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      const allActivitiesPromises = [];
+      itinerariesData.forEach((itinerary) => {
+        if (itinerary.activities && itinerary.activities.length > 0) {
+          itinerary.activities.forEach((activityId) => {
+             allActivitiesPromises.push(getActivityDetails(activityId, itinerary._id));
+          });
+        }
+      });
+
+      const activities = await Promise.all(allActivitiesPromises);
+      activities.forEach(async (activity) => {
+        if (activity && activity.location) {
+          const locationName = await getLocationName(activity.location.lat, activity.location.lng);
+          setActivitiesData((prev) => {
+            const currentActivities = prev[activity.itineraryId] || [];
+            const isDuplicate = currentActivities.some(
+              (a) => a.name === activity.name && a.locationName === locationName
+            );
+
+            if (!isDuplicate) {
+              return {
+                ...prev,
+                [activity.itineraryId]: currentActivities.concat({
+                  name: activity.name,
+                  locationName: locationName,
+                  date: activity.duration.date,
+                  time: activity.duration.time,
+                  price: activity.price,
+                }),
+              };
+            }
+
+            return prev;
+          });
+        }
+      });
+    };
+
+    fetchActivities();
+  }, [itinerariesData]);
+
+  const getActivityDetails = async (_id, itineraryId) => {
+    const options = {
+      apiPath: `/activity/${_id}/${userId}`,
+      UrlParam: _id,
+      userId
+    };
+    try{
+      const response = await NetworkService.get(options);
+      console.log("response", response);
+      return {
+        itineraryId,
+        name: response.name,
+        location: { lat: response.location.latitude, lng: response.location.longitude },
+        duration: { date: response.date, time: response.time },
+        price: response.price
+      };
+    }
+   catch(error){
+    getActivityDetails(_id, itineraryId);
+   }
+  };
+
+  const openEditModal = (itinerary) => {
+    setEditItineraryData({ 
+      ...itinerary, 
+      dateTimeAvailable: itinerary.dateTimeAvailable.map(date => new Date(date)) // Convert to Date objects
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditItineraryData(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditItineraryData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleDateChange = (dates) => {
+    setEditItineraryData((prevData) => ({
+      ...prevData,
+      dateTimeAvailable: dates,
+    }));
+  };
+
+  const handleAddDate = () => {
+    if (newDate) {
+      setEditItineraryData((prevData) => ({
+        ...prevData,
+        dateTimeAvailable: [...prevData.dateTimeAvailable, newDate], // Add new date
+      }));
+      setNewDateModalOpen(false);
+      setNewDate(null);
     }
   };
 
-  // UseEffect to fetch location names
-  useEffect(() => {
-    itinerariesData.forEach((itinerary) => {
-      itinerary.activities.forEach((activity) => {
-        getLocationName(activity.location.lat, activity.location.lng, activity.name);
-      });
-    });
-  }, [itinerariesData]);
+  const submitEdit = async () => {
+      try {
+        const options = {
+          apiPath: `/itinerary/${editItineraryData._id}/${userId}`,
+          UrlParam: editItineraryData._id,
+          body: {
+            ...editItineraryData,
+            dateTimeAvailable: editItineraryData.dateTimeAvailable.map(date => date.toISOString()), // Convert back to ISO string
+          },
+          userId
+        };
+        const response = await NetworkService.put(options); // Adjust the API call for updating
+        console.log("Itinerary updated successfully", response);
+        setSuccessMessage("Itinerary updated successfully!");
+        setShowSuccessMessage(true);
+        setItinerariesData((prev) => 
+          prev.map(itinerary => itinerary._id === editItineraryData._id ? editItineraryData : itinerary)
+        );
+        closeEditModal();
+
+      } catch (error) {
+        setErrorMessage(error.Response.message || 'An error occurred');
+        setShowErrorMessage(true);
+        console.error("Error updating itinerary", error);
+      }
+  };
+
+  const handleRemoveDate = () => {
+    if (dateToRemove) {
+      setEditItineraryData((prevData) => ({
+        ...prevData,
+        dateTimeAvailable: prevData.dateTimeAvailable.filter(date => date.toISOString() !== dateToRemove),
+      }));
+      setRemoveDateModalOpen(false);
+      setDateToRemove(null); // Reset the selected date
+    }
+  };
+
+  const formatDateTime = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: false 
+    };
+    return new Date(dateString).toLocaleString(undefined, options);
+  };
+
+  const deleteItinerary = async (itineraryId) => {
+      try {
+        const options = {
+          apiPath: `/itinerary/${itineraryId}/${userId}`,
+          UrlParam: itineraryId,
+          userId
+        };
+        const response = await NetworkService.delete(options);
+        console.log("Itinerary deleted successfully:", response);
+        setSuccessMessage("Itinerary deleted successfully");
+        setShowSuccessMessage(true);
+        setItinerariesData((prev) => prev.filter(itinerary => itinerary._id !== itineraryId));
+      } catch (error) {
+        setErrorMessage(error.message || 'An error occurred');
+        setShowErrorMessage(true);
+        console.error("Error deleting itinerary:", error);
+      }
+  };
+
+  const toggleStatus = async (itineraryId, currentStatus) => {
+    const newStatus = currentStatus === 0 ? 1 : 0;
+    try {
+      const options = {
+        apiPath: `/updateItineraryActivation/${itineraryId}/${newStatus}/${userId}/${userType}`,
+      };
+      const response = await NetworkService.put(options);
+    } catch (err) {
+      setError(err.response?.data?.message || 'An unexpected error occurred.');
+    }
+  };
+  
 
   return (
     <div className="itinerary-list-container">
       <h2>Your Created Itineraries</h2>
       <div className="itinerary-cards">
         {itinerariesData.map((itinerary) => (
-          <div key={itinerary.id} className="itinerary-card">
-            <h3>{itinerary.title}</h3>
-            <p><strong>Timeline:</strong> {itinerary.timeline}</p>
-            <p><strong>Price:</strong> {itinerary.price}</p>
-            <p><strong>Available Dates:</strong> {itinerary.availableDates.join(", ")}</p>
-            <p><strong>Accessibility:</strong> {itinerary.accessibility}</p>
+          <div key={itinerary._id} className="itinerary-card">
+            <h3>Itinerary Name: {itinerary.name}</h3>
+            <label>
+              <strong>Available Dates:</strong>
+              <span>
+                {itinerary.dateTimeAvailable.map(date => formatDateTime(date)).join(", ")}
+              </span>
+            </label>
+            <p><strong>Language:</strong> {itinerary.language || "Arabic"}</p>
+            <p><strong>Directions:</strong> {itinerary.directions}</p>
             <p><strong>Pickup Location:</strong> {itinerary.pickupLocation}</p>
-            <p><strong>Drop Off Location:</strong> {itinerary.dropOffLocation}</p>
-
+            <p><strong>Drop Off Location:</strong> {itinerary.dropoffLocation}</p>
+            <p><strong>Price:</strong> {itinerary.price}</p>
+            <p><strong>Ratings:</strong> {itinerary.ratings || "0"}</p>
+            <p><strong>Active:</strong> {itinerary.isActivated}</p>
+            <br />
             <h4>Activities:</h4>
-            {itinerary.activities.map((activity, index) => (
-              <div key={index} className="activity-detail">
-                <p><strong>Activity:</strong> {activity.name}</p>
-                <p><strong>Duration:</strong> {activity.duration}</p>
-                <p><strong>Language:</strong> {activity.language}</p>
-                
-                {/* Leaflet Map for each activity */}
-                <MapContainer center={activity.location} zoom={12} style={{ height: "200px", width: "100%" }}>
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <Marker position={activity.location} icon={redMarkerIcon}>
-                    <Popup>{locationNames[activity.name] || "Loading..."}</Popup>
-                  </Marker>
-                </MapContainer>
-
-                {/* GPS Link */}
-                <p>
-                  <strong>GPS Link:</strong>{" "}
-                  <a
-                    href={`https://www.openstreetmap.org/?mlat=${activity.location.lat}&mlon=${activity.location.lng}#map=12/${activity.location.lat}/${activity.location.lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open in OpenStreetMap
-                  </a>
-                </p>
-              </div>
-            ))}
+            <div className="activity-details">
+              {activitiesData[itinerary._id]?.length > 0 ? (
+                activitiesData[itinerary._id].map((activity, index) => (
+                  <div key={index} className="activity-entry">
+                    <span className="activity-names">{activity.name}</span>
+                    <span className="activity-timeline">{" - "}{itinerary.timeline[index] || "No date available"}</span>
+                  </div>
+                ))
+              ) : "Loading..."}
+            </div>
+            <div className="itinerary-actions">
+              <FontAwesomeIcon 
+                icon={faEdit} 
+                onClick={() => openEditModal(itinerary)} 
+                className="itinerary-edit-icon" 
+                title="Edit Itinerary"
+              />
+              <FontAwesomeIcon 
+                icon={faTrash} 
+                onClick={() => deleteItinerary(itinerary._id)} 
+                className="itinerary-delete-icon" 
+                title="Delete Itinerary"
+              />
+            </div>
           </div>
         ))}
       </div>
+
+      {editItineraryData && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={closeEditModal}>&times;</span>
+            <h2>Edit Itinerary</h2>
+            <label>
+              Itinerary Name:
+              <input 
+                type="text" 
+                name="name" 
+                value={editItineraryData.name} 
+                onChange={handleInputChange} 
+              />
+            </label>
+            <label>
+              Available Dates:
+              <input 
+                type="text" 
+                value={editItineraryData.dateTimeAvailable.map(date => formatDateTime(date)).join(", ")} 
+                readOnly 
+              />
+              <button className="add-date-button" onClick={() => setNewDateModalOpen(true)}>Add New Date</button>
+              <button className="remove-date-button" onClick={() => setRemoveDateModalOpen(true)}>Remove Date</button>
+            </label>
+            <label>
+              Language:
+              <input 
+                type="text" 
+                name="language" 
+                value={editItineraryData.language} 
+                onChange={handleInputChange} 
+              />
+            </label>
+            <label>
+              Directions:
+              <input 
+                type="text" 
+                name="directions" 
+                value={editItineraryData.directions} 
+                onChange={handleInputChange} 
+              />
+            </label>
+            <label>
+              Pickup Location:
+              <input 
+                type="text" 
+                name="pickupLocation" 
+                value={editItineraryData.pickupLocation} 
+                onChange={handleInputChange} 
+              />
+            </label>
+            <label>
+              Drop Off Location:
+              <input 
+                type="text" 
+                name="dropoffLocation" 
+                value={editItineraryData.dropoffLocation} 
+                onChange={handleInputChange} 
+              />
+            </label>
+            <label>
+              Price:
+              <input 
+                type="number" 
+                name="price" 
+                value={editItineraryData.price} 
+                onChange={handleInputChange} 
+              />
+            </label>
+            
+<label>
+  isActivated:
+  <div>
+    <label>
+      <input
+        type="radio"
+        name="isActivated"
+        value="0"
+        checked={editItineraryData.isActivated === "0"}
+        onChange={handleInputChange}
+      />
+      Deactivated
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="isActivated"
+        value="1"
+        checked={editItineraryData.isActivated === "1"}
+        onChange={handleInputChange}
+      />
+      Activated
+    </label>
+  </div>
+</label>
+
+            <button onClick={submitEdit}>Submit</button>
+          </div>
+        </div>
+      )}
+
+      {newDateModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setNewDateModalOpen(false)}>&times;</span>
+            <h2>Add New Date</h2>
+            <DatePicker selected={newDate} onChange={date => setNewDate(date)} />
+            <button className="add-date-button2" onClick={handleAddDate} disabled={!newDate}>Add Date</button>
+          </div>
+        </div>
+      )}
+
+      {removeDateModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setRemoveDateModalOpen(false)}>&times;</span>
+            <h2>Remove a Date</h2>
+            <label>
+              Select a Date to Remove:
+              <select onChange={(e) => setDateToRemove(e.target.value)} defaultValue="">
+                <option value="" disabled>Select a date</option>
+                {editItineraryData.dateTimeAvailable.map((date, index) => (
+                  <option key={index} value={date.toISOString()}>{formatDateTime(date)}</option>
+                ))}
+              </select>
+            </label>
+            <button onClick={handleRemoveDate} disabled={!dateToRemove}>Remove Date</button>
+          </div>
+        </div>
+      )}
+<div>
+{showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+</div>
     </div>
   );
 };

@@ -2,12 +2,34 @@ const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 
+
+
+// Controller to handle request for users with requestDeletion set to true
+const getUsersForDeletion = async (req, res) => {
+    try {
+        const result = await userService.fetchUsersForDeletion();
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+const getNotAcceptedUsers = async (req, res) => {
+    try {
+        const users = await userService.getNotAcceptedUsers();
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error.message);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
 // Delete user by _id and userType, ensuring self-id check
 const deleteUserByIdAndType = async (req, res) => {
     const { _id, userType, selfId } = req.body;
-
+    
+    console.log(req.body);
     // Validation
     if (!_id || !userType || !selfId) {
+        console.log("here");
         return res.status(400).json({ error: 'Missing parameters' });
     }
 
@@ -122,10 +144,8 @@ const getTourGuide = async (req, res) => {
 
 // Update a tour guide profile
 const updateTourGuide = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedTourGuide = await userService.updateTourGuide(req.params._id, req.body);
@@ -146,10 +166,8 @@ const updateTourGuide = async (req, res) => {
 //Advertiser
 const createAdvertiser = async (req, res) => {
     console.log("dakahal");
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         console.log("conroller : ",req.params._id,req.body)
@@ -182,10 +200,8 @@ const getAdvertiser = async (req, res) => {
 
 // Update an advertiser profile
 const updateAdvertiser = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedAdvertiser = await userService.updateAdvertiser(req.params._id, req.body);
@@ -208,10 +224,8 @@ const updateAdvertiser = async (req, res) => {
 
 // Create a seller
 const createSeller = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const seller = await userService.createSeller(req.params._id,req.body);
@@ -242,10 +256,8 @@ const getSeller = async (req, res) => {
 
 // Update a seller profile
 const updateSeller = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updatedSeller = await userService.updateSeller(req.params._id, req.body);
@@ -281,10 +293,8 @@ const getTourist = async (req, res) => {
 
 // Update a tourist profile (excluding username and wallet)
 const updateTourist = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    
+    
 
     try {
         const updateData = { ...req.body };
@@ -293,6 +303,10 @@ const updateTourist = async (req, res) => {
         }else if(updateData.wallet){
             return res.status(400).json({ message: 'Cannot update wallet' });
         }
+
+        console.log(updateData)
+
+        console.log('dakhal')
 
         const updatedTourist = await userService.updateTourist(req.params._id, updateData);
         if (!updatedTourist) {
@@ -303,9 +317,14 @@ const updateTourist = async (req, res) => {
             tourist: updatedTourist
         }
 
+        console.log('3adda')
+        console.log(updatedTourist)
+
         res.status(200).json(reponse);
     } catch (error) {
         res.status(400).json({ message: error.message });
+        console.log(error);
+        
     }
 };
 
@@ -313,6 +332,277 @@ const updateTourist = async (req, res) => {
 const checkUsername = (username) => {
     return /^[a-zA-Z0-9]+$/.test(username);
 }
+
+const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const differenceInMilliseconds = Date.now() - birthDate.getTime();
+    const ageDate = new Date(differenceInMilliseconds);
+
+    return Math.abs(ageDate.getUTCFullYear() - 1970); // Calculate age
+};
+
+const rateTourGuide = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { tourGuideId, itineraryId, rating } = req.body;
+
+    try {
+        const result = await userService.rateTourGuide(touristId, tourGuideId, itineraryId, rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const commentOnTourGuide = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { tourGuideId, itineraryId, commentText } = req.body;
+
+    try {
+        const result = await userService.commentOnTourGuide(touristId, tourGuideId, itineraryId, commentText);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const rateItinerary = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { tourGuideId, itineraryId, rating } = req.body;
+
+    try {
+        const result = await userService.rateItinerary(touristId, tourGuideId, itineraryId, rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const commentOnItinerary = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { tourGuideId, itineraryId, commentText } = req.body;
+
+    try {
+        const result = await userService.commentOnItinerary(touristId, tourGuideId, itineraryId, commentText);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const rateActivity = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { activityId, rating } = req.body;
+
+    try {
+        const result = await userService.rateActivity(touristId,activityId,rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const commentOnActivity = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { activityId, commentText } = req.body;
+
+    try {
+        const result = await userService.commentOnActivity(touristId,activityId,commentText);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const rateHistoricalPlace = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { historicalPlaceId, rating } = req.body;
+
+    try {
+        const result = await userService.rateHistoricalPlace(touristId,historicalPlaceId,rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const commentOnHistoricalPlace = async (req, res) => {
+    const { touristId } = req.params; // Get the userId from the route
+    const { historicalPlaceId, commentText } = req.body;
+
+    try {
+        const result = await userService.commentOnHistoricalPlace(touristId,historicalPlaceId,commentText);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+const updatingStatusUser = async (req, res) => {
+    const { userId, status } = req.params;
+    if (!userId || !status) {
+        return res.status(400).json({ message: "Missing inputs" });
+    }
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+    try {
+        const result = await userService.updatingStatusUser(userId, status);
+        res.status(result.status).json(result.response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+//Saif, Tasnim
+
+const changePassword = async (req, res) => {
+    const { userId } = req.params;
+    const { oldPassword, newPassword } = req.body;
+    console.log(userId);
+    console.log(oldPassword, newPassword);
+
+    if (!userId) {
+        return res.status(400).json({ message: "Missing userId" });
+    }
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: "Missing Input" });
+    }
+
+    try {
+        const result = await userService.changePassword(userId, oldPassword, newPassword);
+        res.status(result.status).json(result.response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+const uploadImage = async (req, res) => {
+    const { userId } = req.params;
+    const file = req.file;
+
+    try {
+        if (!file) {
+            return res.status(400).send('No file uploaded.');
+        }
+
+        // Call service to upload image
+        const result = await userService.uploadImage(userId, file);
+
+        // Return the image URL in the response
+        return res.status(200).send({
+            message: result.message,
+            imageUrl: result.imageUrl // Send back the image URL
+        });
+
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return res.status(500).send({ error: 'Error uploading image.' });
+    }
+};
+
+const redeemPoints = async (req, res) => {
+    const { userId,points } = req.params;
+    console.log(userId)
+    console.log(points)
+
+    if (!userId || !points) {
+        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    }
+    try {
+        const result = await userService.redeemPoints(userId, points);
+        return res.status(result.status).json(result.response);
+    } catch (error) {
+        console.error('Error redeeming points:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+const pointsAfterPayment = async (req, res) => {
+    const { userId, amount } = req.params;
+    console.log(userId, amount);
+
+    if (!userId || !amount) {
+        return res.status(400).json({ message: 'Missing userId or amount parameter.' });
+    }
+    try {
+        const result = await userService.pointsAfterPayment(userId, amount);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error redeeming amount:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+const getLevel = async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'Missing userId parameter.' });
+    }
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+    }   
+
+    try {
+        const level = await userService.getLevel(userId);
+        return res.status(200).json({message: "Level fetched successfully", level});
+    } catch (error) {
+        console.error('Error fetching user level:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+const acceptTerms = async (req, res) => {
+    const { _id, type } = req.params;
+    
+
+    // Check if username and type are provided
+    if (!_id || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.acceptTerms(_id, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Terms and conditions accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const requestDeletion = async (req, res) => {
+    const { userId, type } = req.params;
+    
+
+
+    
+    if (!userId || !type) {
+        return res.status(400).json({ message: "ID and type are required." });
+    }
+
+    try {
+        
+        const result = await userService.requestDeletion(userId, type);
+       
+        if (!result) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        
+        res.status(200).json({ message: "Request to be deleted accepted.", user: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const registerUser = async (req, res) => {
     const { type } = req.params;
     const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
@@ -362,14 +652,6 @@ const registerUser = async (req, res) => {
     }
 };
 
-const calculateAge = (dob) => {
-    const birthDate = new Date(dob);
-    const differenceInMilliseconds = Date.now() - birthDate.getTime();
-    const ageDate = new Date(differenceInMilliseconds);
-
-    return Math.abs(ageDate.getUTCFullYear() - 1970); // Calculate age
-};
-
 const login = async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -381,15 +663,33 @@ const login = async (req, res) => {
     }
     try{
         const user = await userService.login(username, password);
-        if (!user) {
+        if (!(user == "user") && !(user == "tourist")) {
             return res.status(404).json({ error: 'Invalid username or password' });
         }
-        return res.status(200).json({message: "Logged in Successfully", user: user});
+        let imageUrl;
+        const allUser = await userRepository.getUserbyUsername(username);
+        if(user != 'tourist'){
+            imageUrl = await userRepository.getUserProfilePicture(allUser._id);
+            if(!allUser.termsAndConditions){
+                return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
+            }
+        }
+        console.log("User: ",allUser);
+
+        return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl});
     }catch(error){
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
 }
+
+
 module.exports = {
+    changePassword,
+    uploadImage,
+    acceptTerms,
+    requestDeletion,
+    pointsAfterPayment,
+    getLevel,
   deleteUserByIdAndType,
   addGovernorOrAdmin,
   fetchAllUsersAndTourists,
@@ -406,5 +706,17 @@ module.exports = {
   getTourist,
   updateTourist,
   registerUser,
-  login
+  login,
+  rateTourGuide,
+  commentOnTourGuide,
+  rateActivity,
+  commentOnActivity,
+  rateItinerary,
+  commentOnItinerary,
+  rateHistoricalPlace,
+  commentOnHistoricalPlace,
+  redeemPoints,
+  getUsersForDeletion,
+  getNotAcceptedUsers,
+  updatingStatusUser
 };

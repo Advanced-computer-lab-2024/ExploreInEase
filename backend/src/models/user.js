@@ -28,17 +28,32 @@ const UsersSchema = new Schema({
         }
         
     },
-    nationalId: {
-        type: String,
-       
+    rating: {
+        type: Number,
+        min: 0,
+        max: 5,
+      },
+    ratingSum: {
+        type: Number,
+        default: 0,
     },
-    certificate: {
-        type: String,
-        
+    ratingCount: {
+        type: Number,
+        default: 0,
     },
-    taxation: {
-        type: String,
-        
+    documents: {
+        nationalId: {
+            type: String,
+           
+        },
+        certificate: {
+            type: String,
+            
+        },
+        taxation: {
+            type: String,
+            
+        },  
     },
     experience: {
         type: String,
@@ -54,7 +69,7 @@ const UsersSchema = new Schema({
     },
     hotline: {
         type: String,
-        
+        default: ''
     },
     companyProfile: {
         type: String,
@@ -69,35 +84,19 @@ const UsersSchema = new Schema({
         required: [true, 'User type is required'],
         enum: ['advertiser', 'tourGuide', 'seller', 'tourismGovernor', 'admin'] // User types
     },
-    selfPicture: {
-        type: String,
-        
-    },
-    logo: {
-        type: String,
-        
+    photo: {
+        selfPicture: {
+            type: String,
+            default: ""
+        },
+        logo: {
+            type: String,
+            default: ""
+        }
     },
     comment: {
-        type: String,
+        type: [String],
         
-    },
-    rating: {
-        type: Number,
-        min: 0,
-        max: 5,
-        
-    },
-    founded: {
-        type: Number,
-       
-    },
-    specialist: {
-        type: String,
-        
-    },
-    noEmployees: {
-        type: Number,
-      
     },
     industry: {
         type: String,
@@ -113,8 +112,44 @@ const UsersSchema = new Schema({
         default: function() {
             return this.type === 'seller' ? 'External' : '';
         }
-    }
-
+    },
+    docStatus: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected', ""],
+        default: function() {
+            if(this.documents.nationalId || this.documents.certificate || this.documents.taxation) {
+                return 'pending';
+            } else {
+                return "";
+            }
+        }
+    },
+    termsAndConditions: {
+        type: Boolean,
+        default: false
+    },
+    requestDeletion: {
+        type: Boolean,
+        default: false
+    },
+    founded: {
+        type: Date,
+       
+    },
+    specialist: {
+        type: String,
+        default: ''
+    },
+    noEmployees: {
+        type: Number,
+      
+    },
+    
+    status: {
+        type: Boolean,
+        default: false
+    },
+    
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

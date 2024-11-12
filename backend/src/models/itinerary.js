@@ -11,11 +11,6 @@ const itinerarySchema = new Schema({
     ref: 'Activity', // Referencing the Activity schema
     required: true,
   }],
-  preftag: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'PreferenceTags', // Referencing the Activity schema
-    required: true,
-  }],
   locations: {
     type: [String], // An array of strings for location names
     required: true,
@@ -71,8 +66,16 @@ const itinerarySchema = new Schema({
     min: 0,
     max: 5, // Rating on a scale of 0 to 5
   },
+  ratingSum: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
   comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' }, // Comments related to the itinerary
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }, // Comments related to the itinerary
     text: { type: String, required: true },
     date: { type: Date, default: Date.now },
   }],

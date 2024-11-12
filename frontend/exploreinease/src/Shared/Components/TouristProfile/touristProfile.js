@@ -1,341 +1,377 @@
-import React, { useState } from 'react';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import InputAdornment from '@mui/material/InputAdornment';
-import Input from '@mui/material/Input';
+import React, { useState, useEffect } from 'react';
+import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import Divider from '@mui/material/Divider';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import { useLocation } from 'react-router-dom';
+import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Email, Phone, Cake, Flag, LocationOn, Wc, Lock } from '@mui/icons-material';
+import WorkIcon from '@mui/icons-material/Work';
 import NetworkService from '../../../NetworkService';
+import { useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
+import axios from 'axios';
+import silver from './silver.png';
+import bronze from './bronze.png';
+import gold from './gold.png';
+import Tooltip from '@mui/material/Tooltip';
+import Sky from '../Sky2.jpeg';
+import { styled } from '@mui/system';
 
-const useForm = (initialValues) => {
-  const [formValues, setFormValues] = useState(initialValues);
-
-  const handleChange = (name) => (valueOrEvent) => {
-    const newValue = name === 'dob' ? valueOrEvent : valueOrEvent.target.value;
-    setFormValues({ ...formValues, [name]: newValue });
-  };
-
-  return [formValues, handleChange];
-};
 
 const TouristProfile = (props) => {
   const location = useLocation();
-  const { Tourist } = location.state || {};  
-  console.log("tourist", Tourist);
-  
-  const initialUsername = Tourist?.username || '';
-  const initialWallet = Tourist?.wallet || 0;
-  const [formValues, handleChange] = useForm({
+  const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
+  console.log(Tourist);
+
+  const initialData = {
     email: Tourist?.email || '',
-    password: Tourist?.password || '',
-    mobileNumber: Tourist?.mobileNum || '',
+    mobileNum: Tourist?.mobileNum || '',
     nationality: Tourist?.nation || '',
-    dob: Tourist?.dob ? dayjs(Tourist.dob) : null, // Ensure this is a dayjs object
-    educationState: Tourist?.profession || '',
-    wallet: Tourist?.wallet || '0',
-  });
-  console.log(Tourist.dob ,typeof Tourist.dob);
+    dob: Tourist?.dob ? dayjs(Tourist.dob) : null,
+    profession: Tourist?.profession || '',
+    password: Tourist?.password || '',
+    wallet: Tourist?.wallet || 0,
+    points: Tourist?.points || 0,
+  };
+  const userId = Tourist._id;
+  const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
+  const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
+  const initialUsername = Tourist.username;
+  const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+
+
+  useEffect(() => {
+    // Update the avatar URL when the component mounts if a new image URL exists
+    if (savedAvatarUrl || imageUrl) {
+        setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+    } else {
+        setAvatarImage(defaultAvatarUrl);
+    }
+}, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
+
+  const [formValues, setFormValues] = useState(initialData);
   const [isEditable, setIsEditable] = useState({
     email: false,
-    password: false,
-    mobileNumber: false,
+    mobileNum: false,
     nationality: false,
     dob: false,
-    educationState: false,
-    wallet: false,
+    password: false,
+    profession: false,
   });
-
-  const initialLetter = Tourist.username;  
-  const firstInitial = initialLetter ? initialLetter.charAt(0).toUpperCase() : '?';
   const [showPassword, setShowPassword] = useState(false);
+  const [level, setLevel] = useState(1);
 
-  const toggleEditMode = (field) => {
-    setIsEditable((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
+  useEffect(() => {
+    const fetchTouristData = async () => {
+      try {
+        const response2 = await axios.get(`http://localhost:3030/level/${Tourist._id}`);
+        console.log('Tourist level:', response2.data);
+        setLevel(response2.data.level);
 
-  const handleClickShowPassword = () => {
-    setShowPassword((prevShow) => !prevShow);
-  };
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
-  const toggleAllEditMode = () => {
-    const allEditable = Object.values(isEditable).some(editable => editable);
-    const newEditableState = {
-      email: !allEditable,
-      password: !allEditable,
-      mobileNumber: !allEditable,
-      nationality: !allEditable,
-      dob: !allEditable,
-      educationState: !allEditable,
-      wallet: !allEditable,
+        const response = await axios.get(`http://localhost:3030/getTourist/${Tourist._id}`);
+        console.log('Tourist data:', response.data);
+        setFormValues({
+          ...formValues,
+          email: response.data.email,
+          mobileNum: response.data.mobileNum,
+          nationality: response.data.nation,
+          dob: response.data.dob ? dayjs(response.data.dob) : null,
+          profession: response.data.profession,
+          points: response.data.points,
+          password: response.data.password,
+          wallet: response.data.wallet,
+          points: response.data.points,
+        });
+      } catch (error) {
+        console.error('Error fetching tourist data:', error);
+      }
     };
-    setIsEditable(newEditableState);
 
-    if (allEditable) {
-      handleSave(); // Save values if switching to non-editable mode
-    }
+    fetchTouristData();
+  }, [Tourist._id]);
+
+  const handleChange = (field) => (event) => {
+    setFormValues({ ...formValues, [field]: event.target ? event.target.value : event });
+  };
+
+  const handleRedeemPoints = async () => {
+      console.log('Redeeming points...');
+      console.log(Tourist._id, formValues.points);
+        // Add your redeem logic here
+        const options = {
+          apiPath: `/redeemPoints/${Tourist._id}/${formValues.points}`,
+        };
+        const response = NetworkService.get(options);
+        console.log(response);
+    
   };
 
   const handleSave = async () => {
     try {
-      const updatedTourist = {
+      console.log('Updating tourist:', formValues);
+      const body = {
         email: formValues.email,
-        mobileNum: formValues.mobileNumber,
+        mobileNum: formValues.mobileNum,
+        nation: formValues.national,
+        dob: formValues.dob,
+        profession: formValues.profession,
         password: formValues.password,
-        profession: formValues.educationState,
-        nation: formValues.nationality,
-        username: formValues.username,
-        dateOfBirth: formValues.dateOfBirth?.toISOString(),
       };
-      const options = {
-        apiPath:  ` /updateTourist/${Tourist._id}`,
-        urlParam: Tourist._id,
-        body: updatedTourist,
-      };
-      const response = await NetworkService.put(options);
-      // Update frontend form with the updated values
-      handleChange({
-        ...formValues,
-        email: response.tourist.email,
-        mobileNumber: response.tourist.mobileNum,
-        dateOfBirth: response.tourist.dateOfBirth, // Convert back to Day.js format if needed
-      });
-
+      const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`, body);
+      console.log(response.message);
       setIsEditable({
         email: false,
-        password: false,
-        mobileNumber: false,
+        mobileNum: false,
         nationality: false,
-        dateOfBirth: false,
-        educationState: false,
-        wallet: false,
+        dob: false,
+        password: false,
+        profession: false,
       });
     } catch (error) {
       console.error('Error updating tourist:', error);
     }
   };
 
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        console.log('Image uploaded successfully:', response.data);
+        setAvatarImage(response.data.imageUrl);
+        localStorage.setItem(`${userId}`, response.data.imageUrl);
+      } catch (err) {
+        console.error('Error uploading image:', err);
+      }
+    }
+  };
+
+  const toggleEdit = (field) => setIsEditable({ ...isEditable, [field]: !isEditable[field] });
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+
   return (
+    <Box
+    sx={{
+      backgroundImage: `url(${Sky})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Card sx={{ padding: 3, width: '80%', margin: 'auto' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h4" gutterBottom>
-            Manage Profile
-          </Typography>
-          <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
-        </Box>
+      {/* Flex container to center the card */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%', // Ensure the box takes full height
+          width: '100%', // Ensure the box takes full width
+        }}
+      >
+        <Card sx={{ padding: 4, width: '90%', maxWidth: 600, borderRadius: 16, boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)', // Slightly transparent
+        animation: 'fadeIn 1s ease-in-out' }}>
+          <Box display="flex" alignItems="Left" justifyContent="center">
+          <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 1}}>My Profile</Typography>
+            </Box>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+          <Box sx={{ textAlign: 'center', mb: 3, position: 'relative', display: 'flex', justifyContent: 'center', gap: 2 }}>
+  {/* Avatar with hover effect */}
+  <Tooltip title="Click to change avatar" arrow>
+    <label htmlFor="avatar-upload">
+      <Avatar
+        sx={{
+          width: 80, height: 80, cursor: 'pointer',
+          '&:hover::before': {
+            position: 'absolute',
+            bottom: '5px',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '5px',
+            padding: '2px 8px',
+          },
+        }}
+        src={avatarImage}
+      />
+      <input
+        accept="image/*"
+        style={{ display: 'none' }}
+        id="avatar-upload"
+        type="file"
+        onChange={handleAvatarChange}
+      />
+    </label>
+  </Tooltip>
 
-        <Divider sx={{ mb: 2 }} />
+  <Avatar
+    sx={{
+      width: 80,
+      height: 110,
+      backgroundColor: 'transparent', // Make the background transparent
+      boxShadow: 'none', // Remove any shadow or outline
+    }}
+  >
+    {Tourist.level === 3 ? (
+      <img src={gold} alt="Level 3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    ) : Tourist.level === 2 ? (
+      <img src={silver} alt="Level 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    ) : (
+      <img src={bronze} alt="Level 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    )}
+  </Avatar>
+</Box>
 
-        {/* Username */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
-            <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Username:</Typography>
-            <Typography>{initialUsername}</Typography>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={1}>
+              <StarIcon color="warning" />
+              <Typography variant="h6" ml={1}>{formValues.points} Points</Typography>
+              {/* Redeem button */}
+              <IconButton onClick={handleRedeemPoints} color="primary" sx={{ ml: 0.5 }}>
+                <Redeem />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
-        <Divider />
 
-        {/* Email Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Email:</Typography>
-            {isEditable.email ? (
-              <TextField
-                sx={{ width: '70%' }}
-                id="email-edit"
-                type="email"
-                variant="standard"
-                value={formValues.email}
-                onChange={handleChange('email')}
-              />
-            ) : (
-              <Typography>{formValues.email}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('email')} aria-label={isEditable.email ? 'save' : 'edit'}>
-              {isEditable.email ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+          <Divider sx={{ mb: 1}} />
 
-        {/* Password Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Password:</Typography>
-            {isEditable.password ? (
-              <Input
-                sx={{ width: '70%' }}
-                type={showPassword ? 'text' : 'password'}
-                value={formValues.password}
-                onChange={handleChange('password')}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                    >
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            ) : (
-              <Typography>{formValues.password}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('password')} aria-label={isEditable.password ? 'save' : 'edit'}>
-              {isEditable.password ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+          {/* Profile Fields */}
+          <Grid container spacing={2}>
+                {/* Username */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <AccountCircleIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
+        <Typography sx={{ mr: 5 }}>{Tourist.username}</Typography>
+      </Box>
+    </Grid>
+            {/* Email */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Email color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Email:</Typography>
+                {isEditable.email ? (
+                  <TextField fullWidth value={formValues.email} onChange={handleChange('email')} />
+                ) : (
+                  <Typography>{formValues.email}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('email'); if (isEditable.email) handleSave(); }}>
+                  {isEditable.email ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Mobile Number Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Mobile Number:</Typography>
-            {isEditable.mobileNumber ? (
-              <TextField
-                sx={{ width: '70%' }}
-                variant="standard"
-                type="tel"
-                value={formValues.mobileNumber}
-                onChange={handleChange('mobileNumber')}
-              />
-            ) : (
-              <Typography>{formValues.mobileNumber}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('mobileNumber')} aria-label={isEditable.mobileNumber ? 'save' : 'edit'}>
-              {isEditable.mobileNumber ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+            {/* Mobile Number */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Phone color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Mobile Number:</Typography>
+                {isEditable.mobileNum ? (
+                  <TextField fullWidth value={formValues.mobileNum} onChange={handleChange('mobileNum')} />
+                ) : (
+                  <Typography>{formValues.mobileNum}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('mobileNum'); if (isEditable.mobileNum) handleSave(); }}>
+                  {isEditable.mobileNum ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Nationality Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Nationality:</Typography>
-            {isEditable.nationality ? (
-              <TextField
-                sx={{ width: '70%' }}
-                variant="standard"
-                type="text"
-                value={formValues.nationality}
-                onChange={handleChange('nationality')}
-              />
-            ) : (
-              <Typography>{formValues.nationality}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('nationality')} aria-label={isEditable.nationality ? 'save' : 'edit'}>
-              {isEditable.nationality ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+            {/* Nationality */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Flag color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Nationality:</Typography>
+                {isEditable.nationality ? (
+                  <TextField fullWidth value={formValues.nationality} onChange={handleChange('nationality')} />
+                ) : (
+                  <Typography>{formValues.nationality}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('nationality'); if (isEditable.nationality) handleSave(); }}>
+                  {isEditable.nationality ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Date of Birth Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Date of Birth:</Typography>
-            {isEditable.dob ? (
-              <DatePicker
-                label="Select Date"
-                value={formValues.dob}
-                onChange={handleChange('dob')}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            ) : (
-              <Typography>{formValues.dob ? formValues.dob.format('MM/DD/YYYY') : 'N/A'}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('dob')} aria-label={isEditable.dob ? 'save' : 'edit'}>
-              {isEditable.dob ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
-        {/* Education State Field */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>Education State:</Typography>
-            {isEditable.educationState ? (
-              <TextField
-                sx={{ width: '70%' }}
-                variant="standard"
-                type="text"
-                value={formValues.educationState}
-                onChange={handleChange('educationState')}
-              />
-            ) : (
-              <Typography>{formValues.educationState}</Typography>
-            )}
-          </Box>
-          <div>
-            <IconButton onClick={() => toggleEditMode('educationState')} aria-label={isEditable.educationState ? 'save' : 'edit'}>
-              {isEditable.educationState ? <SaveIcon /> : <EditIcon />}
-            </IconButton>
-          </div>
-        </Box>
-        <Divider />
+            {/* Date of Birth */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Cake color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Date of Birth:</Typography>
+                <Typography sx={{ mr: 5 }}>{formValues.dob ? formValues.dob.format('YYYY-MM-DD') : 'N/A'}</Typography>
+              </Box>
+            </Grid>
+            
+            {/* Password */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Lock color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Password:</Typography>
+                {isEditable.password ? (
+                  <TextField
+                    fullWidth
+                    type={showPassword ? 'text' : 'password'}
+                    value={formValues.password}
+                    onChange={handleChange('password')}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={toggleShowPassword}>
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                ) : (
+                  <Typography>******</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('password'); if (isEditable.password) handleSave(); }}>
+                  {isEditable.password ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
 
-        {/* Wallet Field */}
-        <Divider sx={{ mb: 2 }} />
+            {/* Profession */}
+            <Grid item xs={12}>
+  <Box display="flex" alignItems="center">
+    <WorkIcon color="action" />
+    <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Profession:</Typography>
+    {isEditable.profession ? (
+      <TextField fullWidth value={formValues.profession} onChange={handleChange('profession')} />
+    ) : (
+      <Typography>{formValues.profession}</Typography>
+    )}
+    <IconButton onClick={() => { toggleEdit('profession'); if (isEditable.profession) handleSave(); }}>
+      {isEditable.profession ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+    </IconButton>
+  </Box>
+</Grid>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
-            <Typography sx={{ marginRight: 9, fontWeight: "bold" }}>Wallet:</Typography>
-            <Typography>{initialWallet}</Typography>
-          </Box>
-        </Box>
-        <Divider />
-
-        {/* Save All Changes Button */}
-        <Button variant="contained" onClick={toggleAllEditMode}>
-          {Object.values(isEditable).some(editable => editable) ? 'Save All Changes' : 'Edit All'}
-        </Button>
-      </Card>
+{/* Wallet */}
+<Grid item xs={12}>
+  <Box display="flex" alignItems="center">
+    <Wallet color="action" />
+    <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Wallet:</Typography>
+    {isEditable.wallet ? (
+      <TextField fullWidth value={formValues.wallet} onChange={handleChange('wallet')} />
+    ) : (
+      <Typography sx={{ mr: 5 }}>{formValues.wallet}</Typography>
+    )}
+  </Box>
+</Grid>
+          </Grid>
+        </Card>
+      </Box>
     </LocalizationProvider>
+    </Box>
   );
 };
 

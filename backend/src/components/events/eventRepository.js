@@ -8,6 +8,9 @@ const Tourist = require('../../models/tourist');
 const mongoose = require('mongoose');
 const historicalTags = require('../../models/historicalTag');
 const historicalPlace = require('../../models/historicalPlace');
+const Transportation = require('../../models/transportation');
+const BookedFlight = require('../../models/bookedFlights');
+const BookedHotel = require('../../models/bookedHotels');
 
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
@@ -16,6 +19,9 @@ const getActivitiesByUserId = async (userId) => {
     .exec(); 
 };
 
+const getAllActivitiesInDatabase = async () => {
+  return await Activity.find().select('name');
+};
 
 const getHistoricalPlacesByUserId = async (userId) => {
   return await HistoricalPlace.find({ created_by: userId })
@@ -59,9 +65,9 @@ const deleteCategoryById = async (id) => {
 };
 
 // Update a category by ID
-const updateCategoryById = async (id, updateData) => {
+const updateCategoryById = async (_id, updatedCategoryName) => {
   try {
-      const updatedCategory = await ActivityCategory.findByIdAndUpdate(id, updateData, { new: true });
+      const updatedCategory = await ActivityCategory.findByIdAndUpdate(_id, updatedCategoryName, { new: true });
       return updatedCategory; // Return the updated category
   } catch (error) {
       console.error(`Error updating category: ${error.message}`);
@@ -150,7 +156,7 @@ const getAllUpcomingEvents = async () => {
 
     // Fetch all upcoming historical places (assuming they also have a date field)
     const upcomingHistoricalPlaces = await HistoricalPlace.find({
-      dateTimeAvailable: { $gte: currentDate },
+      // dateTimeAvailable: { $gte: currentDate },
     })
       .populate("created_by", "username") // Populating user details (creator) with only username
       .exec();
@@ -230,12 +236,14 @@ const getFilteredItineraries = async (filters) => {
 };
 
 const createHistoricalTag = async (tagData) => {
-  const tag = new HistoricalTag(tagData);
+  console.log(tagData);
+  
+  const tag = new historicalTags(tagData);
   return await tag.save();
 };  
 
 const getTypeForTag = async (id) => {
-  const user = await User.findOne({ _id: id });
+  const user = await Users.findOne({ _id: id });
   return user.type
 };
   
@@ -246,7 +254,22 @@ const getActivityById = async (id) => {
 
 const createActivity = async (activityData) => {
   const activity = new Activity(activityData);
-  return await activity.save();
+  const newActivity = await activity.save();
+  const createdActivity = {
+    _id: newActivity._id,
+    name: newActivity.name,
+    date: newActivity.date,
+    time: newActivity.time,
+    location: newActivity.location,
+    price: newActivity.price,
+    category: newActivity.category,
+    tags: newActivity.tags,
+    specialDiscounts: newActivity.specialDiscounts,
+    isOpen: newActivity.isOpen,
+    created_by: newActivity.created_by,
+  }
+  console.log(createdActivity);
+  return createdActivity;
 };
 
 const findCategoryById = async (categoryId) => {
@@ -267,14 +290,32 @@ const deleteActivity = async (_id) => {
 const getAllActivities = async (userId) => {
   return await Activity.find();
 };
+const getAllItineraries2 = async () => {
+  return Itinerary.find()
+    .populate({
+      path: 'activities',
+      populate: { path: 'category tags' } 
+    });
+};
 
 const getAllActivitiesAdvertiser = async (userId) => {
   return await Activity.find({ created_by: userId });
 };
 
+
 const getAllItineraries = async (userId) => {
-  return await Itinerary.find({ created_by: userId });
+  const itineraries = await Itinerary.find({ created_by: userId });
+
+  // Optional: Ensure each itinerary has a name
+  itineraries.forEach(itinerary => {
+    if (!itinerary.name) {
+      console.error(`Itinerary with ID ${itinerary._id} does not have a name.`);
+    }
+  });
+
+  return itineraries;
 };
+
 
 const getItineraryById = async (id) => {
   const itinerary = await Itinerary.findById(id)
@@ -320,7 +361,7 @@ const createHistoricalPlace = async (data) => {
 };
 
 const findTagByTypeAndPeriod = async (type) => {
-  return await historicalTags.findOne({type:type});
+  return await historicalTags.findOne({_id:type});
 };
 
 const checkTourismGovernor = async (userId) => {
@@ -340,9 +381,10 @@ const getHistoricalPlaceById = async (id) => {
 };
 
 // Update a Historical Place by ID
-const updateHistoricalPlace = async (id, data) => {
-  return await HistoricalPlace.findByIdAndUpdate(id, data, { new: true });
-};
+const updateHistoricalPlace = async (_id, data) => {
+  console.log("data:", data.updateValues);
+  return await HistoricalPlace.findByIdAndUpdate(_id, data.updateValues);
+};                      
 
 // Delete a Historical Place by ID
 const deleteHistoricalPlace = async (id) => {
@@ -364,7 +406,445 @@ const getType = async (id) => {
 const getAllHistoricalTags = async () => {
   return await historicalTags.find();
 }
+
+const getHistoricalTagDetails = async (id) => {
+  return await historicalTags.find({ _id: id });
+}
+const getTouristEmailById = async (touristId) => {
+  try {
+      const tourist = await Tourist.findById(touristId);
+      return tourist ? tourist.email : null;
+  } catch (error) {
+      console.error(`Error fetching tourist email: ${error.message}`);
+      throw new Error('Could not fetch tourist email');
+  }
+};
+
+//Mohamed Apis
+const bookedEvents = async ({ touristId }) => {
+  return await Tourist.findById(touristId)
+      .populate({
+        path: 'activityId.id',
+        populate: { path: 'category', model: 'ActivityCategory' } // Populate category in Activity
+      })
+      .populate({
+        path: 'historicalplaceId.id',
+        populate: { path: 'tags', model: 'HistoricalTags' } // Populate tags in HistoricalPlace
+      })
+      .populate('itineraryId.id')
+      .populate('transportationId.id')
+      .exec();
+};
+
+
+const bookEvent = async (touristId, eventType, eventId, ticketType, currency, activityPrice) => {
+  const tourist = await Tourist.findById(touristId);
+  if (!tourist) {
+    throw new Error('Tourist not found');
+  }
+
+  let eventPrice = 0;
+
+  switch (eventType) {
+    case 'itinerary':
+      const itinerary = await Itinerary.findById(eventId);
+      if (!itinerary) {
+        throw new Error('Itinerary not found');
+      }
+      if (tourist.itineraryId.some(event => event.id.toString() === eventId)) {
+        throw new Error('This itinerary has already been booked.');
+      }
+      eventPrice = itinerary.price;
+      break;
+
+    case 'activity':
+      if (tourist.activityId.some(event => event.id.toString() === eventId)) {
+        throw new Error('This activity has already been booked.');
+      }
+      switch (currency) {
+        case 'euro':
+          eventPrice = (activityPrice * 55).toFixed(2);
+          break;
+        case 'dollar':
+          eventPrice = (activityPrice * 50).toFixed(2);
+          break;
+        case 'EGP':
+          eventPrice = (activityPrice * 1).toFixed(2);
+          break;
+        default:
+          throw new Error('Invalid currency');
+      }
+      break;
+
+    case 'historicalPlace':
+      const historicalPlace = await HistoricalPlace.findById(eventId);
+      if (!historicalPlace) {
+        throw new Error('Historical place not found');
+      }
+      if (tourist.historicalplaceId.some(event => event.id.toString() === eventId)) {
+        throw new Error('This historical place has already been booked.');
+      }
+      eventPrice = ticketType === "student" ? historicalPlace.ticketPrice.student :
+                   ticketType === "native" ? historicalPlace.ticketPrice.native :
+                   historicalPlace.ticketPrice.foreign;
+      break;
+
+    default:
+      throw new Error('Invalid event type');
+  }
+
+  if (tourist.wallet < eventPrice) {
+    throw new Error('Insufficient funds to book this event');
+  }
+
+  
+  tourist.wallet -= eventPrice;
+
+  const eventData = { id: eventId, pricePaid: eventPrice };
+  switch (eventType) {
+    case 'itinerary':
+      tourist.itineraryId.push(eventData);
+      break;
+    case 'activity':
+      tourist.activityId.push(eventData);
+      break;
+    case 'historicalPlace':
+      tourist.historicalplaceId.push(eventData);
+      break;
+  }
+
+ 
+  await tourist.save();
+
+  return tourist;
+};
+
+const cancelEvent = async (touristId, eventType, eventId) => {
+  const currentTime = new Date();
+  const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
+
+  const updateData = {};
+  let eventPrice = 0;
+  let startDate;
+
+  
+  const eventObjectId = new mongoose.Types.ObjectId(eventId); 
+
+  switch (eventType) {
+    case 'itinerary':
+      const itinerary = await Itinerary.findById(eventObjectId);
+      if (!itinerary) throw new Error('Itinerary not found');
+
+      startDate = itinerary.dateTimeAvailable.sort((a, b) => a - b)[0];
+      if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
+        throw new Error('Cancellations must be made at least 48 hours before the itinerary start date.');
+      }
+
+      
+      const touristItinerary = await Tourist.findById(touristId).select('itineraryId');
+
+      
+      const itineraryItem = touristItinerary.itineraryId.find(item => {
+         
+        return item.id.equals(eventObjectId);
+      });
+
+      if (!itineraryItem) throw new Error('Itinerary not found in tourist data');
+
+      eventPrice = itineraryItem.pricePaid;
+
+      
+      updateData.$pull = { itineraryId: { id: eventObjectId } };
+      break;
+
+    case 'activity':
+      const activity = await Activity.findById(eventObjectId);
+      if (!activity) throw new Error('Activity not found');
+
+      startDate = activity.date;
+      if (!startDate || (startDate - currentTime) < fortyEightHoursInMs) {
+        throw new Error('Cancellations must be made at least 48 hours before the activity start date.');
+      }
+
+      
+      const touristActivity = await Tourist.findById(touristId).select('activityId');
+
+      
+      const activityItem = touristActivity.activityId.find(item => {
+        return item.id.equals(eventObjectId);
+      });
+
+      if (!activityItem) throw new Error('Activity not found in tourist data');
+
+      eventPrice = activityItem.pricePaid; 
+
+      
+      updateData.$pull = { activityId: { id: eventObjectId } };
+      break;
+
+    case 'historicalPlace':
+      const historicalPlace = await HistoricalPlace.findById(eventObjectId);
+      if (!historicalPlace) throw new Error('Historical place event not found');
+
+      
+      const touristHistoricalPlace = await Tourist.findById(touristId).select('historicalplaceId');
+
+      
+      const historicalPlaceItem = touristHistoricalPlace.historicalplaceId.find(item => {
+        return item.id.equals(eventObjectId);
+      });
+
+      if (!historicalPlaceItem) throw new Error('Historical place event not found in tourist data');
+
+      eventPrice = historicalPlaceItem.pricePaid; 
+
+      
+      updateData.$pull = { historicalplaceId: { id: eventObjectId } };
+      break;
+
+    default:
+      throw new Error('Invalid event type');
+  }
+
+  
+  updateData.$inc = { wallet: eventPrice };
+
+  const updatedTourist = await Tourist.findByIdAndUpdate(touristId, updateData, { new: true });
+
+  if (!updatedTourist) throw new Error('Tourist not found');
+
+  return {
+    message: `${eventType} event cancelled successfully.`,
+    eventPriceRefunded: eventPrice,
+    updatedTourist,
+  };
+};
+
+
+const flightBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
+  try {
+
+    switch (currency) {
+      case 'euro':
+          price = (price * 55).toFixed(2); 
+          break;
+      case 'dollar':
+          price = (price * 50).toFixed(2); 
+          break;
+      case 'EGP':
+          price = price.toFixed(2); 
+          break;
+      default:
+          throw new Error('Invalid currency'); 
+    }
+
+
+
+      const tourist = await Tourist.findById(bookedBy);
+      if (!tourist) {
+        throw new Error('Tourist not found');
+      }
+
+      if (tourist.wallet < price) {
+        throw new Error('Insufficient funds to book this Flight by Wallet');
+      }
+
+
+      tourist.wallet -= price;
+      await tourist.save();
+
+
+      const newBooking = new BookedFlight({
+          bookedBy,
+          price,
+          departureTime,
+          arrivalTime,
+          personCount,
+          originCode,
+          destinationCode
+      });
+
+      
+      await newBooking.save();
+      return {
+        message: 'Booking has been made successfully',
+        booking: newBooking,
+      };
+  } catch (error) {
+      console.error('Error saving booking:', error);
+      throw new Error("Unable to create booking");
+  }
+};
+
+
+const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId, startDate, endDate, personCount, currency }) => {
+  try {
+    
+    switch (currency) {
+      case 'euro':
+        price = (price * 55).toFixed(2);
+        break;
+      case 'dollar':
+        price = (price * 50).toFixed(2);
+        break;
+      case 'EGP':
+        price = price.toFixed(2);
+        break;
+      default:
+        price = price;
+    }
+
+    
+    const tourist = await Tourist.findById(bookedBy);
+    if (!tourist) {
+      throw new Error('Tourist not found');
+    }
+
+    
+    if (tourist.wallet < price) {
+      throw new Error('Insufficient funds to book this hotel');
+    }
+
+    tourist.wallet -= price;
+    await tourist.save();
+
+    
+    const newBooking = new BookedHotel({
+      bookedBy,
+      price,
+      iataCode,
+      hotelName,
+      hotelId,
+      startDate,
+      endDate,
+      personCount,
+      currency,
+    });
+
+    
+    await newBooking.save();
+
+   
+    return {
+      message: 'Booking has been made successfully',
+      booking: newBooking,
+    };
+  } catch (error) {
+    console.error('Error saving booking:', error);
+    throw new Error("Unable to create booking");
+  }
+};
+
+const createTransportation = async (advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType) => {
+  
+  const transportation = new Transportation({
+    advertiserId,
+    pickupLocation,
+    dropoffLocation,
+    dateAvailable,
+    timeAvailable,
+    price,
+    transportationType,
+    
+  });
+
+  await transportation.save(); 
+  return transportation; 
+};
+
+
+const getTransportations = async (currency) => { 
+  const transportations = await Transportation.find();
+
+  
+  const convertedTransportations = transportations.map(transportation => {
+      let convertedPrice;
+      
+      switch (currency) {
+          case 'euro':
+              convertedPrice = (transportation.price / 55).toFixed(2);
+              break;
+          case 'dollar':
+              convertedPrice = (transportation.price / 55).toFixed(2);
+              break;
+          case 'EGP':
+              convertedPrice = (transportation.price).toFixed(2); 
+              break;
+          default:
+              convertedPrice = transportation.price; 
+      }
+
+      
+      return {
+          ...transportation.toObject(), 
+          price: convertedPrice
+      };
+  });
+
+  return convertedTransportations;
+};
+
+
+
+const bookTransportation = async (touristId, transportationId) => {
+  
+  const transportation = await Transportation.findById(transportationId);
+  if (!transportation) {
+    throw new Error('Transportation not found');
+  }
+
+  const price = transportation.price;
+
+  const tourist = await Tourist.findById(touristId);
+  if (!tourist) {
+    throw new Error('Tourist not found');
+  }
+
+  // Check if transportationId already exists in tourist's transportationId array
+  const alreadyBooked = tourist.transportationId.some(entry => entry.id.equals(transportationId));
+  if (alreadyBooked) {
+    throw new Error('Transportation already booked');
+  }
+
+  if (tourist.wallet < price) {
+    throw new Error('Insufficient funds to book this transportation');
+  }
+
+  // Deduct the price from the tourist's wallet
+  tourist.wallet -= price;
+
+  // Add the transportation to the tourist's transportationId array
+  tourist.transportationId.push({ id: transportationId, pricePaid: price });
+  await tourist.save();
+
+  return { message: 'Transportation booked successfully', tourist };
+};
+
+const setFlagToZeroForItinerary = async (_id) => {
+  return await Itinerary.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+const setFlagToZeroForActivity = async (_id) => {
+  return await Activity.findByIdAndUpdate(_id, { flag: 0 }, { new: true });
+};
+
+
+
+// Saif, Tasnim
+
+const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
+  const updatedItinerary = await Itinerary.findOneAndUpdate(
+      { _id: itineraryId, created_by: userId }, 
+      { isActivated: isActivated },
+      { new: true } 
+  );
+
+  return updatedItinerary; 
+};
+
 module.exports = {
+  updateItineraryActivation,
+  getHistoricalTagDetails,
   createCategory,
   getAllCategories,
   updateCategoryById,
@@ -404,7 +884,22 @@ module.exports = {
   findTagByTypeAndPeriod,
   checkTourismGovernor,
   getTypeForTag,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase,
+  createTransportation,
+  getTransportations,
+  bookTransportation,
+  bookedEvents,
+  bookEvent,
+  cancelEvent,
+  flightBooking,
+  bookingHotel,
+  getTypeForTag,
+  setFlagToZeroForItinerary,
+  setFlagToZeroForActivity,
+  getAllItineraries2,
+  getTouristEmailById
+  
 };
 
 

@@ -1,5 +1,8 @@
-import React, { useState, useCallback } from 'react';
-import {Button,Dialog,DialogActions,DialogContent,TextField,DialogTitle,Card,CardContent,Typography,CardActions,} from '@mui/material';
+import React, { useState, useCallback,useEffect } from 'react';
+import {
+  Button,
+  Dialog, DialogActions, DialogContent, TextField,DialogTitle,Card, CardContent,CardMedia,Typography,CardActions,ListItemText,
+} from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import InputLabel from '@mui/material/InputLabel';
@@ -10,65 +13,161 @@ import MenuItem from '@mui/material/MenuItem';
 import { LoadScript, GoogleMap, Marker,PlacesService } from '@react-google-maps/api';
 import Slider from '@mui/material/Slider';
 import dayjs from 'dayjs';
-import NetworkService from '../NetworkService';
-import { useLocation } from "react-router-dom";
+import axios from 'axios'; // Ensure Axios is imported
+import { useLocation } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-const containerStyle = {
+import NetworkService from '../NetworkService';
+import { Alert } from '@mui/material'; 
+  import Basketball from './ActivityImage/Basketball.jpg';
+  import Bowling from './ActivityImage/Bowling.jpg';
+  import Cycling from './ActivityImage/Cycling.webp';
+  import Fishing from './ActivityImage/Fishing.jpg';
+  import Football from './ActivityImage/FootBall.jpg';
+  import Handball from './ActivityImage/Handball.jpg';
+  import Hiking from './ActivityImage/Hiking.jpg';
+  import JetSki from './ActivityImage/JetSki.jpg';
+  import Mountain from './ActivityImage/Mountain.jpg';
+  import Skater from './ActivityImage/Skater.jpg';
+
+
+  const activityImage =[Basketball,Bowling,Fishing,Cycling,Football,Handball,Hiking,JetSki,Mountain,Skater];
+
+  const containerStyle = {
   width: '100%',
   height: '400px',
 };
-
-const center = {
-  lat: 30.033333, 
-  lng: 31.233334, 
+const defaultCenter = {
+  lat: 30.033333, // Default to Egypt's latitude
+  lng: 31.233334, // Default to Egypt's longitude
 };
-
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 function Activity() {
-  const location=useLocation();
-  const TourGuideItinerary=location.useState||'';
-  // console.log(TourGuideItinerary);
-  const [activities, setActivities] = useState([]);
+  const location = useLocation();
+  const { allActivity} = location.state||{};
+  const {id}=location.state||{};
+  const [mapCenter, setMapCenter] = useState({lat: 0, lng: 0});
+  const [activities, setActivities] = useState(allActivity); 
   const [open, setOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
   const [map, setMap] = useState(null);
   const [placesService, setPlacesService] = useState(null);
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [tagsList, setTagsList] = useState([]);
+  const [categoryList, setCategoryList] = useState([]);
+ const [address,setAddress]=useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [activityForm, setActivityForm] = useState({
-    name:'',
+    _id: '',
+    name: '',
     date: null,
     time: null,
-    location: '',
+    location: {
+      latitude: null,
+      longitude: null
+    },
     price: [0, 100],
     category: '',
-    tags: [''],
-    specialDiscounts: '',
+    categoryId: '',
+    tags: [],
+    specialDiscounts: null,
     isOpen: true,
-    latitude: null,
-    longitude: null,
   });
-
-  const categoryList = ['Category 1', 'Category 2', 'Category 3'];
-  const tagsList = ['Tag 1', 'Tag 2', 'Tag 3'];
   const [searchInput, setSearchInput] = useState('');
   const [isApiLoaded, setIsApiLoaded] = useState(false);
+
+  useEffect(() => {
+    getAllTags();
+  }, []);
+  useEffect(() => {
+    getAllCategory();
+  }, []);
+
+useEffect(()=>
+{
+  getAllActivities();
+},[]
+);
+useEffect(() => {
+  if (showSuccessMessage) {
+    const timer = setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [showSuccessMessage]);
+
+useEffect(() => {
+  if (showErrorMessage) {
+    const timer = setTimeout(() => {
+      setShowErrorMessage(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [showErrorMessage]);
+
+
+
+
+const getRandomImage = () => {
+  const randomIndex = Math.floor(Math.random() * activityImage.length);
+  return activityImage[randomIndex];
+};
+const getAllActivities =async()=>{
+  try {
+    // Construct the API path
+    const apiPath = `http://localhost:3030/activity/user/${id}/allActivities`;  // Ensure this matches your API route
+    // Make the GET request using Axios
+    const response = await axios.get(apiPath);
+
+    // Log the response data
+    // console.log('API Response:', response);
+
+    // Pass the fetched activities to the Activities page
+      setActivities(response.data);
+      console.log("Activities:",response.data);
+            
+  } catch (err) {
+    // Check if there is a response from the server and handle error
+    if (err.response) {
+      console.error('API Error:', err.message);
+    } else {
+      console.error('Unexpected Error:', err);
+    }
+  }
+} 
   const handleClickOpen = () => {
     setActivityForm({
+      name:"",
       date: null,
       time: null,
-      location: '',
+      location:{
+        latitude: defaultCenter.lat,
+        longitude: defaultCenter.lng
+      },
       price: [0, 100],
       category: '',
-      tags: '',
-      specialDiscounts: '',
-      booking: false,
-      latitude: null,
-      longitude: null,
+      tags: [],
+      specialDiscounts: null,
+      isOpen: false,
     });
     setCurrentActivity(null);
     setIsApiLoaded(false); // Reset API loaded state
-
+    setMapCenter(defaultCenter);
     setOpen(true);
   };
 
@@ -98,66 +197,255 @@ function Activity() {
     }
   };
 
-  const handleSaveActivity = async () => {
-    const updatedPrice =
-        activityForm.price[0] === activityForm.price[1]
-            ? [activityForm.price[0]]
-            : activityForm.price;
-
-    let updatedDiscount = activityForm.specialDiscounts;
-    if (updatedDiscount && !updatedDiscount.includes('%')) {
-        updatedDiscount = `${updatedDiscount}%`;
-    }
-
-    const updatedActivity = {
-        ...activityForm,
-
-        location:[activityForm.longitude,activityForm.latitude],
-        price: updatedPrice,
-        specialDiscounts: updatedDiscount,
-    };
-
-    // If currentActivity is not null, update the existing activity
-    if (currentActivity !== null) {
-        setActivities((prevActivities) =>
-            prevActivities.map((activity, index) =>
-                index === currentActivity ? updatedActivity : activity
-            )
-        );
+const getAllTags=async ()=>{
+  try {
+    const apiPath = `http://localhost:3030/getAllPreferenceTags/${id}`;  // Ensure this matches your API route
+    const response = await axios.get(apiPath);
+    // console.log(response);
+    
+    if (Array.isArray(response.data.tags)) {
+      const tags = response.data.tags.map(tag => ({
+        id: tag._id,
+        name: tag.tags
+      }));
+      setTagsList(tags);      
     } else {
-        // Create a new activity by calling the NetworkService
-        try {
-            const response = await NetworkService.post({
-                apiPath: '/activity',
-                body: updatedActivity,
-            });
-            if (response && response.activity) {
-                // Add the created activity to the state
-                setActivities((prevActivities) => [...prevActivities, response.activity]);
-            }
-        } catch (error) {
-            console.error('Error creating activity:', error.message);
-            // Handle error appropriately, maybe show a message to the user
-        }
+      console.error('Unexpected data format from API');
     }
+    
+  } catch (err) {
+    // Check if there is a response from the server and handle error
+    if (err.response) {
+      console.error('API Error:', err.message);
+      // setError(err.response.data.message);  // Display error message from the server
+    } else {
+      console.error('Unexpected Error:', err);
+      // setError('An unexpected error occurred.');  // Display generic error message
+    }
+  }
+}
 
-    handleClose();
+const getAllCategory=async ()=>{
+  try {
+    const apiPath = `http://localhost:3030/getAllCategories/advertiser`;  // Ensure this matches your API route
+    const response = await axios.get(apiPath);
+    // console.log(response);
+    
+    if (Array.isArray(response.data)) {
+      const categories = response.data.map(category => ({
+        id: category._id,
+        name: category.categoryName
+      }));
+      setCategoryList(categories);
+      // console.log(categories);
+      
+    } else {
+      console.error('Unexpected data format from API');
+    }
+    
+  } catch (err) {
+    // Check if there is a response from the server and handle error
+    if (err.response) {
+      console.error('API Error:', err.message);
+      // setError(err.response.data.message);  // Display error message from the server
+    } else {
+      console.error('Unexpected Error:', err);
+      // setError('An unexpected error occurred.');  // Display generic error message
+    }
+  }
+}
+
+
+function convertTimeToFullDate(timeString) {
+  // Step 1: Get the current date
+  const currentDate = new Date(); // This gives us the current date
+
+  // Step 2: Extract hours and minutes from the time string
+  const [hoursString, minutesString] = timeString.split(':');
+  let hours = parseInt(hoursString, 10); // Parse the hours
+  const minutes = parseInt(minutesString, 10); // Parse the minutes
+
+  // Step 3: Adjust the time for AM/PM if necessary (optional, assuming 24-hour format for now)
+  // Example: if you're dealing with 12-hour AM/PM format, handle conversion here
+
+  // Step 4: Set the time on the current date
+  currentDate.setHours(hours, minutes, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
+  // console.log("Current Date",currentDate);
+
+  return currentDate;
+  
+}
+// console.log("Data",activities);
+
+const handleSaveActivity = async () => {
+  try {
+    const updatedPrice =
+      activityForm.price[0] === activityForm.price[1]
+        ? activityForm.price[0]
+        : activityForm.price;
+        // console.log("updatedPrice",activityForm.price[0]);
+        
+    const updatedActivity = {
+      ...activityForm,
+      tags: Array.isArray(activityForm.tags) ? activityForm.tags : [], // Ensure tags is always an array of objects
+    };
+    
+    if (currentActivity !== null) {
+      console.log("Activity",updatedActivity);
+      
+      const tagIds = tagsList.filter(tag => updatedActivity.tags.includes(tag.name)).map(tag => tag.id);
+      const rangeArray = updatedActivity.price;
+      // const priceObject = rangeArray.join('-');
+      // console.log("Activity",currentActivity);
+      console.log("Updated activity:",updatedActivity);
+      // console.log("priceObject:",priceObject);
+            try{
+            // Updating existing activity
+            const apiPath=`http://localhost:3030/activity/${updatedActivity._id}/${id}`;
+            const body= {
+                name: updatedActivity.name,
+                date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
+                time: typeof updatedActivity.time === 'string' 
+                ? updatedActivity.time 
+                : dayjs(updatedActivity.time).format('hh:mm'),
+                location: updatedActivity.location,
+                price:rangeArray,
+                category: updatedActivity.categoryId,
+                tags: tagIds || [],
+                specialDiscounts: updatedActivity.specialDiscounts||0,
+                isOpen: updatedActivity.isOpen || false,
+              };
+              console.log("body:",updatedActivity);
+
+                const response = await axios.put(apiPath,body);
+                console.log("response:",response);
+                getAllActivities();
+                handleClose();
+              setSuccessMessage(response.data.message||"Edit Successfully!");
+                setShowSuccessMessage(true);
+            }catch(error){
+              setErrorMessage(error.response?.data?.message || 'An error occurred');
+              setShowErrorMessage(true); 
+            }
+    } else {
+
+      const tagIds = tagsList.filter(tag => updatedActivity.tags.includes(tag.name)).map(tag => tag.id);
+      const rangeArray = updatedActivity.price;
+      const priceObject = Array.isArray(rangeArray) ? rangeArray.join('-') : "0-0"; // Default to "0-0" or any other fallback
+      // console.log("hehhe");
+      try{
+        const apiPath = `http://localhost:3030/activity`;
+        const body = {
+          name: updatedActivity.name,
+          date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
+          // dayjs(updatedActivity.date).format('YYYY-MM-DD'),
+          time: dayjs(updatedActivity.time).format('hh:mm A'),
+          location: updatedActivity.location,
+          price: priceObject,
+          category: updatedActivity.categoryId,
+          tags: tagIds ||[],
+          specialDiscounts: updatedActivity.specialDiscounts||0,
+          isOpen: updatedActivity.isOpen || false,
+          created_by: id
+        }
+        const response = await axios.post(apiPath, body);
+        console.log(response);
+        getAllActivities();
+        handleClose();
+        setSuccessMessage(response.data.message||"Edit Successfully!");
+        setShowSuccessMessage(true); 
+      }catch(error){
+        setErrorMessage(error.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);
+      }
+    }
+  } catch (err) {
+    if (err.response) {
+      console.error('API Error:', err);
+      setErrorMessage(err);
+      setShowErrorMessage(true);
+    } else {
+      console.error('Unexpected Error:', err);
+      setErrorMessage(err);
+      setShowErrorMessage(true);
+    }
+  }
+};
+
+const handleEditActivity = (activity) => {
+  console.log("Activity", activity);
+
+  setCurrentActivity(activity);
+
+  // Parse the price range to get min and max values
+  const [minPrice, maxPrice] = activity.price.split('-').map(Number);
+
+  setActivityForm({
+    ...activity,
+    time: convertTimeToFullDate(activity.time),
+    category: categoryList.find(item => item.id === activity.category)?.name,
+    location: {
+      latitude: activity.location?.latitude || mapCenter.lat,
+      longitude: activity.location?.longitude || mapCenter.lng,
+    },
+    tags: Array.isArray(activity.tags)
+      ? activity.tags
+          .map(tagId => {
+            const tag = tagsList.find(t => t.id === tagId);
+            return tag ? tag.name : null;
+          })
+          .filter(Boolean)
+      : [],
+    minPrice, // Set min value for the slider
+    maxPrice, // Set max value for the slider
+  });
+
+  setOpen(true); 
 };
 
 
-  const handleEditActivity = (index) => {
-    setCurrentActivity(index);
-    setActivityForm(activities[index]);
-    setOpen(true);
-  };
 
-  const handleDeleteActivity = (index) => {
-    setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
+  const handleDeleteActivity = async (index) => {  
+    const activityid=activities[index]._id;
+    try {
+      const options ={
+         apiPath:`/activity/${activityid}/${id}`,
+      };
+      const response = NetworkService.delete(options);
+      setSuccessMessage("Deleted Activity Successfully!");
+      setShowSuccessMessage(true);
+       setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
+
+    } catch (err) {
+      if (err.response) {
+        console.error('API Error:', err);
+        setErrorMessage(err.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);  
+      } else {
+        console.error('Unexpected Error:', err);
+        setErrorMessage(err.response?.data?.message || 'An error occurred');
+        setShowErrorMessage(true);      }
+    }
   };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setActivityForm((prev) => ({ ...prev, [name]: value }));
+    if (name === 'tags') {
+      setActivityForm((prev) => ({ ...prev, 
+        [name]: Array.isArray(value) ? value : []
+      }));
+    } else if (name === 'specialDiscounts') {
+      setActivityForm((prev) => ({ ...prev, [name]: Number(value) })); // Ensure specialDiscounts is a number
+    } else if (name === 'category') {
+      const selectedCategory = categoryList.find(cat => cat.name === value);
+      setActivityForm((prev) => ({ 
+        ...prev, 
+        [name]: value,
+        categoryId: selectedCategory ? selectedCategory.id : ''
+      }))} 
+    else {
+      setActivityForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handlePriceChange = (event, newValue) => {
@@ -183,10 +471,13 @@ function Activity() {
 
         setActivityForm((prev) => ({
           ...prev,
-          latitude: lat,
-          longitude: lng,
-          location: place.name, // Use the place name
+          location: {
+            latitude: lat,
+            longitude: lng
+          },
         }));
+        setMapCenter({ lat, lng });
+
       } else {
         console.log('Place search failed due to: ' + status);
       }
@@ -197,25 +488,26 @@ function Activity() {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
     const geocoder = new window.google.maps.Geocoder();
-
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status === 'OK') {
-        if (results[0]) {
-          const address = results[0].formatted_address;
-
-          setActivityForm((prev) => ({
-            ...prev,
-            longitude: lat,
-            longitude: lng,
-            location: address, // Use the human-readable address
-          }));
-        } else {
-          console.log('No results found');
-        }
-      } else {
-        console.log('Geocoder failed due to: ' + status);
+      if (status === 'OK' && results[0]) {
+        const address = results[0].formatted_address;
+        setAddress(address);
       }
+    })
+    setActivityForm((prev) => {
+      return {
+        ...prev,
+        location: {
+          latitude: lat,
+          longitude: lng
+        },
+      };
     });
+  
+ 
+    setMapCenter({ lat, lng });
+    setMarkerPosition({ lat, lng }); // Set the marker position
+
   }, []);
 
   // Handle Date change
@@ -223,18 +515,20 @@ function Activity() {
     setActivityForm((prev) => ({ ...prev, date: newDate }));
   };
 
+   
   // Handle Time change
   const handleTimeChange = (newTime) => {
     setActivityForm((prev) => ({ ...prev, time: newTime }));
   };
 
   const handleCheckboxChange = (event) => {
-    setActivityForm((prev) => ({ ...prev, booking: event.target.checked }));
+    setActivityForm((prev) => ({ ...prev, isOpen: event.target.checked }));
   };
+console.log("Address mn Map",address);
 
   return (
     <div>
-     <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
+    <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div>
         <Button variant="contained" onClick={handleClickOpen} sx={{ maxWidth: 150, marginTop: 2, marginLeft: 2 }}>
@@ -243,21 +537,35 @@ function Activity() {
         <Dialog open={open} onClose={handleClose} sx={{ minWidth: 1000 }}>
           <DialogTitle>{currentActivity !== null ? 'Edit Activity' : 'Add Activity'}</DialogTitle>
           <DialogContent>
-            <DatePicker
-              labelId="date"
-              id="date"
-              name="date"
-              value={activityForm.date ? dayjs(activityForm.date) : null} // Ensure it's a Day.js object
-              onChange={handleDateChange}
-              label="Date"
-            />
-            <TimePicker
-              name="time"
-              value={activityForm.time ? dayjs(activityForm.time) : null} // Ensure it's a Day.js object
-              onChange={handleTimeChange}
-              label="Time"
-            />
+          <FormControl  margin="normal" sx={{ marginTop: 2,marginRight:2 }}>
+                <DatePicker
+                  labelId="date"
+                  id="date"
+                  name="date"
+                  value={activityForm.date ? dayjs(activityForm.date) : null} // Ensure it's a Day.js object
+                  onChange={handleDateChange}
+                  label="Date"
+                  sx={{ marginTop: 2 }}
+                />
+              </FormControl>
 
+              <FormControl  margin="normal" sx={{ marginTop: 2 }}>
+                <TimePicker
+                  name="time"
+                  value={activityForm.time ? dayjs(activityForm.time) : null} // Ensure it's a Day.js object
+                  onChange={handleTimeChange}
+                  label="Time"
+                  sx={{ marginTop: 2 }}
+                />
+              </FormControl>
+            <TextField
+              fullWidth
+              margin="normal"
+              name="name"
+              label="Name"
+              value={activityForm.name}
+              onChange={handleInputChange}
+            />
             <FormControl fullWidth margin="normal">
               <InputLabel id="category-label">Category</InputLabel>
               <Select
@@ -268,9 +576,9 @@ function Activity() {
                 onChange={handleInputChange}
                 label="Category"
               >
-                {categoryList.map((category, index) => (
-                  <MenuItem key={index} value={category}>
-                    {category}
+                {categoryList.map((category) => (
+                  <MenuItem key={category.id} value={category.name}>
+                    {category.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -282,67 +590,65 @@ function Activity() {
                 labelId="tags-label"
                 id="tags"
                 name="tags"
+                multiple
                 value={activityForm.tags}
                 onChange={handleInputChange}
+                renderValue={(selected) => selected.join(', ')} // Now selected is an array of tag names
                 label="Tags"
               >
-                {tagsList.map((tag, index) => (
-                  <MenuItem key={index} value={tag}>
-                    {tag}
+                {tagsList.map((tag) => (
+                  <MenuItem key={tag.id} value={tag.name}>
+                    <Checkbox checked={activityForm.tags.includes(tag.name)} />
+                    <ListItemText primary={tag.name} />
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            <Typography gutterBottom>Price Range</Typography>
-            <Slider
-              value={activityForm.price}
-              onChange={handlePriceChange}
-              valueLabelDisplay="auto"
-              min={0}
-              max={1000}
-              name="price"
-            />
+            <FormControl fullWidth margin="normal">
+              <Typography>Price Range: {activityForm.price}</Typography>
+              <Slider
+                value={[activityForm.minPrice, activityForm.maxPrice]}
+                onChange={(event, newValue) => {
+                  const [newMin, newMax] = newValue;
+                  setActivityForm(prev => ({
+                    ...prev,
+                    minPrice: newMin,
+                    maxPrice: newMax,
+                    price: `${newMin}-${newMax}`, // Update the price string as well
+                  }));
+                }}
+                valueLabelDisplay="auto"
+                min={0}
+                max={1000}
+                name="price"
+              />
+            </FormControl>
 
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={activityForm.booking}
+                  checked={activityForm.isOpen}
                   onChange={handleCheckboxChange}
                 />
               }
               label="Booking Available"
             />
-            <TextField
-              fullWidth
-              margin="normal"
-              name="location"
-              label="Location"
-              value={activityForm.location}
-              onChange={handleInputChange}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleSearch();
-                }
-              }}
-            />
-            <Button variant="contained" onClick={handleSearch}>
-              Search
-            </Button>
-
-
-
               <GoogleMap
                 mapContainerStyle={containerStyle}
-                center={center}
-                zoom={10}
+                center={{
+                  lat: activityForm.location.latitude|| mapCenter.lat ,
+                  lng: activityForm.location.longitude || mapCenter.lng
+                }}
+              zoom={10}
                 onLoad={onLoad}
                 onClick={handleMapClick}
               >
-                {activityForm.lat && activityForm.lng && (
-                  <Marker position={{ lat: activityForm.lat, lng: activityForm.lng }} />
-                )}
+                   {markerPosition && (
+                        <Marker 
+                          position={markerPosition||activityForm.location}
+                        />
+                      )}
               </GoogleMap>
 
             <TextField
@@ -362,27 +668,67 @@ function Activity() {
           </DialogActions>
         </Dialog>
 
-        <Grid container spacing={2} style={{ marginTop: 20 }}>
+        <Grid container style={{ marginTop: 10}}>
           {activities.map((activity, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card>
+            
+            <Grid item xs={12} sm={6} md={4} key={index} >
+              <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
+              <CardMedia
+                  component="img"
+                  height="180"
+                  image={getRandomImage()}
+                  alt={activityImage?.name||"Image"}
+                />
                 <CardContent>
-                  <Typography variant="h5">{activity.location}</Typography>
-                  <Typography variant="body2">Date: {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
-                  <Typography variant="body2">Time: {activity.time ? dayjs(activity.time).format('HH:mm') : ''}</Typography>
-                  <Typography variant="body2">Price: {activity.price.join(' - ')}</Typography>
-                  <Typography variant="body2">Category: {activity.category}</Typography>
-                  <Typography variant="body2">Tags: {activity.tags}</Typography>
-                  <Typography variant="body2">Discounts: {activity.specialDiscounts}</Typography>
+                  <Typography variant="h5">{activity.name}</Typography>
+                  <Typography variant="body2"><strong>Date:</strong> {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
+                  <Typography variant="body2"><strong>Time:</strong> {activity.time}</Typography>
+                  <Typography variant="body2"><strong>Price: </strong>{activity.price}</Typography>
+                  <Typography variant="body2"><strong>Category:</strong> {categoryList.find(item =>item.id===activity.category)?.name}</Typography> 
+                  <Typography variant="body2"><strong>Tags:</strong> { activity.tags.map(tagId => { const tag = tagsList.find(t => t.id === tagId); return tag ? tag.name : 'No tag';}).filter(Boolean).join(', ') }</Typography>  
+                  <Typography variant="body2"><strong>Discounts:</strong> {activity.specialDiscounts}</Typography>
+                  <Typography variant="body2"><strong></strong>Location longitude: {activity.location?.longitude || mapCenter.lng}</Typography>
+                  <Typography variant="body2"><strong></strong>Location latitude: {activity.location?.latitude|| mapCenter.lat}</Typography>
+                  <Typography variant="body2"><strong>Booking:</strong> {activity.isOpen?"true":"false"}</Typography>
+
                 </CardContent>
-                <CardActions>
-                  <Button size="small" onClick={() => handleEditActivity(index)}>Edit</Button>
-                  <Button size="small" color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
+                <CardActions style={{ justifyContent: 'center' }}>
+                  <Button size="meduim" onClick={() => handleEditActivity(activity)}>Edit</Button>
+                  <Button container='filled' color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
                 </CardActions>
               </Card>
             </Grid>
           ))}
+        {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
         </Grid>
+
       </div>
     </LocalizationProvider>
     </LoadScript>

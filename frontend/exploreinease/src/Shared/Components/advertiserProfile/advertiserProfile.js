@@ -1,137 +1,105 @@
-import React, { useState } from 'react';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import InputAdornment from '@mui/material/InputAdornment';
-import Input from '@mui/material/Input';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import Button from '@mui/material/Button'; 
+import React, { useState, useEffect } from 'react';
+import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { Edit as EditIcon, Save as SaveIcon, Visibility, VisibilityOff, AccountCircle as AccountCircleIcon, Email as EmailIcon, Lock as LockIcon, Language as LanguageIcon, Phone as PhoneIcon, LinkedIn as LinkedInIcon, Work as WorkIcon, Group as GroupIcon, Event as EventIcon  } from '@mui/icons-material';
+import axios from 'axios';
+import dayjs from 'dayjs';
 import NetworkService from '../../../NetworkService';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Tooltip from '@mui/material/Tooltip';
+import Sky from '../Sky2.jpeg';
+import { styled } from '@mui/system';
 
-const useForm = (initialValues) => {
-  const [formValues, setFormValues] = useState(initialValues);
-
-  const handleChange = (name) => (valueOrEvent) => {
-    // If the name is 'dateOfBirth', use the value directly, otherwise use event.target.value
-    const newValue = name === 'dateOfBirth' ? valueOrEvent : valueOrEvent.target.value;
-    
-    setFormValues({ ...formValues, [name]: newValue });
-  };
-  return [formValues, handleChange];
-};
 const AdvertiserProfile = (props) => {
-  const location=useLocation();
-  const { advertiser } = location.state || {};  
+  const initialData = {
+    username: '',
+    email: '',
+    password: '',
+    linkWebsite: '',
+    hotline: '',
+    linkedInLink: '',
+    industry: '',
+    noEmployees: '',
+    founded: null,
+  };
+  const location = useLocation();
+  const { advertiser, imageUrl } = location.state || {};
+  console.log(advertiser.advertiser);
+  const userId = advertiser.advertiser?._id || advertiser?._id;
+  console.log(userId);
+  const [formValues, setFormValues] = useState(initialData);
+    // Retrieve avatar URL from localStorage or fallback to the default avatar
+    const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
+    const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
+    const initialUsername = advertiser.advertiser?.username || advertiser?.username;
+    const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
 
-  const initialUsername = advertiser?.advertiser.username || '';
-  const initialEmail = advertiser?.advertiser.email || '';
-  const initialPassword = advertiser?.advertiser.password || '';
-  const initiallinkWebsite = advertiser?.advertiser.linkWebsite || '';
-  const initialHotline = advertiser?.advertiser.hotline || '';
-  const initiallinkedInLink = advertiser?.advertiser.linkedInLink || '';
-  const initialIndustry = advertiser?.advertiser.industry || '';
-  const initialnoEmployees = advertiser?.advertiser.noEmployees || '';
-  const initialfounded = advertiser?.advertiser.founded || '';
 
-  const [formValues, handleFormChange] = useForm({
-    username: initialUsername || '',
-    email: initialEmail || '',
-    password: initialPassword || '',
-    linkWebsite: initiallinkWebsite || '',
-    hotline: initialHotline || '',
-    linkedInLink: initiallinkedInLink || '',
-    industry: initialIndustry || '',
-    noEmployees: initialnoEmployees || '',
-    founded: initialfounded || '',
+    useEffect(() => {
+      // Update the avatar URL when the component mounts if a new image URL exists
+      if (savedAvatarUrl || imageUrl) {
+          setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+      } else {
+          setAvatarImage(defaultAvatarUrl);
+      }
+  }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
+
+  const [isEditable, setIsEditable] = useState({
+    username: false,
+    email: false,
+    password: false,
+    linkWebsite: false,
+    hotline: false,
+    linkedInLink: false,
+    industry: false,
+    noEmployees: false,
+    founded: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
 
-    const [isEditable, setIsEditable] = useState({
-      email: false,
-      password: false,
-      linkWebsite: false,
-      hotline: false,
-      linkedInLink: false,
-      industry: false,
-      noEmployees: false,
-      founded: false
-    });
-    const [showPassword, setShowPassword] = useState(false);
-
-    const toggleEditMode = (field) => {
-      setIsEditable((prev) => ({
-        ...prev,
-        [field]: !prev[field]
-      }));
-    };
-    const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-    const handleClickShowPassword = () => {
-      setShowPassword((prevShow) => !prevShow);
-    };
-  
-    const handleMouseDownPassword = (event) => {
-      event.preventDefault();
-    };
-  
-    const toggleAllEditMode = () => {
-      const allEditable = Object.values(isEditable).some(editable => editable);
-      const newEditableState = {
-        email: true,
-        password: true,
-        linkWebsite: true,
-        hotline: true,
-        linkedInLink: true,
-        industry: true,
-        noEmployees: true,
-        founded: true
-  
-      };
-      setIsEditable(newEditableState);
-  
-      if (allEditable) {
-        handleSave(); // Save values if switching to non-editable mode
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const options = { apiPath: `/getAdvertiser/${userId}`, urlParam: { userId } };
+        const response = await NetworkService.get(options);
+        setFormValues({
+          username: response.advertiser.username,
+          email: response.advertiser.email,
+          linkWebsite: response.advertiser.linkWebsite,
+          hotline: response.advertiser.hotline,
+          linkedInLink: response.advertiser.linkedInLink,
+          industry: response.advertiser.industry,
+          noEmployees: response.advertiser.noEmployees,
+          founded: response.advertiser.founded ? dayjs(response.advertiser.founded) : null,
+        });
+        console.log(response.advertiser);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
       }
     };
-    const handleSave = async () => {
-      const updatedAdvertiser = {
-        username: formValues.username,
-        email: formValues.email,
-        password: formValues.password,
-        linkWebsite: formValues.linkWebsite,
-        hotline: formValues.hotline,
-        linkedInLink: formValues.linkedInLink,
-        industry: formValues.industry,
-        noEmployees: formValues.noEmployees,
-        founded: formValues.founded
-      };
+    fetchData();
+  }, [userId]);
+
+  const handleChange = (field) => (event) => {
+    setFormValues({ ...formValues, [field]: event.target ? event.target.value : event });
+  };
+
+  const handleSave = async () => {
+    try {
       const options = {
-        apiPath: `/updateAdvertiser/${advertiser.advertiser._id}`,
-        urlParam: advertiser.advertiser._id,
-        body: updatedAdvertiser,
+        apiPath: '/updateAdvertiser/{userId}',
+        urlParam: { userId },
+        body: {
+          ...formValues,
+          founded: formValues.founded ? formValues.founded.toISOString() : null,
+        },
       };
       const response = await NetworkService.put(options);
-      console.log('Response: ', response);
-
-      handleFormChange({
-        ...formValues,
-        email: response.advertiser.email,
-        password: response.advertiser.password,
-        linkWebsite: response.advertiser.linkWebsite,
-        hotline: response.advertiser.hotline,
-        linkedInLink: response.advertiser.linkedInLink,
-        industry: response.advertiser.industry,
-        noEmployees: response.advertiser.noEmployees,
-        founded: response.advertiser.founded
-      });
-
+      console.log(response.message);
       setIsEditable({
+        username: false,
         email: false,
         password: false,
         linkWebsite: false,
@@ -139,237 +107,256 @@ const AdvertiserProfile = (props) => {
         linkedInLink: false,
         industry: false,
         noEmployees: false,
-        founded: false
-  
+        founded: false,
       });
-    };
-  return(
-    <Card sx={{ padding: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h4" gutterBottom>
-            Manage Profile
-          </Typography>
-          <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        console.log('Image uploaded successfully:', response.data);
+        setAvatarImage(response.data.imageUrl);
+        localStorage.setItem(`${userId}`, response.data.imageUrl);
+      } catch (err) {
+        console.error('Error uploading image:', err);
+      }
+    }
+  };
+  const toggleEdit = (field) => setIsEditable({ ...isEditable, [field]: !isEditable[field] });
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+
+  return (
+    <Box
+    sx={{
+      backgroundImage: `url(${Sky})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%', // Ensure the box takes full height
+          width: '100%', // Ensure the box takes full width
+        }}
+      >
+        <Card sx={{ padding: 4, width: '90%', maxWidth: 600, borderRadius: 16, boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)', // Slightly transparent
+        animation: 'fadeIn 1s ease-in-out' }}>
+        <Box display="flex" alignItems="Left" justifyContent="center">
+          <Typography variant="h4" fontWeight="bold" sx={{ marginBottom: 1}}>My Profile</Typography>
+            </Box>
+            {/* Avatar */}
+            <Box sx={{ textAlign: 'center', mb: 3, position: 'relative' }}>
+          {/* Avatar with hover effect */}
+          
+          <Tooltip title="Click to change avatar" arrow>
+            <label htmlFor="avatar-upload">
+              <Avatar
+                sx={{
+                  width: 80, height: 80, margin: 'auto', cursor: 'pointer',
+                  '&:hover::before': {
+                    position: 'absolute',
+                    bottom: '5px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    color: 'white',
+                    borderRadius: '5px',
+                    padding: '2px 8px',
+                  },
+                }}
+                src={avatarImage}
+              />
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="avatar-upload"
+                type="file"
+                onChange={handleAvatarChange}
+              />
+            </label>
+          </Tooltip>
         </Box>
-        <Divider sx={{ mb: 2 }} />
 
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography sx={{ marginRight: 9,fontWeight:"bold" }}>Username:</Typography>
-            <Typography>{initialUsername}</Typography>
-          </Box>
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 1 }} />
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ marginRight: 16,fontWeight:"bold" }}>Email:</Typography>
-              {isEditable.email ? (
-                <TextField
-                fullWidth
-                  id="email-edit"
-                  variant="standard"
-                  value={formValues.email}
-                  onChange={handleFormChange('email')}      
-                />
-              ) : (
-                <Typography>{formValues.email}</Typography>
-              )}
-                 <div>
-              <IconButton onClick={() => toggleEditMode('email')} aria-label={isEditable.email ? 'save' : 'edit'}>
-                {isEditable.email ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={2}>
+    {/* Username */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <AccountCircleIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
+        <Typography sx={{ mr: 5 }}>{formValues.username}</Typography>
+      </Box>
+    </Grid>
 
+    {/* Email */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <EmailIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Email:</Typography>
+        {isEditable.email ? (
+          <TextField fullWidth value={formValues.email} onChange={handleChange('email')} />
+        ) : (
+          <Typography>{formValues.email}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('email'); if (isEditable.email) handleSave(); }}>
+          {isEditable.email ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
+    {/* Password */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <LockIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Password:</Typography>
+        {isEditable.password ? (
+          <TextField
+            fullWidth
+            type={showPassword ? 'text' : 'password'}
+            value={formValues.password}
+            onChange={handleChange('password')}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={toggleShowPassword}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        ) : (
+          <Typography>******</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('password'); if (isEditable.password) handleSave(); }}>
+          {isEditable.password ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
-          <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ marginRight: 9,fontWeight:"bold" }}>Password:</Typography>
-              {isEditable.password ? (
-                <Input
-                fullWidth
-                  id="standard-adornment-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formValues.password}
-                  onChange={handleFormChange('password')}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                      >
-                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              ) : (
-                <Typography>{formValues.password}</Typography>
-              )}
-                 <div>
-              <IconButton onClick={() => toggleEditMode('password')} aria-label={isEditable.password ? 'save' : 'edit'}>
-                {isEditable.password ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
+    {/* Website */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <LanguageIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Website:</Typography>
+        {isEditable.linkWebsite ? (
+          <TextField fullWidth value={formValues.linkWebsite} onChange={handleChange('linkWebsite')} />
+        ) : (
+          <Typography>{formValues.linkWebsite}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('linkWebsite'); if (isEditable.linkWebsite) handleSave(); }}>
+          {isEditable.linkWebsite ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
-            <Divider sx={{ mb: 2 }} />
+    {/* Hotline */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <PhoneIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Hotline:</Typography>
+        {isEditable.hotline ? (
+          <TextField fullWidth value={formValues.hotline} onChange={handleChange('hotline')} />
+        ) : (
+          <Typography>{formValues.hotline}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('hotline'); if (isEditable.hotline) handleSave(); }}>
+          {isEditable.hotline ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
-            <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              
-              <Typography sx={{ marginRight: 15,fontWeight:"bold" }}>Hotline:</Typography>
-              {isEditable.hotline ? (
-                <TextField
-                fullWidth
-                  id="hotline-edit"
-                  variant="standard"
-                  type="number"
-                  value={formValues.hotline}
-                   onChange={handleFormChange('hotline')}// Using the generic change handler
-                />
-              ) : (
-                <Typography>{formValues.hotline}</Typography>
-              )}
-                <div>
-              <IconButton onClick={() => toggleEditMode('hotline') } aria-label={isEditable.hotline ? "save" : "edit"}>
-                {isEditable.hotline ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
+    {/* LinkedIn */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <LinkedInIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>LinkedIn:</Typography>
+        {isEditable.linkedInLink ? (
+          <TextField fullWidth value={formValues.linkedInLink} onChange={handleChange('linkedInLink')} />
+        ) : (
+          <Typography>{formValues.linkedInLink}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('linkedInLink'); if (isEditable.linkedInLink) handleSave(); }}>
+          {isEditable.linkedInLink ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
+    {/* Industry */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <WorkIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Industry:</Typography>
+        {isEditable.industry ? (
+          <TextField fullWidth value={formValues.industry} onChange={handleChange('industry')} />
+        ) : (
+          <Typography>{formValues.industry}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('industry'); if (isEditable.industry) handleSave(); }}>
+          {isEditable.industry ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
-            <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ marginRight: 10,fontWeight:"bold" }}>Website Link:</Typography>
-              {isEditable.linkWebsite ? (
-                <TextField
-                fullWidth
-                  id="linkWebsite-edit"
-                  variant="standard"
-                  type="url"
-                  value={formValues.linkWebsite}
-                  onChange={handleFormChange('linkWebsite')} // Using the generic change handler
-                />
-              ) : (
-                <Typography>{formValues.linkWebsite}</Typography>
-              )}
-               <div>
+    {/* Number of Employees */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <GroupIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Employees:</Typography>
+        {isEditable.noEmployees ? (
+          <TextField fullWidth type="number" value={formValues.noEmployees} onChange={handleChange('noEmployees')} />
+        ) : (
+          <Typography>{formValues.noEmployees}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('noEmployees'); if (isEditable.noEmployees) handleSave(); }}>
+          {isEditable.noEmployees ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 
-              <IconButton onClick={() => toggleEditMode('linkWebsite')} aria-label={isEditable.linkWebsite ? "save" : "edit"}>
-                {isEditable.linkWebsite ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-  
-            <Divider sx={{ mb: 2 }} />
-
-            <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ marginRight: 8 ,fontWeight:"bold"}}>Linkedin Profile:</Typography>
-              {isEditable.linkedInLink ? (
-                <TextField
-                fullWidth
-                  id="Linkedin-edit"
-                  variant="standard"
-                  type="url"
-                  value={formValues.linkedInLink}
-                  onChange={handleFormChange('linkedInLink')} // Using the generic change handler
-                />
-              ) : (
-                <Typography>{formValues.linkedInLink}</Typography>
-              )}
-              <div>
-              <IconButton onClick={() => toggleEditMode('linkedInLink')} aria-label={isEditable.linkedInLink ? "save" : "edit"}>
-                {isEditable.linkedInLink ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-    
-            <Divider sx={{ mb: 2 }} />
-
-
-            <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ marginRight: 14,fontWeight:"bold" }}>Industry:</Typography>
-              {isEditable.industry ? (
-                <TextField
-                fullWidth
-                  id="industry-edit"
-                  variant="standard"
-                  type="link"
-                  value={formValues.industry}
-                  onChange={handleFormChange('industry')} // Using the generic change handler
-                />
-              ) : (
-                <Typography>{formValues.industry}</Typography>
-              )}
-              <div>
-              <IconButton onClick={() => toggleEditMode('industry')} aria-label={isEditable.industry ? "save" : "edit"}>
-                {isEditable.industry ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
-
-
-            <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ marginRight: 2,fontWeight:"bold" }}>Number of Employees:</Typography>
-              {isEditable.noEmployees ? (
-                <TextField
-                fullWidth
-                  id="hotline-edit"
-                  variant="standard"
-                  type="text"
-                  value={formValues.noEmployees}
-                  onChange={handleFormChange('noEmployees')} // Using the generic change handler
-                />
-              ) : (
-                <Typography>{formValues.noEmployees}</Typography>
-              )}
-              <div>
-              <IconButton onClick={() => toggleEditMode('noEmployees')} aria-label={isEditable.noEmployees ? "save" : "edit"}>
-                {isEditable.noEmployees ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-
-            <Divider sx={{ mb: 2 }} />
-
-            <Box  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ marginRight: 8 ,fontWeight:"bold"}}>Year of Release:</Typography>
-              {isEditable.founded ? (
-                <TextField
-                fullWidth
-                  id="founded-edit"
-                  variant="standard"
-                  type="link"
-                  value={formValues.founded}
-                  onChange={handleFormChange('founded')} 
-                />
-              ) : (
-                <Typography>{formValues.founded}</Typography>
-              )}
-              <div>
-              <IconButton onClick={() =>toggleEditMode('founded')} aria-label={isEditable.founded ? "save" : "edit"}>
-                {isEditable.founded ? <SaveIcon /> : <EditIcon />}
-              </IconButton>
-              </div>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
-
-          <Button variant="contained" color="primary" onClick={toggleAllEditMode}>
-            {Object.values(isEditable).some(editable => editable) ? 'Save All' : 'Edit All'}
-          </Button>
-    </Card>
+    {/* Founded Date */}
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <EventIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Founded:</Typography>
+        {isEditable.founded ? (
+          <DatePicker
+            value={formValues.founded}
+            onChange={(date) => handleChange('founded')(date)}
+            renderInput={(params) => <TextField {...params} fullWidth />}
+          />
+        ) : (
+          <Typography>{formValues.founded ? dayjs(formValues.founded).format('YYYY-MM-DD') : ''}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('founded'); if (isEditable.founded) handleSave(); }}>
+          {isEditable.founded ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
+</Grid>
+        </Card>
+      </Box>
+    </LocalizationProvider>
+    </Box>
   );
 };
+
 export default AdvertiserProfile;

@@ -1,146 +1,426 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardMedia, Typography, Button } from '@mui/material';
+import React, { useState, useEffect,useCallback } from 'react';
+import { Card, CardContent, CardMedia, Typography, Button, Alert,CardActions,Select,MenuItem,FormControl,InputLabel} from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid2';
-import NetworkService from '../NetworkService';
-import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
+import Grid from '@mui/material/Grid';
+import { LoadScript, GoogleMap, Marker} from '@react-google-maps/api';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useLocation } from 'react-router-dom';
+import NetworkService from '../NetworkService';
+import dayjs from 'dayjs';
+import { SingleInputTimeRangeField } from '@mui/x-date-pickers-pro/SingleInputTimeRangeField';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
+import axios from 'axios';
+const containerStyle = {
+  width: '100%',
+  height: '400px',
+};
+const defaultCenter = {
+  lat: 30.033333, 
+  lng: 31.233334, 
+};
 function HistoricalPlaces() {
-  const location=useLocation();
-  const { places,userId } = location.state || {};
-  const governorId=userId;
-  const [images, setImages] = useState([]);  // Store multiple images
-  const [imagePreviews, setImagePreviews] = useState([]);  // Store image previews
+  const location = useLocation();
+  const governorId = location.state?.governorId || '';
+  const response = location.state?.response || [];  
+  console.log("data",governorId,response);
+  
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [historicPlaces, setHistoricPlaces] = useState([]);
   const [open, setOpen] = useState(false);
+  const [mapCenter, setMapCenter] = useState({lat:defaultCenter.lat, lng: defaultCenter.lng});
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [map, setMap] = useState(null);
+  const [placesService, setPlacesService] = useState(null);
+  const [currentPlace, setCurrentPlace] = useState(null);
+  const [tags, setTags] = React.useState([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [newHistoricPlace, setNewHistoricPlace] = useState({
     name: '',
     description: '',
-    location: '',
+    location: { latitude: null ,longitude: null, address: '' },
     openingHours: null,
-    ticketPrice: '',
-    images: [], // Add images field for each place
+    nativeTicketPrice: '',
+    studentTicketPrice: '',
+    foreignerTicketPrice: '',
+    images: [],
+    tagId:[],
   });
-  const [editingHistoricPlaceIndex, setEditingHistoricPlaceIndex] = useState(null);
+
+  useEffect(() => {
+    getAllHistoricalPlaces();
+    getAllTags();
+  }, []);
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessMessage]);
+  
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
+  const getAllHistoricalPlaces = async () => {
+    try {
+      const options = { apiPath: `/historical-places/${governorId}/allHistoricalPlaces` };
+      const response = await NetworkService.get(options);
+      // console.log(response);
+      const tempArray= response.filter(item=>item.created_by.toString()===governorId);
+      console.log("temp Array",tempArray);
+      
+      setHistoricPlaces(tempArray ||[]);
+      console.log("Historical Places:",historicPlaces);
+      
+    } catch (error) {
+      console.log('Error fetching historical places:', error);
+    }
+  };
+  const onLoad = (mapInstance) => {
+    setMap(mapInstance);
+    if(window.google){
+      console.log(1)
+
+    } if(window.google.maps){
+      console.log(2)
+
+    }if(!window.google.maps.places){
+      console.log(3)
+
+    }
+    // Check if window.google is defined
+    if (window.google && window.google.maps && window.google.maps.places) {
+      const service = new window.google.maps.places.PlacesService(mapInstance);
+      setPlacesService(service);
+    } else {
+      console.error('Google Maps API not loaded properly');
+    }
+  };
+  const handleMapClick = useCallback((event) => {
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const address = results[0].formatted_address;
+  
+        // Update the location in newHistoricPlace
+        setNewHistoricPlace((prev) => ({
+          ...prev,
+          location: {
+            latitude: lat,
+            longitude: lng,
+            address: address,
+          },
+        }));
+        
+        setMarkerPosition({ lat, lng });
+        setMapCenter({ lat, lng });
+      } else {
+        console.error('Geocode was not successful for the following reason:', status);
+      }
+    });
+  }, []);
 
   const handleClickOpen = () => {
     setOpen(true);
+    setCurrentPlace(null);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setNewHistoricPlace({ name: '', description: '', location: '', openingHours: null, ticketPrice: '', images: [] });
+    setNewHistoricPlace({
+      name: '',
+      description: '',
+      location: { latitude: '', longitude: '', address: '' },
+      openingHours: null,
+      nativeTicketPrice: '',
+      studentTicketPrice: '',
+      foreignerTicketPrice: '',
+      images: [],
+      tagId:[],
+    });
     setImages([]);
     setImagePreviews([]);
-    setEditingHistoricPlaceIndex(null);
+    setErrorMessage('');
   };
 
-  const handleSaveHistoricPlaces = () => {
+  const handleSaveHistoricPlaces = async () => {
+    try {
+  if (currentPlace==null){
     if (newHistoricPlace.name.trim()) {
-      // Prepare the payload for the POST request
-      const payload = {
+      console.log("New Historical Place",newHistoricPlace);
+      const formattedOpeningHours = newHistoricPlace.openingHours 
+      ? `${newHistoricPlace.openingHours[0].format("hh:mm a")} - ${newHistoricPlace.openingHours[1].format("hh:mm a")}` 
+      : '';
+
+      // images.forEach((file) => {
+      //   historicPlaces.append('images', file);
+      // });
+
+      console.log("Hours in normal",newHistoricPlace.openingHours );
+      
+      const body = {
+        name: newHistoricPlace.name,
         description: newHistoricPlace.description,
-        pictures: images.map((file) => URL.createObjectURL(file)), // Convert files to URLs or handle actual uploads
-        location: newHistoricPlace.location,
-        openingHours: newHistoricPlace.openingHours ? newHistoricPlace.openingHours.format('hh:mm A') : null,
-        ticketPrice: newHistoricPlace.ticketPrice,
-        type: '',  // Send empty string for type
-        period: '',  // Send empty string for period
-        created_by: places._id // Example user ID, you can replace with actual data
+        pictures: images.map((file) => URL.createObjectURL(file)),
+        location: {
+          latitude: newHistoricPlace.location.latitude,
+          longitude: newHistoricPlace.location.longitude,
+          address: newHistoricPlace.location.address,
+        },
+        openingHours: formattedOpeningHours ,
+        ticketPrice: {
+          student: newHistoricPlace.studentTicketPrice,
+          native: newHistoricPlace.nativeTicketPrice,
+          foreign: newHistoricPlace.foreignerTicketPrice,
+        },
+        created_by: governorId,
+        tags:newHistoricPlace.tagId
       };
-        NetworkService.post('/historical-places', payload)
-        .then((response) => {
-          // Handle success
-          console.log(response.data.message);
-          const newPlace = { ...newHistoricPlace, images }; // Keep the images
-          setHistoricPlaces((prevPlaces) => [...prevPlaces, newPlace]);
-          handleClose();  // Close the dialog
-        })
-        .catch((error) => {
-          // Handle errors
-          console.error('Error creating historical place:', error);
-        });
+        console.log("create Body:",body);
+
+      try {
+        const response = await axios.post(`http://localhost:3030/historical-places`, body);
+        console.log(response);
+        setSuccessMessage(response.data.message||"Edit Successfully!");
+        setShowSuccessMessage(true);
+
+        handleClose();
+        getAllHistoricalPlaces();
+      } catch (error) {
+        console.error('Error creating historical place:', error);
+        setErrorMessage( 'An error occurred');
+        setShowErrorMessage(true);
+      }
     }
+    
+  }
+  else {
+    console.log("current place",currentPlace);
+    
+    try{
+          const formattedOpeningHours = newHistoricPlace.openingHours 
+      ? `${newHistoricPlace?.openingHours[0].format("hh:mm a")} - ${newHistoricPlace?.openingHours[1].format("hh:mm a")}` 
+      : '';
+      const updateValues =
+      {
+        name: newHistoricPlace.name,
+        description: newHistoricPlace.description,
+        pictures: images.map((file) => URL.createObjectURL(file)),
+        location: {
+          latitude: newHistoricPlace.location.latitude,
+          longitude: newHistoricPlace.location.longitude,
+          address: newHistoricPlace.location.address,
+        },
+        openingHours: formattedOpeningHours ,
+        ticketPrice: {
+          student: newHistoricPlace.studentTicketPrice,
+          native: newHistoricPlace.nativeTicketPrice,
+          foreign: newHistoricPlace.foreignerTicketPrice,
+        },
+        created_by: governorId,
+      };
+      const body={updateValues: {updateValues}};
+      console.log(updateValues);
+      
+      console.log("Body sent:",body);
+      const response = await axios.put(`http://localhost:3030/historical-places/${currentPlace._id}/${governorId}`, body);
+    
+      console.log(response);
+      getAllHistoricalPlaces();
+      setSuccessMessage(response.data.message||"Create Successfully!");
+      setShowSuccessMessage(true);
+      handleClose();
+    }catch (error) {
+      setErrorMessage( 'An error occurred');
+      setShowErrorMessage(true);
+      console.error('Error creating historical place:', error);
+      setErrorMessage('Error: Something went wrong. Please try again.');
+    }
+  }
+  }catch (err){
+    if (err.response) {
+      console.error('API Error:', err);
+      // You might want to set an error state here to display to the user
+      // setError(err.response.data.message);
+    } else {
+      console.error('Unexpected Error:', err);
+      // setError('An unexpected error occurred.');
+    }
+  }
   };
+  function convertTimeRangeToDate(timeRange) {
+    const [startTime, endTime] = timeRange.split(' - ').map(time => time.trim());
   
+    // Get the current date
+    const now = new Date();
+    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+    // Parse the start time
+    const [startHours, startMinutesWithAmpm] = startTime.split(':');
+    const startMinutes = startMinutesWithAmpm.slice(0, 2); // Extract minutes
+    const isStartPm = startMinutesWithAmpm.includes('pm');
+    
+    const startDate = dayjs(currentDate).hour(parseInt(startHours) + (isStartPm ? 12 : 0)).minute(parseInt(startMinutes));
+  
+    // Parse the end time
+    const [endHours, endMinutesWithAmpm] = endTime.split(':');
+    const endMinutes = endMinutesWithAmpm.slice(0, 2); // Extract minutes
+    const isEndPm = endMinutesWithAmpm.includes('pm');
+  
+    const endDate = dayjs(currentDate).hour(parseInt(endHours) + (isEndPm ? 12 : 0)).minute(parseInt(endMinutes));
+  
+    return [startDate, endDate];
+  }
+  const handleEditPlace = (place) => {
+    setCurrentPlace(place);
+
+     const formattedOpeningHours = convertTimeRangeToDate(place?.openingHours); 
+   
+    console.log("Place",formattedOpeningHours);
+    
+    if (place.location) {        
+      setNewHistoricPlace({
+        name: place.name,
+        description: place.description,
+        location: {
+          latitude: place.location.latitude || mapCenter.lat,
+          longitude: place.location.longitude || mapCenter.lng,
+          address: place.location.address || '',
+        },
+         openingHours: formattedOpeningHours ,
+        nativeTicketPrice: place.ticketPrice.native || '',
+        studentTicketPrice: place.ticketPrice.student || '',
+        foreignerTicketPrice: place.ticketPrice.foreign || '',
+        images: place.pictures || [],
+        tagId:place.tagId||[]
+      });
+      setOpen(true);
+    
+ }
+ else {
+    console.error('Activity location is undefined');
+
+  }
+};
+
+const handleDeletePlace = async (place) => {  
+   const placeId=place._id;
+   console.log("Place Id :",place);
+   console.log(governorId);
+  try {
+    const options ={
+       apiPath:`/historical-places/${placeId}/${governorId}`,
+    };
+    const response = NetworkService.delete(options);
+      console.log(response);
+      setSuccessMessage("Delete Successfully!");
+      setShowSuccessMessage(true);
+    setHistoricPlaces((prevPlaces) => prevPlaces.filter((p) => p._id !== placeId));
+
+  } catch (err) {
+    if (err.response) {
+      setSuccessMessage("Delete Successfully!");
+      setShowSuccessMessage(true);
+      console.error('API Error:', err);
+      
+    } else {
+      setErrorMessage(err.response?.data?.message || 'An error occurred');
+      setShowErrorMessage(true);
+      console.error('Unexpected Error:', err);
+      // setError('An unexpected error occurred.');
+    }
+  }
+};
+const getAllTags=async ()=>{
+  try {
+    const apiPath = `http://localhost:3030/getAllHistoricalTags/${governorId}`;  // Ensure this matches your API route
+    const response = await axios.get(apiPath);
+    console.log(response.data.tags);
+    
+    if (Array.isArray(response.data.tags)) {
+      const tags = response.data.tags.map(tag => ({
+        id: tag._id,
+        tagType: tag.type,
+      period:tag.period
+      }));
+      setTags(tags);    
+        
+    } else {
+      console.error('Unexpected data format from API');
+    }
+    
+  } catch (err) {
+    // Check if there is a response from the server and handle error
+    if (err.response) {
+      console.error('API Error:', err.message);
+      // setError(err.response.data.message);  // Display error message from the server
+    } else {
+      console.error('Unexpected Error:', err);
+      // setError('An unexpected error occurred.');  // Display generic error message
+    }
+  }
+}
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setNewHistoricPlace((prev) => ({ ...prev, [name]: value }));
+    setNewHistoricPlace((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // Handle multiple images upload
+  const handleLocationChange = (event) => {
+    const { name, value } = event.target;
+    setNewHistoricPlace((prev) => ({
+      ...prev,
+      location: { ...prev.location, [name]: value },
+    }));
+  };
+
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
-    const previews = files.map((file) => URL.createObjectURL(file));
-
     setImages(files);
-    setImagePreviews(previews);
-  };
+    setImagePreviews(files.map((file) => URL.createObjectURL(file)));
 
-  // Function to handle updating a historic place
-  const handleUpdatePlace = async (index) => {
-    try {
-      const placeId = historicPlaces[index]._id;
-  
-      // Construct the API path using your NetworkService logic
-      const endpoint = `/historical-places/${placeId}/${governorId}`;
-      
-      const response = await NetworkService.get({ endpoint });
-        if (response) {
-        setEditingHistoricPlaceIndex(index);
-        setNewHistoricPlace(response.historicalPlace);
-        setImages(response.historicalPlace.pictures);
-        
-        const previews = response.historicalPlace.pictures.map((image) => image);
-        setImagePreviews(previews);
-        handleClickOpen(); 
-      } else {
-        console.error('Failed to fetch the historical place');
-      }
-    } catch (error) {
-      console.error('Error fetching historical place:', error);
-    }
   };
-  
-  
-
-  // Function to handle deleting a historic place
-  const handleDeletePlace = async (index) => {
-    try {
-      const placeId = historicPlaces[index]._id;  
-      // Use NetworkService to delete the historical place
-      const response = await NetworkService.delete({
-        path: `/historical-places/${placeId}/${governorId}`,
-      });
-  
-      if (response) {
-        // Update the state to remove the deleted place from the list
-        setHistoricPlaces((prevPlaces) => prevPlaces.filter((_, i) => i !== index));
-        console.log('Historical Place deleted successfully');
-      } else {
-        console.error('Failed to delete the historical place');
-      }
-    } catch (error) {
-      console.error('Error deleting historical place:', error);
-    }
+  const handleTagChange = (event) => {
+    const selectedTagId = event.target.value;
+    setNewHistoricPlace((prev) => ({
+      ...prev,
+      tagId: [selectedTagId]
+    }));
   };
-  
-
   return (
-    <div>
-      <Button variant="contained" onClick={handleClickOpen} component="span" sx={{ height: 50, marginTop: 2, marginLeft: 2 }}>
+    <div>  
+    <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
+    <div>   
+      <Button variant="contained" onClick={handleClickOpen} sx={{ height: 50, marginTop: 2, marginLeft: 2 }}>
         Add Historical Places
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{editingHistoricPlaceIndex !== null ? 'Edit Historical Places' : 'Create Historical Places'}</DialogTitle>
+        <DialogTitle>{currentPlace !== null ? 'Edit Historical Place' : 'Add Historical Place'}</DialogTitle>
         <DialogContent>
+          {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+          
           <TextField
             autoFocus
             required
@@ -154,68 +434,111 @@ function HistoricalPlaces() {
             value={newHistoricPlace.name}
             onChange={handleInputChange}
           />
-          <Grid container spacing={9} alignItems="center">
-            <TextField
-              required
-              margin="normal"
-              id="description"
-              name="description"
-              label="Description"
-              type="text"
-              fullWidth
-              variant="outlined"
-              value={newHistoricPlace.description}
-              onChange={handleInputChange}
-            />
-          </Grid>
           <TextField
             required
             margin="normal"
-            id="location"
-            name="location"
-            label="Location"
+            id="description"
+            name="description"
+            label="Description"
             type="text"
             fullWidth
             variant="outlined"
-            value={newHistoricPlace.location}
+            value={newHistoricPlace.description}
             onChange={handleInputChange}
-            sx={{ marginBottom: 2 }}
           />
+          <GoogleMap
+           mapContainerStyle={containerStyle}
+           center={{
+            lat: markerPosition?.lat|| mapCenter.lat ,
+            lng: markerPosition?.lng || mapCenter.lng
+             }}
+            zoom={10}
+            onLoad={onLoad}
+            onClick={handleMapClick}
+              >
+            {markerPosition && (
+               <Marker 
+               position={markerPosition||HistoricalPlaces.location}
+                />
+             )}
+          </GoogleMap>
+
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DesktopTimePicker
-              label="Opening Hours"
-              value={newHistoricPlace.openingHours}
-              onChange={(newValue) => setNewHistoricPlace((prev) => ({ ...prev, openingHours: newValue }))}
-              renderInput={(params) => <TextField {...params} fullWidth margin="dense" required />}
-            />
+          <SingleInputTimeRangeField
+          margin="normal"
+          label="openingHours"
+          name="openingHours"
+          value={newHistoricPlace.openingHours}
+          onChange={(newValue) => setNewHistoricPlace((prev) => ({ ...prev, openingHours: newValue }))}
+        />
           </LocalizationProvider>
           <TextField
             required
             margin="normal"
-            id="ticketPrice"
-            name="ticketPrice"
-            label="Ticket Price"
+            id="nativeTicketPrice"
+            name="nativeTicketPrice"
+            label="Native Ticket Price"
             type="number"
             fullWidth
             variant="outlined"
-            value={newHistoricPlace.ticketPrice}
+            value={newHistoricPlace.nativeTicketPrice}
             onChange={handleInputChange}
-            sx={{ marginBottom: 2 }}
           />
+          <TextField
+            required
+            margin="normal"
+            id="studentTicketPrice"
+            name="studentTicketPrice"
+            label="Student Ticket Price"
+            type="number"
+            fullWidth
+            variant="outlined"
+            value={newHistoricPlace.studentTicketPrice}
+            onChange={handleInputChange}
+          />
+          
+          <TextField
+            required
+            margin="normal"
+            id="foreignerTicketPrice"
+            name="foreignerTicketPrice"
+            label="Foreigner Ticket Price"
+            type="number"
+            fullWidth
+            variant="outlined"
+            value={newHistoricPlace.foreignerTicketPrice}
+            onChange={handleInputChange}
+          />
+ <FormControl fullWidth>
+  <InputLabel id="tags-label">Tags</InputLabel>
+  <Select
+    labelId="tags-label"
+    id="tags-select"
+    name="Tags"
+    label="Tags"
+    value={newHistoricPlace.tagId}
+    onChange={handleTagChange}
+  >
+    {tags.map((tag) => (
+      <MenuItem key={tag.id} value={tag.id}>
+        {tag.period}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
           <input
             accept="image/*"
             style={{ display: 'none' }}
             id="raised-button-file"
             type="file"
-            multiple  // Allow multiple image uploads
+            multiple
             onChange={handleImageChange}
           />
           <label htmlFor="raised-button-file">
-            <Button variant="contained" component="span">
+            <Button variant="contained" component="span" sx={{ marginTop: 2 }}>
               Upload Images
             </Button>
           </label>
-          {/* Display multiple image previews */}
           {imagePreviews.map((preview, index) => (
             <CardMedia
               key={index}
@@ -228,57 +551,88 @@ function HistoricalPlaces() {
           ))}
         </DialogContent>
         <DialogActions>
-          <Button sx={{ gap: 2 }} type="submit" variant="outlined" onClick={handleSaveHistoricPlaces}>
-            {editingHistoricPlaceIndex !== null ? 'Update' : 'Add'}
+          <Button variant="outlined" onClick={handleClose}>
+            Cancel
           </Button>
-          <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveHistoricPlaces}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
+      <Grid container spacing={2} style={{ marginTop: 20 }}>
 
-      <Grid container spacing={2} sx={{ marginTop: 2 }}>
-        {historicPlaces.map((place, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card sx={{ width: 300, height: 350, display: 'flex', flexDirection: 'column', marginLeft: 2 }}>
-              {/* Display all uploaded images for each historical place */}
-              {place.images.map((image, idx) => (
-                <CardMedia
-                  key={idx}
-                  component="img"
-                  height="140"
-                  image={URL.createObjectURL(image)}
-                  alt={`Uploaded Image ${idx + 1}`}
-                  sx={{ objectFit: 'cover' }}
-                />
-              ))}
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="h5" component="div">
-                  {place.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {place.description}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Location: {place.location}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Opening Hours: {place.openingHours ? place.openingHours.format('hh:mm A') : 'N/A'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Ticket Price: {place.ticketPrice}
-                </Typography>
-              </CardContent>
-              <DialogActions>
-                <Button variant="contained" onClick={() => handleUpdatePlace(index)}>
-                  Update
-                </Button>
-                <Button variant="contained" onClick={() => handleDeletePlace(index)}>
-                  Delete
-                </Button>
-              </DialogActions>
-            </Card>
-          </Grid>
+      {Array.isArray(historicPlaces) &&  historicPlaces.map((place,index) => (
+          <Card key={place.id||index} sx={{ marginBottom: 2 }}>
+            <CardMedia
+              component="img"
+              height="140"
+              image={place.pictures ? place.pictures[0] : '/default-placeholder.png'}
+              alt={place.name}
+            />
+            
+            <CardContent>
+              <Typography variant="h6" component="div">
+                {place.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+               Description: {place.description}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+               Student Price: {place.ticketPrice?.student }
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+               Native Price: {place.ticketPrice?.native}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+              Foreign Price: {place.ticketPrice?.foreign}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+              Opening Hours: {place.openingHours}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+              Location: {place.location?.address}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+              Tags: {place.tags}
+              </Typography>
+            </CardContent>
+            <CardActions>
+                  <Button size="small" onClick={() => handleEditPlace(place)}>Edit</Button>
+                  <Button size="small" color="error" onClick={() => handleDeletePlace(place)}>Delete</Button>
+                </CardActions>
+          </Card>
         ))}
-      </Grid>
+        </Grid>
+        {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+    </div>
+    </LoadScript>
     </div>
   );
 }

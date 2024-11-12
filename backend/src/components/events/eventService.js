@@ -1,8 +1,34 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const HistoricalPlace = require('../../models/historicalPlace');
+const nodemailer = require('nodemailer');
+require('dotenv').config({ path: "src/.env" });
 
 
+const getAllEvents=async()=> {
+  // Assuming 'flag' is a property in the items of activities and itineraries
+const activities = (await eventRepository.getAllActivities()).filter(activity => activity.flag === 1);
+const itineraries = (await eventRepository.getAllItineraries2()).filter(itinerary => itinerary.flag === 1);
+
+console.log(itineraries);
+  const historicalPlaces = await eventRepository.getAllHistoricalPlaces();
+
+  return {
+    activities,
+    itineraries,
+    historicalPlaces
+  };
+}
+const updateEventFlag = async ( eventType, eventID) => {
+  
+  if (eventType === 'itinerary') {
+      return await eventRepository.setFlagToZeroForItinerary(eventID);
+  } else if (eventType === 'activity') {
+      return await eventRepository.setFlagToZeroForActivity(eventID);
+  } else {
+      throw new Error('Invalid event type. Must be "itinerary" or "activity".');
+  }
+};
 const getUserEvents = async (_id, userType) => {
   const user = await User.findById(_id); // Find user by _id
   
@@ -44,13 +70,13 @@ const getAllCategories = async () => {
 };
 
 // Delete a category by ID
-const deleteCategoryById = async (id) => {
-  return await eventRepository.deleteCategoryById(id);
+const deleteCategoryById = async (_id) => {
+  return await eventRepository.deleteCategoryById(_id);
 };
 
 // Update a category by ID
-const updateCategoryById = async (id, updateData) => {
-  return await eventRepository.updateCategoryById(id, updateData);
+const updateCategoryById = async (_id, categoryName) => {
+  return await eventRepository.updateCategoryById(_id, categoryName);
 };
 
 
@@ -127,34 +153,80 @@ const getFilteredUpcomingActivities = async (filters) => {
   }
 };
 
-const getAllUpcomingEvents = async () => {
+const getAllUpcomingEvents = async (currency) => {
   try {
+
+    let rate = 1;
+    if(currency === 'euro') {
+      rate = 55;
+    } else if(currency === 'dollar') {
+      rate = 50;
+    }
+    else{
+      rate = 1;
+    }
     // Retrieve upcoming events from the repository
-    const { activities, itineraries, historicalPlaces } =
-      await eventRepository.getAllUpcomingEvents();
+    const { activities, itineraries, historicalPlaces } = await eventRepository.getAllUpcomingEvents();
+
+      const filteredActivities = activities.filter(activity => activity.flag === 1);
+      const filteredItineraries = itineraries.filter(itinerary => itinerary.flag === 1);
 
     // Format activities
-    const formattedActivities = activities.map((activity) => ({
-      id: activity._id,
-      name: activity.name,
-      date: activity.date,
-      time: activity.time,
-      location: activity.location, // Include location details (latitude, longitude)
-      budget: activity.price, // Handle budget or price depending on schema
-      category: activity.category, // Assuming category is populated and has a 'name' field
-      tags: activity.tags, // Include tags if applicable
-      specialDiscounts: activity.specialDiscounts,
-      created_by: activity.created_by,
-      flag: activity.flag,
-      isOpen: activity.isOpen,
-      rating: activity.rating,
-      comments: activity.comments,
-      createdAt: activity.createdAt,
-      description: activity.description,
-    }));
+     const formattedActivities= filteredActivities.map((activity)=>{
+      console.log(1)
+      console.log(activity);
+      
+      lat=activity.location.latitude
+      long=activity.location.longitude
+      category=activity.category?.categoryName
+      loc=[lat,long]
+      console.log(2)
+
+      return{
+        id: activity._id,
+        name: activity.name,
+        date: activity.date,
+        time: activity.time,
+        location: loc, // Include location details (latitude, longitude)
+        budget: activity.price/rate, // Handle budget or price depending on schema
+        category: category, // Assuming category is populated and has a 'name' field
+        tags: activity.tags, // Include tags if applicable
+        specialDiscounts: activity.specialDiscounts,
+        created_by: activity.created_by,
+        flag: activity.flag,
+        isOpen: activity.isOpen,
+        rating: activity.rating,
+        comments: activity.comments,
+        createdAt: activity.createdAt,
+        description: activity.description,
+        type:"Activity"
+      }
+     })
+
+
+
+    // const formattedActivities = activities.map((activity) => ({
+    //   id: activity._id,
+    //   name: activity.name,
+    //   date: activity.date,
+    //   time: activity.time,
+    //   location: activity.location, // Include location details (latitude, longitude)
+    //   budget: activity.price, // Handle budget or price depending on schema
+    //   category: activity.category, // Assuming category is populated and has a 'name' field
+    //   tags: activity.tags, // Include tags if applicable
+    //   specialDiscounts: activity.specialDiscounts,
+    //   created_by: activity.created_by,
+    //   flag: activity.flag,
+    //   isOpen: activity.isOpen,
+    //   rating: activity.rating,
+    //   comments: activity.comments,
+    //   createdAt: activity.createdAt,
+    //   description: activity.description,
+    //   type:"Activity"
+    // }));
 
     // Format itineraries
-    const formattedItineraries = itineraries.map((itinerary) => ({
+    const formattedItineraries = filteredItineraries.map((itinerary) => ({
       id: itinerary._id,
       name:itinerary.name,
       activities: itinerary.activities.map((activity) => activity.name), // Get activity names within the itinerary
@@ -162,7 +234,7 @@ const getAllUpcomingEvents = async () => {
       timeline: itinerary.timeline,
       directions: itinerary.directions,
       language: itinerary.language,
-      price: itinerary.price,
+      price: itinerary.price/rate,
       dateAvailable: itinerary.dateTimeAvailable,
       accessibility: itinerary.accessibility,
       pickupLocation: itinerary.pickupLocation,
@@ -172,20 +244,55 @@ const getAllUpcomingEvents = async () => {
       flag: itinerary.flag,
       rating: itinerary.rating,
       comments: itinerary.comments,
+      type:"Itinerary"
     }));
 
+    const formattedHistoricalPlaces = historicalPlaces.map((place)=>{
+      lat=place.location.latitude
+      long=place.location.longitude
+      address= place.location.address
+
+      student=place.ticketPrice.student/rate
+      native=place.ticketPrice.native/rate
+      foreign=place.ticketPrice.foreign/rate
+
+      ticketPrice=[student,native,foreign]
+
+      loc=[lat,long]
+      return {
+        id: place._id,
+        name: place.name,
+        description: place.description,
+        pictures: place.pictures, // Array of pictures
+        location: loc, // Location details (latitude, longitude, address)
+        openingHours: place.openingHours, // Opening hours
+        ticketPrice: ticketPrice, // Detailed ticket price (student/native/foreign)
+        createdAt: place.createdAt,
+        tags: place.tags, // Associated tags if needed
+        type:"HistoricalPlace"
+      }
+
+    })
+
     // Format historical places
-    const formattedHistoricalPlaces = historicalPlaces.map((place) => ({
-      id: place._id,
-      name:place.name,
-      description: place.description,
-      pictures: place.pictures, // Array of pictures
-      location: place.location, // Location details (latitude, longitude, address)
-      openingHours: place.openingHours, // Opening hours
-      ticketPrice: place.ticketPrice, // Detailed ticket price (student/native/foreign)
-      createdAt: place.createdAt,
-      tags: place.tags, // Associated tags if needed
-    }));
+    // const formattedHistoricalPlaces = historicalPlaces.map((place) => ({
+    //   id: place._id,
+    //   name:place.name,
+    //   description: place.description,
+    //   pictures: place.pictures, // Array of pictures
+    //   location: place.location, // Location details (latitude, longitude, address)
+    //   openingHours: place.openingHours, // Opening hours
+    //   ticketPrice: place.ticketPrice, // Detailed ticket price (student/native/foreign)
+    //   createdAt: place.createdAt,
+    //   tags: place.tags, // Associated tags if needed
+    //   type:"HistoricalPlace"
+    // }));
+
+    const response= {
+      Activity: formattedActivities,
+      itineraries: formattedItineraries,
+      historicalPlaces: formattedHistoricalPlaces,
+    }
 
     // Return formatted data
     return [formattedActivities, formattedItineraries, formattedHistoricalPlaces];
@@ -196,12 +303,20 @@ const getAllUpcomingEvents = async () => {
 };
 
 const createHistoricalTag = async (tag) => {
+  console.log(tag);
+  
     return await eventRepository.createHistoricalTag(tag);
+    console.log("createHistoricalTag Service:",eventRepository.createHistoricalTag(tag));
+    
 };
 
 const getActivityById = async (id) => {
   return await eventRepository.getActivityById(id);
 };
+
+const getAllActivitiesInDatabase = async () => {
+  return await eventRepository.getAllActivitiesInDatabase();
+}
 
 const addActivity = async ({ name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by }) => {
   // Check if the category exists
@@ -234,6 +349,7 @@ const addActivity = async ({ name, date, time, location, price, category, tags, 
   
   return createdActivity;
 };
+
 
 const updateActivity = async (id, updateData) => {
   // You can add additional validation or processing here if needed
@@ -356,12 +472,14 @@ const updateHistoricalPlace = async (id, userId, data) => {
   if (!historicalPlace) {
     return {status: 404, response: {message: 'Historical Place not found'}};
   }
-  if(historicalPlace.created_by != userId) {
+  console.log(historicalPlace.created_by.toString());
+  if(historicalPlace.created_by.toString() != userId) {
     return {status: 400, response: {message: 'You are not authorized to update this Historical Place'}};
   }
   const updatedHistoricalPlace = await eventRepository.updateHistoricalPlace(id, data);
+  console.log("updatedHistoricalPlace", updatedHistoricalPlace)
   if (!updatedHistoricalPlace) {
-    return {status: 500, response: {message: 'Failed to update Historical Place'}};
+    return {status: 500, response: {message: 'Failed to update Historical Placeeeeee'}};
   }
   return {status: 200, response: {message: 'Historical Place updated', updatedHistoricalPlace: updatedHistoricalPlace}};
 };
@@ -443,8 +561,352 @@ const getAllHistoricalTags = async () => {
   return await eventRepository.getAllHistoricalTags();
 }
 
+const getHistoricalTagDetails = async (tagId) => {
+  return await eventRepository.getHistoricalTagDetails(tagId);
+}
+const sendEventEmail = async (touristId, receiverEmail, eventDetails) => {
+    
+  const touristEmail = await eventRepository.getTouristEmailById(touristId);
+  console.log("error1");
+  
+  if (!touristEmail) {
+    console.log("error2");
+    throw new Error('Tourist not found');
+  }
+  const transporter = nodemailer.createTransport({
+    service: 'gmail', 
+    auth: {
+      user: "aclproject7@gmail.com", 
+      pass: "qodo imkr adxs jred", 
+    },
+    tls: {
+      rejectUnauthorized: false // Allows self-signed certificates
+  }
+  });
+  console.log("error3");
+
+  const formattedDetails = Object.entries(eventDetails)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n');
+    console.log("error4");
+
+  const mailOptions = {
+    from: touristEmail,
+    to: receiverEmail,
+    subject: 'Event Details',
+    text: `Hello!\nYour friend with email ${touristEmail} sent you an event!!\n\nHere are the event details:\n\n${formattedDetails}`, // Including tourist email in the message
+  };
+  console.log("erro5");
+
+  await transporter.sendMail(mailOptions);
+  return { message: 'Email sent successfully' };
+};
+
+
+
+//Mohamed APis
+const bookedEvents = async (touristId) => {
+  const tourist = await eventRepository.bookedEvents({ touristId });
+
+  if (!tourist) {
+    throw new Error('Tourist not found');
+  }
+
+  return [
+    // Process activityId array
+    tourist.activityId.length > 0 ? tourist.activityId
+      .filter(activity => activity.id)
+      .map(activity => ({
+        id: activity.id._id.toString(),
+        name: activity.id.name,
+        date: activity.id.date,
+        time: activity.id.time,
+        location: [
+          activity.id.location.latitude,
+          activity.id.location.longitude
+        ],
+        budget: activity.id.price,
+        category: activity.id.category ? activity.id.category.categoryName : 'Unknown', 
+        tags: activity.id.tags.map(tag => tag.toString()), 
+        specialDiscounts: activity.id.specialDiscounts,
+        created_by: activity.id.created_by ? activity.id.created_by.toString() : null,
+        flag: activity.id.flag,
+        isOpen: activity.id.isOpen,
+        comments: activity.id.comments,
+        createdAt: activity.id.createdAt,
+        type: "Activity"
+      })) : [],
+
+    // Process itineraryId array
+    tourist.itineraryId.length > 0 ? tourist.itineraryId
+      .filter(itinerary => itinerary.id)
+      .map(itinerary => ({
+        id: itinerary.id._id.toString(),
+        name: itinerary.id.name,
+        activities: itinerary.id.activities ? itinerary.id.activities.map(activity => activity.toString()) : [],
+        locations: itinerary.id.locations ? itinerary.id.locations.map(location => location.toString()) : [],
+        timeline: itinerary.id.timeline ? itinerary.id.timeline.map(time => time.toString()) : [],
+        directions: itinerary.id.directions,
+        language: itinerary.id.language,
+        price: itinerary.id.price,
+        dateAvailable: itinerary.id.dateAvailable ? itinerary.id.dateAvailable.map(date => date.toISOString()) : [],
+        accessibility: itinerary.id.accessibility,
+        pickupLocation: itinerary.id.pickupLocation,
+        dropoffLocation: itinerary.id.dropoffLocation,
+        isActivated: itinerary.id.isActivated,
+        created_by: itinerary.id.created_by ? { _id: itinerary.id.created_by._id.toString(), username: itinerary.id.created_by.username } : null,
+        flag: itinerary.id.flag,
+        rating: itinerary.id.rating || [],
+        comments: itinerary.id.comments || [],
+        type: "Itinerary",
+        pricePaid: itinerary.pricePaid
+      })) : [],
+
+    // Process historicalplaceId array
+    tourist.historicalplaceId.length > 0 ? tourist.historicalplaceId
+      .filter(historicalPlace => historicalPlace.id)
+      .map(historicalPlace => ({
+        id: historicalPlace.id._id.toString(),
+        name: historicalPlace.id.name,
+        description: historicalPlace.id.description,
+        pictures: historicalPlace.id.pictures || [],
+        location: [
+          historicalPlace.id.location.latitude,
+          historicalPlace.id.location.longitude,
+        ],
+        openingHours: historicalPlace.id.openingHours,
+        ticketPrice: [
+          historicalPlace.id.ticketPrice.student,
+          historicalPlace.id.ticketPrice.native,
+          historicalPlace.id.ticketPrice.foreign
+        ],
+        createdAt: historicalPlace.id.createdAt,
+        tags: historicalPlace.id.tags ? historicalPlace.id.tags.type : [], // Get tag name
+        type: 'HistoricalPlace',
+        pricePaid: historicalPlace.pricePaid,
+      })) : [],
+
+    // Process transportationId array
+    tourist.transportationId && tourist.transportationId.length > 0 ? tourist.transportationId
+      .filter(transportation => transportation.id)
+      .map(transportation => ({
+        ...transportation.id._doc,
+        pricePaid: transportation.pricePaid
+      })) : []
+  ];
+};
+
+const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {
+  
+  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice);
+};
+
+const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
+    
+    return await eventRepository.cancelEvent(touristId, eventType, eventId);
+  }
+
+const Amadeus = require('amadeus');
+
+const amadeus = new Amadeus({
+  clientId: process.env.AMADEUS_CLIENT_ID4, 
+  clientSecret: process.env.AMADEUS_CLIENT_SECRET4,
+});
+
+
+
+const fetchCityCode = async (city) => {
+  try {
+    const response = await amadeus.referenceData.locations.cities.get({ keyword: city });
+
+    const simplifiedResponse = response.data
+      .filter(location => location.iataCode)
+      .map(location => ({
+        name: location.name,
+        iataCode: location.iataCode
+      }));
+
+    if (simplifiedResponse.length === 0) {
+      throw new Error("No city found with the specified name. Please try again.");
+    }
+
+    return simplifiedResponse;
+  } catch (error) {
+    throw new Error(error.message); // Throw the error message without adding any prefix
+  }
+};
+
+
+
+
+
+const flightOffers = async (originCode, destinationCode, dateOfDeparture, currency, personCount) => {
+  try {
+    switch (currency) {
+      case 'euro':
+        currency = "EUR";
+        break;
+      case 'dollar':
+        currency = "USD";
+        break;
+      case 'EGP':
+        currency = "EGP";
+        break;
+      default:
+        throw new Error('Invalid currency');
+    }
+    
+    const requestBody = {
+      currencyCode: currency,
+      originDestinations: [
+        {
+          id: '1',
+          originLocationCode: originCode,
+          destinationLocationCode: destinationCode,
+          departureDateTimeRange: {
+            date: dateOfDeparture,
+            time: '10:00:00'
+          }
+        }
+      ],
+      travelers: [
+        {
+          id: '1',
+          travelerType: 'ADULT'
+        }
+      ],
+      sources: ['GDS'],
+      searchCriteria: {
+        maxFlightOffers: 8,
+        flightFilters: {
+          cabinRestrictions: [
+            {
+              cabin: 'BUSINESS',
+              coverage: 'MOST_SEGMENTS',
+              originDestinationIds: ['1']
+            }
+          ]
+        }
+      }
+    };
+
+    const response = await amadeus.shopping.flightOffersSearch.post(requestBody);
+
+    if (!response.data || response.data.length === 0) {
+      // No flights available
+      return { message: "No flights are available." };
+    }
+
+    const formattedFlights = response.data.map(flightOffer => ({
+      id: flightOffer.id,
+      price: (flightOffer.price.total) * personCount,
+      currency: flightOffer.price.currency,
+      departure: flightOffer.itineraries[0].segments[0].departure,
+      arrival: flightOffer.itineraries[0].segments.slice(-1)[0].arrival,
+      carrierCode: flightOffer.validatingAirlineCodes[0],
+      segments: flightOffer.itineraries[0].segments.map(segment => ({
+        carrierCode: segment.carrierCode,
+        departure: segment.departure,
+        arrival: segment.arrival,
+        duration: segment.duration,
+      })),
+    }));
+
+    return formattedFlights;
+  } catch (error) {
+    let errorMessage;
+
+    if (error.response && error.response.data) {
+      errorMessage = error.response.data;
+      console.error(`API response error: ${errorMessage}`);
+    } else if (error.message) {
+      errorMessage = error.message;
+      console.error(`Network error: ${errorMessage}`);
+    } else {
+      errorMessage = "Server busy, try again please";
+      console.error(errorMessage);
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
+
+
+
+
+
+const flightBooking = async ({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode }) => {
+  
+  return await eventRepository.flightBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode });
+};
+
+
+
+const fetchHotelsByCityCode = async (cityCode, startDate, endDate, currency, personCount) => {
+  try {
+      const response = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
+      
+      const simplifiedResponse = response.data.map(hotel => {
+          let basePrice = Math.floor(Math.random() * (6000 - 3000 + 1)) + 3000; 
+        
+          if (currency === 'euro') {
+              basePrice = basePrice / 55;
+          } else if (currency === 'dollar') {
+              basePrice = basePrice / 50;
+          }
+
+          
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24))); 
+
+          
+          const price = Math.round(basePrice * personCount * days * 100) / 100;
+
+          return {
+              iataCode: hotel.iataCode,
+              name: hotel.name,
+              hotelId: hotel.hotelId,
+              startDate: startDate || null,
+              endDate: endDate || null,
+              price: price
+          };
+      });
+      
+      return simplifiedResponse; 
+  } catch (error) {
+      throw new Error(`Error fetching hotels: ${error.message}`);
+  }
+};
+
+
+const bookingHotel = async ({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency }) => {
+  
+  return await eventRepository.bookingHotel({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency });
+};
+
+
+const createTransportation = async (advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType) => {
+  return await eventRepository.createTransportation(advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType);
+};
+
+const getTransportations = async (currency) => {
+  return await eventRepository.getTransportations(currency);
+}
+
+const bookTransportation = async (touristId, transportationId) => {
+  return await eventRepository.bookTransportation(touristId, transportationId);
+};
+
+//Saif, Tasnim
+const updateItineraryActivation = async (itineraryId, isActivated, userId, userType) => {
+  return await eventRepository.updateItineraryActivation(itineraryId, isActivated, userId);
+};
 
 module.exports = {
+  updateItineraryActivation,
+  getHistoricalTagDetails,
   getUserEvents,
   createCategory,
   getAllCategories,
@@ -476,6 +938,22 @@ module.exports = {
   getAllActivitiesAdvertiser,
   getFilteredItineraries,
   getFilteredHistoricalPlaces,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase,
+  getFilteredHistoricalPlaces,
+  bookedEvents,
+  addEventToTourist,
+  cancelEventToTourist,
+  fetchCityCode,
+  flightOffers,
+  flightBooking,
+  fetchHotelsByCityCode,
+  bookingHotel,
+  createTransportation,
+  getTransportations,
+  bookTransportation,
+  sendEventEmail,
+  updateEventFlag,
+  getAllEvents
 };
 

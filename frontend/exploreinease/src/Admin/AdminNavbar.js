@@ -30,31 +30,42 @@ const AdminNavbar = () => {
                 options = { apiPath: `/getAllCategories/admin` };
                 response = await NetworkService.get(options);
                 setSuccess(response.message);
-                console.log(response);
-                const allcategories = response;
-                navigate('/viewActivityCategory', { state: { Categories:allcategories,id:adminId } });
+                console.log("response for activities from navbar",response);
+                const allcategories = response;        
+                // localStorage.setItem('AllCategory',allcategories);
+                navigate('/viewActivityCategory', { state: { allcategories,adminId } });
             } 
             else if (title === "CRUD Preference Tag") {
                 options = { apiPath: `/getAllPreferenceTags/${adminId}`, urlParam: adminId };
                 response = await NetworkService.get(options);
                 setSuccess(response.message);
                 console.log(response);
-                const PreferenceTag = response;
-                navigate('/viewPreferencatags', { state: { PreferenceTag } });
+                const PreferenceTag = response.tags;
+                // localStorage.setItem('PreferenceTag',);
+                navigate('/viewPreferencatags', { state: { PreferenceTag,adminId } });
             } 
             else if (title === "View Products") {
-                console.log(adminId)
-                options = { apiPath: `/getAvailableProducts/${adminId}`, urlParam: adminId };
-                response = await NetworkService.get(options);
-                setSuccess(response.message);
-                console.log(response);
-                const Product = response.Products;
-                const Type = 'admin';
-                console.log(tourist)
-                navigate('/viewProduct', { state: { Product, Type ,User:tourist} });
+                try{
+                    options = { apiPath: `/getAvailableProducts/${adminId}`, urlParam: adminId };
+                    response = await NetworkService.get(options);
+                    setSuccess(response.message);
+                    console.log(response);
+                    const Product = response.Products;
+                    const Type = 'admin';
+                    console.log(tourist)
+                    navigate('/viewProduct', { state: { Product, Type ,User:tourist} });
+                }catch (err) {
+                    if (err.response) {
+                        console.error(err.message);
+                        setError(err.response.data.message);
+                    } else {
+                        console.error('An unexpected error occurred.', err);
+                        setError('An unexpected error occurred.'); // Generic error message
+                    }
+                }
             } 
             else if (title === "Add User") {
-                navigate('/AdminHomePage');
+                navigate('/AddUser');
             } 
             else if (title === "Delete Account") {
               try{
@@ -62,7 +73,7 @@ const AdminNavbar = () => {
                 response = await NetworkService.get(options);
                 setSuccess(response.message);
                 console.log(response);
-                const allUsers = response;     
+                const allUsers = response;
                 navigate('/viewAllUserProfiles', { state: { Product: allUsers, AdminId: adminId } });} 
               catch (err) {
                 if (err.response) {

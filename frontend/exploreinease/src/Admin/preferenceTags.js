@@ -1,10 +1,11 @@
-import * as React from 'react';
+import React,{ useState } from 'react';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import axios from 'axios'; // Ensure Axios is imported
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
@@ -19,18 +20,38 @@ import NetworkService from '../NetworkService';
 import { useLocation } from 'react-router-dom';
 
 function Preferencetags() {
+    const adminIdd=localStorage.getItem('UserId');
   const [tags, setTags] = React.useState([]);
+  const [prefenceTagg, setPreferenceTagg] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [newTag, setNewTag] = React.useState('');
+  const [prevTag, setPrevTag] = React.useState('');
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
   const [editingTagIndex, setEditingTagIndex] = React.useState(null);
   const location = useLocation();
-  const { PreferenceTag } = location.state || {}; // Use destructuring to access PreferenceTag
+ const {adminId}=location.state || adminIdd;
+ const [checkPreferenceTag, setCheckPreferenceTag] = useState(true);
+ const PreferenceTag = location.state?.PreferenceTag || prefenceTagg;
+
+
   React.useEffect(() => {
-    // Set the initial tags if PreferenceTag exists
-    if (PreferenceTag.tags) {
-      setTags(PreferenceTag.tags);
-    }
-  }, [PreferenceTag.tags]); // Run the effect when PreferenceTag changes
+    getAllPreferenceTags();
+    setCheckPreferenceTag(false);
+  }, checkPreferenceTag); // Run the effect when PreferenceTag changes
+
+
+ const getAllPreferenceTags =async() => {
+  const options = { apiPath: `/getAllPreferenceTags/${adminId}`, urlParam: adminId };
+  const response = await NetworkService.get(options);
+  setSuccess(response.message);
+  console.log(response);
+  const PreferenceTaggg = response.tags;
+  setPreferenceTagg(PreferenceTaggg);
+  console.log(PreferenceTaggg,prefenceTagg);
+  setTags(PreferenceTaggg.map(item =>item.tags));
+};
+console.log("preference",PreferenceTag);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -40,39 +61,60 @@ function Preferencetags() {
     setOpen(false);
     setNewTag('');  // Clear the input when dialog is closed
     setEditingTagIndex(null);  // Reset editing index
+    setPrevTag('');  // Reset previous category
+
   };
 
   const handleSaveTag = async () => {
+    // setCheckPreferenceTag(false);
     if (newTag.trim()) {
-      console.log(newTag);
       if (editingTagIndex !== null) {
-        const updatedTagId = PreferenceTag.ids[editingTagIndex];
-        console.log(updatedTagId);
-        const options = {
-          apiPath: `/updatePreferenceTagById/${updatedTagId}`,
-          body: {
-            tags: newTag
-          }
-        }
-        const response = await NetworkService.put(options);
-        console.log(response);  // Success message from backend
+        console.log('prefenceTag',PreferenceTag);
+        
+        const tagId = PreferenceTag?.find(item => item.tags === prevTag)?._id;
+        try {
+            const options = {
+              apiPath: `/updatePreferenceTagById/${tagId}`,
+              body: {
+                tags: newTag
+              }
+            }
+              const response = await NetworkService.put(options);
+              console.log(response);  // Success message from backend
 
-        // Edit existing tag
-        setTags((prevTags) => {
-          const updatedTags = [...prevTags];
-          updatedTags[editingTagIndex] = newTag;
-          return updatedTags;
-        });
+              // Edit existing tag
+              setTags((prevTags) => {
+                const updatedTags = [...prevTags];
+                updatedTags[editingTagIndex] = newTag;
+                return updatedTags;
+              });
+              setCheckPreferenceTag(true);
+            }catch (err) {
+              if (err.response) {
+                console.error('API Error:', err.message);
+              } else {
+                console.error('Unexpected Error:', err);
+              }
+            }
       } else {
-        const options = {
-          apiPath: '/createPreferenceTag/0',
-          body: {
-            tags: newTag
+            try{
+              const options = {
+                apiPath: '/createPreferenceTag/${adminId}',
+                body: {
+                  tags: newTag
+                }
+              }
+              const response = await NetworkService.post(options);
+              // Add new tag
+              setTags((prevTags) => [...prevTags, newTag]);
+              setCheckPreferenceTag(true);
+            }catch (err) {
+              if (err.response) {
+                console.error('API Error:', err.message);
+              } else {
+                console.error('Unexpected Error:', err);
+              }
           }
-        }
-        const response = await NetworkService.post(options);
-        // Add new tag
-        setTags((prevTags) => [...prevTags, newTag]);
       }
     }
     handleClose();
@@ -83,7 +125,7 @@ function Preferencetags() {
   };
 
   const handleDeleteTag = async (index) => {
-    const deletedId = PreferenceTag.ids[index];
+    const deletedId = PreferenceTag[index]?._id;
     console.log(deletedId)
     const options = {
       apiPath: `/deletePreferenceTagById/${deletedId}`,
@@ -97,6 +139,7 @@ function Preferencetags() {
   const handleEditTag = (index) => {
     setNewTag(tags[index]);  // Set the tag to edit
     setEditingTagIndex(index);  // Store the index of the tag being edited
+    setPrevTag(tags[index]);
     setOpen(true);  // Open the dialog for editing
   };
 

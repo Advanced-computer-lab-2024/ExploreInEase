@@ -68,7 +68,12 @@ const activitySchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-  }
+  },
+  tags: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PreferenceTags',
+    required: true,
+  }],
 });
 
 // Create and export the model

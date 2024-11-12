@@ -1,6 +1,6 @@
-const mangoose = require("mangoose");
+const mongoose = require("mongoose");
 const Tourist = require("./tourist");
-const Schema = mangoose.Schema;
+const Schema = mongoose.Schema;
 
 const orderSchema = new Schema(
   {
@@ -12,13 +12,13 @@ const orderSchema = new Schema(
     status: {
       type: String,
       enum: ["delivered", "pending", "canceled"],
-      default: "pending",
+      default: "delivered",
       required: true,
     },
     productIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product", // Reference to the Product model
+        ref: "Products", // Reference to the Product model
         required: true,
       },
     ],

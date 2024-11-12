@@ -2,6 +2,38 @@ const eventService = require('../events/eventService');
 const { validationResult } = require('express-validator');
 const eventRepository = require('../events/eventRepository');
 
+
+
+
+const getAllEvents= async(req, res) => {
+  try {
+    const data = await eventService.getAllEvents();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ message: 'Failed to fetch events' });
+  }
+}
+
+const updateEventFlagController = async (req, res) => {
+  const { userType, eventType, eventID } = req.body;
+
+  try {
+        if (userType !== 'admin') {
+          throw new Error('Only admins can update the flag.');
+      }
+
+      const updatedEvent = await eventService.updateEventFlag(eventType, eventID);
+      if (!updatedEvent) {
+          return res.status(404).json({ message: 'Event not found.' });
+      }
+      return res.status(200).json({ message: 'Event flag updated successfully.', updatedEvent });
+  } catch (error) {
+      console.error('Error updating event flag:', error.message);
+      return res.status(400).json({ message: error.message });
+  }
+};
+
 // Get all user events by _id and userType
 const getUserEvents = async (req, res) => {
   const { _id, userType } = req.body;
@@ -50,10 +82,11 @@ const getAllCategories = async (req, res) => {
 // Update an activity category by ID
 const updateCategoryById = async (req, res) => {
   const { _id } = req.params; 
-  const updateData = req.body; // Get the update data from the request body
-
+  const categoryName = req.body; // Use req.body directly
+  console.log(categoryName); // Ensure correct data is being logged
   try {
-    const updatedCategory = await eventService.updateCategoryById(_id, updateData);
+    const updatedCategory = await eventService.updateCategoryById(_id, categoryName);
+    console.log(updatedCategory);
     if (!updatedCategory) {
       return res.status(404).json({ message: 'Category not found' });
     }
@@ -64,12 +97,13 @@ const updateCategoryById = async (req, res) => {
   }
 };
 
+
 const deleteCategoryById = async (req, res) => {
-  const { id } = req.params; // Get the ID from the URL
+  const { _id } = req.params; // Get the ID from the URL
   
 
   try {
-      const result = await eventService.deleteCategoryById(id); 
+      const result = await eventService.deleteCategoryById(_id); 
       if (!result) {
           return res.status(404).json({ message: 'Category not found' });
       }
@@ -100,7 +134,7 @@ const getAllTags = async (req, res) => {
   try {
     const tags = await eventService.getAllTags();
     const tagsArray = tags.map(tag => tag.tags);
-    return res.status(200).json({message: 'Fetched all tags', tags: tagsArray});
+    return res.status(200).json({message: 'Fetched all tags', tags: tags});
   } catch (error) {
     console.error('Error fetching tags:', error.message);
     return res.status(500).json({ message: error.message });
@@ -172,7 +206,9 @@ const GetupcommingActivitesFilter = async (req, res) => {
 
 const getUpcomingEvents = async (req, res) => {
   try {
-    const upcomingEvents = await eventService.getAllUpcomingEvents();
+    const {currency} = req.params;
+    console.log(req.params);
+    const upcomingEvents = await eventService.getAllUpcomingEvents(currency);
     return res.status(200).json(upcomingEvents);
   } catch (error) {
     console.error(error);
@@ -231,18 +267,23 @@ const getFilteredItineraries = async (req, res) => {
 
 // Create a new preference tag
 const createHistoricalTag = async (req, res) => {
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("TAG Error 1");
       return res.status(400).json({ errors: errors.array() });
   }
 
   try {
-      const checkUserType =await eventRepo.getTypeForTag(req.params._id);
-      console.log(checkUserType)
+      const checkUserType =await eventRepository.getTypeForTag(req.params._id);
       if(checkUserType !== 'tourismGovernor'){
+        console.log("TAG Error 2");
+
           return res.status(400).json({ message: 'Only tourism governors can create historical tags' });
       }
+
       const checkTagType = req.body.type.toLowerCase();
+
       if (
       checkTagType === 'monuments' || 
       checkTagType === 'museums' || 
@@ -263,16 +304,21 @@ const createHistoricalTag = async (req, res) => {
           }
           catch (error) {
               res.status(400).json({ message: error.message });
+              console.log("TAG Error 3:",error.message);
           }
 
       }else{
+        console.log("TAG Error 4");
           return res.status(400).json({ message: 'Only historical tags can be created' });
       }
 
 
       
   } catch (error) {
+
       res.status(400).json({ message: error.message });
+      console.log("TAG Error 5",error.message);
+
   }
 };
 
@@ -282,17 +328,14 @@ const getActivityById = async (req, res) => {
     res.status(400).json({ message: 'Missing inputs' });
   }
   const type = await eventRepository.getType(userId);
-  if (type !== 'advertiser') {
+  console.log(type);
+  if (type !== 'advertiser' && type !== 'tourGuide') {
     return res.status(400).json({ message: 'Invalid type' });
   }
   try {
     const activity = await eventService.getActivityById(_id);
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' });
-    }
-
-    if (activity.created_by !== userId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
     }
     return res.status(200).json(activity);
   } catch (error) {
@@ -301,18 +344,16 @@ const getActivityById = async (req, res) => {
 };
 
 const getAllActivities = async (req, res) => {
-  const { userId } = req.params;
+  const {userId} = req.params;
   if (!userId) {
     return res.status(400).json({ message: 'Missing userId' });
   }
-
   try {
     const type = await eventRepository.getType(userId);
     if (type !== 'advertiser') {
       return res.status(400).json({ message: 'Invalid user type' });
     }
     const activities = await eventService.getAllActivitiesAdvertiser(userId); // Same here
-    console.log(activities);
     return res.status(200).json(activities);
   } catch (error) {
     console.error('Error fetching activitiesss:', error.message);
@@ -322,7 +363,7 @@ const getAllActivities = async (req, res) => {
 
 const addActivity = async (req, res) => {
   const { name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
-
+  console.log(tags);
   // Validate required fields
   if (!name || !date || !time || !location || !price || !category || !tags || typeof isOpen === 'undefined' || !created_by) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -355,23 +396,35 @@ const addActivity = async (req, res) => {
   }
 };
 
+const getAllActivitiesInDatabase = async (req, res) => {
+  try {
+    const activities = await eventService.getAllActivitiesInDatabase();
+    return res.status(200).json({ activities });
+  } catch (error) {
+    console.error('Error fetching activities:', error.message);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+}
 const updateActivity = async (req, res) => {
   const { _id, userId } = req.params;
   const updateData = req.body; 
-
+  console.log("_id:",_id);
+  console.log("userId:",userId);
+  console.log("Update data:",updateData);
   if(!_id || !userId) {
     return res.status(400).json({ message: 'Missing inputs' });
   }
-
   const type = await eventRepository.getType(userId);
   if (type !== 'advertiser') {
     return res.status(400).json({ message: 'Invalid type' });
   }
 
-  const allowedUpdates = ['date', 'time', 'location', 'price', 'category', 'tags', 'specialDiscounts', 'isOpen'];
+  const allowedUpdates = ['date', 'time', 'location', 'price', 'category', 'tags', 'specialDiscounts', 'isOpen', 'name'];
   const invalidUpdates = Object.keys(updateData).filter(key => !allowedUpdates.includes(key));
 
   if (invalidUpdates.length) {
+    console.log("hena  ");
+    console.log("Invalid fields here:",invalidUpdates);
     return res.status(400).json({ message: `Invalid fields: ${invalidUpdates.join(', ')}` });
   }
 
@@ -381,10 +434,12 @@ const updateActivity = async (req, res) => {
       return res.status(404).json({ message: 'Activity not found.' });
     }
 
-    if (getActivity.created_by !== userId) {
+    if (getActivity.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'You are not authorized to update this activity.' });
     }
     const updatedActivity = await eventService.updateActivity(_id, updateData);
+    console.log("Updated activity:",updatedActivity);
+  
     if (!updatedActivity) {
       return res.status(404).json({ message: 'Activity not found.' });
     }
@@ -393,6 +448,7 @@ const updateActivity = async (req, res) => {
     console.error('Error updating activity:', error.message);
     return res.status(500).json({ message: error.message });
   }
+ 
 };
 
 const deleteActivity = async (req, res) => {
@@ -411,7 +467,8 @@ const deleteActivity = async (req, res) => {
     if (!getActivity) {
       return res.status(404).json({ message: 'Activity not found.' });
     }
-    if(getActivity.created_by !== userId) {
+    if(getActivity.created_by.toString()
+       !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Activity as it is not yours.' });
     }
     const deletedActivity = await eventService.deleteActivity(_id);
@@ -420,7 +477,7 @@ const deleteActivity = async (req, res) => {
       return res.status(404).json({ message: 'Activity not found.' });
     }
 
-    return res.status(200).json({ message: 'Activity deleted successfully.' });
+    return res.status(200).json({ message: 'Activity deleted successfully.', deletedActivity: deletedActivity });
   } catch (error) {
     console.error('Error deleting activity:', error.message);
     return res.status(500).json({ message: error.message });
@@ -481,10 +538,32 @@ const getItineraryById = async (req, res) => {
 
 const createItinerary = async (req, res) => {
   try {
-    const {activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
-    
-    if(!activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !accessibility || !pickupLocation || !dropoffLocation || !isActivated || !created_by || !flag) {
+    const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
+    console.log("      ");
+    console.log(req.body);
+    if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !pickupLocation || !dropoffLocation) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+    if(!flag){
+      const flag = false;
+    }
+    else{
+      const flag = true;
+    }
+    if(!isActivated){
+      const isActivated = false;
+    }
+    else{
+      const isActivated = true;
+    }
+    if(!created_by){
+      return res.status(400).json({ message: 'Missing created_by' });
+    }
+    if(!accessibility){
+      const accessibility = false;
+    }
+    else{
+      const accessibility = true;
     }
     if(!isSpecial){
       const isSpecial = false;
@@ -503,7 +582,7 @@ const createItinerary = async (req, res) => {
     if(!allActivities) {
       return res.status(404).json({ message: 'Activities not found.' });
     }
-
+    console.log(activities);
     const allActivitiesIds = allActivities.map(activity => activity._id.toString());
     const areAllActivitiesValid = activities.every(activityId => allActivitiesIds.includes(activityId));
 
@@ -511,7 +590,7 @@ const createItinerary = async (req, res) => {
       return res.status(400).json({ message: 'One or more provided activities are invalid.' });
     }
     
-    const itineraryData = { activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
+    const itineraryData = { name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
     
     // Call the service to create the itinerary
     const newItinerary = await eventService.createItinerary(itineraryData);
@@ -542,7 +621,7 @@ const updateItinerary = async (req, res) => {
     if (!getItinerary) {
       return res.status(404).json({ message: 'Itinerary not found.' });
     }
-    if(getItinerary.created_by !== userId) {
+    if(getItinerary.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
     }
       const updatedItinerary = await eventService.updateItinerary(_id, itineraryData);
@@ -577,7 +656,7 @@ const deleteItinerary = async (req, res) => {
     if (!getItinerary) {
       return res.status(404).json({ message: 'Itinerary not found.' });
     }
-    if(getItinerary.created_by !== userId) {
+    if(getItinerary.created_by.toString() !== userId) {
       return res.status(400).json({ message: 'Cannot Delete the Itinerary as it is not yours.' });
     }
       const deletedItinerary = await eventService.deleteItinerary(_id);
@@ -601,10 +680,11 @@ const createHistoricalPlace = async (req, res) => {
     openingHours,
     ticketPrice,
     created_by,
+    tags
   } = req.body;
 
   // Validate required fields
-  if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by) {
+  if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by || !tags) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -615,10 +695,10 @@ const createHistoricalPlace = async (req, res) => {
   }
 
   try {
-    // const tag = await eventRepository.findTagByTypeAndPeriod(type);
-    // if (!tag) {
-    //   return res.status(400).json({ message: 'Invalid tag type' });
-    // }
+    const tag = await eventRepository.findTagByTypeAndPeriod(tags);
+      if (!tag) {
+        return res.status(400).json({ message: 'Invalid tag type' });
+      }
     const historicalPlaceData = {
       name,
       description,
@@ -627,6 +707,7 @@ const createHistoricalPlace = async (req, res) => {
       openingHours,
       ticketPrice,
       created_by,
+      tags
     };
 
     // Call the service to create the historical place
@@ -682,19 +763,23 @@ const updateHistoricalPlace = async (req, res) => {
       const { _id, userId } = req.params;
       const { updateValues } = req.body;
 
+      console.log(updateValues);
+
       if (!_id || !userId) {
           return res.status(400).json({ message: 'Missing inputs' });
       }
 
       const type = await eventRepository.getType(userId);
+      console.log(type);
       if (type !== 'tourismGovernor') {
           return res.status(400).json({ message: 'Invalid type' });
       }
-      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id);
+      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id, userId);
       if (!getHistoricalPlace) {
         return res.status(404).json({ message: 'Historical Place not found.' });
       }
-      if(getHistoricalPlace.created_by !== userId) {
+      console.log(getHistoricalPlace);
+      if(getHistoricalPlace.response.historicalPlace.created_by.toString() !== userId) {
         return res.status(400).json({ message: 'Cannot Update the Historical Place as it is not yours.' });
       }
       const updatedPlace = await eventService.updateHistoricalPlace(_id, userId, updateValues);
@@ -719,11 +804,11 @@ const deleteHistoricalPlace = async (req, res) => {
       if (type !== 'tourismGovernor') {
           return res.status(400).json({ message: 'Invalid type' });
       }
-      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id);
+      const getHistoricalPlace = await eventService.getHistoricalPlaceById(_id, userId);
       if (!getHistoricalPlace) {
         return res.status(404).json({ message: 'Historical Place not found.' });
       }
-      if(getHistoricalPlace.created_by !== userId) {
+      if(getHistoricalPlace.response.historicalPlace.created_by.toString() !== userId) {
         return res.status(400).json({ message: 'Cannot Delete the Historical Place as it is not yours.' });
       }
       const deletedPlace = await eventService.deleteHistoricalPlace(_id, userId);
@@ -738,10 +823,15 @@ const deleteHistoricalPlace = async (req, res) => {
 const getAllHistoricalTags = async (req, res) => {
   const { userId } = req.params;
   if(!userId) {
+    console.log("test 1");
+    
     res.status(400).json({ message: 'Missing inputs' });
   }
   const type = await eventRepository.getType(userId);
-  if (type !== 'tourGuide' || type !== 'tourist' || type != 'guest') {
+  console.log("type:",type);
+  if (type !== 'tourGuide' && type !== 'tourist' && type != 'guest' && type != 'tourismGovernor') {
+   console.log("henaaa",type);
+   
     return res.status(400).json({ message: 'Invalid type' });
   }
   try {
@@ -754,7 +844,313 @@ const getAllHistoricalTags = async (req, res) => {
       .json({ error: "An error occurred", details: error.message });
   }
 }
+
+const getHistoricalTagDetails = async (req, res) => {
+  const { tagId } = req.params;
+  if(!tagId) {    
+    res.status(400).json({ message: 'Missing inputs' });
+  }
+  try {
+    const tag = await eventService.getHistoricalTagDetails(tagId);
+    return res.status(200).json({message: "Tags fetched successfully", tags: tag});
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred", details: error.message });
+  }
+}
+
+const sendEventEmail = async (req, res) => {
+  const { touristId, receiverEmail } = req.params;
+  const eventDetails = req.body;
+
+  try {
+      const result = await eventService.sendEventEmail(touristId, receiverEmail, eventDetails);
+      console.log(true);
+      
+      res.status(200).json(result);
+  } catch (error) {
+    console.log("error",error);
+      res.status(500).json({ error: error.message });
+  }
+};
+
+//Mohamed Apis
+
+
+
+const bookedEvents = async (req, res) => {
+  try {
+      const { touristId } = req.params;
+      if (!touristId) {
+          return res.status(400).json({ error: "touristId is required in the request body" });
+      }
+      const result = await eventService.bookedEvents(touristId);
+      console.log(result);
+      return res.status(200).json(result);
+  } catch (error) {
+    // console.log(error.message );
+      return res.status(500).json({ error: error.message });
+      
+  }
+};
+
+
+
+const bookEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice } = req.body;
+
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+    }
+    if (!touristId || !userType || !eventType || !eventID) {
+      console.log("touristId",touristId);
+      console.log("userType",userType);
+      console.log("eventType",eventType);
+      console.log("eventID",eventID);
+
+      
+      return res.status(400).json({ error: "All attributes are required in the request body" });
+    }
+
+    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event booked successfully',
+      data: updatedTourist,
+    });
+  } catch (error) {
+    if (error.message.includes('already been booked')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+const cancelBookingEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID } = req.body;
+
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+     }
+
+      const updatedTourist = await eventService.cancelEventToTourist(userType, touristId, eventType, eventID);
+      return res.status(200).json({
+          success: true,
+          message: 'Event updated successfully',
+          data: updatedTourist,
+      });
+  } catch (error) {
+      return res.status(400).json({
+          success: false,
+          message: error.message,
+      });
+  }
+};
+
+
+const getCityCode = async (req, res) => {
+  try {
+      const response = await eventService.fetchCityCode(req.params.city);
+      res.status(200).json(response);  
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+const flightOffers = async (req, res) => {
+  const { originCode, destinationCode, dateOfDeparture,currency,personCount } = req.body;
+
+  if (!originCode || !destinationCode || !dateOfDeparture  || !currency || !personCount) {
+      return res.status(400).json({ message: "Origin, destination, and departure date are required." });
+  }
+
+  try {
+      
+      const flights = await eventService.flightOffers( originCode, destinationCode, dateOfDeparture,currency,personCount);
+      return res.status(200).json(flights);
+  } catch (error) {
+      console.error('Error searching flights:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+const bookFlight = async (req, res) => {
+  const { bookedBy, price, departureTime, arrivalTime, personCount,currency,originCode,destinationCode } = req.body;
+
+  
+  if (!bookedBy || !price || !departureTime || !arrivalTime || !personCount || !currency || !originCode || !destinationCode) {
+    console.log("bookedBy",bookedBy);
+    console.log("price",price);
+    console.log("departureTime",departureTime);
+    console.log("arrivalTime",arrivalTime);
+    console.log("personCount",personCount);
+    console.log("currency",currency);
+    console.log("originCode",originCode);
+    console.log("destinationCode",destinationCode);
+    console.log("currency",currency);
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+      const newBooking = await eventService.flightBooking({ bookedBy, price, departureTime, arrivalTime, personCount,currency ,originCode,destinationCode });
+      return res.status(201).json(newBooking);
+  } catch (error) {
+      console.error('Error booking flight:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+const getHotelsByCityCode = async (req, res) => {
+  try {
+      const { startDate, endDate, currency, personCount } = req.params; 
+    
+
+      const response = await eventService.fetchHotelsByCityCode(
+          req.params.cityCode,
+          req.params.startDate,
+          req.params.endDate,
+          req.params.currency,  
+          req.params.personCount 
+      );
+      res.status(200).json(response); 
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+const bookHotel = async (req, res) => {
+  const { bookedBy, price, iataCode, hotelName, hotelId,startDate,endDate,personCount,currency } = req.body;
+ 
+  
+  if (!bookedBy || !price || !iataCode || !hotelName || !hotelId || !startDate || !endDate || !personCount || !currency) {
+       
+
+
+
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+      const newBooking = await eventService.bookingHotel({ bookedBy, price, iataCode, hotelName, hotelId,startDate ,endDate,personCount,currency });
+      return res.status(201).json(newBooking);
+  } catch (error) {
+      console.error('Error booking hotel:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
+
+const createTransportation = async (req, res) => {
+  try {
+    const { advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType } = req.body; 
+
+    if (!advertiserId || !pickupLocation || !dropoffLocation || !dateAvailable || !timeAvailable || !price || !transportationType ) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const newTransportation = await eventService.createTransportation(advertiserId, pickupLocation, dropoffLocation, dateAvailable,timeAvailable, price, transportationType);
+    return res.status(201).json({
+      success: true,
+      message: 'Transportation created successfully.',
+      data: newTransportation,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+const getTransportations = async (req, res) => {
+  try {
+    const{currency} = req.params;
+    const transportation = await eventService.getTransportations(currency);
+    return res.status(200).json(transportation);
+  } catch (error) {
+    console.error('Error fetching transportation:', error.message);
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+
+
+const bookTransportation = async (req, res) => {
+  const { touristId, transportationId } = req.body;
+
+  try {
+      const result = await eventService.bookTransportation(touristId, transportationId);
+      return res.status(200).json(result);
+  } catch (error) {
+      console.error('Error in booking transportation:', error.message);
+      return res.status(400).json({ message: error.message });
+  }
+};
+
+
+//Saif,Tasnim
+
+
+const updateItineraryActivation = async (req, res) => {
+  
+  const { itineraryId, isActivated, userId, userType } = req.params;
+
+
+  if (!itineraryId || isActivated === undefined || !userId || !userType) {
+      return res.status(400).json({ message: "Itinerary ID, activation status, user ID, and userType are required." });
+  }
+  if (userType !== 'tourGuide') {
+    throw new Error('Only tour guides can update itineraries.');
+  }
+  if ( (isActivated !== 0 && isActivated !== 1)) {
+      return res.status(400).json({ error: 'isActivated must be 0 (deactivate) or 1 (activate)' });
+  }
+
+  try {
+      const updatedItinerary = await eventService.updateItineraryActivation(itineraryId, isActivated, userId, userType);
+      if (!updatedItinerary) {
+          return res.status(404).json({ message: 'Itinerary not found or not created by this user.' });
+      }
+      return res.status(200).json(updatedItinerary);
+  } catch (error) {
+      console.error('Error updating itinerary activation:', error.message);
+      return res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
+  updateItineraryActivation,
+  getHistoricalTagDetails,
   getUserEvents,
   createCategory,
   getAllCategories,
@@ -784,6 +1180,21 @@ module.exports = {
   deleteHistoricalPlace,
   getAllItineraries,
   getAllActivities,
-  getAllHistoricalTags
+  getAllHistoricalTags,
+  getAllActivitiesInDatabase,
+  bookedEvents,
+  bookEvent,
+  cancelBookingEvent,
+  getCityCode,
+  flightOffers,
+  bookFlight,
+  getHotelsByCityCode,
+  bookHotel,
+  createTransportation,
+  getTransportations,
+  bookTransportation,
+  sendEventEmail,
+  updateEventFlagController,
+  getAllEvents
   };
   

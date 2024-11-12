@@ -1,132 +1,310 @@
-// src/Shared/Components/GuestHP.js
-import React,{ useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
-import '../Guest/GuestHP.css'; // Import the CSS file
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+
+import LockIcon from '@mui/icons-material/Lock';
+import LogoutIcon from '@mui/icons-material/Logout';
+import UploadIcon from '@mui/icons-material/Upload';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import { Alert } from '@mui/material'; 
+import Delete from '@mui/icons-material/Delete';
+import '../Guest/GuestHP.css';
 import HomePageLogo from '../HomePageLogo.png';
+import Drawer from '@mui/material/Drawer';
+import axios from 'axios';
 import NetworkService from '../NetworkService';
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const HomePage = () => {
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const location = useLocation();
-    const [success,setSuccess]=useState();
-    const [error,setError]=useState();
-    const { User } = location.state || {};
+    const [success, setSuccess] = useState('');
+    const [error, setError] = useState('');
+    const { User, imageUrl } = location.state || {};
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const initialUsername = User.User?.username || User.username;
+    const userId = User.User?._id || User._id;
+    const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
+    const userType = User.User?.type || User.type;
+
+    // Retrieve avatar URL from localStorage or fallback to the default avatar
+    const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
+    const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
+
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    useEffect(() => {
+        // Update the avatar URL when the component mounts if a new image URL exists
+        if (savedAvatarUrl || imageUrl) {
+            setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+        } else {
+            setAvatarImage(defaultAvatarUrl);
+        }
+    }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
+
+         useEffect(() => {
+      if (showSuccessMessage) {
+        const timer = setTimeout(() => {
+          setShowSuccessMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showSuccessMessage]);
     
-     const initialUsername = User.User?.username;
-     console.log(User.User);
-     
-    const userId=User.User._id;
-    console.log(User.User._id);
+    useEffect(() => {
+      if (showErrorMessage) {
+        const timer = setTimeout(() => {
+          setShowErrorMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [showErrorMessage]);
 
-    const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-    async function handleRegisterClick(title) {
-        if (title == "My profile"){
-          try {
-            const options = {
-              apiPath: `/getAdvertiser/${userId}`,
-            };
-            
-            const response = await NetworkService.get(options);
-            setSuccess(response.message); // Set success message
-            console.log(response);
-             navigate(`/viewAdvertiserProfile`,{state:{advertiser:response}});          
-          } catch (err) {
-            if (err.response) {
-                console.log(err.message);
-              setError(err.response.data.message); // Set error message from server response if exists
-            } else {
-              setError('An unexpected error occurred.'); // Generic error message
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleMenuClick = (action) => {
+        handleMenuClose();
+        if (action === 'changePassword') {
+            navigate('/change-password', { state: { userId: userId } });
+        } else if (action === 'logout') {
+            navigate('/login');
+        }
+    };
+
+    const handleAvatarUpload = async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                const uploadedImageUrl = response.data.imageUrl;
+                
+                // Update avatarImage and save the URL in localStorage
+                setAvatarImage(uploadedImageUrl);
+                localStorage.setItem(`${userId}`, uploadedImageUrl);
+            } catch (err) {
+                console.error('Error uploading image:', err);
             }
-          }
         }
-      else if ( title =="View All Activities"){
-        try {
-          const options = {
-            apiPath: `/upcomingEvents`,
-          };
-          
-          const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          console.log(response);
-          const events=response.events;
-          navigate(`/explore`,{state:{events}});          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
-        }
-      }
-      else {
-        try {
-          const options = {
-            apiPath: `/activity/user/${userId}/allActivities`,
-          };
+    };
 
-          const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          console.log(response);
-           navigate(`/Activities`,{state:{allActivity:response}});          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
+    const handleRegisterClick = async (title) => {
+        console.log(title);
+        
+     if (title === "Transportation") {
+            try {
+                const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
+                const response = await axios.get(apiPath);
+                navigate(`/transportion`, { state: { allActivity: response.data ,advertiserId:userId} });
+            } catch (err) {
+                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+            }
+        } else if(title ==="Activities") {
+            console.log("heree");
+            
+            try {
+                const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
+                const response = await axios.get(apiPath);
+                navigate(`/Activities`, { state: { allActivity: response.data, id: userId } });
+            } catch (err) {
+                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+            }
+        }else {
+            try {
+                const options = { apiPath: `/getAdvertiser/${userId}` };
+                const response = await NetworkService.get(options);
+                setSuccess(response.message);
+                navigate(`/viewAdvertiserProfile`, { state: { advertiser: response } });
+            } catch (err) {
+                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+            }
         }
-      }
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+          console.log(userId, userType);
+      
+          const options = {
+            apiPath: `/requestDeletion/${userId}/${userType}`,
+            useParams: userId,
+            userType,
+          };
+          const response = await NetworkService.put(options);
+          console.log(response);
+      
+          setSuccessMessage(response.message || "Delete Successfully!");
+          setShowSuccessMessage(true);
+      
+          if (response.success) {
+            setSuccess("Account deletion requested successfully.");
+          } else {
+            setError(response.message || "Account deletion request failed.");
+          }
+        } catch (err) {
+          // Access the error message from the response data
+          const errorMessage = err.response?.data?.message || "An error occurred";
+          setErrorMessage(errorMessage);
+          setShowErrorMessage(true);
+          setError(errorMessage);
+        }
       };
-  return (
-    <div className="homepage">
-      <nav className="navbar">
-        <div className="logo-container">
-          <img
-            src={HomePageLogo} // Use the imported logo
-            alt="ExploreInEase Logo"
-            className="logo"
-          />
-          <span className="website-name">ExploreInEase</span>
+      
+    const toggleDrawer = (open) => () => {
+        setDrawerOpen(open);
+    };
+       
+    return (
+        <div className="homepage">
+            <nav className="navbar">
+                
+                <div className="logo-container">
+                    <img src={HomePageLogo} alt="ExploreInEase Logo" className="logo" />
+                    <span className="website-name">ExploreInEase</span>
+                </div>
+                <div 
+                    className="currency-selector" 
+                    style={{ 
+                        position: 'absolute', 
+                        left: '80%', 
+                        transform: 'translateX(-50%)' 
+                    }}
+                >
+                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
+
+                    <select id="currency-select" className="currency-dropdown">
+                        <option value="usd">USD ($)</option>
+                        <option value="eur">EUR (€)</option>
+                        <option value="egp">EGP (ج.م)</option>
+                    </select>
+                </div>
+              
+                <IconButton 
+                    onClick={toggleDrawer(true)} 
+                    className="menu-button" 
+                    style={{ position: 'absolute', right: '40px', color: 'white', backgroundColor: '#3f51b5' }}>
+                    <MenuIcon />
+                </IconButton>
+            </nav>
+        
+
+            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{ width: drawerOpen ? '700px' : '300px' }}>
+                <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
+                        {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Typography variant="h6" style={{ marginLeft: '10px' }}>{initialUsername}</Typography>
+                </div>
+                <Divider />
+                <List>
+                    <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
+                    <ListItem button onClick={() => handleMenuClick('changePassword')}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <LockIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Change Password" />
+                    </ListItem>
+                    <ListItem button onClick={handleDeleteAccount}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <Delete fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Delete Account" />
+                    </ListItem>
+                    <ListItem component="label" sx={{ alignItems: 'center', padding: 0 , marginLeft: '8px'}}>
+                        <ListItemIcon sx={{ minWidth: 0, marginRight: '8px' }}>
+                            <UploadIcon />
+                        </ListItemIcon>
+                        Upload Image
+                        <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleAvatarUpload}
+                        />
+                    </ListItem>
+                    <ListItem button onClick={() => handleMenuClick('logout')}>
+                        <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+                            <LogoutIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText primary="Logout" />
+                    </ListItem>
+                </List>
+
+                <Divider />
+                <Divider />
+                <List>
+                    <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
+                    {[
+                        "Activities",
+                        "Transportation",               
+                        "My Profile"
+                    ].map((text) => (
+                        <ListItem key={text} disablePadding>
+                            <ListItemButton onClick={() => handleRegisterClick(text)}>
+                                <ListItemText primary={text} />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Drawer>
+      <div>
+      {showSuccessMessage && (
+        <Alert severity="success" 
+        sx={{
+          position: 'fixed',
+          top: 80, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {successMessage}
+        </Alert>
+      )}
+      {showErrorMessage && (
+        <Alert severity="error" 
+        sx={{
+          position: 'fixed',
+          top: 60, // You can adjust this value to provide space between success and error alerts
+          right: 20,
+          width: 'auto',
+          fontSize: '1.2rem', // Adjust the size
+          padding: '16px',
+          zIndex: 9999, // Ensure it's visible above other content
+        }}>
+          {errorMessage}
+        </Alert>
+      )}
+      </div>
+      
         </div>
-        <div className="nav-links">
-          <button  onClick={() => handleRegisterClick("Activities")}
-              style={{width:160}}>Create Activities</button>
-          <button  onClick={() => handleRegisterClick("View All Activities")}
-               style={{width:160}}>View All Activities</button>
-          <button  onClick={() => handleRegisterClick("My profile")}
-               style={{width:160}}>My profile</button>
- 
-        <div style={{marginRight:5,marginTop:30,marginLeft:30}}>
-          <span className="currency-symbol"></span>
-          <select>
-            <option value="usd">USD ($)</option>
-            <option value="eur">EUR (€)</option>
-            <option value="egp">EGP (ج.م)</option>
-          </select>
-        </div>
-        </div>
-        <div className="avatar-container">
-        <Avatar
-            sx={{
-              bgcolor: 'darkblue',
-              color: 'white',
-              width: 56,
-              height: 56,
-              fontSize: 24,
-              marginLeft: 2,
-            }}
-          >
-            {firstInitial}
-          </Avatar>
-        </div>
-      </nav>
-      {/* Other homepage content goes here */}
-    </div>
-  );
+    );
 };
 
 export default HomePage;

@@ -3,6 +3,9 @@ const mongoose = require('mongoose')
 const router = express.Router()
 const eventController = require('../events/eventController');
 
+router.put('/inappropriate', eventController.updateEventFlagController);
+
+router.get('/getAllEvents', eventController.getAllEvents);
 /**
  * @swagger
  * /GetMyEvents/{_id}/{userType}:
@@ -826,7 +829,7 @@ router.delete('/deletePreferenceTagById/:_id', eventController.deleteTagById);
  *                   type: string
  *                   example: "Error message details"
  */
-router.get("/upcomingEvents", eventController.getUpcomingEvents);
+router.get("/upcomingEvents/:currency", eventController.getUpcomingEvents);
 
 /**
  * @swagger
@@ -906,7 +909,6 @@ router.get("/upcomingEvents", eventController.getUpcomingEvents);
  *                   example: "Error details message"
  */
 router.get("/filterUpcommingActivites", eventController.GetupcommingActivitesFilter);
-
 /**
  * @swagger
  * /filteritineraries:
@@ -2504,6 +2506,7 @@ router.post('/createHistoricalTag/:_id', eventController.createHistoricalTag);
 
 router.get('/activity/:_id/:userId', eventController.getActivityById);
 router.get('/activity/user/:userId/allActivities', eventController.getAllActivities);
+router.get('/getAllActivities', eventController.getAllActivitiesInDatabase);
 router.post('/activity', eventController.addActivity);
 router.put('/activity/:_id/:userId', eventController.updateActivity);
 router.delete('/activity/:_id/:userId', eventController.deleteActivity);
@@ -2582,7 +2585,47 @@ router.delete('/historical-places/:_id/:userId', eventController.deleteHistorica
  *                   example: "Detailed error message"
  */
 router.get('/getAllHistoricalTags/:userId', eventController.getAllHistoricalTags);
+router.get('/allActivities', eventController.getAllActivitiesInDatabase);
+router.get('/getHistoricalTagDetails/:tagId', eventController.getHistoricalTagDetails);
+router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEventEmail);
 
+
+
+
+
+
+//mohamed apis 
+
+router.get('/bookedEvents/:touristId', eventController.bookedEvents)
+router.put('/bookEvent', eventController.bookEvent);
+router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
+// Route to get city code by city name
+router.get('/city/:city', eventController.getCityCode);
+
+// Route to get hotel IDs by city code
+router.get('/hotels/:cityCode/:startDate/:endDate/:currency/:personCount', eventController.getHotelsByCityCode);
+
+//define the route to book hotels 
+router.post('/bookHotel', eventController.bookHotel);
+
+// Route to get Flight Offers
+router.post('/flightOffers', eventController.flightOffers);
+// Define the route to book a flight
+router.post('/bookFlight', eventController.bookFlight);
+
+// Create Transportation Route
+router.post('/createTransportation', eventController.createTransportation);
+
+// Get Transportation Route
+router.get('/getTransportations/:currency', eventController.getTransportations);
+// Route to book transportation
+router.post('/bookTransportation', eventController.bookTransportation);
+
+
+
+//Saif, Tasnim 
+
+router.put('/updateItineraryActivation/:itineraryId/:isActivated/:userId/:userType', eventController.updateItineraryActivation);
 
 
 module.exports = router;

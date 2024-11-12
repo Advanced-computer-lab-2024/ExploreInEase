@@ -23,7 +23,7 @@ const AddUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     const options = {
       apiPath: '/addGovernorOrAdmin', 
       body: { username: user.username, password: user.password, type: user.type }, // Request body
@@ -36,10 +36,8 @@ const AddUser = () => {
       setShowSuccess(true); // Show success message
       setTimeout(() => setShowSuccess(false), 3000); // Hide after 3 seconds
       setUser({ type: "admin", username: "", password: "" }); // Reset form
-      navigate('/viewAddedUsers');
-
     } catch (error) {
-      setShowError(error.response?.data?.message || 'An error occurred while adding the user.');
+      setShowError('An error occurred while adding the user.');
     }
   };
 
@@ -98,4 +96,4 @@ const AddUser = () => {
   );
 };
 
-export default AddUser;
+ export default AddUser;
