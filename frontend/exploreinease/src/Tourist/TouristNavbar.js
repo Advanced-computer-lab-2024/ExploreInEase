@@ -31,6 +31,8 @@ const TouristNavbar = () => {
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [currency, setCurrency] = useState("EGP"); // default currency
+    console.log(currency);
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -79,6 +81,10 @@ const TouristNavbar = () => {
      const handleMenuOpen = (event) => {
       setAnchorEl(event.currentTarget);
    };
+
+   const handleCurrencyChange = (event) => {
+    setCurrency(event.target.value);
+};
 
    const handleMenuClose = () => {
       setAnchorEl(null);
@@ -198,7 +204,6 @@ const TouristNavbar = () => {
           const options = {
             apiPath: `/myComplaints/${userId}`,
             urlParam:userId
-
           };
           const response = await NetworkService.get(options);
           setSuccess(response.message); // Set success message
@@ -218,8 +223,10 @@ const TouristNavbar = () => {
       else{
         try {
             const options = {
-              apiPath: `/upcomingEvents`,
+              apiPath: `/upcomingEvents/${currency}`,
+              urlParam: {currency: currency},
             };
+            console.log(options);
             const response = await NetworkService.get(options);
             setSuccess(response.message); // Set success message
             console.log("response",response);
@@ -240,29 +247,33 @@ const TouristNavbar = () => {
 
       const handleDeleteAccount = async () => {
         try {
-          console.log(userId,userType);
-
+          console.log(userId, userType);
+      
           const options = {
-              apiPath: `/requestDeletion/${userId}/${userType}`,
-              useParams:userId,userType,
-            };
+            apiPath: `/requestDeletion/${userId}/${userType}`,
+            useParams: userId,
+            userType,
+          };
           const response = await NetworkService.put(options);
           console.log(response);
-          setSuccessMessage(response.message||"Delete Successfully!");
+      
+          setSuccessMessage(response.message || "Delete Successfully!");
           setShowSuccessMessage(true);
-
+      
           if (response.success) {
-
-              setSuccess("Account deletion requested successfully.");
+            setSuccess("Account deletion requested successfully.");
           } else {
-              setError(response.message || "Account deletion request failed.");
+            setError(response.message || "Account deletion request failed.");
           }
-      } catch (err) {
-        setErrorMessage(error.response.message || 'An error occurred');
-        setShowErrorMessage(true);
-          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
-      }
-    };
+        } catch (err) {
+          // Access the error message from the response data
+          const errorMessage = err.response?.data?.message || "An error occurred";
+          setErrorMessage(errorMessage);
+          setShowErrorMessage(true);
+          setError(errorMessage);
+        }
+      };
+      
 
     const handleAvatarUpload = async (event) => {
       const file = event.target.files[0];
@@ -298,21 +309,23 @@ return (
               <span className="website-name">ExploreInEase</span>
           </div>
           <div 
-                    className="currency-selector" 
-                    style={{ 
-                        position: 'absolute', 
-                        left: '80%', 
-                        transform: 'translateX(-50%)' 
-                    }}
+                className="currency-selector" 
+                style={{ position: 'absolute', left: '80%', transform: 'translateX(-50%)' }}
+            >
+                <label htmlFor="currency-select" style={{ marginRight: '8px' }}>
+                    <strong>Choose Currency:</strong>
+                </label>
+                <select 
+                    id="currency-select" 
+                    className="currency-dropdown" 
+                    value={currency} 
+                    onChange={handleCurrencyChange}
                 >
-                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
-
-                    <select id="currency-select" className="currency-dropdown">
-                        <option value="usd">USD ($)</option>
-                        <option value="eur">EUR (€)</option>
-                        <option value="egp">EGP (ج.م)</option>
-                    </select>
-                </div>
+                    <option value="dollar">USD ($)</option>
+                    <option value="euro">EUR (€)</option>
+                    <option value="EGP">EGP (ج.م)</option>
+                </select>
+            </div>
           <IconButton 
   onClick={toggleDrawer(true)} 
   className="menu-button" 

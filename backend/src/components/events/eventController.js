@@ -206,7 +206,9 @@ const GetupcommingActivitesFilter = async (req, res) => {
 
 const getUpcomingEvents = async (req, res) => {
   try {
-    const upcomingEvents = await eventService.getAllUpcomingEvents();
+    const {currency} = req.params;
+    console.log(req.params);
+    const upcomingEvents = await eventService.getAllUpcomingEvents(currency);
     return res.status(200).json(upcomingEvents);
   } catch (error) {
     console.error(error);

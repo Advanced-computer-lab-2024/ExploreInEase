@@ -829,7 +829,7 @@ router.delete('/deletePreferenceTagById/:_id', eventController.deleteTagById);
  *                   type: string
  *                   example: "Error message details"
  */
-router.get("/upcomingEvents", eventController.getUpcomingEvents);
+router.get("/upcomingEvents/:currency", eventController.getUpcomingEvents);
 
 /**
  * @swagger

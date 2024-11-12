@@ -60,7 +60,7 @@ const TouristSignUp = () => {
       const response = await NetworkService.post(options);
       const tourist = response.tourist;
       setSuccess(response.message);
-      navigate(`/TouristHomePage`, { state: { tourist } });
+      navigate(`/Login`);
 
     } catch (err) {
       if (err.response) {

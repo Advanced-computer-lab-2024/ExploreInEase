@@ -3,6 +3,7 @@ const Tourist = require('../../models/tourist');
 const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const HistoricalPlace = require('../../models/historicalPlace');
+const Product = require('../../models/product');
 const fs = require('fs');
 const path = require('path');
 
@@ -25,6 +26,11 @@ const updateUserStatus = async (userId, status) => {
     } catch (error) {
         throw new Error(`Error updating user status: ${error.message}`);
     }
+};
+
+const getTouristByUsername = async (username) => {
+    console.log(username);
+    return await Tourist.findOne({ username });
 };
 
 // Find user by ID
@@ -757,5 +763,6 @@ module.exports = {
     checkTouristDeletionCriteria,
     checkTourGuideItineraryDates,
     checkSellerProductStatus,
-    checkAdvertiserActivityStatus
+    checkAdvertiserActivityStatus,
+    getTouristByUsername
 };

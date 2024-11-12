@@ -62,7 +62,7 @@ const fetchAllUsersAndTourists = async () => {
 
 
 const getTouristUpcommingEvents = async (username) => {
-  const tourist = await userRepository.getTouristEventDetails(username);
+  const tourist = await userRepository.getTouristByUsername(username);
 
   if (!tourist) {
     throw new Error("Tourist not found");
@@ -482,14 +482,29 @@ const updatingStatusUser = async (userId, status) => {
 
 const changePassword = async (userId, oldPassword, newPassword) => {
     const user = await userRepository.findUserById(userId);
-    if (!user) {
-        return { status: 404, response: { message: "User not found" } };
+    const tourist = await userRepository.findTouristById(userId);
+    console.log("User: ",user);
+    console.log("Tourist: ",tourist);
+    if (user) {
+        if(user.password !== oldPassword) {
+            return { status: 400, response: { message: "Incorrect password" } };
+        }
+        const newUser = await userRepository.updateUserPassword(user, newPassword);
+        return { status: 200, response: { message: "Password updated successfully", user: newUser } };
     }
-    if(user.password !== oldPassword) {
-        return { status: 400, response: { message: "Incorrect password" } };
+    else{
+        if(tourist){
+            if(tourist.password !== oldPassword){
+                return { status: 400, response: { message: "Incorrect password" } };
+            }
+            const newUser = await userRepository.updateUserPassword(tourist, newPassword);
+            return { status: 200, response: { message: "Password updated successfully", user: tourist } };
+        }
+
+        else{
+            return { status: 400, response: { message: "User not found" } };
+        }
     }
-    const newUser = await userRepository.updateUserPassword(user, newPassword);
-    return {status: 200, response: { message: "Password updated successfully", user: newUser } };
 };
 
 const uploadImage = async (userId, file) => {

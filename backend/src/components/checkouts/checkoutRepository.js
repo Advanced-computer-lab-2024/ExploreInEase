@@ -259,7 +259,7 @@ const getAllAvailableProducts = async () => {
         const availableProducts = await Product.find({
             $expr: { $lt: ["$takenQuantity", "$originalQuantity"] }
         })
-        .select('picture price description ratings reviews name originalQuantity sellerId isActive')
+        .select('picture price description ratings reviews name originalQuantity takenQuantity sellerId isActive')
         .populate({
             path: 'reviews.userId', // Populate userId in each review
             select: 'username mobileNum email nation dob profession', // Specify fields to include from the Tourist model

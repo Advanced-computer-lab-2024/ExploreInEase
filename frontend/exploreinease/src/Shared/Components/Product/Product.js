@@ -52,6 +52,7 @@ const ProductCard = () => {
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
   const [productInterval,setProductInterval]=useState([]);
   const  Product = location.state?.Product || productInterval||[];
+  console.log("Product",Product);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -75,24 +76,6 @@ const ProductCard = () => {
   },[checkProductAdd]);
 
   useEffect(() => {
-    console.log("hehhehe");
-    
-    if (Product && Array.isArray(Product)) {
-      const loadedProducts = Product.map(product => {
-        const savedImageUrl = localStorage.getItem(`product-image-${product._id}`);
-        return {
-          ...product,
-          picture: savedImageUrl || product.picture || 'http://localhost:3030/images/changePassword.jpg',
-        };
-      });
-      setProducts(loadedProducts);
-      const maxProductPrice = Math.max(...Product.map(item => Number(item.price) || 0));
-      setMaxPrice(maxProductPrice);
-      setPriceRange([0, maxProductPrice]);
-    }
-  }, [Product]);
-
-  useEffect(() => {
     if (showSuccessMessage) {
       const timer = setTimeout(() => {
         setShowSuccessMessage(false);
@@ -110,51 +93,83 @@ const ProductCard = () => {
     }
   }, [showErrorMessage]);
 
-  const handleGetAllProduct = async () => {
-    try {
-        const options = { apiPath: `/getAvailableProducts/${userId}`, urlParam: userId };
-        const response = await NetworkService.get(options);
-        console.log(response);
-        if (response && response.Products) {
-            setProductInterval(response.Products);
-            console.log("Products",productInterval);
-        } else {
-            console.warn('Product data is not available in the response');
-        }
-    } catch (error) {
-        console.error('Error fetching products:', error);
-    }
-};
-  const handleClickPurchase=async(productt)=>{
-    try {
-      // touristId, productIds, quantities
-      console.log("Product",productt);
+// Replace setProductData with setProducts in handleGetAllProduct
+const handleGetAllProduct = async () => {
+  try {
+    const options = { apiPath: `/getAvailableProducts/${userId}`, urlParam: userId };
+    const response = await NetworkService.get(options);
+    console.log(response);
+    
+    if (response && response.Products) {
+      const adjustedProducts = response.Products.map((product) => ({
+        ...product,
+        originalQuantity: product.originalQuantity - product.takenQuantity || 0,
+        picture: localStorage.getItem(`product-image-${product._id}`) || product.picture || 'http://localhost:3030/images/changePassword.jpg',
+      }));
+  
+      // Use setProducts instead of setProductData
+      setProducts(adjustedProducts);
+      console.log("Adjusted Products", adjustedProducts);
       
-      const options = { 
-        apiPath: `/addOrder`,
-        body:
-        {
-          touristId:userId,
-          productIds:[productt._id],
-          quantities:[1],
-          totalPrice:productt.price,
-        }
-       };
-       console.log(options.body);
-       
-      const response = await NetworkService.post(options);
-        console.log(response);
-        setSuccessMessage(" Successfully!");
-        setShowSuccessMessage(true);
-        setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productt._id));
-
-
-    } catch (error) {
-      setErrorMessage(error.message || 'An error occurred');
-      setShowErrorMessage(true);
-      console.log('Error fetching historical places:', error);
+      // Set max price and price range based on the adjusted products
+      const maxProductPrice = Math.max(...adjustedProducts.map(item => Number(item.price) || 0));
+      setMaxPrice(maxProductPrice);
+      setPriceRange([0, maxProductPrice]);
+    } else {
+      console.warn('Product data is not available in the response');
     }
+  } catch (error) {
+    console.error('Error fetching products:', error);
   }
+};
+
+// Ensure `products` is used in JSX rendering, not `productData`
+
+
+  useEffect(() => {
+    console.log("Fetching products...");
+    handleGetAllProduct();
+  }, []);
+  
+const handleClickPurchase = async (product, selectedQuantity) => {
+  try {
+    const options = { 
+      apiPath: `/addOrder`,
+      body: {
+        touristId: userId,
+        productIds: [product._id],
+        quantities: [selectedQuantity],
+        totalPrice: product.price * selectedQuantity,
+      }
+    };
+
+    const response = await NetworkService.post(options);
+    console.log(response);
+    setSuccessMessage("Successfully purchased!");
+    setShowSuccessMessage(true);
+
+    setProducts((prevProducts) =>
+      prevProducts.map((p) => 
+        p._id === product._id ? { ...p, originalQuantity: p.originalQuantity - selectedQuantity } : p
+      )
+    );
+
+    const options2 = { 
+      apiPath: `/pointsAfterPayment/{userId}/{amount}`,
+      urlParam: { userId, amount: product.price * selectedQuantity },
+    };
+    const response2 = await NetworkService.put(options2);
+    console.log(response2);
+  } 
+  catch (error) {
+    setErrorMessage(error.message || 'An error occurred');
+    setShowErrorMessage(true);
+    console.error('Error:', error);
+  } finally {
+    setOpenDialog(false); // Close dialog after purchase
+  }
+};
+
   
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
@@ -171,6 +186,10 @@ const ProductCard = () => {
 
   const handleOpenSalesDialog = () => setSalesDialogOpen(true);
   const handleCloseSalesDialog = () => setSalesDialogOpen(false);
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [openDialog, setOpenDialog] = useState(false);
 
 
   const handleSalesDetails = async (productId) => {
@@ -413,6 +432,12 @@ const ProductCard = () => {
     }
   };
 
+  const handleQuantity = (product) => {
+    setSelectedProduct(product);
+    setQuantity(1); // Reset quantity
+    setOpenDialog(true); // Open dialog
+  };
+
   const filteredProducts = products
     .filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -635,7 +660,7 @@ const ProductCard = () => {
       </Tooltip>
 
       <Tooltip title="Purchase" placement="top" arrow>
-        <IconButton onClick={() => handleClickPurchase(product)} sx={{ color: '#1976d2',width:'30px' }}>
+        <IconButton onClick={() => handleQuantity(product)} sx={{ color: '#1976d2',width:'30px' }}>
           <ShoppingBasket />
         </IconButton>
       </Tooltip>
@@ -811,6 +836,29 @@ const ProductCard = () => {
         </DialogActions>
       </Dialog>
 
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Select Quantity</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Quantity"
+            type="number"
+            inputProps={{ min: 1, max: selectedProduct?.originalQuantity }}
+            value={quantity}
+            onChange={(e) => setQuantity(Math.min(Math.max(1, e.target.value), selectedProduct?.originalQuantity))}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button
+            onClick={() => handleClickPurchase(selectedProduct, quantity)}
+            disabled={!quantity || quantity > selectedProduct?.originalQuantity}
+          >
+            Confirm Purchase
+          </Button>
+        </DialogActions>
+      </Dialog>
       
     {/* Sales Details Dialog */}
     <Dialog open={isSalesDialogOpen} onClose={handleCloseSalesDialog} fullWidth maxWidth="xs">

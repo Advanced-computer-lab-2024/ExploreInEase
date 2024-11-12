@@ -521,17 +521,17 @@ const redeemPoints = async (req, res) => {
 }
 
 const pointsAfterPayment = async (req, res) => {
-    const { userId, points } = req.params;
-    console.log(userId, points);
+    const { userId, amount } = req.params;
+    console.log(userId, amount);
 
-    if (!userId || !points) {
-        return res.status(400).json({ message: 'Missing userId or points parameter.' });
+    if (!userId || !amount) {
+        return res.status(400).json({ message: 'Missing userId or amount parameter.' });
     }
     try {
-        const result = await userService.pointsAfterPayment(userId, points);
-        return res.status(result.status).json(result);
+        const result = await userService.pointsAfterPayment(userId, amount);
+        return res.status(200).json(result);
     } catch (error) {
-        console.error('Error redeeming points:', error);
+        console.error('Error redeeming amount:', error);
         return res.status(500).json({ message: 'Internal server error.' });
     }
 }

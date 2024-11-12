@@ -169,34 +169,33 @@ const TourGuideHP = () => {
 
     const handleDeleteAccount = async () => {
       try {
-          console.log(userId,userType);
-
-          const options = {
-              apiPath: `/requestDeletion/${userId}/${userType}`,
-              useParams:userId,userType,
-            };
-          const response = await NetworkService.put(options);
-          console.log(response);
-          setSuccessMessage(response.data.message||"Delete Successfully!");
-          setShowSuccessMessage(true);
-          if (response.success) {
-            console.log("hereee 1");
-            
-              setSuccess("Account deletion requested successfully.");
-          } else {
-            console.log("hereee 2");
-
-              setError(response.message || "Account deletion request failed.");
-          }
+        console.log(userId, userType);
+    
+        const options = {
+          apiPath: `/requestDeletion/${userId}/${userType}`,
+          useParams: userId,
+          userType,
+        };
+        const response = await NetworkService.put(options);
+        console.log(response);
+    
+        setSuccessMessage(response.message || "Delete Successfully!");
+        setShowSuccessMessage(true);
+    
+        if (response.success) {
+          setSuccess("Account deletion requested successfully.");
+        } else {
+          setError(response.message || "Account deletion request failed.");
+        }
       } catch (err) {
-        console.log("hereee 3 ");
-        
-        setErrorMessage(err.response?.data?.message  || 'An error occurred');
+        // Access the error message from the response data
+        const errorMessage = err.response?.data?.message || "An error occurred";
+        setErrorMessage(errorMessage);
         setShowErrorMessage(true);
-          setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+        setError(errorMessage);
       }
-
-  };
+    };
+    
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
 };

@@ -148,24 +148,33 @@ const HomePage = () => {
 
     const handleDeleteAccount = async () => {
         try {
-            const options = {
-                apiPath: `/requestDeletion/${userId}/${userType}`,
-            };
-            const response = await NetworkService.put(options);
-            setSuccessMessage(response.message||"Delete Successfully!");
-            setShowSuccessMessage(true);
-            if (response.success) {
-                setSuccess("Account deletion requested successfully.");
-            } else {
-                setError(response.message || "Account deletion request failed.");
-            }
+          console.log(userId, userType);
+      
+          const options = {
+            apiPath: `/requestDeletion/${userId}/${userType}`,
+            useParams: userId,
+            userType,
+          };
+          const response = await NetworkService.put(options);
+          console.log(response);
+      
+          setSuccessMessage(response.message || "Delete Successfully!");
+          setShowSuccessMessage(true);
+      
+          if (response.success) {
+            setSuccess("Account deletion requested successfully.");
+          } else {
+            setError(response.message || "Account deletion request failed.");
+          }
         } catch (err) {
-            setErrorMessage(err.response?.data?.message || 'An error occurred');
-            setShowErrorMessage(true);
-            setError(err.response?.data?.message || "An error occurred while requesting account deletion.");
+          // Access the error message from the response data
+          const errorMessage = err.response?.data?.message || "An error occurred";
+          setErrorMessage(errorMessage);
+          setShowErrorMessage(true);
+          setError(errorMessage);
         }
-    };
-    
+      };
+      
     const toggleDrawer = (open) => () => {
         setDrawerOpen(open);
     };

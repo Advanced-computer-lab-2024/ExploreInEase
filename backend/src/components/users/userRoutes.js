@@ -282,7 +282,7 @@ router.get('/fetchAllUsersAndTourists/:_id', userController.fetchAllUsersAndTour
  *                 details:
  *                   type: string
  */
-router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents);
+// router.get('/upcomingEvents/:username', userController.getTouristUpcommingEvents);
 
 /**
  * @swagger

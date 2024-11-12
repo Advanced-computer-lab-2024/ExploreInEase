@@ -169,6 +169,15 @@ const addOrder = async (req, res) => {
         dateDelivered: null // Initially null, can be updated later
     };
 
+    const product = await checkoutRepository.getProductById(productIds[0]);
+    if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+    }
+    console.log("PRODUCT: ",product);
+    product.takenQuantity = product.takenQuantity + quantities[0];
+    console.log("Quantity: ",product.takenQuantity);
+    product.save();
+
     try {
         // Call the service function to add the order
         const newOrder = await checkoutService.addOrder(orderData);
@@ -353,7 +362,7 @@ const getAvailableProducts = async (req, res) => {
         console.log(products);
         const allActiveProducts = products.filter(product => product.isActive === true);
         let finalProducts = allActiveProducts;
-        if(type === 'admin' || type === 'seller'){
+        if(type === 'seller'){
             finalProducts = allActiveProducts.filter(product => product.sellerId.toString() === userId);
             console.log(finalProducts);
         }

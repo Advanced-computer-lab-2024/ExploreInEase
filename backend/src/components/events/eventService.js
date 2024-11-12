@@ -153,11 +153,20 @@ const getFilteredUpcomingActivities = async (filters) => {
   }
 };
 
-const getAllUpcomingEvents = async () => {
+const getAllUpcomingEvents = async (currency) => {
   try {
+
+    let rate = 1;
+    if(currency === 'euro') {
+      rate = 55;
+    } else if(currency === 'dollar') {
+      rate = 50;
+    }
+    else{
+      rate = 1;
+    }
     // Retrieve upcoming events from the repository
-    const { activities, itineraries, historicalPlaces } =
-      await eventRepository.getAllUpcomingEvents();
+    const { activities, itineraries, historicalPlaces } = await eventRepository.getAllUpcomingEvents();
 
       const filteredActivities = activities.filter(activity => activity.flag === 1);
       const filteredItineraries = itineraries.filter(itinerary => itinerary.flag === 1);
@@ -179,7 +188,7 @@ const getAllUpcomingEvents = async () => {
         date: activity.date,
         time: activity.time,
         location: loc, // Include location details (latitude, longitude)
-        budget: activity.price, // Handle budget or price depending on schema
+        budget: activity.price/rate, // Handle budget or price depending on schema
         category: category, // Assuming category is populated and has a 'name' field
         tags: activity.tags, // Include tags if applicable
         specialDiscounts: activity.specialDiscounts,
@@ -225,7 +234,7 @@ const getAllUpcomingEvents = async () => {
       timeline: itinerary.timeline,
       directions: itinerary.directions,
       language: itinerary.language,
-      price: itinerary.price,
+      price: itinerary.price/rate,
       dateAvailable: itinerary.dateTimeAvailable,
       accessibility: itinerary.accessibility,
       pickupLocation: itinerary.pickupLocation,
@@ -243,9 +252,9 @@ const getAllUpcomingEvents = async () => {
       long=place.location.longitude
       address= place.location.address
 
-      student=place.ticketPrice.student
-      native=place.ticketPrice.native
-      foreign=place.ticketPrice.foreign
+      student=place.ticketPrice.student/rate
+      native=place.ticketPrice.native/rate
+      foreign=place.ticketPrice.foreign/rate
 
       ticketPrice=[student,native,foreign]
 

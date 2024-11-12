@@ -32,7 +32,7 @@ class NetworkService {
   static async get(options) {
     const apiPath = this.transform(options.apiPath, options.urlParam);
     const params = this.prepareQuery(options.query);
-    
+    console.log(apiPath)
     try {
       const response = await axios.get(`${BASE_URL}${apiPath}`, {
         params: params,
