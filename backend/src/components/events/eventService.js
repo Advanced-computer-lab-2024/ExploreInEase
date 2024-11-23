@@ -1,8 +1,9 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const nodemailer = require('nodemailer');
-
 require('dotenv').config();
+
+
 
 
 const getUserEvents = async (_id, userType) => {

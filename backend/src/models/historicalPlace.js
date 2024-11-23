@@ -12,7 +12,6 @@ const historicalPlaceSchema = new Schema({
   },
   pictures: {
     type: [String], // Array of picture URLs or file paths
-    required: true,
   },
   location: {
     type: {

@@ -19,7 +19,6 @@ const itinerarySchema = new Schema({
     type: [String], // An array of strings representing the timeline for each activity
     required: true,
   },
-
   directions: {
     type: String, // Directions to follow during the itinerary
     required: true,

@@ -8,4 +8,24 @@ router.get('/availableQuantityAndSales', checkoutController.availableQuantityAnd
 
 
 
+
+//New ElNew code 
+
+
+// Route to create an order
+router.post('/createOrder', checkoutController.createOrder);
+
+
+// Route for viewing delivered orders
+router.get('/pastOrders/:touristId', checkoutController.viewDeliveredOrders);
+
+// Route for viewing pending orders
+router.get('/currentOrders/:touristId', checkoutController.viewPendingOrders);
+
+
+
+// Route for canceling an order
+router.delete('/cancelOrders', checkoutController.cancelOrder);
+
+
 module.exports = router;
