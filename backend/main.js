@@ -13,6 +13,7 @@ const { GridFSBucket, ObjectId } = require('mongodb'); // Ensure ObjectId is imp
 const multer = require('multer'); // Import multer for file uploads
 const Users = require('./src/models/user'); // Import Users model
 const path = require('path');
+const { authenticateToken } = require('./src/middlewares/authenticateToken');
 
 
 // Initialize Express app
@@ -49,6 +50,7 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .catch((error) => {
         console.error('Error connecting to MongoDB:', error);
     });
+
 
 // Upload Document Endpoint
 ACLapp.post('/uploadDocument/:userId', upload.single('file'), async (req, res) => {
@@ -135,7 +137,7 @@ ACLapp.get('/viewDocument/:fileId', (req, res) => {
 });
 
 ACLapp.use('/images', express.static(path.join(__dirname, 'src', 'components', 'images')));
-
+ACLapp.use(authenticateToken);
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);

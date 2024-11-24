@@ -25,9 +25,10 @@ const ProductCard = () => {
    const userType= localStorage.getItem('UserType');
 
   const location = useLocation();
-  const { User } = location.state || {};
+  const { User, AccessToken } = location.state || {};
   const userId = User ? User._id : adminIdd;
   console.log("User",userId);
+  console.log("AccessToken: ",AccessToken);
   const [products, setProducts] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -96,7 +97,14 @@ const ProductCard = () => {
 // Replace setProductData with setProducts in handleGetAllProduct
 const handleGetAllProduct = async () => {
   try {
-    const options = { apiPath: `/getAvailableProducts/${userId}`, urlParam: userId };
+    const options = { 
+      apiPath: `/getAvailableProducts/${userId}`, 
+      urlParam: userId,
+      headers: {
+        authorization: `${AccessToken}`,
+        "Content-Type": "application/json",
+    }
+    };
     const response = await NetworkService.get(options);
     console.log(response);
     

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const Tourist = require("./tourist");
+const Tourist = require("../models/tourist");
+const Products = require("../models/product");
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema(
@@ -11,8 +12,8 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["delivered", "pending", "canceled"],
-      default: "delivered",
+      enum: ["delivered", "pending"],
+      default: "pending",
       required: true,
     },
     productIds: [
@@ -22,16 +23,26 @@ const orderSchema = new Schema(
         required: true,
       },
     ],
-    quantities: [
-      {
-        type: Number,
-        min: [1, "Quantity cannot be less than 1"], //haga 2esmha min validation in mongoo
-        required: true,
-      },
-    ],
+    productsIdsQuantity: [{
+      id: { type: mongoose.Schema.Types.ObjectId, ref: 'Products' }, // Reference to Itinerary schema
+      quantity: { type: Number} // Ensure price is not negative
+    }],
+    price: {
+      type: Number,
+      required: [true, 'Price is required'],
+      min: 0                     // Price cannot be negative
+    },
     dateDelivered: {
       type: Date,
-      default: null, // Initially null; set when status is 'delivered' bas when delivered
+      
+    },
+    addressToBeDelivered: {
+      
+        street: { type: String },
+        city: { type: String},
+        country: { type: String},
+        zipCode: { type: String, match: [/^\d{5}$/, 'Invalid zip code'] }
+    
     },
   },
   {

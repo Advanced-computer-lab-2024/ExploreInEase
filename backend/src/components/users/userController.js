@@ -1,7 +1,7 @@
 const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
-
+const generateToken = require('../../middlewares/generateToken');
 
 
 // Controller to handle request for users with requestDeletion set to true
@@ -653,7 +653,7 @@ const registerUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
     if (!username || !password) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
@@ -663,20 +663,36 @@ const login = async (req, res) => {
     }
     try{
         const user = await userService.login(username, password);
-        if (!(user == "user") && !(user == "tourist")) {
+        if (!(user.role == "user") && !(user.role == "tourist")) {
             return res.status(404).json({ error: 'Invalid username or password' });
+        }
+        if(user.role == "user"){
+            if(!(user.user.type == role)){
+                return res.status(404).json({ error: 'Invalid Credentials' });
+            }
+        }
+        else{
+            if(!(role == "tourist")){
+                return res.status(404).json({ error: 'Invalid Credentials' });
+            }
         }
         let imageUrl;
         const allUser = await userRepository.getUserbyUsername(username);
-        if(user != 'tourist'){
+        if(user.role != 'tourist'){
             imageUrl = await userRepository.getUserProfilePicture(allUser._id);
             if(!allUser.termsAndConditions){
                 return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
             }
         }
-        console.log("User: ",allUser);
 
-        return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl});
+        const userToken = {
+            id: allUser._id,
+            type: role,
+        };
+
+        const accessToken = generateToken(userToken);
+
+        return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl, accessToken: accessToken});
     }catch(error){
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }

@@ -149,6 +149,20 @@ const UsersSchema = new Schema({
         type: Boolean,
         default: false
     },
+    adminPromoCodes: [{
+        type: Number,
+        default: '',
+    }],
+    promoCodes: [{
+        userId: {
+            type: Number,
+            required: true
+        },
+        promoCode: {
+            type: Number,
+            required: true
+        },
+    }],
     
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields

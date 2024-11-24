@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const checkTouristRole  = require('../../middlewares/checkTouristRole');
 const checkoutController = require('../checkouts/checkoutController');
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -536,7 +537,7 @@ const upload = multer({ storage });
  */
 
 router.post('/addProduct/:userId', checkoutController.addProduct);
-router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProducts);
+router.get('/getAvailableProducts/:userId', checkTouristRole ,checkoutController.getAvailableProducts);
 router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange);
 router.put('/editProducts/:userId/:productId', checkoutController.updateProduct);
 router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSortedByRatings);

@@ -36,6 +36,7 @@ const Login = () => {
       body: {
         username: formData.email,
         password: formData.password,
+        role: formData.role,
       },
     };
 
@@ -48,7 +49,7 @@ const Login = () => {
       if (response.message === 'Logged in Successfully') {
         console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-        navigateToHomePage(response.user, response.imageUrl);
+        navigateToHomePage(response.user, response.imageUrl, response.accessToken);
       }
     } catch (error) {
       setError(
@@ -59,7 +60,7 @@ const Login = () => {
     }
   };
 
-  const navigateToHomePage = (user, imageUrl) => {
+  const navigateToHomePage = (user, imageUrl, accessToken) => {
     localStorage.setItem('UserId',user._id);
     localStorage.setItem('UserType',user.type);
     switch (formData.role) {
@@ -79,7 +80,7 @@ const Login = () => {
         navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
-        navigate('/TouristHomePage', { state: { tourist: user } });
+        navigate('/TouristHomePage', { state: { tourist: user, accessToken: accessToken } });
     }
   };
 

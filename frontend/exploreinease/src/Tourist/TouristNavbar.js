@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import jwtDecode from "jwt-decode";
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -22,17 +23,20 @@ import { Alert } from '@mui/material';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import { Delete } from '@mui/icons-material';
+import { Delete, Token } from '@mui/icons-material';
 import axios from 'axios';
 const TouristNavbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { tourist, imageUrl } = location.state || {};
+    const { tourist, imageUrl, accessToken } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [currency, setCurrency] = useState("EGP"); // default currency
     console.log(currency);
+    console.log("Token: ",accessToken);
+    const decodedToken = accessToken ? jwtDecode(accessToken) : null;
+    console.log("Decoded Tokem: ",decodedToken);
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -119,6 +123,10 @@ const TouristNavbar = () => {
             try {
                 const options = {
                   apiPath: `/getAvailableProducts/${userId}`,
+                  headers: {
+                    authorization: `${accessToken}`,
+                    "Content-Type": "application/json",
+                },
                 };
                 
                 const response = await NetworkService.get(options);
@@ -126,7 +134,7 @@ const TouristNavbar = () => {
                 console.log(response);
                 const Product=response.Products;
                 const Type='tourist';
-                navigate(`/viewProduct`,{ state: { Product, Type ,User:tourist} });          
+                navigate(`/viewProduct`,{ state: { Product, Type ,User:tourist, AccessToken: accessToken} });          
               } catch (err) {
                 if (err.response) {
                     console.log(err.message);

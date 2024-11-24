@@ -423,7 +423,7 @@ const login = async (username, password) => {
             if (!isMatch) {
                 throw new Error('Incorrect username or password');
             }
-            return "user";
+            return {user: user, role: "user"};
         }
         else{
             if(tourist !== null){
@@ -432,7 +432,7 @@ const login = async (username, password) => {
                     throw new Error('Incorrect username or password');
                 }
                 console.log("Tourist: ",tourist);
-                return "tourist";
+                return {user: tourist, role: "tourist"};
             }
             else{
                 throw new Error('Incorrect username or password');

@@ -106,7 +106,17 @@ const TouristSchema = new Schema({
     photo:{
         type: String,
         default: ""
-    }
+    },
+    promoCodes: [{
+        userId: {
+            type: Number,
+            required: true
+        },
+        promoCode: {
+            type: Number,
+            required: true
+        },
+    }],
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"
