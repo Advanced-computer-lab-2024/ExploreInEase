@@ -13,7 +13,12 @@ router.get('/availableQuantityAndSales', checkoutController.availableQuantityAnd
 
 
 // Route to create an order
-router.post('/createOrder', checkoutController.createOrder);
+router.post('/createOrderWalletOrCod', checkoutController.createOrderWalletOrCod);
+
+
+// Route to create an order with card payment
+router.post('/createOrderCard', checkoutController.createOrderWithCard);
+
 
 
 // Route for viewing delivered orders
@@ -26,6 +31,9 @@ router.get('/currentOrders/:touristId', checkoutController.viewPendingOrders);
 
 // Route for canceling an order
 router.delete('/cancelOrders', checkoutController.cancelOrder);
+
+
+
 
 
 module.exports = router;

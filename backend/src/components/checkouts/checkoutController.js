@@ -45,19 +45,40 @@ const availableQuantityAndSales = async (req, res) => {
 //New ElNew code 
 
 
-// Controller function to handle order creation
-const createOrder = async (req, res) => {
-    const { touristId, productsIdsQuantity, price, addressToBeDelivered } = req.body;
 
-    if (!touristId || !Array.isArray(productsIdsQuantity) || productsIdsQuantity.length === 0 || price === undefined) {
+// Controller function to handle order creation with wallet or COD payment
+const createOrderWalletOrCod = async (req, res) => {
+    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType } = req.body;
+
+    if (
+        !touristId ||
+        !Array.isArray(productsIdsQuantity) ||
+        productsIdsQuantity.length === 0 ||
+        price === undefined ||
+        !paymentType
+    ) {
         return res.status(400).json({
             success: false,
-            message: 'Tourist ID, products, and price are required.',
+            message: 'Tourist ID, products, price, and payment type are required.',
+        });
+    }
+
+    const validPaymentTypes = ['wallet', 'COD'];
+    if (!validPaymentTypes.includes(paymentType)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid payment type. Must be "wallet" or "COD".',
         });
     }
 
     try {
-        const order = await checkoutService.createOrder({ touristId, productsIdsQuantity, price, addressToBeDelivered });
+        const order = await checkoutService.createOrderWalletOrCod({
+            touristId,
+            productsIdsQuantity,
+            price,
+            addressToBeDelivered,
+            paymentType,
+        });
         return res.status(201).json({
             success: true,
             data: order,
@@ -70,6 +91,56 @@ const createOrder = async (req, res) => {
     }
 };
 
+
+
+const createOrderWithCard = async (req, res) => {
+    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType, paymentMethodId } = req.body;
+
+    // Validate input
+    if (
+        !touristId ||
+        !Array.isArray(productsIdsQuantity) ||
+        productsIdsQuantity.length === 0 ||
+        price === undefined ||
+        !paymentType ||
+        !paymentMethodId
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: 'Tourist ID, products, price, payment type, and payment method ID are required.',
+        });
+    }
+
+    if (paymentType !== 'card') {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid payment type. Must be "card".',
+        });
+    }
+
+    try {
+        // Call the service layer
+        const { order, paymentIntentId } = await checkoutService.createOrderWithCard({
+            touristId,
+            productsIdsQuantity,
+            price,
+            addressToBeDelivered,
+            paymentType,
+            paymentMethodId,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: 'Payment successful and order created.',
+            data: { order, paymentIntentId },
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
 
 // Controller for viewing delivered orders associated with a tourist
 const viewDeliveredOrders = async (req, res) => {
@@ -140,7 +211,7 @@ const cancelOrder = async (req, res) => {
         await checkoutService.cancelOrder(orderId, touristId);
         return res.status(200).json({
             success: true,
-            message: 'Order canceled successfully, and wallet refunded.',
+            message: 'Order canceled successfully.',
         });
     } catch (error) {
         return res.status(500).json({
@@ -155,7 +226,8 @@ const cancelOrder = async (req, res) => {
 
 module.exports = {
     availableQuantityAndSales,
-    createOrder,
+    createOrderWalletOrCod,
+    createOrderWithCard,
     viewDeliveredOrders,
     viewPendingOrders,
     cancelOrder

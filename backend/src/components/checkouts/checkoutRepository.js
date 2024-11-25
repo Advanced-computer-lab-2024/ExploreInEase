@@ -15,7 +15,7 @@ const getProductById = async (productId) => {
 const createOrder = async (orderData) => {
     const order = new Order(orderData);
     return await order.save();
-}
+};
 
 
 const findOrdersByStatusAndTouristId = async (status, touristId) => {

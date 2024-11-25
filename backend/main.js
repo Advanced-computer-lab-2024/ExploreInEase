@@ -6,6 +6,7 @@ const userRoutes = require('./src/components/users/userRoutes');
 const eventRoutes = require('./src/components/events/eventRoutes');
 const checkoutRoutes = require('./src/components/checkouts/checkoutsRoutes');
 const setupSwaggerDocs = require('../backend/src/swagger/swagger');
+const { authenticateToken } = require('../backend/src/middlewares/authenticateToken');
  
 
 // Express app
@@ -19,6 +20,10 @@ ACLapp.use((req, res, next) => {
     console.log(req.path, req.method);
     next();
 });
+
+
+// ACLapp.use(authenticateToken);
+
 
 // Routes
 ACLapp.use('/api', userRoutes);

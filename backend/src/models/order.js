@@ -44,6 +44,11 @@ const orderSchema = new Schema(
         zipCode: { type: String, match: [/^\d{5}$/, 'Invalid zip code'] }
     
     },
+    paymentType: {
+      type: String,
+      enum: ["wallet", "COD", "card"],
+      required: true,
+    },
   },
   {
     timestamps: true, // bey7ot adds createdAt and updatedAt fields beta3 el order

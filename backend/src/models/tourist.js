@@ -58,10 +58,12 @@ const TouristSchema = new Schema({
         id: { type: mongoose.Schema.Types.ObjectId, ref: 'Transportation' }, // Reference to Transportation schema
         pricePaid: { type: Number,min: 0 }
     }],
-    bookmark: {
-        type: String, // You can change this to a specific type based on the data you expect
-        default: ''
-    },
+    bookmark: [
+        {
+            id: [{type: mongoose.Schema.Types.ObjectId}],
+            type: [{type: String}]
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now, // Auto-sets to the current date/time
