@@ -435,6 +435,69 @@ const getAllEvents= async(req, res) => {
   }
 }
 
+
+
+//New ElNew code 
+
+const bookEventWithCard = async (req, res) => {
+  const {
+    userType,
+    touristId,
+    eventType,
+    eventID,
+    ticketType,
+    currency,
+    activityPrice,
+    cardNumber,
+    expMonth,
+    expYear,
+    cvc,
+  } = req.body;
+
+  try {
+    if (userType !== "tourist") {
+      throw new Error("User type must be tourist");
+    }
+    if (
+      !touristId ||
+      !userType ||
+      !eventType ||
+      !eventID ||
+      !cardNumber ||
+      !expMonth ||
+      !expYear ||
+      !cvc
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All attributes are required in the request body",
+      });
+    }
+
+    const result = await eventService.addEventToTouristWithCard(
+      userType,touristId,eventType,eventID,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Event booked successfully, Payment successful and Email sent",
+      data: result.tourist,
+      paymentStatus: result.paymentStatus,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+
+
+
+
 module.exports = {
     getUserEvents,
     createCategory,
@@ -459,7 +522,8 @@ module.exports = {
     flightOffers,
     bookFlight,
     bookHotel,
-    getAllEvents
+    getAllEvents,
+    bookEventWithCard
 
   };
   

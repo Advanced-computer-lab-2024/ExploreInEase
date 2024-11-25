@@ -312,4 +312,15 @@ router.post('/bookTransportation', eventController.bookTransportation);
 
 router.get('/getAllEvents', eventController.getAllEvents);
 
+
+
+
+
+//New ElNew code 
+
+
+router.post('/bookEventWithCard', eventController.bookEventWithCard);
+
+
+
 module.exports = router;

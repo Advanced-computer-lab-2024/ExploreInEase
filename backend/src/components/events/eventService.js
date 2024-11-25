@@ -453,6 +453,31 @@ const  getAllEvents=async()=> {
     historicalPlaces
   };
 }
+
+
+
+
+//New ElNew code 
+
+
+const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc) => {
+  return await eventRepository.bookEventWithCard(
+    touristId,
+    eventType,
+    eventId,
+    ticketType,
+    currency,
+    activityPrice,
+    cardNumber,
+    expMonth,
+    expYear,
+    cvc
+  );
+};
+
+
+
+
 module.exports = {
   getUserEvents,
   createCategory,
@@ -477,6 +502,7 @@ module.exports = {
   flightOffers,
   flightBooking,
   bookingHotel,
-  getAllEvents
+  getAllEvents,
+  addEventToTouristWithCard
 };
 
