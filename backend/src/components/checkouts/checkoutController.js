@@ -1,5 +1,7 @@
 // checkoutController.js
 const checkoutService = require('../checkouts/checkoutService');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Tourist = require('../../models/tourist');
 
 // Function to handle the API request
 const availableQuantityAndSales = async (req, res) => {
@@ -93,54 +95,119 @@ const createOrderWalletOrCod = async (req, res) => {
 
 
 
-const createOrderWithCard = async (req, res) => {
-    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType, paymentMethodId } = req.body;
 
-    // Validate input
+
+
+const createOrderWithCard = async (req, res) => {
+    const { 
+        touristId, 
+        productsIdsQuantity, 
+        price, 
+        addressToBeDelivered, 
+        cardNumber, 
+        expMonth, 
+        expYear, 
+        cvc,
+        currency 
+    } = req.body;
+
     if (
-        !touristId ||
-        !Array.isArray(productsIdsQuantity) ||
-        productsIdsQuantity.length === 0 ||
-        price === undefined ||
-        !paymentType ||
-        !paymentMethodId
+        !touristId || 
+        !Array.isArray(productsIdsQuantity) || 
+        productsIdsQuantity.length === 0 || 
+        !price || 
+        !cardNumber || 
+        !expMonth || 
+        !expYear || 
+        !cvc    ||
+        !addressToBeDelivered ||
+        !currency
+
     ) {
         return res.status(400).json({
             success: false,
-            message: 'Tourist ID, products, price, payment type, and payment method ID are required.',
+            message: 'Missing required fields.',
         });
     }
+    
 
-    if (paymentType !== 'card') {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid payment type. Must be "card".',
-        });
-    }
+
+    let updatedCurrency;
+    switch (currency) {
+        case 'euro':
+          updatedCurrency = "EUR";
+          break;
+        case 'dollar':
+            updatedCurrency = "USD";
+          break;
+        case 'EGP':
+            updatedCurrency = "EGP";
+          break;
+        default:
+          throw new Error('Invalid currency');
+      }
+
+
 
     try {
-        // Call the service layer
-        const { order, paymentIntentId } = await checkoutService.createOrderWithCard({
+        // Find tourist information
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tourist not found.',
+            });
+        }
+
+        // Create a Payment Method
+        const paymentMethod = await stripe.paymentMethods.create({
+            type: 'card',
+            card: {
+                number: cardNumber,
+                exp_month: expMonth,
+                exp_year: expYear,
+                cvc: cvc,
+            },
+        });
+
+        // Create a Payment Intent with a custom description
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(price * 100), // Convert dollars to cents
+            currency: updatedCurrency,
+            payment_method: paymentMethod.id,
+            confirm: true, // Automatically confirms the payment
+            description: `Payment for order by Tourist with username: ${tourist.username}`, // Custom description
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: 'never', // Disallow redirect-based payment methods
+            },
+        });
+
+        // Payment successful, create the order
+        const order = await checkoutService.createOrderWithCard({
             touristId,
             productsIdsQuantity,
             price,
             addressToBeDelivered,
-            paymentType,
-            paymentMethodId,
+            paymentType: 'card',
         });
 
         return res.status(201).json({
             success: true,
-            message: 'Payment successful and order created.',
-            data: { order, paymentIntentId },
+            data: order,
+            paymentStatus: paymentIntent.status,
         });
     } catch (error) {
         return res.status(400).json({
             success: false,
-            message: error.message,
+            message: `Stripe Payment Failed: ${error.message}`,
         });
     }
 };
+
+
+
+
 
 // Controller for viewing delivered orders associated with a tourist
 const viewDeliveredOrders = async (req, res) => {

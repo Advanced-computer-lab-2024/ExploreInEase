@@ -110,15 +110,12 @@ const TouristSchema = new Schema({
         default: ""
     },
     promoCodes: [{
-        userId: {
-            type: Number,
-            required: true
-        },
-        promoCode: {
-            type: Number,
-            required: true
-        },
+        type: String,
     }],
+    promoCodeFlag: {
+        type: Boolean,
+        default: false
+    },
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"

@@ -83,46 +83,25 @@ const createOrderWalletOrCod = async ({ touristId, productsIdsQuantity, price, a
 
 
 
-const createOrderWithCard = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType, paymentMethodId }) => {
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-    // Validate the tourist ID
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-        throw new Error('Tourist not found.');
-    }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(price * 100), // Amount in cents
-        currency: 'egp', // Replace with your desired currency
-        payment_method: paymentMethodId, // The payment method
-        confirm: true, // Confirm the payment immediately
-        customer: 'cus_RHFDIdaFc7jKJU', // Provide the customer ID
-        return_url: 'https://yourwebsite.com/payment-complete', // Replace with your actual return URL
-        description: `Payment for order by Tourist ID: ${touristId}`,
-        metadata: { touristId, products: JSON.stringify(productsIdsQuantity) },
-    });
-    
-    
-    
 
-    // Step 2: Check payment status
-    if (paymentIntent.status !== 'succeeded') {
-        throw new Error(`Stripe Payment Failed: ${paymentIntent.status}`);
-    }
 
-    // Step 3: Save the order in the database
+// Service to create an order with card payment
+const createOrderWithCard = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType }) => {
+    // Create the order
     const order = await checkoutRepository.createOrder({
         touristId,
-        productIds: productsIdsQuantity.map((product) => product.id),
+        productIds: productsIdsQuantity.map(product => product.id),
         productsIdsQuantity,
         price,
         addressToBeDelivered,
         paymentType,
     });
 
-    return { order, paymentIntentId: paymentIntent.id };
+    return order;
 };
+
 
 
 // Service for retrieving orders by status and touristId
