@@ -2,6 +2,7 @@ const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const generateToken = require('../../middlewares/generateToken');
+const Tourist = require('../../models/tourist');
 
 
 // Controller to handle request for users with requestDeletion set to true
@@ -618,10 +619,10 @@ const registerUser = async (req, res) => {
         return res.status(409).json({ message: "Username already exists" });
     }
 
-    const emailExists = await userRepository.checkUserExistsByEmail(email);
-    if (emailExists) {
-        return res.status(409).json({ message: "Email already exists" });
-    }
+    // const emailExists = await userRepository.checkUserExistsByEmail(email);
+    // if (emailExists) {
+    //     return res.status(409).json({ message: "Email already exists" });
+    // }
 
     if(type == 'tourist') {
         if (!email||!username||!password||!mobileNum||!nation||!dob||!profession) {
@@ -699,7 +700,100 @@ const login = async (req, res) => {
 }
 
 
+
+
+
+const forgetPassword = async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
+
+    try{
+        const user = await userService.forgetPassword(email);
+        if (!user) {
+            return res.status(404).json({ error: 'Invalid email' });
+        }
+        return res.status(200).json({message: "Email sent successfully", status: user.status, response: user.response});
+    }catch(error){
+        return res.status(500).json({ error: 'An error occurred while logging in the user' });
+    }
+}
+
+const creatingPromoCode = async (req, res) => {
+    try{
+        const {promoCode} = req.body;
+        const promoCodeResult = await userService.creatingPromoCode(promoCode);
+        return res.status(200).json({message: "Promo code created successfully", promoCode: promoCodeResult});
+    }catch(error){
+        return res.status(500).json({ error: 'An error occurred while logging in the user' });
+    }
+}
+
+const updatePromoCode = async (req, res) => {
+    try {
+        // Fetch all tourists
+        const tourists = await Tourist.find();
+
+        // Get today's date (month and day only, ignoring year)
+        const today = new Date();
+        const todayMonth = today.getMonth() + 1; // JavaScript months are 0-based
+        const todayDay = today.getDate();
+
+        // Loop through tourists to check if it's their birthday today
+        const birthdayTourists = await Promise.all(tourists.map(async (tourist) => {
+            const birthDate = new Date(tourist.dob);
+            const isBirthdayToday = birthDate.getMonth() + 1 === todayMonth && birthDate.getDate() === todayDay;
+
+            // If it's their birthday, set the flag to true, otherwise false
+            if (isBirthdayToday && !tourist.promoCodeFlag) {
+                // Update the tourist's flag and save
+                tourist.promoCodeFlag = true;
+                await tourist.save();
+
+                // Return the tourist's ID if the flag is true (birthday today)
+                return tourist._id;
+            } else if (!isBirthdayToday && tourist.promoCodeFlag) {
+                // If not their birthday, and the flag was previously true, reset it to false
+                tourist.promoCodeFlag = false;
+                await tourist.save();
+            }
+            // If it's not the tourist's birthday today and the flag is already false, return null
+            return null;
+        }));
+
+        // Filter out nulls (tourists whose birthday isn't today or whose flag was already true)
+        const birthdayTouristIds = birthdayTourists.filter(id => id !== null);
+
+        console.log("Birthday Tourists: ", birthdayTouristIds); // Log the IDs for debugging
+
+        if (birthdayTouristIds.length === 0) {
+            return res.status(404).json({
+                message: "No tourists with birthdays today or all have already received a promo code",
+            });
+        }
+
+        // Pass the tourist IDs to update the promo code
+        const promoCodeResult = await userService.updatePromoCode(birthdayTouristIds);
+
+        return res.status(200).json({
+            message: "Promo code updated successfully",
+            promoCode: promoCodeResult,
+        });
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return res.status(500).json({
+            error: 'An error occurred while updating the promo code',
+        });
+    }
+};
+
+
+
 module.exports = {
+    updatePromoCode,
+    creatingPromoCode,
+    forgetPassword,
     changePassword,
     uploadImage,
     acceptTerms,

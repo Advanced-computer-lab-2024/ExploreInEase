@@ -137,7 +137,7 @@ ACLapp.get('/viewDocument/:fileId', (req, res) => {
 });
 
 ACLapp.use('/images', express.static(path.join(__dirname, 'src', 'components', 'images')));
-ACLapp.use(authenticateToken);
+// ACLapp.use(authenticateToken);
 ACLapp.use(userRoutes);
 ACLapp.use(eventRoutes);
 ACLapp.use(checkoutRoutes);

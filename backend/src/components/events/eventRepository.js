@@ -842,7 +842,19 @@ const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
   return updatedItinerary; 
 };
 
+
+
+const getPublisher = async (userId) => {
+  return await Users.findById(userId);
+};
+
+const getTouist = async (userId) => {
+  return await Tourist.findById(userId);
+};
+
 module.exports = {
+  getTouist,
+  getPublisher,
   updateItineraryActivation,
   getHistoricalTagDetails,
   createCategory,

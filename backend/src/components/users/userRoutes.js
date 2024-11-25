@@ -1027,6 +1027,12 @@ router.post('/login', userController.login);
 
 router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
 
+
+
+router.post('/forgetPassword', userController.forgetPassword);
+router.post('/creatingPromoCode', userController.creatingPromoCode);
+router.put('/updatePromoCode', userController.updatePromoCode);
+
 module.exports = {
     router,
     setDBConnection,

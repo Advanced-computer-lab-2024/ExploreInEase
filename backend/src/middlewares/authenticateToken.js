@@ -4,7 +4,13 @@ const dotenv = require('dotenv');
 require('dotenv').config({ path: 'src/.env' });
 
 const authenticateToken = (req, res, next) => {
-    if (req.path === '/register' || req.path === '/login' || req.path === '/') {
+    if (req.path === '/register/tourist' 
+        || req.path === '/register/tourguide' 
+        || req.path === '/register/advertiser' 
+        || req.path === '/register/seller'
+        || req.path === '/login' 
+        || req.path === '/') 
+    {
         return next();
     }
     const authHeader = req.headers['authorization'];

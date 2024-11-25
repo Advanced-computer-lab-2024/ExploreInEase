@@ -18,16 +18,7 @@ const UsersSchema = new Schema({
     },
     email: {
         type: String,
-        required: function() {
-            // Required for specific types
-            return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
-        },
-        unique: function() {
-            // Required for specific types
-            return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
-        }
-        
-    },
+    }, 
     rating: {
         type: Number,
         min: 0,
@@ -149,18 +140,13 @@ const UsersSchema = new Schema({
         type: Boolean,
         default: false
     },
-    adminPromoCodes: [{
-        type: Number,
-        default: '',
-    }],
     promoCodes: [{
         userId: {
-            type: Number,
-            required: true
+            type: mongoose.Schema.Types.ObjectId,
         },
         promoCode: {
-            type: Number,
-            required: true
+            type: String,
+            ref: 'PromoCodes'
         },
     }],
     

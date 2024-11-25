@@ -537,7 +537,7 @@ const upload = multer({ storage });
  */
 
 router.post('/addProduct/:userId', checkoutController.addProduct);
-router.get('/getAvailableProducts/:userId', checkTouristRole ,checkoutController.getAvailableProducts);
+router.get('/getAvailableProducts/:userId', checkoutController.getAvailableProducts);
 router.get('/filterProducts/:userId', checkoutController.getProductsByPriceRange);
 router.put('/editProducts/:userId/:productId', checkoutController.updateProduct);
 router.get('/sortProducts/:userId', checkoutController.getAvailableProductsSortedByRatings);
@@ -550,6 +550,8 @@ router.post('/reviewProduct/:touristId', checkoutController.reviewProduct);
 router.post('/addOrder', checkoutController.addOrder);
 router.get('/getOrders/:userId', checkoutController.getOrders);
 router.put('/editOrder/:userId', checkoutController.updateOrder);
+
+router.get('/allNotifications/:userId/:type', checkoutController.getAllNotifications);
 
 router.post('/product/uploadImage/:productId/:userId', upload.single('image'), checkoutController.uploadImage);
 router.get('/getArchivedProducts/:userId', checkoutController.getArchivedProducts);

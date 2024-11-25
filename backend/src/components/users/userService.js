@@ -5,6 +5,7 @@ const HistoricalPlace = require('../../models/historicalPlace');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 
 const getUserById = async (id) => {
@@ -647,7 +648,81 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+const forgetPassword = async (email) => {
+    const user = await userRepository.findUserByEmail(email);
+    if (!user) {
+        return { status: 400, response: { message: "User not found" } };
+    }
+
+    // Generate an OTP and send it to the user's email
+    const otp = Math.floor(10000000 + Math.random() * 90000000);
+    console.log(otp);
+    // Send the OTP to the user's email
+    await sendEmail(user.username, user.email, `Your OTP is: ${otp}`);
+    console.log("Email sent");
+    // Update the user's OTP in the database
+    await userRepository.updateUserOtp(email, otp);
+
+    return { status: 200, response: { message: "User found", user: user } };
+};
+
+const sendEmail = async (username, email, message) => {
+    console.log(username);
+    console.log(email);
+    console.log(message);
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL2_USER,
+            pass: process.env.EMAIL2_PASS
+        }
+    });
+
+    console.log("Transporter created");
+    
+    const mailOptions = {
+        from: process.env.EMAIL2_USER,
+        to: email,
+        subject: 'Your Account Password',
+        text: `Hello ${username},\n\n ${message}\n\nBest regards,\n${process.env.EMAIL2_USER}`
+    };
+
+    await transporter.sendMail(mailOptions);
+}
+
+const creatingPromoCode = async (promoCode) => {
+    console.log(promoCode);
+    const promoCodeResult = await userRepository.savePromoCode(promoCode);
+    return promoCodeResult;
+}
+
+const updatePromoCode = async (birthdayTourists) => {
+    const allPromoCodes = await userRepository.fetchAllPromoCodes(); // Fetch users with adminPromoCodes
+    console.log("All PromoCodes: ",allPromoCodes);
+
+    if (!allPromoCodes || allPromoCodes.length === 0) {
+        throw new Error('No promo codes available in adminPromoCodes.');
+    }
+
+    // Randomly assign a promo code for each birthday tourist
+    const assignedPromoCodes = birthdayTourists.map(() => {
+        const randomIndex = Math.floor(Math.random() * allPromoCodes.length);
+        return allPromoCodes[randomIndex]; // Randomly select a promo code
+    });
+
+    console.log("Assigned: ", assignedPromoCodes);
+
+    // Update promo codes for the birthday tourists
+    const promoCodeResult = await userRepository.updatePromoCode(birthdayTourists, assignedPromoCodes);
+    return promoCodeResult;
+};
+
+
 module.exports = {
+    updatePromoCode,
+    creatingPromoCode,
+    forgetPassword,
     changePassword,
     uploadImage,
     acceptTerms,

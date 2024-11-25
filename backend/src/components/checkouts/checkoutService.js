@@ -222,7 +222,13 @@ const updateOrder = async (orderId, updatedOrderData) => {
 };
 
 
+
+
+const getAllNotifications = async (id, type) => {
+    return await checkoutRepository.getAllNotifications(id, type);
+}
 module.exports = {
+    getAllNotifications,
     uploadImage,
     archiveProduct,
     calculateSalesAndAvailability,

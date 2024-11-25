@@ -5,6 +5,7 @@ const eventController = require('../events/eventController');
 
 router.put('/inappropriate', eventController.updateEventFlagController);
 
+
 router.get('/getAllEvents', eventController.getAllEvents);
 /**
  * @swagger
@@ -2627,5 +2628,8 @@ router.post('/bookTransportation', eventController.bookTransportation);
 
 router.put('/updateItineraryActivation/:itineraryId/:isActivated/:userId/:userType', eventController.updateItineraryActivation);
 
+
+
+router.get('/notifyUpcomingEvents/:userId', eventController.notifyUpcomingEvents);
 
 module.exports = router;

@@ -1,6 +1,8 @@
 const Product = require('../../models/product'); 
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const Notification = require('../../models/notification');
+const PromoCode = require('../../models/promoCode');
 const Order = require('../../models/order');
 const path = require('path');
 const fs = require('fs');
@@ -326,7 +328,39 @@ const archiveProduct = async (product) => {
     await product.save();
 };
 
+const addNotification = async (notificationData) => {
+    const notification = new Notification(notificationData);
+    const newNotification = await notification.save();
+    return newNotification;
+};
+
+
+
+
+const getAllNotifications = async (id, type) => {
+
+    try {
+        const allnotifications = await Notification.find();
+        console.log(allnotifications);
+        const notifications = await Notification.find({ 'user.user_id': id, 'user.user_type': type });
+        return notifications;
+    } catch (error) {
+        throw new Error(`Error retrieving notifications: ${error.message}`);
+    }
+};
+
+const getPromoCode = async (promoCode) => {
+    try {
+        const promoCode = await PromoCode.findOne({ promoCodes: promoCode });
+        return promoCode.promoCodes;
+    } catch (error) {
+        throw new Error(`Error retrieving notifications: ${error.message}`);
+    }
+};
+
 module.exports = {
+    getAllNotifications,
+    addNotification,
     getAvailableProductsSortedByRatings,
     addProduct,
     getAllAvailableProducts,
