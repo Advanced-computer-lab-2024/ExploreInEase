@@ -2,6 +2,7 @@ const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const HistoricalPlace = require('../../models/historicalPlace');
 const nodemailer = require('nodemailer');
+const path = require('path');
 require('dotenv').config({ path: "src/.env" });
 
 
@@ -346,6 +347,23 @@ const addActivity = async ({ name, date, time, location, price, category, tags, 
 
   // Call the repository to add the activity to the database
   const createdActivity = await eventRepository.createActivity(newActivity);
+
+  const validExtensions = ['.jpg', '.jpeg', '.png'];
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+
+  if (!validExtensions.includes(fileExtension)) {
+      throw new Error('Only image files are allowed (jpg, jpeg, png).');
+  }
+
+  const fileName = `${createdActivity._id}-${Date.now()}${fileExtension}`;
+  const fileBuffer = file.buffer;
+
+  await eventRepository.uploadImage(createdActivity._id, fileName, fileBuffer); 
+  const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+  await eventRepository.updateActivityImage(createdActivity._id, fileName);
+  
+
   
   return createdActivity;
 };
@@ -379,7 +397,25 @@ const getItineraryById = async (id) => {
 };
 
 const createItinerary = async (itineraryData) => {
-  return await eventRepository.createItinerary(itineraryData);
+
+  const itinerary = await eventRepository.createItinerary(itineraryData);
+
+  const validExtensions = ['.jpg', '.jpeg', '.png'];
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+
+  if (!validExtensions.includes(fileExtension)) {
+      throw new Error('Only image files are allowed (jpg, jpeg, png).');
+  }
+
+  const fileName = `${itinerary._id}-${Date.now()}${fileExtension}`;
+  const fileBuffer = file.buffer;
+
+  await eventRepository.uploadImage(itinerary._id, fileName, fileBuffer); 
+  const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+  await eventRepository.updateItineraryImage(itinerary._id, fileName);
+
+  return itinerary ;
 };
 
 const updateItinerary = async (_id, itineraryData) => {
@@ -434,6 +470,21 @@ const createHistoricalPlace = async (data) => {
   // Create a new historical place
   const newPlace = new HistoricalPlace(data);
   const savedPlace = await newPlace.save();
+
+  const validExtensions = ['.jpg', '.jpeg', '.png'];
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+
+  if (!validExtensions.includes(fileExtension)) {
+      throw new Error('Only image files are allowed (jpg, jpeg, png).');
+  }
+
+  const fileName = `${savedPlace._id}-${Date.now()}${fileExtension}`;
+  const fileBuffer = file.buffer;
+
+  await eventRepository.uploadImage(savedPlace._id, fileName, fileBuffer); 
+  const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+  await eventRepository.updateHistorialPlaceImage(savedPlace._id, fileName);
 
   return { status: 200, response: { message: "Historical Place created successfully", savedPlace } };
 };
