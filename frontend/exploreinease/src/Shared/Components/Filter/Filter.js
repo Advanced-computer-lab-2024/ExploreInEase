@@ -39,12 +39,12 @@ const roleFields = {
   Itineraries: ['budget', 'date', 'preferences', 'language'],
 };
 
-const Filter = () => {
+const Filter = ({eventsG=[],typeeG=''}) => {
   const location = useLocation();
-  const { events,userId } = location.state || {};
-  console.log("userId",userId);
+  const { events,userId=null,typee } = location.state || {};
+  // console.log("userId",userId);
   
-  const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
+  const itemList = events?.flat() ||eventsG?.flat()|| []; // Flatten the array and ensure it's initialized
   console.log(events);
   console.log(itemList);
   // console.log("User:",User);
@@ -550,7 +550,7 @@ const Filter = () => {
   //   });
   // }, [filteredData, historicalTags]);
 // getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
-console.log("filteredData",filteredData);
+// console.log("filteredData",filteredData);
 
   return (
 
@@ -708,7 +708,7 @@ console.log("filteredData",filteredData);
               <Card    
                style={{
                  width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
-                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '340px',
+                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '360px',
                 }}>
                 <CardContent>
                   <Typography variant="h5" component="div">
@@ -757,19 +757,22 @@ console.log("filteredData",filteredData);
                           {item.tags ? renderTags(item.tags) : 'No tags available'}
                       </Typography>                      </>
                   )}
-                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                 <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
-                 Book a ticket 
-                  </Button> 
-                  <Button
+                      {typee=="tourist" && (<>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                       <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
+                         Book a ticket 
+                        </Button> 
+                      <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleShareClick(item)}
                       style={{ marginLeft: '10px' }}
-                    >
+                     >
                       Share
                     </Button>
                    </div>
+                </>)}
+
                    {shareDialogOpen && (
                     <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
                   )}

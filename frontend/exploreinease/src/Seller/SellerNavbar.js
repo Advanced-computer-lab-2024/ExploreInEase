@@ -85,7 +85,7 @@ const HomePage = () => {
       if (action === 'changePassword') {
          navigate('/change-password', { state: { userId: userId } });;
       } else if (action === 'logout') {
-         navigate('/login');
+         navigate('/');
       }
    };
 

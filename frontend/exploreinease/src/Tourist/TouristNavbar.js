@@ -95,7 +95,7 @@ const TouristNavbar = () => {
       if (action === 'changePassword') {
          navigate('/change-password', { state: { userId: userId } });;
       } else if (action === 'logout') {
-         navigate('/login');
+         navigate('/');
       }
    };
 
@@ -233,7 +233,7 @@ const TouristNavbar = () => {
             const events=response;
             console.log(userId);
             
-            navigate(`/explore`,{state:{events:events,userId:userId}});          
+            navigate(`/explore`,{state:{events:events,userId:userId,typee:"tourist"}});          
           } catch (err) {
             if (err.response) {
                 console.log(err.message);

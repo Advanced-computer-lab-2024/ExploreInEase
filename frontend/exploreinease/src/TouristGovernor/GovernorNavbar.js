@@ -44,7 +44,7 @@ const GovernorNavbar = () => {
       else if (title === 'changePassword') {
        navigate('/change-password', { state: { userId: governorId } });;
     } else if (title === 'logout') {
-       navigate('/login');
+       navigate('/');
     }
      else {
        try{
