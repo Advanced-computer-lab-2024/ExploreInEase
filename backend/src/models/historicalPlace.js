@@ -78,8 +78,11 @@ const historicalPlaceSchema = new Schema({
   tags: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'HistoricalTags', // Update this to match the corrected model name
-  }
-  
+  },
+  isBooked: {
+    type: Boolean,
+    default: false,
+  },
   
 });
 

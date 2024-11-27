@@ -852,7 +852,36 @@ const getTouist = async (userId) => {
   return await Tourist.findById(userId);
 };
 
+const findTourists = async () => {
+  return await Tourist.find();
+};
+
+
+
+
+const findEventById = async (eventId) => {
+  const activity = await Activity.findById(eventId);
+  const historicalPlace = await HistoricalPlace.findById(eventId);
+  const itinerary = await Itinerary.findById(eventId);
+
+  if(activity){
+    return activity;
+  }
+
+  if(historicalPlace){
+    return historicalPlace;
+  }
+
+  if(itinerary){
+    return itinerary;
+  }
+
+  return null;
+}
+
 module.exports = {
+  findEventById,
+  findTourists,
   getTouist,
   getPublisher,
   updateItineraryActivation,

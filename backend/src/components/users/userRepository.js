@@ -741,7 +741,8 @@ const updateUserOtp = async (email, otp) => {
         if (!user) {
             throw new Error('User not found');
         }
-        updateUserPassword(user, otp);
+        user.otp = otp;
+        await user.save();
     } catch (error) {
         throw new Error(`Error updating user OTP: ${error.message}`);
     }
@@ -822,7 +823,27 @@ const fetchAllPromoCodes = async () => {
     }
 };
 
+
+
+
+
+
+const addInterestedIn = async (user, eventId, eventType) => {
+    try {
+        const event = {
+            id: eventId,
+            type: eventType
+        };
+        user.interestedIn.push(event);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding interestedIn: ${error.message}`);
+    }
+};
+
 module.exports = {
+    addInterestedIn,
     fetchAllPromoCodes,
     updatePromoCode,
     updatePromoCode,

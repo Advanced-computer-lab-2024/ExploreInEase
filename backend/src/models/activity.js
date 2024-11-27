@@ -74,6 +74,10 @@ const activitySchema = new Schema({
     ref: 'PreferenceTags',
     required: true,
   }],
+  isBooked: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Create and export the model

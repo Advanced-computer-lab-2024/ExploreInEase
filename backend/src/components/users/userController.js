@@ -790,7 +790,56 @@ const updatePromoCode = async (req, res) => {
 
 
 
+
+
+
+
+
+
+const addInterestedIn = async (req, res) => {
+    const { _id, eventId, eventType } = req.params;
+    if(!eventId || !_id || !eventType){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.addInterestedIn(_id, eventId, eventType);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const changePasswordAfterOTP = async (req, res) => {
+    const { userId } = req.params;
+    const { newPassword } = req.body;
+    if(!userId || !newPassword){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.changePasswordAfterOTP(userId, newPassword);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const verifyOtP = async (req, res) => {
+    const { userId, otp } = req.params;
+    if(!userId || !otp){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.verifyOtP(userId, otp);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
+    verifyOtP,
+    changePasswordAfterOTP,
+    addInterestedIn,
     updatePromoCode,
     creatingPromoCode,
     forgetPassword,

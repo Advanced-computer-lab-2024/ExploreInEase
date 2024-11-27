@@ -1030,8 +1030,14 @@ router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
 
 
 router.post('/forgetPassword', userController.forgetPassword);
+router.get('/verifyOTP/:userId/:otp', userController.verifyOtP);
+router.put('/changePasswordAfterOTP/:userId', userController.changePasswordAfterOTP);
+
 router.post('/creatingPromoCode', userController.creatingPromoCode);
 router.put('/updatePromoCode', userController.updatePromoCode);
+
+router.put('/addInterestedIn/:_id/:eventId/:eventType', userController.addInterestedIn);
+
 
 module.exports = {
     router,

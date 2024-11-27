@@ -87,6 +87,10 @@ const itinerarySchema = new Schema({
     type: Boolean,
     default: false,
   },
+  isBooked: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Create and export the model

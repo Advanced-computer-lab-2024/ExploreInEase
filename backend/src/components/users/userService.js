@@ -655,7 +655,7 @@ const forgetPassword = async (email) => {
     }
 
     // Generate an OTP and send it to the user's email
-    const otp = Math.floor(10000000 + Math.random() * 90000000);
+    const otp = Math.floor(100000 + Math.random() * 900000);
     console.log(otp);
     // Send the OTP to the user's email
     await sendEmail(user.username, user.email, `Your OTP is: ${otp}`);
@@ -719,7 +719,52 @@ const updatePromoCode = async (birthdayTourists) => {
 };
 
 
+
+
+
+const addInterestedIn = async (userId, eventId, eventType) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const updatedUser = await userRepository.addInterestedIn(user, eventId, eventType);
+    return updatedUser;
+}
+
+const changePasswordAfterOTP = async (_id, newPassword) => {
+    let user = await userRepository.findUserById(_id);
+    if (!user) {
+        user = await userRepository.findTouristById(_id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+    }
+
+    const updatedUser = await userRepository.updateUserPassword(user, newPassword);
+    return updatedUser;
+}
+
+const verifyOtP = async (_id, otp) => {
+    let user = await userRepository.findUserById(_id);
+    if (!user) {
+        user = await userRepository.findTouristById(_id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+    }
+    const savedOTP = user.otp;
+    if (savedOTP === otp) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 module.exports = {
+    verifyOtP,
+    changePasswordAfterOTP,
+    addInterestedIn,
     updatePromoCode,
     creatingPromoCode,
     forgetPassword,
