@@ -10,8 +10,8 @@ const historicalPlaceSchema = new Schema({
     type: String,
     required: true,
   },
-  pictures: {
-    type: [String], // Array of picture URLs or file paths
+  picture: {
+    type: String, // Array of picture URLs or file paths
   },
   location: {
     type: {

@@ -7,6 +7,9 @@ const activitySchema = new Schema({
     type: String,
     required: true,
   },
+  picture: {
+    type: String,
+  },
   date: {
     type: Date,
     required: true,

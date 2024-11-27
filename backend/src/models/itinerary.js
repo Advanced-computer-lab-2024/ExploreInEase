@@ -11,6 +11,9 @@ const itinerarySchema = new Schema({
     ref: 'Activity', // Referencing the Activity schema
     required: true,
   }],
+  picture: {
+    type: String, // Picture URL or file path
+  },
   locations: {
     type: [String], // An array of strings for location names
     required: true,
