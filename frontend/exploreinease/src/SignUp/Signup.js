@@ -69,6 +69,15 @@ const Signup = () => {
             Login
           </span>
         </LoginPrompt>
+        <LoginPrompt>
+        Back to 
+        <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>
+
+        </LoginPrompt>
+        {/* <p className="signup-prompt">
+          Back to Home Page
+          <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>
+        </p> */}
       </SignUpCard>
     </BackgroundContainer>
   );

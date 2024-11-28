@@ -708,7 +708,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
               <Card    
                style={{
                  width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
-                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '360px',
+                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '400px',
                 }}>
                 <CardContent>
                   <Typography variant="h5" component="div">
@@ -781,9 +781,6 @@ const Filter = ({eventsG=[],typeeG=''}) => {
                 </Grid>
                   ))}
                 </Grid>
-
-
-
                 <Dialog
                   open={open}
                   onClose={handleClose}

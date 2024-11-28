@@ -99,12 +99,26 @@
   font-size: 14px; /* Slightly smaller font for the prompt */
   color: #555; /* Dark grey text color for the prompt */
 }
+.signup-promptadvance {
+  text-align: center;
+  font-size: 14px; /* Slightly smaller font for the prompt */
+  color: #555; /* Dark grey text color for the prompt */
+}
 
 .signup-link {
   color: #007bff; /* Blue color for the link */
   text-decoration: underline; /* Underline to signify it's a link */
   cursor: pointer; /* Pointer cursor on hover */
   margin-left: 5px; /* Space between the text and the link */
+}
+.parent-container {
+  text-align: right;
+}
+.reset-password{
+  color: #007bff; 
+  text-decoration: underline;
+  cursor: pointer;
+  margin-right: 5px; 
 }
 
 .signup-link:hover {

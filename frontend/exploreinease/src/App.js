@@ -43,8 +43,8 @@ const BookTransportation= React.lazy(() => import("./Tourist/bookTransportation"
 const BookHotel= React.lazy(() => import("./Tourist/hotels"));
 const BookFlight= React.lazy(() => import("./Tourist/flights"));
 const Complaints = React.lazy(() => import('./Tourist/Complaints'));
- const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
-
+const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
+const ResetPassword=React.lazy(()=>import('./Login/resetPassword'));
 const App = () => {
   return (
     <Router>
@@ -91,6 +91,7 @@ const App = () => {
           <Route path="/TermsAcceptance" element={<TermsAcceptance />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/unArchiveProduct" element={<ArchiveProduct />} />
+          <Route path="/resetPassword" element={<ResetPassword/>}/>
 
         </Routes>
       </Suspense>

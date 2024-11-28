@@ -64,7 +64,7 @@ const ChangePassword = () => {
                               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                               edge="end"
                            >
-                              {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                              {showCurrentPassword ? <Visibility /> : <VisibilityOff />}
                            </IconButton>
                         </InputAdornment>
                      ),
@@ -85,7 +85,7 @@ const ChangePassword = () => {
                               onClick={() => setShowNewPassword(!showNewPassword)}
                               edge="end"
                            >
-                              {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                              {showNewPassword ? <Visibility /> : <VisibilityOff />}
                            </IconButton>
                         </InputAdornment>
                      ),
@@ -106,7 +106,7 @@ const ChangePassword = () => {
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                               edge="end"
                            >
-                              {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                              {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                            </IconButton>
                         </InputAdornment>
                      ),

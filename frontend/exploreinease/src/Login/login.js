@@ -107,10 +107,20 @@ const Login = () => {
             <button type="submit" className="login-button">Sign In</button>
           </div>
         </form>
+        <div className="parent-container">
+           <span className="reset-password" onClick={() => navigate('/resetPassword')}>Forgot Password?</span>
+        </div>
+        <div>
         <p className="signup-prompt">
           Don't have an account? 
           <span className="signup-link" onClick={() => navigate('/register')}> Sign Up</span>
         </p>
+        <p className="signup-promptadvance">
+          Back to 
+          <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>
+        </p>
+        </div>
+
       </div>
     </div>
   );
