@@ -1,6 +1,6 @@
 const eventRepository = require('../events/eventRepository');
-const User = require('../../models/user'); 
-const HistoricalPlace = require('../../models/historicalPlace');
+const User = require('../../models/models/user'); 
+const HistoricalPlace = require('../../models/models/historicalPlace');
 const nodemailer = require('nodemailer');
 require('dotenv').config({ path: "src/.env" });
 

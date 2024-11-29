@@ -163,7 +163,7 @@ const TourGuideHP = () => {
         //  navigate('/viewCreatedItineraryList');
        }
        else {
-        navigate('/createItinerary', {state: { User }});
+        navigate('/TourGuideReport', {state: { User }});
        }
     };
 
@@ -287,7 +287,8 @@ const TourGuideHP = () => {
               {[
                   "Create an Itinerary",
                   "View My Created Itineraries",
-                  "My Profile"
+                  "My Profile",
+                  "Report"
               ].map((text) => (
                   <ListItem key={text} disablePadding>
                       <ListItemButton onClick={() => handleRegisterClick(text)}>

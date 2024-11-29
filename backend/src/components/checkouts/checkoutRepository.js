@@ -1,7 +1,7 @@
-const Product = require('../../models/product'); 
-const Users = require('../../models/user');
-const Tourist = require('../../models/tourist');
-const Order = require('../../models/order');
+const Product = require('../../models/models/product'); 
+const Users = require('../../models/models/user');
+const Tourist = require('../../models/models/tourist');
+const Order = require('../../models/models/order');
 const path = require('path');
 const fs = require('fs');
 

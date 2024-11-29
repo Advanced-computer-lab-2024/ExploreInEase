@@ -11,7 +11,7 @@ const swaggerUi = require('swagger-ui-express');
 require('dotenv').config({ path: 'src/.env' });
 const { GridFSBucket, ObjectId } = require('mongodb'); // Ensure ObjectId is imported
 const multer = require('multer'); // Import multer for file uploads
-const Users = require('./src/models/user'); // Import Users model
+const Users = require('./src/models/models/user'); // Import Users model
 const path = require('path');
 
 

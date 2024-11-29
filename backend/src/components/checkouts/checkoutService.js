@@ -1,6 +1,6 @@
 const checkoutRepository = require('../checkouts/checkoutRepository');
-const Product = require('../../models/product'); 
-const Order = require('../../models/order');
+const Product = require('../../models/models/product'); 
+const Order = require('../../models/models/order');
 const path = require('path');
 
 const addProduct = async (productData) => {

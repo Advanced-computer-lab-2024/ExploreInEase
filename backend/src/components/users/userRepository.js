@@ -1,9 +1,9 @@
-const Users = require('../../models/user');
-const Tourist = require('../../models/tourist');
-const Itinerary = require('../../models/itinerary');
-const Activity = require('../../models/activity');
-const HistoricalPlace = require('../../models/historicalPlace');
-const Product = require('../../models/product');
+const Users = require('../../models/models/user');
+const Tourist = require('../../models/models/tourist');
+const Itinerary = require('../../models/models/itinerary');
+const Activity = require('../../models/models/activity');
+const HistoricalPlace = require('../../models/models/historicalPlace');
+const Product = require('../../models/models/product');
 const fs = require('fs');
 const path = require('path');
 

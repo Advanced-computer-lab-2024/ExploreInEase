@@ -1,16 +1,16 @@
-const HistoricalPlace = require('../../models/historicalPlace');
-const Itinerary = require('../../models/itinerary');
-const Activity = require('../../models/activity');
-const ActivityCategory = require('../../models/activityCategory'); 
-const PreferenceTags = require('../../models/preferenceTags'); 
-const Users = require('../../models/user');
-const Tourist = require('../../models/tourist');
+const HistoricalPlace = require('../../models/models/historicalPlace');
+const Itinerary = require('../../models/models/itinerary');
+const Activity = require('../../models/models/activity');
+const ActivityCategory = require('../../models/models/activityCategory'); 
+const PreferenceTags = require('../../models/models/preferenceTags'); 
+const Users = require('../../models/models/user');
+const Tourist = require('../../models/models/tourist');
 const mongoose = require('mongoose');
-const historicalTags = require('../../models/historicalTag');
-const historicalPlace = require('../../models/historicalPlace');
-const Transportation = require('../../models/transportation');
-const BookedFlight = require('../../models/bookedFlights');
-const BookedHotel = require('../../models/bookedHotels');
+const historicalTags = require('../../models/models/historicalTag');
+const historicalPlace = require('../../models/models/historicalPlace');
+const Transportation = require('../../models/models/transportation');
+const BookedFlight = require('../../models/models/bookedFlights');
+const BookedHotel = require('../../models/models/bookedHotels');
 
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })

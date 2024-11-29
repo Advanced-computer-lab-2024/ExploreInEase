@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Complaint = require("../../models/complaint");
+const Complaint = require("../../models/models/complaint");
 
 //sprint 2
 

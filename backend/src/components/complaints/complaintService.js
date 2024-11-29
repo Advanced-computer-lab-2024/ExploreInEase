@@ -1,6 +1,6 @@
 const complaintRepository = require("../../components/complaints/complaintRepository");
-const Tourist = require("../../models/tourist");
-const User = require("../../models/user");
+const Tourist = require("../../models/models/tourist");
+const User = require("../../models/models/user");
 
 //sprint2
 
