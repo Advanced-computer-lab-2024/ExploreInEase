@@ -166,7 +166,7 @@ const TourGuideHP = () => {
         navigate('/SalesReport', {state: { User }});
        }
        else {
-        navigate('/TourGuideReport', {state: { User }});
+        navigate('/TouristsReport', {state: { User }});
        }
     };
 

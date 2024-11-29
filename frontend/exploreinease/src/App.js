@@ -44,8 +44,8 @@ const BookHotel= React.lazy(() => import("./Tourist/hotels"));
 const BookFlight= React.lazy(() => import("./Tourist/flights"));
 const Complaints = React.lazy(() => import('./Tourist/Complaints'));
  const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
- const TourGuideReport = React.lazy(() => import('./TourGuide/TouristsReport'));
- const SalesReport = React.lazy(() => import('./TourGuide/SalesReport'));
+ const TourGuideReport = React.lazy(() => import('./Shared/Components/Reports/TouristsReport'));
+ const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesReport'));
 
 
 const App = () => {
@@ -94,7 +94,7 @@ const App = () => {
           <Route path="/TermsAcceptance" element={<TermsAcceptance />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/unArchiveProduct" element={<ArchiveProduct />} />
-          <Route path="/TourGuideReport" element={<TourGuideReport />} />
+          <Route path="/TouristsReport" element={<TourGuideReport />} />
           <Route path="/SalesReport" element={<SalesReport />} />
 
 

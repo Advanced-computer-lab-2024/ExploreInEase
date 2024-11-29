@@ -134,7 +134,14 @@ const HomePage = () => {
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
-        }else {
+        }else if (title=="Tourists Report"){
+            navigate('/TouristsReport', {state: { User }});
+
+        }else if (title=="Sales Report"){
+            navigate('/SalesReport', {state: { User }});
+
+        }
+        else {
             try {
                 const options = { apiPath: `/getAdvertiser/${userId}` };
                 const response = await NetworkService.get(options);
@@ -262,7 +269,9 @@ const HomePage = () => {
                     {[
                         "Activities",
                         "Transportation",               
-                        "My Profile"
+                        "My Profile",
+                        "Tourists Report",
+                        "Sales Report"
                     ].map((text) => (
                         <ListItem key={text} disablePadding>
                             <ListItemButton onClick={() => handleRegisterClick(text)}>
