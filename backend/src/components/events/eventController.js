@@ -452,6 +452,7 @@ const bookEventWithCard = async (req, res) => {
     expMonth,
     expYear,
     cvc,
+    promoCode
   } = req.body;
 
   try {
@@ -475,7 +476,7 @@ const bookEventWithCard = async (req, res) => {
     }
 
     const result = await eventService.addEventToTouristWithCard(
-      userType,touristId,eventType,eventID,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc
+      userType,touristId,eventType,eventID,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode
     );
 
     return res.status(200).json({

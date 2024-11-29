@@ -50,7 +50,7 @@ const availableQuantityAndSales = async (req, res) => {
 
 // Controller function to handle order creation with wallet or COD payment
 const createOrderWalletOrCod = async (req, res) => {
-    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType } = req.body;
+    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType,promoCode,currency } = req.body;
 
     if (
         !touristId ||
@@ -80,6 +80,8 @@ const createOrderWalletOrCod = async (req, res) => {
             price,
             addressToBeDelivered,
             paymentType,
+            promoCode,
+            currency
         });
         return res.status(201).json({
             success: true,
@@ -108,6 +110,7 @@ const createOrderWithCard = async (req, res) => {
         expMonth, 
         expYear, 
         cvc,
+        promoCode,
         currency 
     } = req.body;
 
@@ -133,15 +136,20 @@ const createOrderWithCard = async (req, res) => {
 
 
     let updatedCurrency;
+    let price2 = price;
     switch (currency) {
         case 'euro':
           updatedCurrency = "EUR";
+          price2 = (price * 55).toFixed(2);
+
           break;
         case 'dollar':
             updatedCurrency = "USD";
+            price2 = (price * 50).toFixed(2);
           break;
         case 'EGP':
             updatedCurrency = "EGP";
+            price2 = price.toFixed(2);
           break;
         default:
           throw new Error('Invalid currency');
@@ -158,6 +166,20 @@ const createOrderWithCard = async (req, res) => {
                 message: 'Tourist not found.',
             });
         }
+        if (promoCode) {
+            const validPromo = tourist.promoCodes.includes(promoCode); // Correct validation
+            if (validPromo) {
+              // Remove the promo code from the array
+              tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+              await tourist.save(); // Save the updated promo codes
+            } else {
+              throw new Error("Invalid promo code");
+            }
+        }
+        // Apply discount if promo code was valid
+        if (promoCode) {
+            price2 *= 0.7; // Apply 30% discount
+        }
 
         // Create a Payment Method
         const paymentMethod = await stripe.paymentMethods.create({
@@ -172,7 +194,7 @@ const createOrderWithCard = async (req, res) => {
 
         // Create a Payment Intent with a custom description
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(price * 100), // Convert dollars to cents
+            amount: Math.round(price2 * 100), // Convert dollars to cents
             currency: updatedCurrency,
             payment_method: paymentMethod.id,
             confirm: true, // Automatically confirms the payment
@@ -187,7 +209,7 @@ const createOrderWithCard = async (req, res) => {
         const order = await checkoutService.createOrderWithCard({
             touristId,
             productsIdsQuantity,
-            price,
+            price:price2,
             addressToBeDelivered,
             paymentType: 'card',
         });

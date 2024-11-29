@@ -460,7 +460,7 @@ const  getAllEvents=async()=> {
 //New ElNew code 
 
 
-const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc) => {
+const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode) => {
   return await eventRepository.bookEventWithCard(
     touristId,
     eventType,
@@ -471,7 +471,7 @@ const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ti
     cardNumber,
     expMonth,
     expYear,
-    cvc
+    cvc,promoCode
   );
 };
 

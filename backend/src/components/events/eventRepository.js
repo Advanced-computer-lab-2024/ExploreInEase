@@ -579,7 +579,7 @@ const bookEventWithCard = async (
   cardNumber,
   expMonth,
   expYear,
-  cvc
+  cvc,promoCode
 ) => {
   const tourist = await Tourist.findById(touristId);
   if (!tourist) {
@@ -588,6 +588,20 @@ const bookEventWithCard = async (
 
   let eventPrice = 0;
   let eventName = "";
+
+
+
+
+  if (promoCode) {
+    const validPromo = tourist.promoCodes.includes(promoCode); // Correct validation
+    if (validPromo) {
+      // Remove the promo code from the array
+      tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+      await tourist.save(); // Save the updated promo codes
+    } else {
+      throw new Error("Invalid promo code");
+    }
+  }
 
   // Determine event price and name based on the event type
   switch (eventType) {
@@ -601,6 +615,12 @@ const bookEventWithCard = async (
       }
       eventPrice = itinerary.price;
       eventName = itinerary.name;
+
+      // Apply discount if promo code was valid
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      } 
+
       break;
 
     case "activity":
@@ -626,6 +646,11 @@ const bookEventWithCard = async (
         default:
           throw new Error("Invalid currency");
       }
+
+      // Apply discount if promo code was valid
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      }
       break;
 
     case "historicalPlace":
@@ -647,6 +672,12 @@ const bookEventWithCard = async (
           ? historicalPlace.ticketPrice.native
           : historicalPlace.ticketPrice.foreign;
       eventName = historicalPlace.name;
+
+
+      // Apply discount if promo code was valid
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      }
       break;
 
     default:
@@ -734,7 +765,7 @@ const sendPaymentReceiptEmail = async (
     from: "aclproject7@gmail.com",
     to: touristEmail,
     subject: "Payment Receipt for Your Booking",
-    text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid: ${pricePaid} EGP\nPayment Method: Card ending in ${lastFourDigits}\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
+    text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid: ${pricePaid} EGP\nPayment Method: Card ending in ****${lastFourDigits}\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
   };
 
   await transporter.sendMail(mailOptions);
