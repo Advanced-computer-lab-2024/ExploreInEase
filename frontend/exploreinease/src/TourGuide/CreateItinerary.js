@@ -8,6 +8,7 @@ import Select from '@mui/material/Select';
 import { Alert } from '@mui/material'; 
 import NetworkService from "../NetworkService";
 import { useLocation } from "react-router-dom";
+import TourGuideHP from "./TourGuideNavbar";
  import "./CreateItinerary.css"; // Import your CSS for styling
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -420,6 +421,7 @@ const CreateItinerary = () => {
         </Alert>
       )}
     </div>
+    
   );
 };
 

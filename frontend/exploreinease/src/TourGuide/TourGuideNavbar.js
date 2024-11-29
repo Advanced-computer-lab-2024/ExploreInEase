@@ -24,18 +24,31 @@ import NetworkService from '../NetworkService';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-
-//
+import Badge from '@mui/material/Badge';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 const TourGuideHP = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [menuItems,setMenuItems]=useState( [
+      { title: 'New Message', body: 'You have received a new message from Alex.' },
+      { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
+      { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
+      { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
+      { title: 'Project Deadline', body: 'Project submission is due next week.' },
+      { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
+      { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }
+    ]);
+    
     const { User, imageUrl } = location.state || {};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorEl1, setAnchorEl1] = React.useState(null);
+
     const [drawerOpen, setDrawerOpen] = useState(false);
     const open = Boolean(anchorEl);
-    
+    const openNotfication = Boolean(anchorEl1);
+
     const initialUsername = User.User?.username || User.username;
     const userId = User.User?._id || User._id;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
@@ -91,7 +104,12 @@ const TourGuideHP = () => {
          navigate('/');
       }
    };
-
+   const handleClick = (event) => {
+    setAnchorEl1(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl1(null);
+  };
 
    const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
@@ -199,6 +217,9 @@ const TourGuideHP = () => {
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
 };
+
+
+
   return (
     <div className="homepage">
       <nav className="navbar">
@@ -210,34 +231,73 @@ const TourGuideHP = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
-        <div 
-                    className="currency-selector" 
-                    style={{ 
-                        position: 'absolute', 
-                        left: '70%', 
-                        transform: 'translateX(-50%)' 
-                    }}
-                >
-                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
+        <div className="currency-selector" 
+            style={{ 
+                alignItems: 'center', marginLeft: 'auto',
+                display: 'flex', // Use flex to arrange items side by side
+                gap: '35px' // Add spacing between the buttons
+            }}
+        >
+    {/* Notifications Button */}
+    <IconButton 
+        onClick={handleClick} 
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        className="menu-button" 
+        style={{ 
+            color: 'blue',      // Change icon color to blue
+            backgroundColor: '#e0f7fa', // Light blue background for contrast
+        }}
+    >
+          <Badge badgeContent={4} color="success">
+          <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
+          </Badge>
 
-                    <select id="currency-select" className="currency-dropdown">
-                        <option value="usd">USD ($)</option>
-                        <option value="eur">EUR (€)</option>
-                        <option value="egp">EGP (ج.م)</option>
-                    </select>
-                </div>
-          <IconButton 
-  onClick={toggleDrawer(true)} 
-  className="menu-button" 
-  style={{ 
-    position: 'absolute', 
-    right: '40px', 
-    color: 'white',      // Icon color
-    backgroundColor: '#3f51b5' // Background color
-  }}
+    </IconButton>
+    <Menu
+    id="basic-menu"
+    anchorEl={anchorEl1}
+    open={openNotfication}
+    onClose={handleClose}
+    MenuListProps={{
+        'aria-labelledby': 'basic-button',
+    }}
+    PaperProps={{
+        style: {
+            maxHeight: '300px', // Set the maximum height for the menu
+            overflow: 'auto',   // Enable scrolling
+        },
+    }}
 >
-<MenuIcon />
-</IconButton>
+    {menuItems && menuItems.length > 0 ? (
+        menuItems.map((item, index) => (
+            <MenuItem key={index}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <strong>{item.title}</strong>
+                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
+                </div>
+            </MenuItem>
+        ))
+    ) : (
+        <MenuItem disabled>No notifications available</MenuItem>
+    )}
+</Menu>
+
+
+    {/* Menu Button */}
+    <IconButton 
+        onClick={toggleDrawer(true)} 
+        className="menu-button" 
+        style={{ 
+            color: 'blue',      // Change icon color to blue
+            backgroundColor: '#e0f7fa', // Light blue background for contrast
+        }}
+    >
+        <MenuIcon sx={{ fontSize: 30 }} />
+    </IconButton>
+</div>
+
 </nav>
 <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{width: drawerOpen ? '700px' : '300px'}}>
           <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
