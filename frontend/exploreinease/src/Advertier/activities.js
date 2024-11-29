@@ -13,7 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { LoadScript, GoogleMap, Marker,PlacesService } from '@react-google-maps/api';
 import Slider from '@mui/material/Slider';
 import dayjs from 'dayjs';
-import axios from 'axios'; // Ensure Axios is imported
+import axios from 'axios'; 
 import { useLocation } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -21,17 +21,17 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import NetworkService from '../NetworkService';
 import { Alert } from '@mui/material'; 
-  import Basketball from './ActivityImage/Basketball.jpg';
-  import Bowling from './ActivityImage/Bowling.jpg';
-  import Cycling from './ActivityImage/Cycling.webp';
-  import Fishing from './ActivityImage/Fishing.jpg';
-  import Football from './ActivityImage/FootBall.jpg';
-  import Handball from './ActivityImage/Handball.jpg';
-  import Hiking from './ActivityImage/Hiking.jpg';
-  import JetSki from './ActivityImage/JetSki.jpg';
-  import Mountain from './ActivityImage/Mountain.jpg';
-  import Skater from './ActivityImage/Skater.jpg';
-
+import Basketball from './ActivityImage/Basketball.jpg';
+import Bowling from './ActivityImage/Bowling.jpg';
+import Cycling from './ActivityImage/Cycling.webp';
+import Fishing from './ActivityImage/Fishing.jpg';
+import Football from './ActivityImage/FootBall.jpg';
+import Handball from './ActivityImage/Handball.jpg';
+import Hiking from './ActivityImage/Hiking.jpg';
+import JetSki from './ActivityImage/JetSki.jpg';
+import Mountain from './ActivityImage/Mountain.jpg';
+import Skater from './ActivityImage/Skater.jpg';
+import HomePage from './AdvertiserNavbar';
 
   const activityImage =[Basketball,Bowling,Fishing,Cycling,Football,Handball,Hiking,JetSki,Mountain,Skater];
 
@@ -528,6 +528,10 @@ console.log("Address mn Map",address);
 
   return (
     <div>
+      <div>
+        <HomePage/>
+      </div>
+    <div>
     <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div>
@@ -733,6 +737,8 @@ console.log("Address mn Map",address);
     </LocalizationProvider>
     </LoadScript>
     </div>
+    </div>
+
   );
 }
 

@@ -11,9 +11,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import HistoryEduIcon from '@mui/icons-material/History';
 import Sky from '../Sky2.jpeg';
+import TourGuideHP from '../../../TourGuide/TourGuideNavbar';
 import { styled } from '@mui/system';
-
-const TourGuideProdile = (props) => {
+import './tourGuideProfile.css';
+const TourGuideProfile = (props) => {
+  const navigate = useNavigate();
   const initialData = {
     username: '',
     email: '',
@@ -24,9 +26,9 @@ const TourGuideProdile = (props) => {
   };
   const location = useLocation();
   const { TourGuide, imageUrl } = location.state || {};
-  console.log(TourGuide);
+  // console.log(TourGuide);
   const userId = TourGuide.TourGuide?._id || TourGuide?._id;
-  console.log(userId);
+  // console.log(userId);
   const [formValues, setFormValues] = useState(initialData);
     // Retrieve avatar URL from localStorage or fallback to the default avatar
     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
@@ -297,6 +299,10 @@ const TourGuideProdile = (props) => {
 </Grid>
 
 </Grid>
+        <p className='signup-promptadvance'>
+          Back to 
+          <span className='signup-link' onClick={() => navigate('/TourGuideHomePage')}>Home Page</span>
+        </p>
         </Card>
       </Box>
     </LocalizationProvider>
@@ -304,4 +310,4 @@ const TourGuideProdile = (props) => {
   );
 };
 
-export default TourGuideProdile;
+export default TourGuideProfile;

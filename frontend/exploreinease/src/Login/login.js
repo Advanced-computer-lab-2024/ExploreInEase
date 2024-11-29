@@ -60,6 +60,8 @@ const Login = () => {
   };
 
   const navigateToHomePage = (user, imageUrl) => {
+    localStorage.setItem('User',JSON.stringify(user));
+    localStorage.setItem('imageUrl',JSON.stringify(imageUrl));
     localStorage.setItem('UserId',user._id);
     localStorage.setItem('UserType',user.type);
     switch (formData.role) {

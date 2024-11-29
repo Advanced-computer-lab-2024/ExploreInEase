@@ -7,18 +7,19 @@ import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from "react-datepicker";
 import { Alert } from '@mui/material'; 
 import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
+import TourGuideHP from "./TourGuideNavbar";
 import "./ItineraryList.css"; 
 
 const ItineraryList = () => {
   const location = useLocation();
   const { TourGuideItinerary, User } = location.state || {};
   console.log("User", User);
-  console.log(TourGuideItinerary);
+  // console.log(TourGuideItinerary);
 
   const userId = User._id;
   const userType = User.type;
 
-  const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary.Itineraries);
+  const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary?.Itineraries);
   const [activitiesData, setActivitiesData] = useState({});
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [editItineraryData, setEditItineraryData] = useState(null);
@@ -32,6 +33,7 @@ const ItineraryList = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  
   useEffect(() => {
     if (showSuccessMessage) {
       const timer = setTimeout(() => {
@@ -241,6 +243,10 @@ const ItineraryList = () => {
   
 
   return (
+    <div>
+      <div>
+      <TourGuideHP/>
+      </div>
     <div className="itinerary-list-container">
       <h2>Your Created Itineraries</h2>
       <div className="itinerary-cards">
@@ -450,6 +456,7 @@ const ItineraryList = () => {
         </Alert>
       )}
 </div>
+    </div>
     </div>
   );
 };

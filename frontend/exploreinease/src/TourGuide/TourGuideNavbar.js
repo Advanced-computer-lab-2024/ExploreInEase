@@ -26,8 +26,12 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+
 const TourGuideHP = () => {
-    const navigate = useNavigate();
+  const Userr = JSON.parse(localStorage.getItem('User'));
+ const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
+
+ const navigate = useNavigate();
     const location = useLocation();
     const [menuItems,setMenuItems]=useState( [
       { title: 'New Message', body: 'You have received a new message from Alex.' },
@@ -36,23 +40,22 @@ const TourGuideHP = () => {
       { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
       { title: 'Project Deadline', body: 'Project submission is due next week.' },
       { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
-      { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }
-    ]);
-    
-    const { User, imageUrl } = location.state || {};
+      { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
+    const { state } = location;
+    const User = state?.User || Userr;    
+    const imageUrl = state?.imageUrl ||imageUrll;
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
-
     const [drawerOpen, setDrawerOpen] = useState(false);
     const open = Boolean(anchorEl);
     const openNotfication = Boolean(anchorEl1);
 
-    const initialUsername = User.User?.username || User.username;
-    const userId = User.User?._id || User._id;
+    const initialUsername = User?.User?.username || User?.username;
+    const userId = User?.User?._id || User?._id;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-    const userType = User.User?.type || User.type;
+    const userType = User?.User?.type || User?.type;
 
     // Retrieve avatar URL from localStorage or fallback to the default avatar
     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
@@ -178,7 +181,6 @@ const TourGuideHP = () => {
             setError('An unexpected error occurred.'); // Generic error message
           }
         }
-        //  navigate('/viewCreatedItineraryList');
        }
        else {
         navigate('/createItinerary', {state: { User }});
@@ -221,7 +223,7 @@ const TourGuideHP = () => {
 
 
   return (
-    <div className="homepage">
+    <div >
       <nav className="navbar">
         <div className="logo-container">
           <img
@@ -231,13 +233,8 @@ const TourGuideHP = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
-        <div className="currency-selector" 
-            style={{ 
-                alignItems: 'center', marginLeft: 'auto',
-                display: 'flex', // Use flex to arrange items side by side
-                gap: '35px' // Add spacing between the buttons
-            }}
-        >
+
+        <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',gap: '10px', }}>
     {/* Notifications Button */}
     <IconButton 
         onClick={handleClick} 
@@ -248,13 +245,14 @@ const TourGuideHP = () => {
         style={{ 
             color: 'blue',      // Change icon color to blue
             backgroundColor: '#e0f7fa', // Light blue background for contrast
-        }}
+          }}
     >
           <Badge badgeContent={4} color="success">
           <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
           </Badge>
 
     </IconButton>
+   
     <Menu
     id="basic-menu"
     anchorEl={anchorEl1}

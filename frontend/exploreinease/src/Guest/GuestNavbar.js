@@ -63,7 +63,7 @@ const HomePage = () => {
           {error}
         </div>
       )}
-      <nav className="navbar">
+      <nav className="navbarMain">
         <div className="logo-container">
           <img
             src={HomePageLogo} // Use the imported logo

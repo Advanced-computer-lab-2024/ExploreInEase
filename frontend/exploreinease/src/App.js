@@ -1,6 +1,6 @@
 import './App.css'; 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import React, { Suspense } from 'react';
+import React, { Suspense,useEffect } from 'react';
   
 // Lazy load components
 const ArchiveProduct = React.lazy(() => import("./Shared/Components/Product/ArchiveProduct"));
@@ -46,6 +46,9 @@ const Complaints = React.lazy(() => import('./Tourist/Complaints'));
 const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
 const ResetPassword=React.lazy(()=>import('./Login/resetPassword'));
 const App = () => {
+  useEffect(() => {
+    document.title = 'ExploreInEase';
+}, []);
   return (
     <Router>
       {/* Wrapping Routes with Suspense to handle loading */}

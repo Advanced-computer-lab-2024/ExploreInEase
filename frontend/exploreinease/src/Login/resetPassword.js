@@ -9,21 +9,40 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import './login.css';
 import backgroundImage1 from '../rerere.jpg';
+import { Password, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Box, InputAdornment, IconButton } from '@mui/material';
 
 const ResetPassword = () => {
     const navigate = useNavigate(); // Move useNavigate inside the component
   const [formData, setFormData] = useState({
     email: '',
     otp: '      ', // 6 spaces for OTP placeholders
+    password:'',
+    repeatPassword:''
   });
   const [clicked, setClicked] = useState(false);
-
+  const [clickedT, setClickedT] = useState(false);
+  const [clickedOTP, setClickedOTP] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handleEmailChange = (event) => {
     setFormData({
       ...formData,
       email: event.target.value,
     });
   };
+  const setNewPassword =(event)=>{
+    setFormData({
+      ...formData,
+      password:event.target.value,
+    });
+  }
+  const setConfirmPassword=(event)=>{
+    setFormData({
+      ...formData,
+      repeatPassword:event.target.value,
+    })
+  }
 
   const handleOtpChange = (index, value) => {
     if (value.length > 1 || isNaN(value)) return; // Ensure it's a single digit
@@ -39,8 +58,13 @@ const ResetPassword = () => {
   };
 
   const verifyEmailOTP = () => {
+    setClickedT(true);
+    setClickedOTP(true);
     console.log('Verifying OTP:', formData.otp.trim());
   };
+  const changePasswords=()=>{
+    navigate('/Login');
+  }
 
   return (
     <div
@@ -59,7 +83,7 @@ const ResetPassword = () => {
           <Typography variant="h4" component="div" gutterBottom>
             <strong>Reset Password</strong>
           </Typography>
-          {!clicked && (
+          {!clicked &&!clickedT && (
             <>
               <Typography variant="h6" paragraph>
                 Forgotten your password? Enter your e-mail address below, and we'll send an OTP to your email to verify it.
@@ -75,7 +99,7 @@ const ResetPassword = () => {
               />
             </>
           )}
-          {clicked && (
+          {clicked &&!clickedT && (
             <>
               <Typography variant="h6" paragraph>
                 A 6-digit email OTP was sent to {formData.email}.
@@ -106,14 +130,63 @@ const ResetPassword = () => {
               </div>
             </>
           )}
+          {clickedOTP && clickedT &&(<>
+            <Typography variant="h6" paragraph>
+                Enter Your New Password
+              </Typography>
+              <div>
+              <TextField
+                  label="New Password"
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={setNewPassword}
+                  fullWidth
+                  required
+                  InputProps={{
+                     endAdornment: (
+                        <InputAdornment position="end">
+                           <IconButton
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              edge="end"
+                           >
+                              {showNewPassword ? <Visibility /> : <VisibilityOff />}
+                           </IconButton>
+                        </InputAdornment>
+                     ),
+                  }}
+                  margin="normal"
+               />
+               <TextField
+                  label="Confirm New Password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.repeatPassword}
+                  onChange={ setConfirmPassword}
+                  fullWidth
+                  required
+                  InputProps={{
+                     endAdornment: (
+                        <InputAdornment position="end">
+                           <IconButton
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              edge="end"
+                           >
+                              {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                           </IconButton>
+                        </InputAdornment>
+                     ),
+                  }}
+                  margin="normal"
+               />
+              </div>       
+          </>)}
         </CardContent>
         <CardActions>
-          {!clicked && (
+          {!clicked && !clickedT &&  (
             <Button color="primary" onClick={handleSendEmailOTP} fullWidth variant="contained">
               SEND EMAIL OTP
             </Button>
           )}
-          {clicked && (
+          {clicked  && !clickedT && (
             <>
             <Button
               color="primary"
@@ -126,19 +199,36 @@ const ResetPassword = () => {
             </Button>
          </>
           )}
+          {
+            clickedOTP && clickedT &&(
+              <Button
+              color="primary"
+              onClick={changePasswords}
+              fullWidth
+              variant="contained"
+            >
+              change Password
+            </Button>
+            )
+          }
         </CardActions>
-          {clicked &&(
+          {clicked && !clickedT  &&(
         <p className="signup-prompt">
         Didn't get OTP?{' '}
         <span className="signup-link" onClick={handleSendEmailOTP}>
          Resend
         </span>
-     </p>
-          )}
-        <p className="signup-promptadvance">
-          Back to 
-          <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>
         </p>
+          )}
+        {
+          !clickedOTP&&(
+            <p className="signup-promptadvance">
+            Back to 
+            <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>
+          </p>
+          )
+        }
+     
       </Card>
     </div>
   );

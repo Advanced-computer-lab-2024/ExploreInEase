@@ -6,16 +6,25 @@
 
 .navbar {
     display: flex;
-    justify-content: space-between;
+    height: '100%';
     align-items: center;
     padding: 20px;
     background-color: #ffffff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
+.navbarMain {
+    display: flex;
+    justify-content: space-between;
+    height: '100%';
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 .logo-container {
     display: flex;
     align-items: center;
+    width: '100%',
 }
 
 .logo {

@@ -53,6 +53,8 @@ const CreateItinerary = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const location = useLocation();
   const { User } = location.state || {};
+  console.log("User",User);
+  
   const userId = User._id;
   console.log(userId);
 
@@ -191,6 +193,10 @@ const CreateItinerary = () => {
   };
 
   return (
+    <div >
+      <div>
+        <TourGuideHP/>
+      </div>
     <div className="create-itinerary-container">
       <h2>Create Itinerary</h2>
       <form onSubmit={handleSubmit} className="itinerary-form">
@@ -209,14 +215,14 @@ const CreateItinerary = () => {
         <div className="form-group">
           <label>Select Activities:</label>
           <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel id="activity-multiple-select-label">Activities</InputLabel>
+            {/* <InputLabel id="activity-multiple-select-label">Activities</InputLabel> */}
             <Select
               labelId="activity-multiple-select-label"
               id="activity-multiple-select"
               multiple
               value={selectedActivityNames}
               onChange={handleActivityChange}
-              input={<OutlinedInput label="Activities" />}
+              // input={<OutlinedInput label="Activities" />}
               MenuProps={MenuProps}
             >
               {activities?.map((activity) => (
@@ -421,7 +427,7 @@ const CreateItinerary = () => {
         </Alert>
       )}
     </div>
-    
+    </div>
   );
 };
 

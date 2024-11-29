@@ -11,8 +11,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import NetworkService from '../NetworkService';
 import { useLocation } from 'react-router-dom';
-
 import axios from 'axios';
+import HomePage from './AdvertiserNavbar';
+
 function Transportation() {
   const location = useLocation();
   const { advertiserId} = location.state||{};
@@ -118,6 +119,10 @@ function Transportation() {
     }
 
   return (
+    <div>
+    <div>
+      <HomePage/>
+    </div>
     <div>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Button variant="contained" onClick={handleClickOpen} sx={{ maxWidth: 200, marginTop: 2, marginLeft: 2 }}>
@@ -239,6 +244,7 @@ function Transportation() {
       )}
         </div>
       </LocalizationProvider>
+    </div>
     </div>
   );
 }
