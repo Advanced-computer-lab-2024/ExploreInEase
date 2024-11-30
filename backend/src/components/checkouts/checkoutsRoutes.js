@@ -558,4 +558,16 @@ router.get('/getArchivedProducts/:userId', checkoutController.getArchivedProduct
 router.put('/archiveProduct/:userId/:productId', checkoutController.archiveProduct);
 router.get('/availableQuantityAndSales/:userType/:productId/:currency', checkoutController.availableQuantityAndSales);
 
+
+
+router.post('/addWishlist/:userId', checkoutController.addWishlist);
+router.get('/getWishlist/:userId', checkoutController.getWishlist);
+router.delete('/removeWishlist/:userId/:productId', checkoutController.removeWishlist);
+
+router.post('/addCart/:userId', checkoutController.addCart);
+router.get('/getCart/:userId', checkoutController.getCart);
+router.delete('/removeCart/:userId/:cartItemId', checkoutController.removeCart);
+router.put('/editQuantityInCart/:userId/:cartItemId/:quantity', checkoutController.editQuantityInCart);
+
+
 module.exports = router;

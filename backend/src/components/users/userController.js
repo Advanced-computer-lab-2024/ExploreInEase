@@ -836,7 +836,50 @@ const verifyOtP = async (req, res) => {
     }
 }
 
+const addAddresses = async (req, res) => {
+    const { userId } = req.params;
+    const { address } = req.body;
+    if(!userId || !address){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.addAddresses(userId, address);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const getAddresses = async (req, res) => {
+    const { userId } = req.params;
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.getAddresses(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const getTouristReport = async (req, res) => {
+    const { userId } = req.params;
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.getTouristReport(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
+    getTouristReport,
+    getAddresses,
+    addAddresses,
     verifyOtP,
     changePasswordAfterOTP,
     addInterestedIn,

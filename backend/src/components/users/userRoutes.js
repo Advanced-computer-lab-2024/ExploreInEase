@@ -1038,7 +1038,10 @@ router.put('/updatePromoCode', userController.updatePromoCode);
 
 router.put('/addInterestedIn/:_id/:eventId/:eventType', userController.addInterestedIn);
 
+router.post('/addAddresses/:userId', userController.addAddresses);
+router.get('/getAddresses/:userId', userController.getAddresses);
 
+router.get('/getTouristReport/:userId', userController.getTouristReport);
 module.exports = {
     router,
     setDBConnection,

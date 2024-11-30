@@ -227,7 +227,43 @@ const updateOrder = async (orderId, updatedOrderData) => {
 const getAllNotifications = async (id, type) => {
     return await checkoutRepository.getAllNotifications(id, type);
 }
+
+const addWishlist = async (userId, productId) => {
+    return await checkoutRepository.addWishlist(userId, productId);
+}
+
+const getWishlist = async (userId) => {
+    return await checkoutRepository.getWishlist(userId);
+}
+
+const removeWishlist = async (userId, productId) => {
+    return await checkoutRepository.removeWishlist(userId, productId);
+}
+
+const addCart = async (userId, productId, quantity) => {
+    return await checkoutRepository.addCart(userId, productId, quantity);
+}
+
+const getCart = async (userId) => {
+    return await checkoutRepository.getCart(userId);
+}
+
+const removeCart = async (userId, cartItemId) => {
+    return await checkoutRepository.removeCart(userId, cartItemId);
+}
+
+const editQuantityInCart = async (userId, cartItemId, quantity) => {
+    return await checkoutRepository.editQuantityInCart(userId, cartItemId, quantity);
+}
+
 module.exports = {
+    editQuantityInCart,
+    removeCart,
+    getCart,
+    addCart,
+    removeWishlist,
+    getWishlist,
+    addWishlist,
     getAllNotifications,
     uploadImage,
     archiveProduct,

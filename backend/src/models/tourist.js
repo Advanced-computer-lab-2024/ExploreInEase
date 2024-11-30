@@ -69,14 +69,9 @@ const TouristSchema = new Schema({
         default: Date.now, // Auto-sets to the current date/time
         immutable: true // This value cannot be changed once set
     },
-    addresses: [
-        {
-            street: { type: String },
-            city: { type: String},
-            country: { type: String},
-            zipCode: { type: String, match: [/^\d{5}$/, 'Invalid zip code'] }
-        }
-    ],
+    addresses: [{
+        type: String,
+    }],
     points: {
         type: Number,
         default: 0,

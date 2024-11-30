@@ -4,6 +4,7 @@ const Tourist = require('../../models/tourist');
 const Notification = require('../../models/notification');
 const PromoCode = require('../../models/promoCode');
 const Order = require('../../models/order');
+const Cart = require('../../models/cart');
 const path = require('path');
 const fs = require('fs');
 
@@ -358,7 +359,106 @@ const getPromoCode = async (promoCode) => {
     }
 };
 
+const addWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.push(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const getWishlist = async (touristId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        const wishlistProducts = tourist.wishlists;
+        const products = await Product.find({ _id: { $in: wishlistProducts } });
+        return products;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const removeWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.pull(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const addCart = async (touristId, productId, quantity) => {
+    try {
+        const cartTourists = await Cart.find({ touristId: touristId });
+        if(cartTourists.length != 0){
+            cartTourists[0].products.push({ productId: productId, quantity: quantity });
+            await cartTourists[0].save();
+            return cartTourists[0];
+        }
+        const cartItem = {
+            touristId: touristId,
+            products: {
+                productId:productId,
+                quantity:quantity
+            }
+        };
+        const cart = new Cart(cartItem);
+        await cart.save();
+        return cart;
+    } catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
+
+const getCart = async (touristId) => {
+    try {
+        const cart = await Cart.find({ touristId: touristId });
+        return cart;
+    } catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
+
+const removeCart = async (touristId, cartItemId) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products.splice(cartItemId, 1); // Removes the item at the given index
+        if(cart.products.length == 0){
+            await Cart.deleteOne({ touristId: touristId });
+        }
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error removing from cart: ${error.message}`);
+    }
+}
+
+const editQuantityInCart = async (touristId, cartItemId, quantity) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products[cartItemId].quantity = quantity;
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
+
 module.exports = {
+    editQuantityInCart,
+    removeCart,
+    getCart,
+    addCart,
+    removeWishlist,
+    getWishlist,
+    addWishlist,
     getAllNotifications,
     addNotification,
     getAvailableProductsSortedByRatings,

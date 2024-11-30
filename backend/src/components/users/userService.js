@@ -761,7 +761,39 @@ const verifyOtP = async (_id, otp) => {
     }
 }
 
+const addAddresses = async (userId, address) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const updatedUser = await userRepository.addAddresses(user, address);
+    return updatedUser;
+}
+
+const getAddresses = async (userId) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const addresses = await userRepository.getAddresses(user);
+    return addresses;
+}
+
+const getTouristReport = async (userId) => {
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const report = await userRepository.getTouristReport(user);
+    return report;
+}
 module.exports = {
+    getTouristReport,
+    getAddresses,
+    addAddresses,
     verifyOtP,
     changePasswordAfterOTP,
     addInterestedIn,
