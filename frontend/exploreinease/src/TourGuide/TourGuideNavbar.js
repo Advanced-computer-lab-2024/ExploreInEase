@@ -146,7 +146,6 @@ const TourGuideHP = () => {
             const options = {
               apiPath: `/getTourGuide/${userId}`,
             };
-            //
             const response = await NetworkService.get(options);
             setSuccess(response.message); // Set success message
             const TourGuide=response.tourGuide;
@@ -297,8 +296,8 @@ const TourGuideHP = () => {
 </div>
 
 </nav>
-<Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{width: drawerOpen ? '700px' : '300px'}}>
-          <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
+<Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 250,  overflowX: 'hidden',}}}>
+<div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
               <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
                   {avatarImage ? '' :defaultAvatarUrl }
               </Avatar>

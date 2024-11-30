@@ -19,7 +19,7 @@ import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review ic
 import ArchiveIcon from '@mui/icons-material/Unarchive';
 import Avatar from '@mui/material/Avatar';
 import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
-
+import HomePage from '../../../Seller/SellerNavbar';
 
 
 
@@ -242,6 +242,10 @@ const ArchiveProduct = () => {
     );
 
   return (
+    <div>
+    <div>
+      <HomePage/>
+    </div>
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
       <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}      
        sx={{
@@ -526,6 +530,7 @@ const ArchiveProduct = () => {
       )}
 </div>
     </Box>
+    </div>
   );
 };
 

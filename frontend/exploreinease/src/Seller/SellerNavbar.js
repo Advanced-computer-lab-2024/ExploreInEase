@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import HomePageLogo from '../HomePageLogo.png';
 import '../Guest/GuestHP.css';
 import Avatar from '@mui/material/Avatar';
@@ -23,10 +23,23 @@ import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
+import Badge from '@mui/material/Badge';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 
 const HomePage = () => {
+  const Userr = JSON.parse(localStorage.getItem('User'));
+  const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
    const location=useLocation();
+   const { state } = location;
     const navigate = useNavigate();
+    const [menuItems,setMenuItems]=useState( [
+      { title: 'New Message', body: 'You have received a new message from Alex.' },
+      { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
+      { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
+      { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
+      { title: 'Project Deadline', body: 'Project submission is due next week.' },
+      { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
+      { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
     const [success,setSuccess]=useState();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [error,setError]=useState();
@@ -34,9 +47,12 @@ const HomePage = () => {
     const [showErrorMessage, setShowErrorMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const { User, imageUrl } = location.state || {};
-    const [anchorEl, setAnchorEl] = useState(null);
+    const User = state?.User || Userr;    
+    const imageUrl = state?.imageUrl ||imageUrll; 
+     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const [anchorEl1, setAnchorEl1] = React.useState(null);
+    const openNotfication = Boolean(anchorEl1);
         const initialUsername = User.User?.username || User.username;
     const userId = User.User?._id || User._id;
     const userType = User.User?.type || User.type;
@@ -114,7 +130,9 @@ const HomePage = () => {
         }
     }
 };
-   
+const handleClickNotification = (event) => {
+  setAnchorEl1(event.currentTarget);
+}; 
     async function handleClick(title) {
        if (title=="My Profile"){
         try {
@@ -209,12 +227,14 @@ const HomePage = () => {
           setError(errorMessage);
         }
       };
-      
+      const handleClose = () => {
+        setAnchorEl1(null);
+      };
     const toggleDrawer = (open) => () => {
       setDrawerOpen(open);
   };
   return (
-    <div className="homepage">
+    <div>
       <nav className="navbar">
         <div className="logo-container">
           <img
@@ -224,31 +244,61 @@ const HomePage = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
-        <div 
-                    className="currency-selector" 
-                    style={{ 
-                        position: 'absolute', 
-                        left: '80%', 
-                        transform: 'translateX(-50%)' 
-                    }}
-                >
-                        <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
-
-                    <select id="currency-select" className="currency-dropdown">
-                        <option value="usd">USD ($)</option>
-                        <option value="eur">EUR (€)</option>
-                        <option value="egp">EGP (ج.م)</option>
-                    </select>
+        <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',alignContent:'center',alignItems:'center' }}>
+        <IconButton 
+                        onClick={handleClickNotification} 
+                        aria-controls={open ? 'basic-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        className="menu-button" 
+                        style={{ 
+                            position:'absolute',
+                            color: 'blue',      // Change icon color to blue
+                            backgroundColor: '#e0f7fa', // Light blue background for contrast
+                            right: '100px',
+                            alignItems:'center'
+                        }}>
+                        <Badge badgeContent={4} color="success">
+                        <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
+                        </Badge>
+             </IconButton>
+    <Menu
+    id="basic-menu"
+    anchorEl={anchorEl1}
+    open={openNotfication}
+    onClose={handleClose}
+    MenuListProps={{
+        'aria-labelledby': 'basic-button',
+    }}
+    PaperProps={{
+        style: {
+            maxHeight: '300px', // Set the maximum height for the menu
+            overflow: 'auto',   // Enable scrolling
+        },
+    }}
+>
+    {menuItems && menuItems.length > 0 ? (
+        menuItems.map((item, index) => (
+            <MenuItem key={index}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <strong>{item.title}</strong>
+                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
                 </div>
-              
-                <IconButton 
+            </MenuItem>
+        ))
+    ) : (
+        <MenuItem disabled>No notifications available</MenuItem>
+    )}
+</Menu>
+        <IconButton 
                     onClick={toggleDrawer(true)} 
                     className="menu-button" 
                     style={{ position: 'absolute', right: '40px', color: 'white', backgroundColor: '#3f51b5' }}>
                     <MenuIcon />
                 </IconButton>
+        </div>
             </nav>
-            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{ width: drawerOpen ? '700px' : '300px' }}>
+            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 250,  overflowX: 'hidden',}}}>
                 <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
                     <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
                         {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}

@@ -69,7 +69,7 @@ const Login = () => {
         navigate('/AdminHomePage', { state: { tourist: user } });
         break;
       case 'touristGovern':
-        navigate('/GovernorHomePage', { state: { tourist: user } });
+        navigate('/GovernorHomePage', { state: { tourist: user,imageUrl: imageUrl } });
         break;
       case 'seller':
         navigate('/SellerHomePage', { state: { User: user, imageUrl: imageUrl } });
@@ -81,7 +81,7 @@ const Login = () => {
         navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
-        navigate('/TouristHomePage', { state: { tourist: user } });
+        navigate('/TouristHomePage', { state: { tourist: user,imageUrl: imageUrl } });
     }
   };
 

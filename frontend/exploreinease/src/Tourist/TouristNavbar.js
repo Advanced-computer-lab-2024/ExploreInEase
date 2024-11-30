@@ -9,7 +9,6 @@ import LockIcon from '@mui/icons-material/Lock';
 import LogoutIcon from '@mui/icons-material/Logout';
 import '../Guest/GuestHP.css'; 
 import HomePageLogo from '../HomePageLogo.png';
-
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -18,23 +17,29 @@ import IconButton from '@mui/material/IconButton';
 import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Alert } from '@mui/material'; 
-
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { Delete } from '@mui/icons-material';
 import axios from 'axios';
+import Badge from '@mui/material/Badge';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+
 const TouristNavbar = () => {
+  // const Userr = JSON.parse(localStorage.getItem('User'));
+  // const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
     const navigate = useNavigate();
     const location = useLocation();
-    const { tourist, imageUrl } = location.state || {};
+    const { state } = location;
+    const  tourist  = state?.tourist || {};
+    const imageUrl = state?.imageUrl ||{};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [currency, setCurrency] = useState("EGP"); // default currency
-    console.log(currency);
-
     const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorEl1, setAnchorEl1] = React.useState(null);
+    const openNotfication = Boolean(anchorEl1);
     const open = Boolean(anchorEl);
     const initialUsername = tourist?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
@@ -49,7 +54,14 @@ const TouristNavbar = () => {
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
- 
+     const [menuItems,setMenuItems]=useState( [
+      { title: 'New Message', body: 'You have received a new message from Alex.' },
+      { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
+      { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
+      { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
+      { title: 'Project Deadline', body: 'Project submission is due next week.' },
+      { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
+      { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
      useEffect(() => {
          // Update the avatar URL when the component mounts if a new image URL exists
          if (savedAvatarUrl || imageUrl) {
@@ -84,6 +96,12 @@ const TouristNavbar = () => {
 
    const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
+};
+const handleClick = (event) => {
+  setAnchorEl1(event.currentTarget);
+};
+const handleClose = () => {
+  setAnchorEl1(null);
 };
 
    const handleMenuClose = () => {
@@ -302,42 +320,72 @@ const TouristNavbar = () => {
     setDrawerOpen(open);
 };
 return (
-  <div className="homepage">
+  <div>
       <nav className="navbar">
           <div className="logo-container">
               <img src={HomePageLogo} alt="ExploreInEase Logo" className="logo" />
               <span className="website-name">ExploreInEase</span>
           </div>
-          <div 
-                className="currency-selector" 
-                style={{ position: 'absolute', left: '80%', transform: 'translateX(-50%)' }}
-            >
-                <label htmlFor="currency-select" style={{ marginRight: '8px' }}>
-                    <strong>Choose Currency:</strong>
-                </label>
-                <select 
-                    id="currency-select" 
-                    className="currency-dropdown" 
-                    value={currency} 
-                    onChange={handleCurrencyChange}
-                >
-                    <option value="dollar">USD ($)</option>
-                    <option value="euro">EUR (€)</option>
-                    <option value="EGP">EGP (ج.م)</option>
-                </select>
-            </div>
+          <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',alignContent:'center',alignItems:'center' }}>
           <IconButton 
-  onClick={toggleDrawer(true)} 
-  className="menu-button" 
-  style={{ 
-    position: 'absolute', 
-    right: '40px', 
-    color: 'white',      // Icon color
-    backgroundColor: '#3f51b5' // Background color
-  }}
+                        onClick={handleClick} 
+                        aria-controls={open ? 'basic-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        className="menu-button" 
+                        style={{ 
+                            position:'absolute',
+                            color: 'blue',      // Change icon color to blue
+                            backgroundColor: '#e0f7fa', // Light blue background for contrast
+                            right: '100px',
+                            alignItems:'center'
+                        }}>
+                        <Badge badgeContent={4} color="success">
+                        <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
+                        </Badge>
+             </IconButton>
+    <Menu
+    id="basic-menu"
+    anchorEl={anchorEl1}
+    open={openNotfication}
+    onClose={handleClose}
+    MenuListProps={{
+        'aria-labelledby': 'basic-button',
+    }}
+    PaperProps={{
+        style: {
+            maxHeight: '300px', // Set the maximum height for the menu
+            overflow: 'auto',   // Enable scrolling
+        },
+    }}
 >
-  <MenuIcon />
-</IconButton>
+    {menuItems && menuItems.length > 0 ? (
+        menuItems.map((item, index) => (
+            <MenuItem key={index}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <strong>{item.title}</strong>
+                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
+                </div>
+            </MenuItem>
+        ))
+    ) : (
+        <MenuItem disabled>No notifications available</MenuItem>
+    )}
+</Menu>
+                  <IconButton 
+            onClick={toggleDrawer(true)} 
+            className="menu-button" 
+            style={{ 
+              position: 'absolute', 
+              right: '40px', 
+              color: 'white',      // Icon color
+              backgroundColor: '#3f51b5' // Background color
+            }}
+          >
+              <MenuIcon />
+            </IconButton>
+                    </div>
+
        
       </nav>
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{width: drawerOpen ? '700px' : '300px'}}>

@@ -55,11 +55,11 @@ const HomePage = () => {
     // Retrieve avatar URL from localStorage or fallback to the default avatar
     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
     const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
-
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [showErrorMessage, setShowErrorMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    
     useEffect(() => {
         // Update the avatar URL when the component mounts if a new image URL exists
         if (savedAvatarUrl || imageUrl) {
@@ -259,12 +259,8 @@ const HomePage = () => {
                     <MenuIcon />
                 </IconButton>
                 </div>
-              
-              
             </nav>
-        
-
-            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 250,  overflowX: 'hidden',}}}>
+            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 500,  overflowX: 'hidden',}}}>
                 <div style={{ padding: '16px', display: 'flex', alignItems: 'center',alignContent:'center' }}>
                     <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
                         {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}

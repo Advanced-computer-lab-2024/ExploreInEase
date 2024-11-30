@@ -7,7 +7,7 @@ import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem, A
 import { Visibility, VisibilityOff, Email, Phone, Cake, Flag, LocationOn, Wc, Lock } from '@mui/icons-material';
 import WorkIcon from '@mui/icons-material/Work';
 import NetworkService from '../../../NetworkService';
-import { useLocation } from 'react-router-dom';
+import { useLocation,useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import silver from './silver.png';
@@ -21,7 +21,7 @@ import { styled } from '@mui/system';
 const TouristProfile = (props) => {
   const location = useLocation();
   const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
-  console.log(Tourist);
+  // console.log(Tourist);
 
   const initialData = {
     email: Tourist?.email || '',
@@ -33,6 +33,7 @@ const TouristProfile = (props) => {
     wallet: Tourist?.wallet || 0,
     points: Tourist?.points || 0,
   };
+  const navigate = useNavigate();
   const userId = Tourist._id;
   const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
   const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);

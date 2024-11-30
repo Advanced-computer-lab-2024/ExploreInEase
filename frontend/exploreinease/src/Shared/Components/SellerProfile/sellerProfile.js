@@ -12,9 +12,7 @@ import Tooltip from '@mui/material/Tooltip';
 import StarIcon from '@mui/icons-material/Star';
 import Sky from '../Sky2.jpeg';
 import { styled } from '@mui/system';
-
-
-
+import '../TourGuideProfile/tourGuideProfile.css';
 const SellerProfile = (props) => {
   const initialData = {
     username: '',
@@ -23,6 +21,7 @@ const SellerProfile = (props) => {
     specialist: '',
   };
   const location = useLocation();
+  const navigate=useNavigate();
   const { tourist, imageUrl } = location.state || {};
   console.log(tourist);
   const userId = tourist.tourist?._id || tourist?._id;
@@ -252,6 +251,10 @@ const SellerProfile = (props) => {
       </Box>
     </Grid>
 </Grid>
+        <p className='signup-promptadvance'>
+          Back to 
+          <span className='signup-link' onClick={() => navigate('/SellerHomePage')}>Home Page</span>
+        </p>
         </Card>
       </Box>
     </LocalizationProvider>

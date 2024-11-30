@@ -20,6 +20,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import ShoppingBasket from '@mui/icons-material/ShoppingBasket';
 import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
 import Avatar from '@mui/material/Avatar';
+import HomePage from '../../../Seller/SellerNavbar';
+
+
 const ProductCard = () => {
    const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
@@ -446,6 +449,11 @@ const handleClickPurchase = async (product, selectedQuantity) => {
     );
 
   return (
+    <div>
+      <div>
+    <HomePage/>
+      </div>
+    
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
       <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}   
       sx={{
@@ -942,6 +950,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
   </Tooltip>
 )}
     </Box>
+    </div>
   );
 };
 
