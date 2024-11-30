@@ -18,36 +18,65 @@ const createOrder = async (orderData) => {
 };
 
 
-const findOrdersByStatusAndTouristId = async (status, touristId, currency) => {
-    const orders = await Order.find({ status, touristId }).exec();
-  
-    // Handle currency conversion
-    const convertedOrders = orders.map((order) => {
+const findOrdersByStatusAndTouristId = async (touristId, currency) => {
+  // Fetch orders for the given touristId
+  const orders = await Order.find({ touristId }).exec();
+
+  // Fetch tourist information for the given touristId
+  const tourist = await Tourist.findById(touristId).exec();
+  if (!tourist) {
+      throw new Error("Tourist not found");
+  }
+  const customerName = tourist.username;
+
+  // Create a map of product IDs to their names for efficient lookup
+  const productIds = [
+      ...new Set(
+          orders.flatMap(order => order.productsIdsQuantity.map(product => product.id))
+      )
+  ];
+  const products = await Products.find({ _id: { $in: productIds } }).exec();
+  const productMap = Object.fromEntries(
+      products.map(product => [product._id.toString(), product.name])
+  );
+
+  // Map orders to the desired structure
+  const convertedOrders = orders.map((order, index) => {
+      // Convert price based on the specified currency
       let convertedPrice = order.price;
-  
       switch (currency) {
-        case "euro":
-            convertedPrice = parseFloat((order.price / 55).toFixed(2))
-          break;
-        case "dollar":
-            convertedPrice = parseFloat((order.price / 50).toFixed(2))
-          break;
-        case "EGP":
-          // No conversion needed for EGP
-          break;
-        default:
-          throw new Error("Invalid currency specified");
+          case "euro":
+              convertedPrice = parseFloat((order.price / 55).toFixed(2));
+              break;
+          case "dollar":
+              convertedPrice = parseFloat((order.price / 50).toFixed(2));
+              break;
+          case "EGP":
+              // No conversion needed for EGP
+              break;
+          default:
+              throw new Error("Invalid currency specified");
       }
-  
+
       return {
-        ...order.toObject(), // Spread order data as a plain object
-        price: convertedPrice, // Update the price with the converted value
+          id: index + 1, // Generate a unique ID starting from 1
+          orderDate: new Date(order.createdAt).toISOString().split("T")[0], // Format date as YYYY-MM-DD
+          status: order.status,
+          products: order.productsIdsQuantity.map((product, idx) => ({
+              id: idx + 1, // Product index in sequence
+              name: productMap[product.id] || "Unknown Product", // Fetch name from productMap
+              quantity: product.quantity,
+              price: convertedPrice, // Total price of the order
+          })),
+          customerName, // Fetched from the Tourist table
+          shippingAddress: `${order.addressToBeDelivered.street}, ${order.addressToBeDelivered.city}, ${order.addressToBeDelivered.country}`,
+          paymentType: order.paymentType,
       };
-    });
-  
-    return convertedOrders;
-  };
-  
+  });
+
+  return convertedOrders;
+};
+
 
 
 

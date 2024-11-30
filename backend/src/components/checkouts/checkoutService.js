@@ -134,13 +134,8 @@ const createOrderWithCard = async ({ touristId, productsIdsQuantity, price, addr
 
 
 // Service for retrieving orders by status and touristId
-const getOrdersByStatusAndTouristId = async (status, touristId,currency) => {
-    const validStatuses = ['delivered', 'pending'];
-    if (!validStatuses.includes(status)) {
-        throw new Error('Invalid order status');
-    }
-
-    const orders = await checkoutRepository.findOrdersByStatusAndTouristId(status, touristId,currency);
+const getOrdersByStatusAndTouristId = async (touristId,currency) => {
+    const orders = await checkoutRepository.findOrdersByStatusAndTouristId(touristId,currency);
     return orders;
 };
 

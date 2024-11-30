@@ -232,7 +232,7 @@ const createOrderWithCard = async (req, res) => {
 
 
 // Controller for viewing delivered orders associated with a tourist
-const viewDeliveredOrders = async (req, res) => {
+const viewMyOrders = async (req, res) => {
     const { touristId,currency } = req.params;
 
     if (!touristId) {
@@ -243,7 +243,7 @@ const viewDeliveredOrders = async (req, res) => {
     }
 
     try {
-        const orders = await checkoutService.getOrdersByStatusAndTouristId('delivered', touristId,currency);
+        const orders = await checkoutService.getOrdersByStatusAndTouristId(touristId,currency);
         return res.status(200).json({
             success: true,
             data: orders,
@@ -256,30 +256,6 @@ const viewDeliveredOrders = async (req, res) => {
     }
 };
 
-// Controller for viewing pending orders associated with a tourist
-const viewPendingOrders = async (req, res) => {
-    const { touristId,currency } = req.params;
-
-    if (!touristId) {
-        return res.status(400).json({
-            success: false,
-            message: 'Tourist ID is required.',
-        });
-    }
-
-    try {
-        const orders = await checkoutService.getOrdersByStatusAndTouristId('pending', touristId,currency);
-        return res.status(200).json({
-            success: true,
-            data: orders,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message,
-        });
-    }
-};
 
 
 
@@ -317,7 +293,6 @@ module.exports = {
     availableQuantityAndSales,
     createOrderWalletOrCod,
     createOrderWithCard,
-    viewDeliveredOrders,
-    viewPendingOrders,
+    viewMyOrders,
     cancelOrder
 };
