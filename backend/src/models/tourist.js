@@ -22,10 +22,7 @@ const TouristSchema = new Schema({
         match: [/^\d{10,15}$/, 'Invalid mobile number'], // Supports 10 to 15 digit numbers
     },
     email: {
-        type: String,
-        required: [true, 'Email is required'],
-        unique: true,
-        match: [/\S+@\S+\.\S+/, 'Invalid email format'], // Basic email validation
+        type: String
     },
     nation: {
         type: String,
@@ -119,6 +116,10 @@ const TouristSchema = new Schema({
         type: Number,
         default: 0
     },
+    currency: {
+        type: String,
+        default: "EGP"
+    }
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"

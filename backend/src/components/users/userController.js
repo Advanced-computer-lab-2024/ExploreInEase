@@ -606,7 +606,7 @@ const requestDeletion = async (req, res) => {
 
 const registerUser = async (req, res) => {
     const { type } = req.params;
-    const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
+    const { email, username, password, mobileNum, nation, dob,  profession, currency} = req.body;
     if (!type) {
         return res.status(400).json({ message: "User type is required" });
     }
@@ -629,7 +629,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Missing Input" });
         }
         try {
-            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob,  profession);
+            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob,  profession, currency);
             res.status(result.status).json(result.response);
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -641,7 +641,7 @@ const registerUser = async (req, res) => {
                 return res.status(400).json({ message: "Missing Input" });
             }
             try {
-                const result = await userService.registerUser(type, email, username, password);
+                const result = await userService.registerUser(type, email, username, password, currency);
                 res.status(result.status).json(result.response);
             } catch (error) {
                 res.status(500).json({ message: error.message });

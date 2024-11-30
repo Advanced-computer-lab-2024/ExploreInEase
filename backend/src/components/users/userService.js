@@ -601,7 +601,7 @@ const requestDeletion = async (userId, type) => {
     return updateResult;
 };
 
-const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession) => {
+const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession,currency) => {
     const touristExists = await userRepository.checkTouristExists(username);
     if (touristExists) {
         return { status: 409, response: {message: "Tourist already exists"} };
@@ -615,14 +615,15 @@ const registerTourist = async (email, username, password, mobileNum, nation, dob
         nation: nation,
         dob: dob,
         profession: profession,
-        wallet: 1000000
+        wallet: 1000000,
+        currency
     };
     const tourist = await userRepository.saveTourist(newTourist);
     return { status: tourist.status, response: {message: "Turist registered successfully", tourist: tourist.tourist, type: 'tourist'} };
     
 }
 
-const registerUser = async (type, email, username, password) => {
+const registerUser = async (type, email, username, password, currency) => {
     try {
         // Check if a user with the same email or username already exists
         const existingUser = await userRepository.findUserByUsername(username);
@@ -637,6 +638,7 @@ const registerUser = async (type, email, username, password) => {
             password: password,
             type,
             docStatus: 'pending',
+            currency
         };
 
         // Save the user using the repository

@@ -153,6 +153,10 @@ const UsersSchema = new Schema({
         type: Number,
         default: 0
     },
+    currency: {
+        type: String,
+        default: 'EGP'
+    }
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key
