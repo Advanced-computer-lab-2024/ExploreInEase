@@ -198,6 +198,8 @@ const TouristNavbar = () => {
       }
       else if(title =="Book Flights") {
         navigate(`/BookFlight`,{state:{userId}});          
+      }else if(title =="Order History") {
+        navigate(`/OrderHistory`,{state:{userId}});          
       }
       else if (title =="Complaints"){
         try { 
@@ -383,7 +385,8 @@ return (
                   "Book Hotels",
                   "Book Flights",
                   "Complaints",
-                  "My Profile"
+                  "My Profile",
+                  "Order History"
               ].map((text) => (
                   <ListItem key={text} disablePadding>
                       <ListItemButton onClick={() => handleRegisterClick(text)}>
