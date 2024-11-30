@@ -1,22 +1,29 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const router = express.Router()
-const userController = require('../users/userController');
-const multer = require('multer');
-const { bucket } = require('../../../main'); // Import bucket directly from main.js
+const express = require("express");
+const mongoose = require("mongoose");
+const router = express.Router();
+const userController = require("../users/userController");
+const multer = require("multer");
+const { bucket } = require("../../../main"); // Import bucket directly from main.js
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 let db;
 
 const setDBConnection = (database) => {
-    db = database;
+  db = database;
 };
-router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
+router.get("/notAcceptedUsers", userController.getNotAcceptedUsers);
 
-router.get('/deletionrequests', userController.getUsersForDeletion);
+router.get("/deletionrequests", userController.getUsersForDeletion);
 
-router.put('/user/updatingStatus/:userId/:status', userController.updatingStatusUser)
+router.put(
+  "/user/updatingStatus/:userId/:status",
+  userController.updatingStatusUser
+);
+
+//sarah api35
+
+router.get("/getUserStats/:userId", userController.getUserStatistics);
 
 /**
  * @swagger
@@ -48,7 +55,7 @@ router.put('/user/updatingStatus/:userId/:status', userController.updatingStatus
  *       500:
  *         description: Server error
  */
-router.delete('/deleteUserByIdAndType', userController.deleteUserByIdAndType);
+router.delete("/deleteUserByIdAndType", userController.deleteUserByIdAndType);
 
 /**
  * @swagger
@@ -109,7 +116,7 @@ router.delete('/deleteUserByIdAndType', userController.deleteUserByIdAndType);
  *                 message:
  *                   type: string
  */
-router.post('/addGovernorOrAdmin', userController.addGovernorOrAdmin);
+router.post("/addGovernorOrAdmin", userController.addGovernorOrAdmin);
 
 /**
  * @swagger
@@ -187,7 +194,10 @@ router.post('/addGovernorOrAdmin', userController.addGovernorOrAdmin);
  *                 message:
  *                   type: string
  */
-router.get('/fetchAllUsersAndTourists/:_id', userController.fetchAllUsersAndTourists);
+router.get(
+  "/fetchAllUsersAndTourists/:_id",
+  userController.fetchAllUsersAndTourists
+);
 
 /**
  * @swagger
@@ -476,9 +486,9 @@ router.get('/fetchAllUsersAndTourists/:_id', userController.fetchAllUsersAndTour
  *                   example: "Error message here"
  */
 
-router.post('/createTourGuide/:_id', userController.createTourGuide);
-router.get('/getTourGuide/:_id', userController.getTourGuide);
-router.put('/updateTourGuide/:_id', userController.updateTourGuide);
+router.post("/createTourGuide/:_id", userController.createTourGuide);
+router.get("/getTourGuide/:_id", userController.getTourGuide);
+router.put("/updateTourGuide/:_id", userController.updateTourGuide);
 
 /**
  * @swagger
@@ -672,9 +682,9 @@ router.put('/updateTourGuide/:_id', userController.updateTourGuide);
  *                   example: "Error message here"
  */
 
-router.post('/createAdvertiser/:_id', userController.createAdvertiser);
-router.get('/getAdvertiser/:_id', userController.getAdvertiser);
-router.put('/updateAdvertiser/:_id', userController.updateAdvertiser);
+router.post("/createAdvertiser/:_id", userController.createAdvertiser);
+router.get("/getAdvertiser/:_id", userController.getAdvertiser);
+router.put("/updateAdvertiser/:_id", userController.updateAdvertiser);
 
 /**
  * @swagger
@@ -868,9 +878,9 @@ router.put('/updateAdvertiser/:_id', userController.updateAdvertiser);
  *                   example: "Error message here"
  */
 
-router.post('/createSeller/:_id', userController.createSeller);
-router.get('/getSeller/:_id', userController.getSeller);
-router.put('/updateSeller/:_id', userController.updateSeller);
+router.post("/createSeller/:_id", userController.createSeller);
+router.get("/getSeller/:_id", userController.getSeller);
+router.put("/updateSeller/:_id", userController.updateSeller);
 
 /**
  * @swagger
@@ -985,65 +995,79 @@ router.put('/updateSeller/:_id', userController.updateSeller);
  *                   example: "Error message here"
  */
 
-router.get('/getTourist/:_id', userController.getTourist);
-router.put('/updateTourist/:_id', userController.updateTourist);
+router.get("/getTourist/:_id", userController.getTourist);
+router.put("/updateTourist/:_id", userController.updateTourist);
 
-router.post('/rateTourGuide/:touristId', userController.rateTourGuide);
+router.post("/rateTourGuide/:touristId", userController.rateTourGuide);
 
-router.post('/commentTourGuide/:touristId', userController.commentOnTourGuide);
+router.post("/commentTourGuide/:touristId", userController.commentOnTourGuide);
 
-router.post('/rateItinerary/:touristId', userController.rateItinerary);
+router.post("/rateItinerary/:touristId", userController.rateItinerary);
 
-router.post('/commentItinerary/:touristId', userController.commentOnItinerary);
+router.post("/commentItinerary/:touristId", userController.commentOnItinerary);
 
-router.post('/rateActivity/:touristId', userController.rateActivity);
+router.post("/rateActivity/:touristId", userController.rateActivity);
 
-router.post('/commentActivity/:touristId', userController.commentOnActivity);
+router.post("/commentActivity/:touristId", userController.commentOnActivity);
 
-router.post('/rateHistoricalPlace/:touristId', userController.rateHistoricalPlace);
+router.post(
+  "/rateHistoricalPlace/:touristId",
+  userController.rateHistoricalPlace
+);
 
-router.post('/commentHistoricalPlace/:touristId', userController.commentOnHistoricalPlace);
-
-
+router.post(
+  "/commentHistoricalPlace/:touristId",
+  userController.commentOnHistoricalPlace
+);
 
 // Saif ,Tasnim
-router.put('/changePassword/:userId', userController.changePassword);
+router.put("/changePassword/:userId", userController.changePassword);
 
-router.post('/uploadImage/:userId', upload.single('image'), userController.uploadImage);
+router.post(
+  "/uploadImage/:userId",
+  upload.single("image"),
+  userController.uploadImage
+);
 
-router.get('/notAcceptedUsers', userController.getNotAcceptedUsers);
+router.get("/notAcceptedUsers", userController.getNotAcceptedUsers);
 
-router.get('/redeemPoints/:userId/:points', userController.redeemPoints);
+router.get("/redeemPoints/:userId/:points", userController.redeemPoints);
 
-router.put('/pointsAfterPayment/:userId/:amount', userController.pointsAfterPayment);
+router.put(
+  "/pointsAfterPayment/:userId/:amount",
+  userController.pointsAfterPayment
+);
 
-router.get('/level/:userId', userController.getLevel);
+router.get("/level/:userId", userController.getLevel);
 
-router.put('/acceptTerms/:_id/:type', userController.acceptTerms);
+router.put("/acceptTerms/:_id/:type", userController.acceptTerms);
 
-router.post('/register/:type', userController.registerUser);
+router.post("/register/:type", userController.registerUser);
 
-router.post('/login', userController.login);
+router.post("/login", userController.login);
 
-router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
+router.put("/requestDeletion/:userId/:type", userController.requestDeletion);
 
+router.post("/forgetPassword", userController.forgetPassword);
+router.get("/verifyOTP/:userId/:otp", userController.verifyOtP);
+router.put(
+  "/changePasswordAfterOTP/:userId",
+  userController.changePasswordAfterOTP
+);
 
+router.post("/creatingPromoCode", userController.creatingPromoCode);
+router.put("/updatePromoCode", userController.updatePromoCode);
 
-router.post('/forgetPassword', userController.forgetPassword);
-router.get('/verifyOTP/:userId/:otp', userController.verifyOtP);
-router.put('/changePasswordAfterOTP/:userId', userController.changePasswordAfterOTP);
+router.put(
+  "/addInterestedIn/:_id/:eventId/:eventType",
+  userController.addInterestedIn
+);
 
-router.post('/creatingPromoCode', userController.creatingPromoCode);
-router.put('/updatePromoCode', userController.updatePromoCode);
+router.post("/addAddresses/:userId", userController.addAddresses);
+router.get("/getAddresses/:userId", userController.getAddresses);
 
-router.put('/addInterestedIn/:_id/:eventId/:eventType', userController.addInterestedIn);
-
-router.post('/addAddresses/:userId', userController.addAddresses);
-router.get('/getAddresses/:userId', userController.getAddresses);
-
-router.get('/getTouristReport/:userId', userController.getTouristReport);
+router.get("/getTouristReport/:userId", userController.getTouristReport);
 module.exports = {
-    router,
-    setDBConnection,
-   
+  router,
+  setDBConnection,
 };
