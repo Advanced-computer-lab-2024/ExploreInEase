@@ -233,7 +233,7 @@ const createOrderWithCard = async (req, res) => {
 
 // Controller for viewing delivered orders associated with a tourist
 const viewDeliveredOrders = async (req, res) => {
-    const { touristId } = req.params;
+    const { touristId,currency } = req.params;
 
     if (!touristId) {
         return res.status(400).json({
@@ -243,7 +243,7 @@ const viewDeliveredOrders = async (req, res) => {
     }
 
     try {
-        const orders = await checkoutService.getOrdersByStatusAndTouristId('delivered', touristId);
+        const orders = await checkoutService.getOrdersByStatusAndTouristId('delivered', touristId,currency);
         return res.status(200).json({
             success: true,
             data: orders,
@@ -258,7 +258,7 @@ const viewDeliveredOrders = async (req, res) => {
 
 // Controller for viewing pending orders associated with a tourist
 const viewPendingOrders = async (req, res) => {
-    const { touristId } = req.params;
+    const { touristId,currency } = req.params;
 
     if (!touristId) {
         return res.status(400).json({
@@ -268,7 +268,7 @@ const viewPendingOrders = async (req, res) => {
     }
 
     try {
-        const orders = await checkoutService.getOrdersByStatusAndTouristId('pending', touristId);
+        const orders = await checkoutService.getOrdersByStatusAndTouristId('pending', touristId,currency);
         return res.status(200).json({
             success: true,
             data: orders,

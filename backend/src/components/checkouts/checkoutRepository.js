@@ -18,9 +18,36 @@ const createOrder = async (orderData) => {
 };
 
 
-const findOrdersByStatusAndTouristId = async (status, touristId) => {
-    return await Order.find({ status, touristId }).exec();
-};
+const findOrdersByStatusAndTouristId = async (status, touristId, currency) => {
+    const orders = await Order.find({ status, touristId }).exec();
+  
+    // Handle currency conversion
+    const convertedOrders = orders.map((order) => {
+      let convertedPrice = order.price;
+  
+      switch (currency) {
+        case "euro":
+            convertedPrice = parseFloat((order.price / 55).toFixed(2))
+          break;
+        case "dollar":
+            convertedPrice = parseFloat((order.price / 50).toFixed(2))
+          break;
+        case "EGP":
+          // No conversion needed for EGP
+          break;
+        default:
+          throw new Error("Invalid currency specified");
+      }
+  
+      return {
+        ...order.toObject(), // Spread order data as a plain object
+        price: convertedPrice, // Update the price with the converted value
+      };
+    });
+  
+    return convertedOrders;
+  };
+  
 
 
 

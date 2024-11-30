@@ -22,10 +22,11 @@ router.post('/createOrderCard', checkoutController.createOrderWithCard);
 
 
 // Route for viewing delivered orders
-router.get('/pastOrders/:touristId', checkoutController.viewDeliveredOrders);
+router.get('/pastOrders/:touristId/:currency', checkoutController.viewDeliveredOrders);
+
 
 // Route for viewing pending orders
-router.get('/currentOrders/:touristId', checkoutController.viewPendingOrders);
+router.get('/currentOrders/:touristId/:currency', checkoutController.viewPendingOrders);
 
 
 

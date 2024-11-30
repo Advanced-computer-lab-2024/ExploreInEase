@@ -283,7 +283,7 @@ router.post('/sendEventEmail/:touristId/:receiverEmail', eventController.sendEve
 
 
 router.get('/bookedEvents/:touristId', eventController.bookedEvents)
-router.put('/bookEvent', eventController.bookEvent);
+
 router.put('/cancelBookingEvent', eventController.cancelBookingEvent);
 // Route to get city code by city name
 router.get('/city/:city', eventController.getCityCode);
@@ -318,7 +318,7 @@ router.get('/getAllEvents', eventController.getAllEvents);
 
 //New ElNew code 
 
-
+router.put('/bookEvent', eventController.bookEvent);
 router.post('/bookEventWithCard', eventController.bookEventWithCard);
 
 

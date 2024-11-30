@@ -197,10 +197,7 @@ const bookedEvents = async (touristId) => {
 
 
 
-const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {
-  
-  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice);
-};
+
 
 const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
     
@@ -458,6 +455,12 @@ const  getAllEvents=async()=> {
 
 
 //New ElNew code 
+
+
+const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice,promoCode) => {
+  
+  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice,promoCode);
+};
 
 
 const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode) => {

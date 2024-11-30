@@ -212,39 +212,6 @@ const bookedEvents = async (req, res) => {
 
 
 
-const bookEvent = async (req, res) => {
-  const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice } = req.body;
-
-  try {
-    if (userType !== 'tourist') {
-      throw new Error('User type must be tourist');
-    }
-    if (!touristId || !userType || !eventType || !eventID) {
-      return res.status(400).json({ error: "All attributes are required in the request body" });
-    }
-
-    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Event booked successfully',
-      data: updatedTourist,
-    });
-  } catch (error) {
-    if (error.message.includes('already been booked')) {
-      return res.status(409).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
 
 
 const cancelBookingEvent = async (req, res) => {
@@ -438,6 +405,42 @@ const getAllEvents= async(req, res) => {
 
 
 //New ElNew code 
+
+
+
+const bookEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice,promoCode } = req.body;
+
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+    }
+    if (!touristId || !userType || !eventType || !eventID) {
+      return res.status(400).json({ error: "All attributes are required in the request body" });
+    }
+
+    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice,promoCode);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event booked successfully',
+      data: updatedTourist,
+    });
+  } catch (error) {
+    if (error.message.includes('already been booked')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 
 const bookEventWithCard = async (req, res) => {
   const {
