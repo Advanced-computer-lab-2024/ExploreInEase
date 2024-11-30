@@ -47,6 +47,8 @@ const Complaints = React.lazy(() => import('./Tourist/Complaints'));
  const TourGuideReport = React.lazy(() => import('./Shared/Components/Reports/TouristsReport'));
  const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesReport'));
  const OrderHistory = React.lazy(() => import('./Tourist/OrderHistory'));
+ const Cart = React.lazy(() => import('./Tourist/cart2'));
+
 
 
 
@@ -99,6 +101,8 @@ const App = () => {
           <Route path="/TouristsReport" element={<TourGuideReport />} />
           <Route path="/SalesReport" element={<SalesReport />} />
           <Route path="/OrderHistory" element={<OrderHistory />} />
+          <Route path="/Cart" element={<Cart />} />
+
 
 
 

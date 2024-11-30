@@ -82,6 +82,7 @@ const OrdersDashboard = () => {
       shippingAddress: "456 Oak Ave, Los Angeles, CA"
     }
   ]);
+  console.log(orders);
 
   const calculateOrderTotal = (products) => {
     return products.reduce((total, product) => total + (product.price * product.quantity), 0);
