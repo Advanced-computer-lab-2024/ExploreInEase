@@ -7,6 +7,9 @@ const activitySchema = new Schema({
     type: String,
     required: true,
   },
+  picture: {
+    type: String,
+  },
   date: {
     type: Date,
     required: true,
@@ -74,6 +77,10 @@ const activitySchema = new Schema({
     ref: 'PreferenceTags',
     required: true,
   }],
+  isBooked: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Create and export the model

@@ -69,14 +69,9 @@ const TouristSchema = new Schema({
         default: Date.now, // Auto-sets to the current date/time
         immutable: true // This value cannot be changed once set
     },
-    addresses: [
-        {
-            street: { type: String },
-            city: { type: String},
-            country: { type: String},
-            zipCode: { type: String, match: [/^\d{5}$/, 'Invalid zip code'] }
-        }
-    ],
+    addresses: [{
+        type: String,
+    }],
     points: {
         type: Number,
         default: 0,
@@ -116,6 +111,18 @@ const TouristSchema = new Schema({
         type: Boolean,
         default: false
     },
+    interestedIn: [{
+        id: { type: mongoose.Schema.Types.ObjectId},
+        type: { type: String }
+    }],
+    otp: {
+        type: Number,
+        default: 0
+    },
+    currency: {
+        type: String,
+        default: "EGP"
+    }
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"

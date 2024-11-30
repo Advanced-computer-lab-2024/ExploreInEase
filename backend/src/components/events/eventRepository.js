@@ -631,7 +631,7 @@ const sendBookingConfirmationEmail = async (
     from: "aclproject7@gmail.com",
     to: touristEmail,
     subject: "Booking Confirmation for Your Event",
-    text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid: ${pricePaid} EGP\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
+    text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid by wallet: ${pricePaid} EGP\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
   };
 
   await transporter.sendMail(mailOptions);
@@ -843,6 +843,37 @@ const sendPaymentReceiptEmail = async (
 };
 
 
+
+
+//saif functions 
+const findTourists = async () => {
+  return await Tourist.find();
+};
+
+
+
+
+const findEventById = async (eventId) => {
+  const activity = await Activity.findById(eventId);
+  const historicalPlace = await HistoricalPlace.findById(eventId);
+  const itinerary = await Itinerary.findById(eventId);
+
+  if(activity){
+    return activity;
+  }
+
+  if(historicalPlace){
+    return historicalPlace;
+  }
+
+  if(itinerary){
+    return itinerary;
+  }
+
+  return null;
+}
+
+
 module.exports = {
   createCategory,
   getAllCategories,
@@ -871,4 +902,6 @@ module.exports = {
   getAllItineraries,
   getAllHistoricalPlaces,
   bookEventWithCard,
+  findTourists,
+  findEventById
 };

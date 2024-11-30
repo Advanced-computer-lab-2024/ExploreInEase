@@ -1,4 +1,9 @@
 const eventService = require('../events/eventService');
+const nodemailer = require('nodemailer');
+const eventRepository = require('./eventRepository');
+const checkoutRepository = require('../checkouts/checkoutRepository');
+require('dotenv').config();
+
 
 // Get all user events by _id and userType
 const getUserEvents = async (req, res) => {
@@ -421,6 +426,53 @@ const bookEvent = async (req, res) => {
 
     const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice,promoCode);
 
+    const allTourists = await eventRepository.findTourists();
+    
+    allTourists.forEach(async tourist => {
+  const isInterested = tourist.interestedIn.some(interested => 
+      interested.id.toString() === eventID && 
+      interested.type === eventType
+  );
+
+  if (isInterested) {
+      const event = eventRepository.findEventById(eventID, eventType);
+      if (event) {
+          if(!event.isBooked) {
+            const body = `${eventType} with Name ${event.name} started its first booking`;
+            const notificationData = {
+                body,
+                user: {
+                    user_id: touristId,
+                    user_type: "tourist"
+                }
+            };
+            const notification = await checkoutRepository.addNotification(notificationData);
+            console.log("NOTIFICATION: ",notification);
+            
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL2_USER,
+                    pass: process.env.EMAIL2_PASS
+                }
+            });
+        
+            console.log("Transporter created");
+            
+            const mailOptions = {
+                from: process.env.EMAIL2_USER,
+                to: tourist.email,
+                subject: 'Event Booking',
+                text: `${eventType} with Name ${event.name} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+            };
+        
+            await transporter.sendMail(mailOptions); 
+          }
+      }
+  }
+    });
+
+
     return res.status(200).json({
       success: true,
       message: 'Event booked successfully',
@@ -481,6 +533,52 @@ const bookEventWithCard = async (req, res) => {
     const result = await eventService.addEventToTouristWithCard(
       userType,touristId,eventType,eventID,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode
     );
+
+    const allTourists = await eventRepository.findTourists();
+    
+    allTourists.forEach(async tourist => {
+      const isInterested = tourist.interestedIn.some(interested => 
+          interested.id.toString() === eventID && 
+          interested.type === eventType
+      );
+    
+      if (isInterested) {
+          const event = eventRepository.findEventById(eventID, eventType);
+          if (event) {
+              if(!event.isBooked) {
+                const body = `${eventType} with Name ${event.name} started its first booking`;
+                const notificationData = {
+                    body,
+                    user: {
+                        user_id: touristId,
+                        user_type: "tourist"
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+                
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: tourist.email,
+                    subject: 'Event Booking',
+                    text: `${eventType} with Name ${event.name} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions); 
+              }
+          }
+      }
+    });
 
     return res.status(200).json({
       success: true,

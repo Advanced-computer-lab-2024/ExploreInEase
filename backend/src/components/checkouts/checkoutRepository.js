@@ -2,6 +2,7 @@
 const Products = require('../../models/product'); // Adjust the path as necessary
 const Order = require('../../models/order'); // Adjust the path as necessary
 const Tourist = require('../../models/tourist'); // Adjust the path as necessary
+const Notification = require('../../models/notification'); // Adjust the path as necessary
 
 const getProductById = async (productId) => {
     
@@ -96,11 +97,24 @@ const deleteOrderById = async (orderId) => {
 };
 
 
+
+// saif functions
+
+
+const addNotification = async (notificationData) => {
+    const notification = new Notification(notificationData);
+    const newNotification = await notification.save();
+    return newNotification;
+};
+
+
 module.exports = {
     getProductById,
     createOrder,
     findOrdersByStatusAndTouristId,
     getOrderById,
     getTouristById,
-    deleteOrderById
+    deleteOrderById,
+    addNotification,
+    
 };

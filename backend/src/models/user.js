@@ -149,7 +149,14 @@ const UsersSchema = new Schema({
             ref: 'PromoCodes'
         },
     }],
-    
+    otp: {
+        type: Number,
+        default: 0
+    },
+    currency: {
+        type: String,
+        default: 'EGP'
+    }
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

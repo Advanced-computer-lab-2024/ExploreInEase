@@ -206,6 +206,20 @@ const getAllUsersForDeletion = async () => {
 };
 
 
+//new elnew codeee
+
+//saif function
+
+const findSellerById = async (id) => {
+    try {
+        const seller = await Users.findById({_id: id});
+        return seller;
+    } catch (error) {
+        console.error('Error fetching seller by ID:', error);
+        throw error;
+    }
+}
+
 
 module.exports = { 
     deleteTourist,
@@ -221,5 +235,6 @@ module.exports = {
     checkTourGuideItineraryDates,
     checkSellerProductStatus,
     checkAdvertiserActivityStatus,
-    getAllUsersForDeletion
+    getAllUsersForDeletion,
+    findSellerById
 };
