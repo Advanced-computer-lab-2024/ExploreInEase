@@ -5,7 +5,7 @@ import React, { Suspense } from 'react';
 
 import MyCart from './Tourist/components/cart'; 
 import CartPage from './Tourist/components/cart2';
-
+import WishList from './Tourist/components/wishlist';
 
 
 
@@ -59,7 +59,9 @@ const Complaints = React.lazy(() => import('./Tourist/Complaints'));
 
 const App = () => {
   return (
-    <CartPage />
+    // <MyCart />
+    // <CartPage />
+    <WishList />
     // <Router>
     //   {/* Wrapping Routes with Suspense to handle loading */}
     //   <Suspense fallback={<div>Loading...</div>}>
