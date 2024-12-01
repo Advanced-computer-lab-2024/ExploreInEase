@@ -22,67 +22,17 @@ import {
   Cancel as XCircleIcon,
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
+import { useLocation } from 'react-router-dom';
+import axios from 'axios';
+
 
 const OrdersDashboard = () => {
-  const [currentTab, setCurrentTab] = useState(0);
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      orderDate: "2024-12-15",
-      status: "pending",
-      products: [
-        {
-          id: 1,
-          name: "Wireless Headphones",
-          quantity: 2,
-          price: 199.99
-        },
-        {
-          id: 2,
-          name: "Smart Watch",
-          quantity: 1,
-          price: 299.99
-        }
-      ],
-      customerName: "John Doe",
-      shippingAddress: "123 Main St, New York, NY"
-    },
-    {
-      id: 2,
-      orderDate: "2024-11-20",
-      status: "delivered",
-      products: [
-        {
-          id: 3,
-          name: "Gaming Mouse",
-          quantity: 1,
-          price: 79.99
-        },
-        {
-          id: 4,
-          name: "Mechanical Keyboard",
-          quantity: 1,
-          price: 149.99
-        },
-        {
-          id: 5,
-          name: "Mouse Pad",
-          quantity: 2,
-          price: 19.99
-        },
-        {
-            id: 6,
-            name: "trial",
-            quantity: 5,
-            price: 79.99
-        }
 
-      ],
-      customerName: "Jane Smith",
-      shippingAddress: "456 Oak Ave, Los Angeles, CA"
-    }
-  ]);
-  console.log(orders);
+  const location = useLocation();
+  const { Orders ,User } = location.state || {};
+  const [currentTab, setCurrentTab] = useState(0);
+  const [orders, setOrders] = useState(Orders);
+  console.log(orders)
 
   const calculateOrderTotal = (products) => {
     return products.reduce((total, product) => total + (product.price * product.quantity), 0);

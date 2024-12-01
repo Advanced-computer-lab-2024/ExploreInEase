@@ -202,7 +202,26 @@ const TouristNavbar = () => {
       else if(title =="Book Flights") {
         navigate(`/BookFlight`,{state:{userId}});          
       }else if(title =="Order History") {
-        navigate(`/OrderHistory`,{state:{userId}});          
+        try {
+          const options = {
+            apiPath: `/myOrders/${userId}/${currency}`,
+          };
+          
+          const response = await NetworkService.get(options);
+          console.log(response);
+
+          setSuccess(response.message); // Set success message
+          const Type='tourist';
+          const Orders = response.data;
+          navigate(`/OrderHistory`,{ state: { Orders, Type ,User:tourist} });          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }          
       }
       else if (title =="Complaints"){
         try { 

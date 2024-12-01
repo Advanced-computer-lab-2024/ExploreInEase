@@ -350,6 +350,7 @@ const availableQuantityAndSales = async (req, res) => {
 
 const getAvailableProducts = async (req, res) => {
     const {userId} = req.params;
+    console.log(userId);
     const type = await checkoutRepository.getType(userId);
     console.log(type);
     if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
@@ -407,6 +408,65 @@ const getAvailableProductsSortedByRatings = async (req, res) => {
     }
 };
 
+
+
+// Controller for viewing delivered orders associated with a tourist
+const viewMyOrders = async (req, res) => {
+    const { touristId,currency } = req.params;
+    console.log(currency);
+
+    if (!touristId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Tourist ID is required.',
+        });
+    }
+
+    try {
+        const orders = await checkoutService.getOrdersByStatusAndTouristId(touristId,currency);
+        console.log(orders);
+        return res.status(200).json({
+            success: true,
+            data: orders,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
+
+
+
+
+// Controller to cancel an order
+const cancelOrder = async (req, res) => {
+    const { orderId, touristId } = req.body;
+
+    if (!orderId || !touristId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Order ID and Tourist ID are required.',
+        });
+    }
+
+    try {
+        await checkoutService.cancelOrder(orderId, touristId);
+        return res.status(200).json({
+            success: true,
+            message: 'Order canceled successfully.',
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 module.exports = {
     uploadImage,
     availableQuantityAndSales,
@@ -422,5 +482,7 @@ module.exports = {
     reviewProduct,
     addOrder,
     getOrders,
-    updateOrder
+    updateOrder,
+    viewMyOrders,
+    cancelOrder
 };
