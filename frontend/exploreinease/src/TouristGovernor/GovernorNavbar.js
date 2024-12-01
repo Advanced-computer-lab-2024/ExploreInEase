@@ -22,9 +22,11 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom'; 
 
 const GovernorNavbar = () => {
+  const Userr = JSON.parse(localStorage.getItem('User'));
    const navigate = useNavigate();
    const location = useLocation();
-   const { tourist } = location.state || {};
+   const { state } = location;
+   const tourist = state?.tourist || Userr;    
    const {error,setError}=useState();
    const {success,setSuccess}=useState();
    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -62,11 +64,13 @@ const GovernorNavbar = () => {
        }       
      }
      };
+
+     
      const toggleDrawer = (open) => () => {
        setDrawerOpen(open);
    };
  return (
-   <div className="homepage">
+   <div>
      <nav className="navbar">
        <div className="logo-container">
          <img
@@ -76,34 +80,19 @@ const GovernorNavbar = () => {
          />
          <span className="website-name">ExploreInEase</span>
        </div>
-       <div 
-                   className="currency-selector" 
-                   style={{ 
-                       position: 'absolute', 
-                       left: '80%', 
-                       transform: 'translateX(-50%)' 
-                   }}
-               >
-                       <label htmlFor="currency-select" style={{ marginRight: '8px' }}><strong>Choose Currency:</strong></label>
-
-                   <select id="currency-select" className="currency-dropdown">
-                       <option value="usd">USD ($)</option>
-                       <option value="eur">EUR (€)</option>
-                       <option value="egp">EGP (ج.م)</option>
-                   </select>
-               </div>
+    
 
 
                <IconButton 
- onClick={toggleDrawer(true)} 
- className="menu-button" 
- style={{ 
-   position: 'absolute', 
-   right: '40px', 
-   color: 'white',      // Icon color
-   backgroundColor: '#3f51b5' // Background color
- }}
->
+              onClick={toggleDrawer(true)} 
+              className="menu-button" 
+              style={{ 
+                position: 'absolute', 
+                right: '40px', 
+                color: 'white',      // Icon color
+                backgroundColor: '#3f51b5' // Background color
+              }}
+                >
  <MenuIcon />
 </IconButton>
 </nav>

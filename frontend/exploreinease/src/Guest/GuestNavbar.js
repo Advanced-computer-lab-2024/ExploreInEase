@@ -47,6 +47,7 @@ const HomePage = () => {
   useEffect(() => {
     fetchEvents();
   }, [currency]); // Re-fetch events if currency changes
+
   function handleLoginClick(){
     navigate('/Login');
   }
@@ -56,7 +57,6 @@ const HomePage = () => {
   }
   };
   return (
-
     <div className="homepage">
       {error && (
         <div className="error-alert">
@@ -82,17 +82,11 @@ const HomePage = () => {
          onClick={() => handleRegisterClick("Register")}
           className="small-button">
             Register</button>
-          <button 
-           className="small-button">Upload Required Documents</button>
+          {/* <button 
+           className="small-button">Upload Required Documents</button> */}
           <button  className="small-button">View Step-by-Step Guide</button>
         </div>
         <div className="currency-selector">
-          <span className="currency-symbol"></span>
-          <select>
-            <option value="usd">USD ($)</option>
-            <option value="eur">EUR (€)</option>
-            <option value="egp">EGP (ج.م)</option>
-          </select>
         </div>
   
       </nav>

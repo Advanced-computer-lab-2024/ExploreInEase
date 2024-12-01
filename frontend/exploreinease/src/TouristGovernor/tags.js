@@ -6,6 +6,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
+import { Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import { Alert } from "@mui/material";
 import TextField from "@mui/material/TextField";
@@ -17,16 +18,23 @@ import ListSubheader from "@mui/material/ListSubheader";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
-import axios from "axios"; // Ensure Axios is imported
+import axios from "axios";
+import GovernorNavbar from "./GovernorNavbar";
+import Tooltip from "@mui/material/Tooltip";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import IconButton from "@mui/material/IconButton";
+import TagIcon from "@mui/icons-material/Tag";
+import AddIcon from "@mui/icons-material/Add";
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
+import bgImage from "../BG.jpg";
+import "./changePassword.css";
 
 function Tags() {
   const location = useLocation();
   const { governorId } = location.state || {};
   const [period, setPeriod] = useState(""); // State for period
-
-  console.log("daa", governorId);
-
   const [tags, setTags] = React.useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
   const [open, setOpen] = React.useState(false);
   const [tagType, setTagType] = React.useState(""); // State for tag type
   const [Name, setName] = React.useState(""); // State for Name
@@ -34,29 +42,15 @@ function Tags() {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
   useEffect(() => {
     getAllTags();
   }, []);
-  useEffect(() => {
-    if (showSuccessMessage) {
-      const timer = setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSuccessMessage]);
 
-  useEffect(() => {
-    if (showErrorMessage) {
-      const timer = setTimeout(() => {
-        setShowErrorMessage(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showErrorMessage]);
   const getAllTags = async () => {
+    setLoading(true); // Start loading
     try {
-      const apiPath = `http://localhost:3030/getAllHistoricalTags/${governorId}`; // Ensure this matches your API route
+      const apiPath = `http://localhost:3030/getAllHistoricalTags/${governorId}`;
       const response = await axios.get(apiPath);
       console.log(response);
 
@@ -64,21 +58,16 @@ function Tags() {
         const tags = response.data.tags.map((tag) => ({
           id: tag._id,
           tagType: tag.type,
-          period: tag.period, // Display period instead of Name
+          period: tag.period,
         }));
         setTags(tags);
       } else {
         console.error("Unexpected data format from API");
       }
     } catch (err) {
-      // Check if there is a response from the server and handle error
-      if (err.response) {
-        console.error("API Error:", err.message);
-        // setError(err.response.data.message);  // Display error message from the server
-      } else {
-        console.error("Unexpected Error:", err);
-        // setError('An unexpected error occurred.');  // Display generic error message
-      }
+      console.error("Error fetching tags:", err);
+    } finally {
+      setLoading(false); // End loading
     }
   };
 
@@ -96,16 +85,12 @@ function Tags() {
     if (tagType && period.trim()) {
       const body = {
         type: tagType,
-        period: period, // Ensure you have period defined as a state if it isn't already
+        period: period,
       };
-      console.log(body);
-      console.log(governorId);
-
       const apiPath = `http://localhost:3030/createHistoricalTag/${governorId}`;
 
       try {
         const response = await axios.post(apiPath, body);
-        console.log(response);
         getAllTags();
         setSuccessMessage(response.data.message || "Successfully!");
         setShowSuccessMessage(true);
@@ -120,127 +105,96 @@ function Tags() {
 
   return (
     <div>
-      <Button
-        variant="contained"
-        onClick={handleClickOpen}
-        sx={{ width: 200, marginLeft: 2, marginTop: 2, height: 50 }}
-      >
-        Create Tag
-      </Button>
-      <Box
-        sx={{
-          maxWidth: 360,
-          bgcolor: "white",
-          border: "1px solid #ccc",
-          marginTop: 4,
-          borderRadius: 1,
-          padding: 2,
-        }}
-      >
-        {/* Dialog for creating a new tag */}
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Create a usable Tag</DialogTitle>
-          <DialogContent>
-            {/* Replace TextField with Select for the tagType */}
-            <InputLabel id="tags-label">type</InputLabel>
-            <Select
-              required
-              labelId="tags-label"
-              id="type"
-              margin="dense"
-              name="type"
-              fullWidth
-              value={tagType}
-              onChange={(e) => setTagType(e.target.value)}
+      <GovernorNavbar />
+
+      <Box className="tags-background">
+        {loading ? ( // Conditionally render spinner or content
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh", // Adjust as needed
+            }}
+          >
+            <CircularProgress color="error"size={100} />
+          </Box>
+        ) : (
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                bgcolor: "background.paper",
+                borderRadius: "50px",
+                padding: 2,
+                boxShadow: 3,
+                maxWidth: 400,
+                margin: "0 auto",
+              }}
             >
-              <MenuItem value="monuments">Monuments</MenuItem>
-              <MenuItem value="museums">Museums</MenuItem>
-              <MenuItem value="religious">Religious </MenuItem>
-              <MenuItem value="sites">Sites</MenuItem>
-              <MenuItem value="palaces">Palaces</MenuItem>
-              <MenuItem value="castles">Castles</MenuItem>
-              <MenuItem value="palaces/castles">Palaces/Castles</MenuItem>
-            </Select>
+              <nav aria-label="main tags folders">
+                <List
+                  sx={{
+                    width: "100%",
+                    maxWidth: 360,
+                    maxHeight: 700,
+                    overflowY: "auto",
+                    bgcolor: "background.paper",
+                  }}
+                  subheader={
+                    <ListSubheader
+                      sx={{
+                        fontWeight: "bold",
+                        fontSize: "1.25rem",
+                        color: "red",
+                        textAlign: "center",
+                      }}
+                    >
+                      Tags
+                    </ListSubheader>
+                  }
+                >
+                  {tags.map((tag, index) => (
+                    <React.Fragment key={index}>
+                      <ListItem sx={{ display: "flex", alignItems: "center" }}>
+                        <ListItemIcon>
+                          <TagIcon sx={{ color: "primary.main" }} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={`Type: ${tag.tagType}`}
+                          secondary={`Period: ${tag.period}`}
+                        />
+                      </ListItem>
+                      {index < tags.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </List>
 
-            <TextField
-              required
-              margin="normal"
-              id="period"
-              name="period"
-              label="Period"
-              type="text"
-              fullWidth
-              variant="outlined"
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" onClick={handleSaveTag}>
-              Add
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        <nav aria-label="main tags folders">
-          <List
-            sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-            subheader={
-              <ListSubheader
-                sx={{ fontWeight: "bold", fontSize: "1.25rem", color: "red" }}
-              >
-                Tags
-              </ListSubheader>
-            }
-          >
-            {tags.map((tag, index) => (
-              <React.Fragment key={index}>
-                <ListItemText
-                  primary={`Type: ${tag.tagType}`}
-                  secondary={`Period: ${tag.period}`}
-                />
-
-                {index < tags.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </List>
-        </nav>
+                <Tooltip title="Create a Tag" arrow>
+                  <IconButton
+                    onClick={handleClickOpen}
+                    sx={{
+                      width: 50,
+                      height: 35,
+                      marginLeft: 35,
+                      marginTop: 2,
+                      bgcolor: "red",
+                      color: "white",
+                      "&:hover": {
+                        bgcolor: "primary.dark",
+                      },
+                    }}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Tooltip>
+              </nav>
+            </Box>
+          </Box>
+        )}
       </Box>
-      <div>
-        {showSuccessMessage && (
-          <Alert
-            severity="success"
-            sx={{
-              position: "fixed",
-              top: 80, // You can adjust this value to provide space between success and error alerts
-              right: 20,
-              width: "auto",
-              fontSize: "1.2rem", // Adjust the size
-              padding: "16px",
-              zIndex: 9999, // Ensure it's visible above other content
-            }}
-          >
-            {successMessage}
-          </Alert>
-        )}
-        {showErrorMessage && (
-          <Alert
-            severity="error"
-            sx={{
-              position: "fixed",
-              top: 60, // You can adjust this value to provide space between success and error alerts
-              right: 20,
-              width: "auto",
-              fontSize: "1.2rem", // Adjust the size
-              padding: "16px",
-              zIndex: 9999, // Ensure it's visible above other content
-            }}
-          >
-            {errorMessage}
-          </Alert>
-        )}
-      </div>
     </div>
   );
 }

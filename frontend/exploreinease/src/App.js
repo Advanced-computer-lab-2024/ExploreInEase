@@ -45,6 +45,7 @@ const BookFlight= React.lazy(() => import("./Tourist/flights"));
 const Complaints = React.lazy(() => import('./Tourist/Complaints'));
 const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
 const ResetPassword=React.lazy(()=>import('./Login/resetPassword'));
+const GovernT=React.lazy(()=>import('./TouristGovernor/GovernorHomePage'));
 const App = () => {
   useEffect(() => {
     document.title = 'ExploreInEase';
@@ -52,7 +53,7 @@ const App = () => {
   return (
     <Router>
       {/* Wrapping Routes with Suspense to handle loading */}
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div>Loading</div>}>
         <Routes>
           <Route path="/" element={<GuestNavbar />} />
           <Route path="/register" element={<Signup />} />
@@ -78,10 +79,10 @@ const App = () => {
           <Route path="/TourGuideHomePage" element={<TourGuideNavbar />} />
           <Route path="/AdminHomePage" element={<AdminSideMenu/>} />
           <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} />
-          <Route path="/GovernorHomePage" element={<GovernorNavbar />} />
+          <Route path="/GovernorHomePage" element={<GovernT />} />
           <Route path="/Activities" element={<Activity />} />
           <Route path="/Login" element={<SignIn />} />
-          <Route path="/AdminHomePage" element={<AdminHomePage />} />
+          {/* <Route path="/AdminHomePage" element={<AdminHomePage />} /> */}
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
           <Route path="/ViewListofBooked" element={<Booked />} />
