@@ -902,6 +902,48 @@ const fetchUserStatistics = async () => {
   }
 };
 
+//api64
+const getTouristHistory = async (touristId) => {
+  try {
+    const tourist = await userRepository.getTouristHistoryFromDb(touristId);
+
+    const paidHistory = {
+      itineraries: tourist.itineraryId.filter((item) => item.pricePaid > 0),
+      activities: tourist.activityId.filter((item) => item.pricePaid > 0),
+      historicalPlaces: tourist.historicalplaceId.filter(
+        (item) => item.pricePaid > 0
+      ),
+      transportation: tourist.transportationId.filter(
+        (item) => item.pricePaid > 0
+      ),
+    };
+
+    return paidHistory;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+//api 65 and 66
+
+const addBookmark = async (touristId, bookmarks) => {
+  try {
+    // Call the repository to update the tourist's bookmarks
+    return await userRepository.addBookmark(touristId, bookmarks);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getBookmarks = async (touristId) => {
+  try {
+    const bookmarks = await userRepository.getBookmarks(touristId);
+    return bookmarks;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
   getTouristReport,
   getAddresses,
@@ -951,4 +993,7 @@ module.exports = {
   getNotAcceptedUsers,
   updatingStatusUser,
   fetchUserStatistics,
+  getTouristHistory,
+  addBookmark,
+  getBookmarks,
 };

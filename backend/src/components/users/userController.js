@@ -120,12 +120,10 @@ const getTouristUpcommingEvents = async (req, res) => {
   }
   try {
     const events = await userService.getTouristUpcommingEvents(username);
-    return res
-      .status(200)
-      .json({
-        message: "Fetched Upcomming Events successfully",
-        events: events,
-      });
+    return res.status(200).json({
+      message: "Fetched Upcomming Events successfully",
+      events: events,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -160,12 +158,10 @@ const getTourGuide = async (req, res) => {
     if (!tourGuide) {
       return res.status(404).json({ message: "Tour guide not found" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Tour Guide Profile fetched successfully",
-        tourGuide: tourGuide,
-      });
+    res.status(200).json({
+      message: "Tour Guide Profile fetched successfully",
+      tourGuide: tourGuide,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -221,12 +217,10 @@ const getAdvertiser = async (req, res) => {
     if (!advertiser) {
       return res.status(404).json({ message: "Advertiser not found" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Advertiser profile fetched successfully",
-        advertiser: advertiser,
-      });
+    res.status(200).json({
+      message: "Advertiser profile fetched successfully",
+      advertiser: advertiser,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -278,12 +272,10 @@ const getSeller = async (req, res) => {
     if (!seller) {
       return res.status(404).json({ message: "Seller not found" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Seller profile retrieved successfully",
-        seller: seller,
-      });
+    res.status(200).json({
+      message: "Seller profile retrieved successfully",
+      seller: seller,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -774,12 +766,10 @@ const login = async (req, res) => {
     if (user.role != "tourist") {
       imageUrl = await userRepository.getUserProfilePicture(allUser._id);
       if (!allUser.termsAndConditions) {
-        return res
-          .status(200)
-          .json({
-            message: "Terms and Conditions not accepted",
-            user: allUser,
-          });
+        return res.status(200).json({
+          message: "Terms and Conditions not accepted",
+          user: allUser,
+        });
       }
     }
 
@@ -790,14 +780,12 @@ const login = async (req, res) => {
 
     const accessToken = generateToken(userToken);
 
-    return res
-      .status(200)
-      .json({
-        message: "Logged in Successfully",
-        user: allUser,
-        imageUrl: imageUrl,
-        accessToken: accessToken,
-      });
+    return res.status(200).json({
+      message: "Logged in Successfully",
+      user: allUser,
+      imageUrl: imageUrl,
+      accessToken: accessToken,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -816,13 +804,11 @@ const forgetPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "Invalid email" });
     }
-    return res
-      .status(200)
-      .json({
-        message: "Email sent successfully",
-        status: user.status,
-        response: user.response,
-      });
+    return res.status(200).json({
+      message: "Email sent successfully",
+      status: user.status,
+      response: user.response,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -834,12 +820,10 @@ const creatingPromoCode = async (req, res) => {
   try {
     const { promoCode } = req.body;
     const promoCodeResult = await userService.creatingPromoCode(promoCode);
-    return res
-      .status(200)
-      .json({
-        message: "Promo code created successfully",
-        promoCode: promoCodeResult,
-      });
+    return res.status(200).json({
+      message: "Promo code created successfully",
+      promoCode: promoCodeResult,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -997,22 +981,22 @@ const getTouristReport = async (req, res) => {
 
 //api 35
 const getUserStatistics = async (req, res) => {
+  console.log("ia am here");
+  const { adminid } = req.params;
+  if (!adminid) {
+    return res.status(400).json({
+      success: false,
+      message: "Admin ID is required",
+    });
+  }
+  const type = await userRepository.getType(adminid);
+  if (type !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Unauthorized access. Only admins access.",
+    });
+  }
   try {
-    const { adminid } = req.params;
-    if (!adminid) {
-      return res.status(400).json({
-        success: false,
-        message: "Admin ID is required",
-      });
-    }
-    const type = await userRepository.getType(adminid);
-    if (type !== "admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized access. Only admins access.",
-      });
-    }
-
     // Fetch user statistics
     const stats = await userService.fetchUserStatistics();
     res.status(200).json({
@@ -1024,6 +1008,77 @@ const getUserStatistics = async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || "Internal Server Error",
+    });
+  }
+};
+
+//api 64
+
+const getTouristHistory = async (req, res) => {
+  const { touristId } = req.params;
+  if (!touristId) {
+    return res.status(400).json({
+      success: false,
+      message: "tourist Id is required",
+    });
+  }
+  try {
+    const paidHistory = await userService.getTouristHistory(touristId);
+
+    res.status(200).json({
+      data: paidHistory,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//api 65 and 66
+
+const addBookmark = async (req, res) => {
+  const { touristId } = req.params;
+  const { id, type } = req.body;
+
+  if (!id || !type) {
+    return res.status(400).json({
+      success: false,
+      message: "Both id and type are required",
+    });
+  }
+
+  try {
+    const bookmark = { id, type };
+    const updatedBookmarks = await userService.addBookmark(touristId, bookmark);
+    res.status(201).json({
+      success: true,
+      data: updatedBookmarks,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Controller method to handle retrieving all bookmarks
+const getBookmarks = async (req, res) => {
+  const { touristId } = req.params;
+
+  try {
+    const bookmarks = await userService.getBookmarks(touristId);
+
+    res.status(200).json({
+      success: true,
+      data: bookmarks,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -1074,4 +1129,7 @@ module.exports = {
   getNotAcceptedUsers,
   updatingStatusUser,
   getUserStatistics,
+  getTouristHistory,
+  addBookmark,
+  getBookmarks,
 };

@@ -1007,24 +1007,29 @@ const getTouristReport = async (user) => {
 
 // Fetch total users and count of new users per month
 const getUserStatistics = async () => {
-  const totalUsers = await Users.countDocuments();
+  const totalUsers = await Users.countDocuments({ type: { $ne: "admin" } }); // haysheel el admin  users
   const toatlTourist = await Tourist.countDocuments();
 
   const total = totalUsers + toatlTourist;
 
   // Count new users grouped by month
   const pipeline = [
-    {$group: {
+    {
+      $match: { type: { $ne: "admin" } }, // Exclude admin users
+    },
+    {
+      $group: {
         _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
         count: { $sum: 1 },
       },
-    },{ $sort: { _id: 1 } },
+    },
+    { $sort: { _id: 1 } },
   ];
 
   const userStats = await Users.aggregate(pipeline);
   const touristStats = await Tourist.aggregate(pipeline);
 
-  //... da merge opertator fa negma3 both user and tourists 
+  //... da merge opertator fa negma3 both user and tourists
   const combinedStats = [...userStats, ...touristStats].reduce((acc, cur) => {
     const existing = acc.find((entry) => entry._id === cur._id);
     if (existing) {
@@ -1038,18 +1043,63 @@ const getUserStatistics = async () => {
   return { total, newUsersPerMonth: combinedStats };
 };
 
-
 const getType = async (id) => {
-    const user = await Users.findOne({ _id: id });
-    const tourist = await Tourist.findOne({ _id: id });
-    if (user) {
-      return user.type;
-    } else if (tourist) {
-      return "tourist";
-    } else {
-      throw new Error('User not found');
+  const user = await Users.findOne({ _id: id });
+  const tourist = await Tourist.findOne({ _id: id });
+  if (user) {
+    return user.type;
+  } else if (tourist) {
+    return "tourist";
+  } else {
+    throw new Error("User not found");
+  }
+};
+
+//api 64
+const getTouristHistoryFromDb = async (touristId) => {
+  const tourist = await Tourist.findById(touristId)
+    .populate("itineraryId.id", "name description price")
+    .populate("activityId.id", "name description price")
+    .populate("historicalplaceId.id", "name description price")
+    .populate("transportationId.id", "name description price");
+
+  if (!tourist) {
+    throw new Error("Tourist not found");
+  }
+
+  return tourist;
+};
+
+//65 and 66
+const addBookmark = async (touristId, bookmark) => {
+  try {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      throw new Error("Tourist not found");
     }
-  };
+
+    tourist.bookmark.push(bookmark);
+    await tourist.save();
+
+    return {
+      message: "Bookmark added successfully",
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getBookmarks = async (touristId) => {
+  const tourist = await Tourist.findById(touristId)
+    .populate("bookmark.id")
+    .exec();
+
+  if (!tourist) {
+    throw new Error("Tourist not found");
+  }
+
+  return tourist.bookmark;
+};
 
 module.exports = {
   getTouristReport,
@@ -1110,5 +1160,8 @@ module.exports = {
   checkAdvertiserActivityStatus,
   getTouristByUsername,
   getUserStatistics,
-  getType
+  getType,
+  getTouristHistoryFromDb,
+  addBookmark,
+  getBookmarks,
 };

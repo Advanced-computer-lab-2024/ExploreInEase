@@ -23,7 +23,15 @@ router.put(
 
 //sarah api35
 
-router.get("/getUserStats/:userId", userController.getUserStatistics);
+router.get("/fetchUserStats/:adminid", userController.getUserStatistics);
+
+//api64
+
+router.get("/touristPaidHistory/:touristId", userController.getTouristHistory);
+
+router.post("/bookmark/:touristId", userController.addBookmark);
+
+router.get("/fetchbookmark/:touristId", userController.getBookmarks);
 
 /**
  * @swagger
