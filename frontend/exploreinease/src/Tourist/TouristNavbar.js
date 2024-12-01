@@ -220,6 +220,31 @@ const TouristNavbar = () => {
           }
         }
       }
+      else if (title == "View My Saved Events"){
+        console.log("Clicked View My Saved Events");  // Add this line for debugging
+       try {
+        const options = {
+          apiPath: `/fetchbookmark/${userId}` ,
+
+        };
+        const response = await NetworkService.get(options);
+        setSuccess(response.message);
+        console.log(response);
+        const events = response.data;
+        console.log(events);
+        navigate(`myBookmarks`,{state:{events,userId:userId}});
+
+       }
+       catch (err) {
+        if (err.response) {
+            console.log(err.message);
+          setError(err.response.data.message); // Set error message from server response if exists
+        } else {
+          setError('An unexpected error occurred.'); // Generic error message
+        }
+      }
+    }
+
       else{
         try {
             const options = {
@@ -376,6 +401,7 @@ return (
               <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
               {[
                   "Explore Activities",
+                  "View My Saved Events",
                   "View Products",
                   "Book a Transportation",
                   "View Booked items",
