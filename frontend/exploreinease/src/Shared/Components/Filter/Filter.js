@@ -303,6 +303,31 @@ const Filter = () => {
 
     setFilteredData(data);
   };
+  const handleBookmarkClick = async (item) => {
+    // Ensure that this function is asynchronous
+    const touristId = userId;
+  
+    const id = item.id; // 'Activity', 'Itinerary', 'HistoricalPlace'
+    const type = item.type;
+  
+    try {
+      const options = {
+        apiPath: `/bookmark/${touristId}`,
+        useParams: { id, type }, // Pass id and type as parameters
+      };
+      
+      const response = await NetworkService.put(options);  // Use await inside an async function
+      console.log(response);
+    } catch (error) {
+      console.error('Error bookmarking event:', error);
+      alert('Failed to bookmark event. Please try again.');
+    }
+  };
+  
+   
+    
+   
+ 
 
 
   // Reset Filters
@@ -769,6 +794,15 @@ console.log("filteredData",filteredData);
                     >
                       Share
                     </Button>
+                    <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => handleBookmarkClick(item)}
+              style={{ marginLeft: '10px' }}
+            >
+              Bookmark
+            </Button>
+
                    </div>
                    {shareDialogOpen && (
                     <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
