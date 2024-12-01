@@ -795,7 +795,7 @@ console.log("filteredData",filteredData);
                     </Button>
                     <Button
               variant="contained"
-              color="secondary"
+              color="primary"
               onClick={() => handleBookmarkClick(item)}
               style={{ marginLeft: '10px' }}
             >
