@@ -55,7 +55,7 @@ const availableQuantityAndSales = async (req, res) => {
 
 
 const createOrderWalletOrCod = async (req, res) => {
-    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType, promoCode, currency } = req.body;
+    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType,promoCode,currency } = req.body;
 
     if (
         !touristId ||
@@ -88,34 +88,28 @@ const createOrderWalletOrCod = async (req, res) => {
             promoCode,
             currency
         });
-
-        for (const product of productsIdsQuantity) {
-            const { id: productId, quantity } = product; // Access productId and quantity directly
-            const productDetails = await checkoutRepository.getProductById(productId); // Fetch product details
-            
-            if (!productDetails) {
-                console.warn(`Product with ID ${productId} not found.`);
-                continue; 
-            }
-
-            if (product.takenQuantity === product.originalQuantity) {
-                console.log(product.sellerId);
-                const publisherId = productDetails.sellerId.toString();
+        
+        for(let i = 0; i < productsIdsQuantity.length; i++){
+            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
+            console.log("PRODUCT: ",product);           
+            if(product.takenQuantity === product.originalQuantity){
+                const publisherId = product.sellerId.toString();
                 const publisher = await userRepository.findSellerById(publisherId);
-
-                console.log("PUBLISHER: ", publisher);
-
+                console.log("PUBLISHER: ",publisher);
+        
+        
                 const body = `Product ${product.name} is out of stock`;
                 const notificationData = {
                     body,
                     user: {
-                        user_id: publisher._id,
-                        user_type: publisher.type
+                        user_id: publisher._id,     // Match the schema key
+                        user_type: publisher.type   // Match the schema key
                     }
                 };
                 const notification = await checkoutRepository.addNotification(notificationData);
-                console.log("NOTIFICATION: ", notification);
-
+                console.log("NOTIFICATION: ",notification);
+        
+        
                 const transporter = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
@@ -123,17 +117,18 @@ const createOrderWalletOrCod = async (req, res) => {
                         pass: process.env.EMAIL2_PASS
                     }
                 });
-
+            
                 console.log("Transporter created");
-
+                
                 const mailOptions = {
                     from: process.env.EMAIL2_USER,
                     to: publisher.email,
                     subject: 'Product out of stock',
-                    text:` Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                    text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
                 };
-
+            
                 await transporter.sendMail(mailOptions);
+        
             }
         }
 
@@ -150,57 +145,64 @@ const createOrderWalletOrCod = async (req, res) => {
 };
 
 const createOrderWithCard = async (req, res) => {
-    const {
-        touristId,
-        productsIdsQuantity,
-        price,
-        addressToBeDelivered,
-        cardNumber,
-        expMonth,
-        expYear,
+    const { 
+        touristId, 
+        productsIdsQuantity, 
+        price, 
+        addressToBeDelivered, 
+        cardNumber, 
+        expMonth, 
+        expYear, 
         cvc,
         promoCode,
-        currency
+        currency 
     } = req.body;
 
     if (
-        !touristId ||
-        !Array.isArray(productsIdsQuantity) ||
-        productsIdsQuantity.length === 0 ||
-        !price ||
-        !cardNumber ||
-        !expMonth ||
-        !expYear ||
-        !cvc ||
+        !touristId || 
+        !Array.isArray(productsIdsQuantity) || 
+        productsIdsQuantity.length === 0 || 
+        !price || 
+        !cardNumber || 
+        !expMonth || 
+        !expYear || 
+        !cvc    ||
         !addressToBeDelivered ||
         !currency
+
     ) {
         return res.status(400).json({
             success: false,
             message: 'Missing required fields.',
         });
     }
+    
+
 
     let updatedCurrency;
     let price2 = price;
     switch (currency) {
         case 'euro':
-            updatedCurrency = "EUR";
-            price2 = (price * 55).toFixed(2);
-            break;
+          updatedCurrency = "EUR";
+          price2 = (price * 55).toFixed(2);
+
+          break;
         case 'dollar':
             updatedCurrency = "USD";
             price2 = (price * 50).toFixed(2);
-            break;
+          break;
         case 'EGP':
             updatedCurrency = "EGP";
             price2 = price.toFixed(2);
-            break;
+          break;
         default:
-            throw new Error('Invalid currency');
-    }
+          throw new Error('Invalid currency');
+      }
+
+
 
     try {
+        // Find tourist information
         const tourist = await Tourist.findById(touristId);
         if (!tourist) {
             return res.status(404).json({
@@ -208,21 +210,22 @@ const createOrderWithCard = async (req, res) => {
                 message: 'Tourist not found.',
             });
         }
-
         if (promoCode) {
-            const validPromo = tourist.promoCodes.includes(promoCode);
+            const validPromo = tourist.promoCodes.includes(promoCode); // Correct validation
             if (validPromo) {
-                tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
-                await tourist.save();
+              // Remove the promo code from the array
+              tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+              await tourist.save(); // Save the updated promo codes
             } else {
-                throw new Error("Invalid promo code");
+              throw new Error("Invalid promo code");
             }
         }
-
+        // Apply discount if promo code was valid
         if (promoCode) {
             price2 *= 0.7; // Apply 30% discount
         }
 
+        // Create a Payment Method
         const paymentMethod = await stripe.paymentMethods.create({
             type: 'card',
             card: {
@@ -233,52 +236,50 @@ const createOrderWithCard = async (req, res) => {
             },
         });
 
+        // Create a Payment Intent with a custom description
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(price2 * 100),
+            amount: Math.round(price2 * 100), // Convert dollars to cents
             currency: updatedCurrency,
             payment_method: paymentMethod.id,
-            confirm: true,
-            description:` Payment for order by Tourist with username: ${tourist.username}`,
+            confirm: true, // Automatically confirms the payment
+            description: `Payment for order by Tourist with username: ${tourist.username}`, // Custom description
             automatic_payment_methods: {
                 enabled: true,
-                allow_redirects: 'never',
+                allow_redirects: 'never', // Disallow redirect-based payment methods
             },
         });
 
+        // Payment successful, create the order
         const order = await checkoutService.createOrderWithCard({
             touristId,
             productsIdsQuantity,
-            price: price2,
+            price:price2,
             addressToBeDelivered,
             paymentType: 'card',
         });
 
-        for (const product of productsIdsQuantity) {
-            const { id: productId, quantity } = product; // Access productId and quantity directly
-            const productDetails = await checkoutRepository.getProductById(productId); // Fetch product details
-            
-            if (!productDetails) {
-                console.warn(`Product with ID ${productId} not found.`);
-                continue; 
-            }
 
-            if (product.takenQuantity === product.originalQuantity) {
-                const publisherId = productDetails.sellerId.toString();
+        for(let i = 0; i < productsIdsQuantity.length; i++){
+            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
+            console.log("PRODUCT: ",product);           
+            if(product.takenQuantity === product.originalQuantity){
+                const publisherId = product.sellerId.toString();
                 const publisher = await userRepository.findSellerById(publisherId);
-
-                console.log("PUBLISHER: ", publisher);
-
+                console.log("PUBLISHER: ",publisher);
+        
+        
                 const body = `Product ${product.name} is out of stock`;
                 const notificationData = {
                     body,
                     user: {
-                        user_id: publisher._id,
-                        user_type: publisher.type
+                        user_id: publisher._id,     // Match the schema key
+                        user_type: publisher.type   // Match the schema key
                     }
                 };
                 const notification = await checkoutRepository.addNotification(notificationData);
-                console.log("NOTIFICATION: ", notification);
-
+                console.log("NOTIFICATION: ",notification);
+        
+        
                 const transporter = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
@@ -286,17 +287,18 @@ const createOrderWithCard = async (req, res) => {
                         pass: process.env.EMAIL2_PASS
                     }
                 });
-
+            
                 console.log("Transporter created");
-
+                
                 const mailOptions = {
                     from: process.env.EMAIL2_USER,
                     to: publisher.email,
                     subject: 'Product out of stock',
-                    text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                    text:` Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
                 };
-
+            
                 await transporter.sendMail(mailOptions);
+        
             }
         }
 
@@ -312,7 +314,6 @@ const createOrderWithCard = async (req, res) => {
         });
     }
 };
-
 
 
 
