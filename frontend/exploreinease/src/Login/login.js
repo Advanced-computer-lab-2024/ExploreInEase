@@ -68,7 +68,7 @@ const Login = () => {
       case 'admin':
         navigate('/AdminHomePage', { state: { tourist: user } });
         break;
-      case 'touristGovern':
+      case 'tourismGovernor':
         navigate('/GovernorHomePage', { state: { tourist: user,imageUrl: imageUrl } });
         break;
       case 'seller':
@@ -99,7 +99,7 @@ const Login = () => {
           <label>Role:</label>
           <select name="role" value={formData.role} onChange={handleInputChange} required>
             <option value="admin">Admin</option>
-            <option value="touristGovern">Tourist Governor</option>
+            <option value="tourismGovernor">tourism Governor</option>
             <option value="tourist">Tourist</option>
             <option value="tourGuide">Tour Guide</option>
             <option value="advertiser">Advertiser</option>

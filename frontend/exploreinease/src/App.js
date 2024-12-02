@@ -46,6 +46,8 @@ const Complaints = React.lazy(() => import('./Tourist/Complaints'));
 const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
 const ResetPassword=React.lazy(()=>import('./Login/resetPassword'));
 const GovernT=React.lazy(()=>import('./TouristGovernor/GovernorHomePage'));
+const Cart2=React.lazy(()=>import('./Tourist/cart2'));
+
 const App = () => {
   useEffect(() => {
     document.title = 'ExploreInEase';
@@ -96,6 +98,7 @@ const App = () => {
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/unArchiveProduct" element={<ArchiveProduct />} />
           <Route path="/resetPassword" element={<ResetPassword/>}/>
+          <Route path="/cart" element={<Cart2/>}/>
 
         </Routes>
       </Suspense>

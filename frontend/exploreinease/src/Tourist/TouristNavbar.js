@@ -24,7 +24,7 @@ import { Delete } from '@mui/icons-material';
 import axios from 'axios';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-
+import { AddShoppingCart } from "@mui/icons-material";
 const TouristNavbar = () => {
   // const Userr = JSON.parse(localStorage.getItem('User'));
   // const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
@@ -328,6 +328,18 @@ return (
           </div>
           <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',alignContent:'center',alignItems:'center' }}>
           <IconButton 
+           className="menu-button"
+           style={{ 
+            position:'absolute',
+            color: 'blue',      // Change icon color to blue
+            backgroundColor: '#e0f7fa', // Light blue background for contrast
+            alignItems:'center'
+        }}
+          onClick={()=>{navigate('/cart')}} >
+                    <AddShoppingCart />
+            </IconButton>
+      
+          <IconButton 
                         onClick={handleClick} 
                         aria-controls={open ? 'basic-menu' : undefined}
                         aria-haspopup="true"
@@ -337,13 +349,14 @@ return (
                             position:'absolute',
                             color: 'blue',      // Change icon color to blue
                             backgroundColor: '#e0f7fa', // Light blue background for contrast
-                            right: '100px',
+                            right: '115px',
                             alignItems:'center'
                         }}>
                         <Badge badgeContent={4} color="success">
                         <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
                         </Badge>
              </IconButton>
+             
     <Menu
     id="basic-menu"
     anchorEl={anchorEl1}
