@@ -153,7 +153,13 @@ const HomePage = () => {
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
-        }else {
+        }
+        else if (title=="Tourists Report"){
+            navigate('/TouristsReport', {state: { User }});
+        }else if (title=="Sales Report"){
+            navigate('/SalesReport', {state: { User }});
+        }
+        else {
             try {
                 const options = { apiPath: `/getAdvertiser/${userId}` };
                 const response = await NetworkService.get(options);
@@ -308,8 +314,10 @@ const HomePage = () => {
                     <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
                     {[
                         "Activities",
-                        "Transportation",               
-                        "My Profile"
+                        "Transportation",  
+                        "Tourists Report",
+                        "Sales Report",             
+                        "My Profile",
                     ].map((text) => (
                         <ListItem key={text} disablePadding>
                             <ListItemButton onClick={() => handleRegisterClick(text)}>

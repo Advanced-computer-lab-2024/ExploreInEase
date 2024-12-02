@@ -25,6 +25,7 @@ import axios from 'axios';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { AddShoppingCart } from "@mui/icons-material";
+
 const TouristNavbar = () => {
   // const Userr = JSON.parse(localStorage.getItem('User'));
   // const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
@@ -238,6 +239,28 @@ const handleClose = () => {
           }
         }
       }
+      else if(title =="Order History"){
+        try {
+          const options = {
+            apiPath: `/myOrders/${userId}/${currency}`,
+          };
+          
+          const response = await NetworkService.get(options);
+          console.log(response);
+
+          setSuccess(response.message); // Set success message
+          const Type='tourist';
+          const Orders = response.data;
+          navigate(`/OrderHistory`,{ state: { Orders, Type ,User:tourist} });          
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        } 
+      }
       else{
         try {
             const options = {
@@ -444,6 +467,7 @@ return (
                   "Book Hotels",
                   "Book Flights",
                   "Complaints",
+                  "Order History",
                   "My Profile"
               ].map((text) => (
                   <ListItem key={text} disablePadding>

@@ -14,6 +14,8 @@ const SellerProfile = React.lazy(() => import('./Shared/Components/SellerProfile
 const TouristProfile = React.lazy(() => import('./Shared/Components/TouristProfile/touristProfile'));
 const AdminUserProfiles = React.lazy(() => import('./Admin/adminUserProfiles'));
 const Tags = React.lazy(() => import('./TouristGovernor/tags'));
+
+
 const Preferencetags = React.lazy(() => import('./Admin/preferenceTags'));
 const ActivityCategory = React.lazy(() => import('./Admin/activityCategories'));
 const HistoricalPlaces = React.lazy(() => import('./TouristGovernor/historicPlaces'));
@@ -27,6 +29,10 @@ const ItineraryList = React.lazy(() => import('./TourGuide/ItineraryList'));
 const CreateItinerary = React.lazy(() => import('./TourGuide/CreateItinerary'));
 const GuestNavbar = React.lazy(() => import("./Guest/GuestNavbar"));
 const AdminNavbar = React.lazy(() => import('./Admin/AdminNavbar'));
+
+
+
+
 const AdvertiserNavbar = React.lazy(() => import("./Advertier/AdvertiserNavbar"));
 const TouristNavbar = React.lazy(() => import('./Tourist/TouristNavbar'));
 const SellerNavbar = React.lazy(() => import('./Seller/SellerNavbar'));
@@ -39,6 +45,8 @@ const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"
 const Booked=React.lazy(()=>import("./Tourist/booked"));
 const ProductPurchased= React.lazy(() => import("./Shared/Components/Product/PurchaseProduct"));
 const Transportion= React.lazy(() => import("./Advertier/transportation"));
+
+
 const BookTransportation= React.lazy(() => import("./Tourist/bookTransportation"));
 const BookHotel= React.lazy(() => import("./Tourist/hotels"));
 const BookFlight= React.lazy(() => import("./Tourist/flights"));
@@ -47,6 +55,11 @@ const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
 const ResetPassword=React.lazy(()=>import('./Login/resetPassword'));
 const GovernT=React.lazy(()=>import('./TouristGovernor/GovernorHomePage'));
 const Cart2=React.lazy(()=>import('./Tourist/cart2'));
+const TourGuideReport = React.lazy(() => import('./Shared/Components/Reports/TouristsReport'));
+const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesReport'));
+const OrderHistory = React.lazy(() => import('./Tourist/OrderHistory'));
+
+
 
 const App = () => {
   useEffect(() => {
@@ -99,6 +112,9 @@ const App = () => {
           <Route path="/unArchiveProduct" element={<ArchiveProduct />} />
           <Route path="/resetPassword" element={<ResetPassword/>}/>
           <Route path="/cart" element={<Cart2/>}/>
+          <Route path="/TouristsReport" element={<TourGuideReport />} />
+          <Route path="/SalesReport" element={<SalesReport />} />
+          <Route path="/OrderHistory" element={<OrderHistory />} />
 
         </Routes>
       </Suspense>

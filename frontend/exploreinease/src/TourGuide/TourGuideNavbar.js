@@ -27,6 +27,7 @@ import { useLocation } from 'react-router-dom';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 
+
 const TourGuideHP = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
  const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
@@ -141,7 +142,7 @@ const TourGuideHP = () => {
 };
 
     async function handleRegisterClick(title) {
-        if (title == "My Profile"){
+        if (title === "My Profile"){
           try {
             const options = {
               apiPath: `/getTourGuide/${userId}`,
@@ -160,7 +161,7 @@ const TourGuideHP = () => {
             }
           }
        }
-       else if(title == 'View My Created Itineraries') {
+       else if(title === 'View My Created Itineraries') {
         try {
           const options = {
             apiPath: `/itinerary/user/${userId}/allItineraries`,
@@ -180,6 +181,12 @@ const TourGuideHP = () => {
             setError('An unexpected error occurred.'); // Generic error message
           }
         }
+       }
+       else if (title === 'Sales Report'){
+        navigate('/SalesReport', {state: { User }});
+       }
+       else if (title==='Tourists Report'){
+        navigate('/TouristsReport', {state: { User }});
        }
        else {
         navigate('/createItinerary', {state: { User }});
@@ -344,6 +351,8 @@ const TourGuideHP = () => {
               {[
                   "Create an Itinerary",
                   "View My Created Itineraries",
+                  "Sales Report",
+                  "Tourists Report",
                   "My Profile"
               ].map((text) => (
                   <ListItem key={text} disablePadding>
