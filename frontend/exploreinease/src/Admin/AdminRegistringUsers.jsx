@@ -19,14 +19,17 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CircularProgress from '@mui/material/CircularProgress';
 //
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    // Styling for table header cells
     [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
+      backgroundColor: '#1261A0', // Updated background color for the header
+      color: 'white',            // Updated text color for the header
+      fontWeight: 'bold',        // Optional: Makes header text bold
     },
+    // Styling for table body cells
     [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
+      fontSize: 14,              // Retain the same font size for body cells
     },
-}));
+  }));
 
 ////////////////////// YOUR CODE HERE //////////////////////
 
