@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper';
 import { Menu, MenuItem } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { Tooltip, IconButton } from '@mui/material';
-import {TextField,Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@mui/material';
+import { TextField, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@mui/material';
 
 import dayjs from 'dayjs';
 import SortIcon from '@mui/icons-material/Sort';
@@ -21,12 +21,15 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  // Styling for table header cells
   [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
+    backgroundColor: '#1261A0', // Updated background color for the header
+    color: 'white',            // Updated text color for the header
+    fontWeight: 'bold',        // Optional: Makes header text bold
   },
+  // Styling for table body cells
   [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
+    fontSize: 14,              // Retain the same font size for body cells
   },
 }));
 
@@ -56,7 +59,7 @@ const ComplaintsTable = () => {
 
   const [replyOpen, setReplyOpen] = useState(false);
 
-  const[reload,setReload]=useState(false);
+  const [reload, setReload] = useState(false);
 
   // Filter complaints based on the selected filter
 
@@ -70,17 +73,17 @@ const ComplaintsTable = () => {
     setReply(event.target.value);
   };
 
-  const handleReplySubmit = async(complaint) => {
+  const handleReplySubmit = async (complaint) => {
     console.log("Reply submitted:", reply);
 
-   let  reqBody = {
+    let reqBody = {
       reply: reply
     }
 
-    await axios.patch(`http://localhost:3030/replyComplaint/${complaint._id}?adminId=${adminid}`,reqBody).then((res) => {
+    await axios.patch(`http://localhost:3030/replyComplaint/${complaint._id}?adminId=${adminid}`, reqBody).then((res) => {
       console.log(res.data);
       setLoaded(true);
-      
+
       setReload(!reload);
     }
     ).catch((err) => {
@@ -151,15 +154,15 @@ const ComplaintsTable = () => {
     const sortedComplaints = [...filteredComplaints].sort((a, b) => {
       const dateA = Date.parse(a.dateOfComplaint);
       const dateB = Date.parse(b.dateOfComplaint);
-      
+
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
-    
+
     setFilteredComplaints(sortedComplaints);
     setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle sort order
   };
-  
-  
+
+
 
 
   const handleOptionsClick = (event, complaintId) => {
@@ -225,10 +228,10 @@ const ComplaintsTable = () => {
       }
     }
 
-    await axios.patch(`http://localhost:3030/markComplaint/${complaint._id}?adminId=${adminid}`,reqBody).then((res) => {
+    await axios.patch(`http://localhost:3030/markComplaint/${complaint._id}?adminId=${adminid}`, reqBody).then((res) => {
       console.log(res.data);
       setLoaded(true);
-      
+
       setReload(!reload);
     }
     ).catch((err) => {
@@ -243,163 +246,197 @@ const ComplaintsTable = () => {
 
 
 
-    return (
-      <div className="UsersList">
-        <h1>Complaints</h1>
+  return (
+    <div>
+      <h1>Complaints</h1>
 
 
-      {loaded? 
-      <div>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-            <TableHead>
-              <TableRow>
-                <StyledTableCell align="center">Tourist Name</StyledTableCell>
-                <StyledTableCell align="center">Tourist Email</StyledTableCell>
-                <StyledTableCell align="center">Title</StyledTableCell>
+      {loaded ?
+        <div>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+              <TableHead sx={{ backgroundColor: '#1261A0' }}>
+                <TableRow sx={{ backgroundColor: '#1261A0' }}>
+                  <StyledTableCell align="center" sx={{ backgroundColor: '#1261A0', color: 'white' }}>Tourist Name</StyledTableCell>
+                  <StyledTableCell align="center" sx={{ backgroundColor: '#1261A0', color: 'white' }}>Tourist Email</StyledTableCell>
+                  <StyledTableCell align="center" sx={{ backgroundColor: '#1261A0', color: 'white' }}>Title</StyledTableCell>
 
-                <StyledTableCell align="center">Date
-                  <Tooltip title={sortOrder === "asc" ? "Sort by Date DESC" : "Sort by Date ASC"} arrow>
-                    <Button
-                      sx={{ marginLeft: "8px", background: "white", minWidth: "10px", padding: "6px" }}
-                      onClick={handleSortByDate}
-                    >
-                      <SortIcon sx={{ color: "black", fontSize: "16px" }} />
-                    </Button>
-                  </Tooltip>
+                  <StyledTableCell align="center">Date
+                    <Tooltip title={sortOrder === "asc" ? "Sort by Date DESC" : "Sort by Date ASC"} arrow>
+                      <Button
+                        sx={{ marginLeft: "8px", background: "white", minWidth: "10px", padding: "6px" }}
+                        onClick={handleSortByDate}
+                      >
+                        <SortIcon sx={{ color: "black", fontSize: "16px" }} />
+                      </Button>
+                    </Tooltip>
 
 
 
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  Status
-                  <Tooltip title="Filter complaints based on status" arrow>
+                  </StyledTableCell>
+                  <StyledTableCell align="center">
+                    Status
+                    <Tooltip title="Filter complaints based on status" arrow>
 
-                    <Button sx={{
-                      marginLeft: "8px",
-                      background: "white",
-                      width: "10px",
-                      height: "15px",
-                      minWidth: "10px",
-                      padding: "12px"    // Adjust padding to make the button smaller
-                    }} onClick={handleFilterClick}>
-                      <FilterListIcon sx={{ color: "black", fontSize: "16px" }} />
-                    </Button>
-                  </Tooltip>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={() => setAnchorEl(null)}
-                  >
-                    <MenuItem onClick={() => handleFilterClose("All")}>All</MenuItem>
-                    <MenuItem onClick={() => handleFilterClose("Pending")}>Pending</MenuItem>
-                    <MenuItem onClick={() => handleFilterClose("Resolved")}>Resolved</MenuItem>
-                  </Menu>
-                </StyledTableCell>
-                <StyledTableCell align="center"></StyledTableCell>
-
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredComplaints.map((complaint) => (
-                <TableRow
-                  hover
-                  sx={{
-                    "&:hover": {
-                      cursor: "pointer",
-                      backgroundColor: "#f5f5f5",
-                      width: "100%"
-                    }
-                  }}
-                  key={complaint._id}
-                >
-                  <TableCell align="center">{complaint.touristName}</TableCell>
-                  <TableCell align="center">{complaint.touristEmail}</TableCell>
-                  <TableCell sx={{maxWidth:"250px"}} align="center">{complaint.title}</TableCell>
-
-                  <TableCell align="center">{dayjs(complaint.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
-                  <TableCell align="center">{complaint.status}</TableCell>
-                  <TableCell align="center"> <IconButton onClick={(event) => handleOptionsClick(event, complaint._id)}>
-                    <MoreVertIcon />
-                  </IconButton>
+                      <Button sx={{
+                        marginLeft: "8px",
+                        background: "white",
+                        width: "10px",
+                        height: "15px",
+                        minWidth: "10px",
+                        padding: "12px"    // Adjust padding to make the button smaller
+                      }} onClick={handleFilterClick}>
+                        <FilterListIcon sx={{ color: "black", fontSize: "16px" }} />
+                      </Button>
+                    </Tooltip>
                     <Menu
-                      anchorEl={optionsAnchorEl}
-                      open={Boolean(optionsAnchorEl) && selectedComplaintId === complaint._id}
-                      onClose={handleOptionsClose}
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={() => setAnchorEl(null)}
                     >
-                      <MenuItem onClick={() => handleViewComplaint(complaint)}>view complaint</MenuItem>
-                      <MenuItem onClick={() => handleMark(complaint)}>{complaint.status === 'pending' ? 'mark as resolved' : 'mark as pending'} </MenuItem>
-                      <MenuItem onClick={() => handleReply(complaint)}>reply</MenuItem>
-                    </Menu></TableCell>
+                      <MenuItem onClick={() => handleFilterClose("All")}>All</MenuItem>
+                      <MenuItem onClick={() => handleFilterClose("Pending")}>Pending</MenuItem>
+                      <MenuItem onClick={() => handleFilterClose("Resolved")}>Resolved</MenuItem>
+                    </Menu>
+                  </StyledTableCell>
+                  <StyledTableCell align="center"></StyledTableCell>
+
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Dialog open={open} onClose={handleCloseDialog}>
-          <DialogTitle>Complaint Details</DialogTitle>
-          <DialogContent>
-            <Typography mb={1} variant="body1"><strong>Tourist Name:</strong> {complaintDetails.touristName}</Typography>
-            <Typography mb={1} variant="body1"><strong>Tourist Email:</strong> {complaintDetails.touristEmail}</Typography>
-            <Typography mb={1} variant="body1"><strong>Title:</strong> {complaintDetails.title}</Typography>
-            <Typography mb={1} variant="body1"><strong>Problem:</strong> {complaintDetails.problem}</Typography>
+              </TableHead>
+              <TableBody>
+                {filteredComplaints.map((complaint) => (
+                  <TableRow
+                    hover
+                    sx={{
+                      "&:hover": {
+                        cursor: "pointer",
+                        backgroundColor: "#f5f5f5",
+                        width: "100%"
+                      }
+                    }}
+                    key={complaint._id}
+                  >
+                    <TableCell align="center">{complaint.touristName}</TableCell>
+                    <TableCell align="center">{complaint.touristEmail}</TableCell>
+                    <TableCell sx={{ maxWidth: "250px" }} align="center">{complaint.title}</TableCell>
 
-            <Typography mb={1} variant="body1"><strong>Date of Complaint:</strong> {dayjs(complaintDetails.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</Typography>
-            <Typography mb={1} variant="body1"><strong>Reply:</strong> {complaintDetails.reply}</Typography>
+                    <TableCell align="center">{dayjs(complaint.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell align="center">{complaint.status}</TableCell>
+                    <TableCell align="center"> <IconButton onClick={(event) => handleOptionsClick(event, complaint._id)}>
+                      <MoreVertIcon />
+                    </IconButton>
+                      <Menu
+                        anchorEl={optionsAnchorEl}
+                        open={Boolean(optionsAnchorEl) && selectedComplaintId === complaint._id}
+                        onClose={handleOptionsClose}
+                      >
+                        <MenuItem onClick={() => handleViewComplaint(complaint)}>view complaint</MenuItem>
+                        <MenuItem onClick={() => handleMark(complaint)}>{complaint.status === 'pending' ? 'mark as resolved' : 'mark as pending'} </MenuItem>
+                      </Menu></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Dialog open={open} onClose={handleCloseDialog}>
+            <DialogTitle>Complaint Details</DialogTitle>
+            <DialogContent>
+              <Typography mb={1} variant="body1">
+                <strong>Tourist Name:</strong> {complaintDetails.touristName}
+              </Typography>
+              <Typography mb={1} variant="body1">
+                <strong>Tourist Email:</strong> {complaintDetails.touristEmail}
+              </Typography>
+              <Typography mb={1} variant="body1">
+                <strong>Title:</strong> {complaintDetails.title}
+              </Typography>
+              <Typography mb={1} variant="body1">
+                <strong>Problem:</strong> {complaintDetails.problem}
+              </Typography>
+              <Typography mb={1} variant="body1">
+                <strong>Date of Complaint:</strong>{" "}
+                {dayjs(complaintDetails.dateOfComplaint).format("YYYY-MM-DD HH:mm:ss")}
+              </Typography>
 
-            <Typography mb={1} variant="body1"><strong>Status:</strong> {complaintDetails.status}</Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="primary">Close</Button>
-          </DialogActions>
-        </Dialog>
+              {/* Reply Row with Button Positioned on the Right */}
+              <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+                <Typography variant="body1">
+                  <strong>Reply:</strong> {complaintDetails.reply || "No reply yet"}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    ml: 2, // Optional spacing to the left of the button
+                    alignSelf: "flex-end",
+                    width:"10px"
+                  }}
+                  onClick={() => {
+                    setOpen(false); // Close View Complaint dialog
+                    setReplyOpen(true); // Open Reply dialog
+                  }}
+                >
+                  Edit
+                </Button>
+              </Box>
+
+              <Typography mb={1} variant="body1">
+                <strong>Status:</strong> {complaintDetails.status}
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
 
 
-        <Dialog  open={replyOpen} onClose={handleCloseReplyDialog}>
-          <DialogTitle>Reply to complaint</DialogTitle>
-          <DialogContent>
-            <Typography mb={1} variant="body1"><strong>Tourist Name:</strong> {complaintDetails.touristName}</Typography>
-            <Typography mb={1} variant="body1"><strong>Tourist Email:</strong> {complaintDetails.touristEmail}</Typography>
-            <Typography mb={1} variant="body1"><strong>Title:</strong> {complaintDetails.title}</Typography>
-            <Typography mb={1} variant="body1"><strong>Problem:</strong> {complaintDetails.problem}</Typography>
 
-            <Typography mb={1} variant="body1"><strong>Date of Complaint:</strong> {dayjs(complaintDetails.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</Typography>
-            <Typography mb={1} variant="body1"><strong>Status:</strong> {complaintDetails.status}</Typography>
+          <Dialog open={replyOpen} onClose={handleCloseReplyDialog}>
+            <DialogTitle>Reply to complaint</DialogTitle>
+            <DialogContent>
+              <Typography mb={1} variant="body1"><strong>Tourist Name:</strong> {complaintDetails.touristName}</Typography>
+              <Typography mb={1} variant="body1"><strong>Tourist Email:</strong> {complaintDetails.touristEmail}</Typography>
+              <Typography mb={1} variant="body1"><strong>Title:</strong> {complaintDetails.title}</Typography>
+              <Typography mb={1} variant="body1"><strong>Problem:</strong> {complaintDetails.problem}</Typography>
 
-            <Box>
-      <Typography mb={1} variant="body1">Enter your reply:</Typography>
-      
-      <TextField 
-        variant="outlined" 
-        placeholder="Type your reply here..." 
-        fullWidth 
-        value={reply}
-        onChange={handleReplyChange}
-        multiline
-        rows={4} // Adjust rows if you want a multi-line input
-      />
+              <Typography mb={1} variant="body1"><strong>Date of Complaint:</strong> {dayjs(complaintDetails.dateOfComplaint).format('YYYY-MM-DD HH:mm:ss')}</Typography>
+              <Typography mb={1} variant="body1"><strong>Status:</strong> {complaintDetails.status}</Typography>
 
-      <Button 
-        variant="contained" 
-        
-        sx={{ mt: 2,color:"white",backgroundColor:"black" }}
-        onClick={() => handleReplySubmit(complaintDetails)}
-      >
-        Submit
-      </Button>
-    </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button  onClick={handleCloseReplyDialog} >Close</Button>
-          </DialogActions>
-        </Dialog>
+              <Box>
+                <Typography mb={1} variant="body1">Enter your reply:</Typography>
+
+                <TextField
+                  variant="outlined"
+                  placeholder="Type your reply here..."
+                  fullWidth
+                  value={reply}
+                  onChange={handleReplyChange}
+                  multiline
+                  rows={4} // Adjust rows if you want a multi-line input
+                />
+
+                <Button
+                  variant="contained"
+
+                  sx={{ mt: 2, color: "white", backgroundColor: "black" }}
+                  onClick={() => handleReplySubmit(complaintDetails)}
+                >
+                  Submit
+                </Button>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseReplyDialog} >Close</Button>
+            </DialogActions>
+          </Dialog>
         </div>
-: <CircularProgress />}
+        : <CircularProgress />}
 
 
 
-      </div>
-    );
-  };
+    </div>
+  );
+};
 
-  export default ComplaintsTable;
+export default ComplaintsTable;

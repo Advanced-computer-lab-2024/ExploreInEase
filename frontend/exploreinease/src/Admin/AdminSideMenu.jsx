@@ -14,6 +14,9 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+
+import HomeIcon from "@mui/icons-material/Home";
+
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
@@ -28,6 +31,9 @@ import RegistringUsers from './AdminRegistringUsers';
 import DeletionRequests from './DeletionRequests';
 import EventsAndItineraries from './EventsAndItenararies';
 
+import AdminHomePage from './AdminHomePage';
+import AdminSalesReport from './AdminSalesReport';
+
 import ActivityCategory from './activityCategories';//done
 import AddUser from './AddUser';//done
 import Preferencetags from './preferenceTags';//done
@@ -36,16 +42,21 @@ import ArchiveProduct from '../Shared/Components/Product/ArchiveProduct';
 import ViewProduct from '../Shared/Components/Product/Product';
 import ChangePassword from '../TouristGovernor/changePassword';
 import Login from '../Login/login';
+
+// import AdminHomePage from './AdminHomePage';
+
+
+
 const drawerWidth = 240;
 
 
 
-function ResponsiveDrawer(props) {
-  const adminId = localStorage.getItem('UserId');
+const ResponsiveDrawer = (props) => {
+  const adminId = localStorage.getItem("UserId");
 
   const { window } = props;
   const navigate = useNavigate(); // Use useNavigate hook
-  const [mobileOpen, setMobileOpen] =useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [collapseOpen, setCollapseOpen] = useState(false);
 
@@ -53,135 +64,117 @@ function ResponsiveDrawer(props) {
     setCollapseOpen(!collapseOpen);
   };
 
-
   const [UsercollapseOpen, setUserCollapseOpen] = useState(false);
 
   const handleUserCollapseToggle = () => {
     setUserCollapseOpen(!UsercollapseOpen);
   };
 
-  const [ openTab , setOpenTab ] = useState('ComplaintsTable');
+  const [openTab, setOpenTab] = useState("AdminHomePage");
 
-  const [tab, setTab] = useState(<ComplaintsTable />);
-
+  const [tab, setTab] = useState(<AdminHomePage />);
 
   useEffect(() => {
-
-    console.log(localStorage.getItem('openTab'));
-
-    
-
     const tab = () => {
-      localStorage.getItem('openTab') && setOpenTab(localStorage.getItem('openTab'));
-
-      console.log('openTab', openTab);
-
-      switch(openTab){
-        case 'ComplaintsTable':
+      localStorage.getItem("openTab") &&
+        setOpenTab(localStorage.getItem("openTab"));
+  
+      switch (openTab) {
+        case "AdminHomePage":
+          setTab(<AdminHomePage />);
+          return <AdminHomePage />;
+        case "ComplaintsTable":
           setTab(<ComplaintsTable />);
-          console.log("1");
-          return <ComplaintsTable />
-        case 'DeletionRequests':
+          return <ComplaintsTable />;
+        case "AdminSalesReport": // Add this case
+          setTab(<AdminSalesReport />);
+          return <AdminSalesReport />;
+        case "DeletionRequests":
           setTab(<DeletionRequests />);
-          console.log("2");
-
-          return <DeletionRequests />
-        case 'EventsAndItineraries':
+          return <DeletionRequests />;
+        case "EventsAndItineraries":
           setTab(<EventsAndItineraries />);
-          console.log("3");
-
-          return <EventsAndItineraries />
-        case 'RegistringUsers':
+          return <EventsAndItineraries />;
+        case "RegistringUsers":
           setTab(<RegistringUsers />);
-          console.log("4");
-
-          return <RegistringUsers />
-          case 'ViewProduct':
-            setTab(<ViewProduct />);
-            console.log("5");
-
-            return <ViewProduct />
-            case 'AdminUserProfiles':
-              setTab(<AdminUserProfiles />);
-              console.log("6");
-
-              return <AdminUserProfiles />
-              case 'Preferencetags':
-                setTab(<Preferencetags/>);
-                console.log("7");
-
-                return <Preferencetags/>
-                case 'AddUser':
-                  setTab(<AddUser />);
-                  console.log("8");
-
-                  return <AddUser />
-                  case 'ActivityCategory':
-                    setTab(<ActivityCategory />);
-                    console.log("9");
-
-                    return <ActivityCategory />
-                    case 'ArchiveProduct':
-                      setTab(<ArchiveProduct />);
-                      console.log("10");
-
-                      return <ArchiveProduct />
-                      case 'ChangePassword':
-                        setTab(<ChangePassword />);
-                        console.log("1");
-
-                        return <ChangePassword />
-
-                        default:
-          setTab(<ComplaintsTable />);
-          return <ComplaintsTable />
+          return <RegistringUsers />;
+        case "ViewProduct":
+          setTab(<ViewProduct />);
+          return <ViewProduct />;
+        case "AdminUserProfiles":
+          setTab(<AdminUserProfiles />);
+          return <AdminUserProfiles />;
+        case "Preferencetags":
+          setTab(<Preferencetags />);
+          return <Preferencetags />;
+        case "AddUser":
+          setTab(<AddUser />);
+          return <AddUser />;
+        case "ActivityCategory":
+          setTab(<ActivityCategory />);
+          return <ActivityCategory />;
+        case "ArchiveProduct":
+          setTab(<ArchiveProduct />);
+          return <ArchiveProduct />;
+        case "ChangePassword":
+          setTab(<ChangePassword />);
+          return <ChangePassword />;
+        default:
+          setTab(<AdminHomePage />);
+          return <AdminHomePage />;
       }
-    }
-
+    };
+  
     tab();
-
-   
-
   }, [openTab]);
-
+  
   const handleTabChange = (tab) => {
     setOpenTab(tab);
-    localStorage.setItem('openTab', tab);
-
-    console.log('openTab', openTab);
-  }
-  const handleLogOut = () => {
-    navigate('/Login');
+    localStorage.setItem("openTab", tab);
   };
-
-  const handleDrawerClose = () => {
-    setIsClosing(true);
-    setMobileOpen(false);
-  };
-
-  const handleDrawerTransitionEnd = () => {
-    setIsClosing(false);
-  };
-
-  const handleDrawerToggle = () => {
-    if (!isClosing) {
-      setMobileOpen(!mobileOpen);
-    }
-  };
-
+  
+  // Update drawer to include AdminSalesReport
   const drawer = (
     <div>
       <Toolbar />
       <Divider />
       <List>
+        <ListItemButton onClick={() => handleTabChange("AdminHomePage")}>
+          <ListItemIcon>
+            <HomeIcon />
+          </ListItemIcon>
+          <ListItemText primary="Home" />
+        </ListItemButton>
+        <Divider />
+        <ListItemButton onClick={() => handleTabChange("AllNotifications")}>
+          <ListItemIcon>
+            <MailIcon />
+          </ListItemIcon>
+          <ListItemText primary="All Notifications" />
+        </ListItemButton>
+        <Divider />
         
+        <ListItemButton onClick={() => handleTabChange("AdminSalesReport")}>
+          <ListItemIcon>
+            <InboxIcon />
+          </ListItemIcon>
+          <ListItemText primary="Sales Report" />
+        </ListItemButton>
+        <Divider />
         <ListItemButton onClick={handleUserCollapseToggle}>
           <ListItemText primary="Users" />
           {UsercollapseOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
         <Collapse in={UsercollapseOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries', 'RegistringUsers','AddUser','ChangePassword'].map((text) => (
+          <List component="div" disablePadding sx={{ backgroundColor: "#156fb7", color: "fff" }}>
+            {[
+              "ComplaintsTable",
+              "DeletionRequests",
+              "EventsAndItineraries",
+              "RegistringUsers",
+              "AddUser",
+              "ChangePassword",
+            ].map((text) => (
               <ListItemButton
                 key={text}
                 sx={{ pl: 4 }}
@@ -189,7 +182,6 @@ function ResponsiveDrawer(props) {
               >
                 <ListItemText primary={text} />
               </ListItemButton>
-              
             ))}
           </List>
         </Collapse>
@@ -198,8 +190,16 @@ function ResponsiveDrawer(props) {
           {collapseOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
         <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {['ComplaintsTable', 'DeletionRequests', 'EventsAndItineraries','ViewProduct','Preferencetags','ActivityCategory','ArchiveProduct'].map((text) => (
+          <List component="div" disablePadding sx={{ backgroundColor: "#156fb7", color: "fff" }}>
+            {[
+              "ComplaintsTable",
+              "DeletionRequests",
+              "EventsAndItineraries",
+              "ViewProduct",
+              "Preferencetags",
+              "ActivityCategory",
+              "ArchiveProduct",
+            ].map((text) => (
               <ListItemButton
                 key={text}
                 sx={{ pl: 4 }}
@@ -207,73 +207,41 @@ function ResponsiveDrawer(props) {
               >
                 <ListItemText primary={text} />
               </ListItemButton>
-              
             ))}
           </List>
         </Collapse>
-        
-        
       </List>
       <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam','LogOut'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton button onClick={text === 'LogOut' ? handleLogOut : undefined}>
-              <ListItemIcon>{text ==='LogOut'? <LogoutIcon /> : (index % 2 === 0 ? <InboxIcon /> : <MailIcon /> )}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
     </div>
   );
 
-  // Remove this const when copying and pasting into your project.
-  const container = window !== undefined ? () => window().document.body : undefined;
+  const container =
+    window !== undefined ? () => window().document.body : undefined;
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      {/* <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Responsive drawer
-          </Typography>
-        </Toolbar>
-      </AppBar> */}
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
         aria-label="mailbox folders"
       >
-        {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
           container={container}
           variant="temporary"
           open={mobileOpen}
-          onTransitionEnd={handleDrawerTransitionEnd}
-          onClose={handleDrawerClose}
+          onClose={() => setMobileOpen(false)}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              backgroundColor: "#1261a0",
+              color: "white",
+            },
           }}
         >
           {drawer}
@@ -281,8 +249,13 @@ function ResponsiveDrawer(props) {
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              backgroundColor: "#1261a0",
+              color: "white",
+            },
           }}
           open
         >
@@ -291,21 +264,18 @@ function ResponsiveDrawer(props) {
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` },marginTop: "50px" }}
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          marginTop: "50px",
+        }}
       >
-
-
-          {tab}
-        {/* <ComplaintsTable /> */}
-        {/* <DeletionRequests /> */}
-        {/* <EventsAndItineraries /> */}
-        {/* <RegistringUsers /> */}
-        
+        {tab}
       </Box>
     </Box>
   );
-}
-
-
+};
 
 export default ResponsiveDrawer;
+
