@@ -1,5 +1,5 @@
 import GovernorNavbar from './GovernorNavbar';
-import { FaCar, FaUserCircle, FaTasks, FaRoute } from 'react-icons/fa'; // Example icon library
+import { FaCar, FaUserCircle, FaTasks, FaChartLine, FaBox, FaTags, FaArchive, FaFolderOpen } from 'react-icons/fa';
 import NetworkService from '../NetworkService';
 import LogoutSharpIcon from '@mui/icons-material/LogoutSharp';
 import "./GovernorHomePage.css"; // Import CSS file for styling
@@ -57,7 +57,7 @@ const GovernorHomePage = () => {
         {/* Card 2 - Transportation */}
         <div className="card">
           <div className="card-icon">
-            <FaCar /> {/* Icon for Transportation */}
+            <FaTags /> {/* Icon for Transportation */}
           </div>
           <button className="card-button" onClick={()=>handleClick("Historical Tags")}>Tags</button>
         </div>

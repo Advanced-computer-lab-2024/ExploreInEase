@@ -28,6 +28,7 @@ import axios from "axios";
 import debounce from 'lodash.debounce';
 import NetworkService from "../../../NetworkService";
 import TravelItemsShareDialog from './TravelItemsShareDialog';
+import TouristNavbar from "../../../Tourist/TouristNavbar";
 // Sample data with 'type' field added
 const itemList = [];
 const addressCache = {};
@@ -41,13 +42,8 @@ const roleFields = {
 
 const Filter = ({eventsG=[],typeeG=''}) => {
   const location = useLocation();
-  const { events,userId=null,typee } = location.state || {};
-  // console.log("userId",userId);
-  
+  const { events,userId=null,typee } = location.state || {};  
   const itemList = events?.flat() ||eventsG?.flat()|| []; // Flatten the array and ensure it's initialized
-  console.log(events);
-  console.log(itemList);
-  // console.log("User:",User);
   const [tagsList, setTagsList] = useState([]);
   const [filters, setFilters] = useState({
     budget: '',
@@ -570,6 +566,10 @@ const Filter = ({eventsG=[],typeeG=''}) => {
 // console.log("filteredData",filteredData);
 
   return (
+<div>
+    {typee==='tourist' &&(
+      <TouristNavbar/>
+    )}
 
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
      <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>
@@ -724,8 +724,8 @@ const Filter = ({eventsG=[],typeeG=''}) => {
             <Grid item xs={12} sm={6} md={4} key={item.id}>
               <Card    
                style={{
-                 width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
-                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '400px',
+                 width: item.type === 'Activity' ? '400px' : item.type === 'Itinerary' ? '380px' : '400px',
+                 height: item.type === 'Activity' ? '280px' : item.type === 'Itinerary' ? '380px' : '380px',
                 }}>
                 <CardContent>
                   <Typography variant="h5" component="div">
@@ -770,12 +770,13 @@ const Filter = ({eventsG=[],typeeG=''}) => {
                       <Typography><strong>Students ticket price: </strong> {item.ticketPrice[0]}</Typography>
                       <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
                       <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography>
-                      <Typography><strong> Tags:</strong>
+                      {/* <Typography><strong> Tags:</strong>
                           {item.tags ? renderTags(item.tags) : 'No tags available'}
-                      </Typography>                      </>
+                      </Typography>           */}
+                    </>
                   )}
                       {typee=="tourist" && (<>
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
                        <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
                          Book a ticket 
                         </Button> 
@@ -921,6 +922,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
           {errorMessage}
         </Alert>
       )} */}
+            </div>
             </div>
           );
         };

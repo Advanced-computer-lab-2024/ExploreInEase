@@ -8,7 +8,7 @@ import axios from 'axios'; // Ensure Axios is imported
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';  
 import { useLocation } from 'react-router-dom';
-
+import TouristNavbar from './TouristNavbar';
 import NetworkService from '../NetworkService';
 const containerStyle = {
   width: '100%',
@@ -111,6 +111,7 @@ function BookTransportation() {
 
   return (
     <div>
+      <TouristNavbar/>
      <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>
       {/* Alert component to show success message */}
       {success && (

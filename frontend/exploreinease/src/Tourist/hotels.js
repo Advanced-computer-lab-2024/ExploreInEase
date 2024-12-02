@@ -24,6 +24,7 @@ import Hotel13 from '../Hotels Images/Hotel 13.jpeg';
 import Hotel14 from '../Hotels Images/Hotel 14.jpeg';
 import Hotel15 from '../Hotels Images/Hotel 15.jpeg';
 import Hotel16 from '../Hotels Images/Hotel 16.jpeg';
+import TouristNavbar from './TouristNavbar';
 
 const hotelImages =
  [
@@ -151,6 +152,8 @@ const handleBookHotels=async(selected)=>{
   const getRandomImage = () => hotelImages[Math.floor(Math.random() * hotelImages.length)];
 
   return (
+    <div>
+      <TouristNavbar/>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Grid container spacing={4} sx={{ mt: 5, px: 3 }}>
         
@@ -264,6 +267,7 @@ const handleBookHotels=async(selected)=>{
 </Grid>
       </Grid>
     </LocalizationProvider>
+    </div>
   );
 };
 

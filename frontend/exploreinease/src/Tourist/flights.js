@@ -11,6 +11,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleIcon from '@mui/icons-material/People';
 import NetworkService from '../NetworkService';
 import flight from "../Hotels Images/flight.png"
+import TouristNavbar from './TouristNavbar';
 
 
 const Flights = () => {
@@ -153,6 +154,8 @@ const handleBookFlight=async(selected)=>{
   };
 
   return (
+    <div>
+      <TouristNavbar/>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Grid container spacing={4} sx={{ mt: 5, px: 3 }}>
 
@@ -291,6 +294,7 @@ const handleBookFlight=async(selected)=>{
 
       </Grid>
     </LocalizationProvider>
+    </div>
   );
 };
 

@@ -52,6 +52,10 @@ const Complaints = React.lazy(() => import('./Tourist/Complaints'));
 const AdminSideMenu = React.lazy(() => import('./Admin/AdminSideMenu'));
 const ResetPassword=React.lazy(()=>import('./Login/resetPassword'));
 const GovernT=React.lazy(()=>import('./TouristGovernor/GovernorHomePage'));
+const AdvertiserHP=React.lazy(()=>import('./Advertier/advertiserHomePage'));
+const SellerHomePage =React.lazy(()=>import('./Seller/SellerHomePage'));
+const TourGuideHomePage=React.lazy(()=>import('./TourGuide/GuideHomePage'));
+const TouristHomePage=React.lazy(()=>import('./Tourist/touristHomePage'));
 const Cart2=React.lazy(()=>import('./Tourist/cart2'));
 const TourGuideReport = React.lazy(() => import('./Shared/Components/Reports/TouristsReport'));
 const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesReport'));
@@ -87,12 +91,13 @@ const App = () => {
           <Route path="/viewPreferencatags" element={<Preferencetags />} />
           <Route path="/viewAddedUsers" element={<AddUser />} />
           <Route path="/viewAllUserProfiles" element={<AdminUserProfiles />} />
-          <Route path="/TouristHomePage" element={<TouristNavbar />} />
-          <Route path="/SellerHomePage" element={<SellerNavbar />} />
-          <Route path="/TourGuideHomePage" element={<TourGuideNavbar />} />
+          <Route path="/TouristHomePage" element={<TouristHomePage />} />
+          <Route path="/SellerHomePage" element={<SellerHomePage />} />
+          <Route path="/TourGuideHomePage" element={<TourGuideHomePage />} />
           <Route path="/AdminHomePage" element={<AdminSideMenu/>} />
-          <Route path="/AdvertiserHomePage" element={<AdvertiserNavbar />} />
+          <Route path="/AdvertiserNavbar" element={<AdvertiserNavbar />} />
           <Route path="/GovernorHomePage" element={<GovernT />} />
+          <Route path="AdvertiserHomePage" element={<AdvertiserHP/>}/>
           <Route path="/Activities" element={<Activity />} />
           <Route path="/Login" element={<SignIn />} />
           {/* <Route path="/AdminHomePage" element={<AdminHomePage />} /> */}

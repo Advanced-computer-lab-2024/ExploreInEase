@@ -27,12 +27,12 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import { AddShoppingCart } from "@mui/icons-material";
 
 const TouristNavbar = () => {
-  // const Userr = JSON.parse(localStorage.getItem('User'));
+   const Userr = JSON.parse(localStorage.getItem('User'));
   // const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
-    const  tourist  = state?.tourist || {};
+    const  tourist  = state?.tourist ||Userr.User|| {};
     const imageUrl = state?.imageUrl ||{};
     const [success,setSuccess]=useState();
     const [error,setError]=useState();
@@ -44,9 +44,8 @@ const TouristNavbar = () => {
     const open = Boolean(anchorEl);
     const initialUsername = tourist?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-     const userId=tourist._id;
-     const userType = tourist.tourist?.type || tourist.type||'tourist';
-
+     const userId=Userr.User?._id ||tourist._id||{};
+     const userType = tourist.tourist?.type || Userr?.type||tourist.type||'tourist';
      const [showSuccessMessage, setShowSuccessMessage] = useState(false);
      const [showErrorMessage, setShowErrorMessage] = useState(false);
      const [errorMessage, setErrorMessage] = useState('');
@@ -134,7 +133,7 @@ const handleClose = () => {
           console.log('Error:', error);
         }
       }
-        if (title == "View Products") {
+       else if (title == "View Products") {
             try {
                 const options = {
                   apiPath: `/getAvailableProducts/${userId}`,

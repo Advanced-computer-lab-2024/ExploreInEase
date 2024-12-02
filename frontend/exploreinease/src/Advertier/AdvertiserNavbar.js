@@ -132,9 +132,7 @@ const HomePage = () => {
       const handleClose = () => {
         setAnchorEl1(null);
       };
-    const handleRegisterClick = async (title) => {
-        console.log(title);
-        
+    const handleRegisterClick = async (title) => {        
      if (title === "Transportation") {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;

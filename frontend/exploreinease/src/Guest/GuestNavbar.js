@@ -9,6 +9,10 @@ import NetworkService from '../NetworkService';
 import Filter from '../Shared/Components/Filter/Filter';
 import Alert from '@mui/material/Alert';
 import { Login } from '@mui/icons-material';
+import "../TouristGovernor/GovernorHomePage.css"; // Import CSS file for styling
+import { FaCar, FaUserCircle, FaTasks, FaChartLine, FaBox, FaTags, FaArchive, FaFolderOpen, FaCalendarAlt, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import { FaBookOpen, FaClipboardList, FaListOl, FaHandsHelping } from 'react-icons/fa';
+import { FaRegUser, FaRegCalendarCheck } from 'react-icons/fa';
 
 const HomePage = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -48,16 +52,21 @@ const HomePage = () => {
     fetchEvents();
   }, [currency]); // Re-fetch events if currency changes
 
-  function handleLoginClick(){
-    navigate('/Login');
-  }
+
   async function handleRegisterClick(title){
-    if (title == "Register"){
+    if (title === "Register"){
     navigate('/register'); 
+  }
+  else if (title ==="Login"){
+    navigate('/Login');
+  }else if (title==="Events") {
+    
+  }else {
+
   }
   };
   return (
-    <div className="homepage">
+    <div>
       {error && (
         <div className="error-alert">
           {error}
@@ -72,26 +81,39 @@ const HomePage = () => {
           />
           <span className="website-name">ExploreInEase</span>
         </div>
-        <div className="nav-links">
-        <button
-         onClick={() => handleLoginClick()}
-          className="small-button" >
-          Login
-        </button>
-        <button 
-         onClick={() => handleRegisterClick("Register")}
-          className="small-button">
-            Register</button>
-          {/* <button 
-           className="small-button">Upload Required Documents</button> */}
-          <button  className="small-button">View Step-by-Step Guide</button>
-        </div>
-        <div className="currency-selector">
-        </div>
-  
       </nav>
-      <Filter eventsG={events} typeeG={"guest"} />
-      {/* Other homepage content goes here */}
+      <div className="photo-background-guest" />
+      <div className="card-container">
+        {/* Card 1 - Activity */}
+        <div className="card">
+          <div className="card-icon">
+            <FaRegUser /> {/* You can change the icon to suit your needs */}
+          </div>
+          <button className="card-button" onClick={()=>handleRegisterClick("Register")}>Register</button>
+        </div>
+
+        {/* Card 2 - Transportation */}
+        <div className="card">
+          <div className="card-icon">
+            <FaSignInAlt /> {/* Icon for Transportation */}
+          </div>
+          <button className="card-button" onClick={()=>handleRegisterClick("Login")}>Login</button>
+        </div>
+
+        {/* Card 3 - My Profile */}
+        <div className="card">
+          <div className="card-icon">
+            <FaClipboardList /> 
+          </div>
+          <button className="card-button" onClick={()=>handleRegisterClick("View Step-by-Step Guide")}>View Step-by-Step Guide</button>
+        </div>
+        <div className="card">
+          <div className="card-icon">
+            <FaRegCalendarCheck /> 
+          </div>
+          <button className="card-button" onClick={()=>handleRegisterClick("Events")}>View Events</button>
+        </div>
+      </div>
     </div>
   );
 };

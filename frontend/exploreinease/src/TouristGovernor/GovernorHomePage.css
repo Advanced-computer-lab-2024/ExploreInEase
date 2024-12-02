@@ -11,6 +11,35 @@
   background-position: center;
   background-repeat: no-repeat;
 }
+.photo-background-advertiser{
+  min-height: 64.2vh;
+  background-image: url('../advertiserHP.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.photo-background-guide{
+  min-height: 64.2vh;
+  background-image: url('../travelG.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.photo-background-guest{
+  min-height: 64.2vh;
+  background-image: url('../7109953.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.photo-background-tourist{
+  min-height: 64.2vh;
+  background-image: url('../tourist.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 
 .card-container {
   display: flex;
