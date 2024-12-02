@@ -555,4 +555,14 @@ router.get('/getArchivedProducts/:userId', checkoutController.getArchivedProduct
 router.put('/archiveProduct/:userId/:productId', checkoutController.archiveProduct);
 router.get('/availableQuantityAndSales/:userType/:productId/:currency', checkoutController.availableQuantityAndSales);
 
+// Route for viewing delivered orders
+router.get('/myOrders/:touristId/:currency', checkoutController.viewMyOrders);
+
+
+
+
+
+// Route for canceling an order
+router.delete('/cancelOrders', checkoutController.cancelOrder);
+
 module.exports = router;

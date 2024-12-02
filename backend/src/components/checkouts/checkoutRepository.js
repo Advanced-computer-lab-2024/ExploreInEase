@@ -165,19 +165,19 @@ const updateProductReviews = async (productId, updatedFields) => {
     }
 };
 
-const getOrderById = async (orderId) => {
-    try {
-        // Use Mongoose to find the order by its ID
-        const order = await Order.findById(orderId)
-            .populate('touristId', 'name email') // Populate touristId with specific fields if needed
-            .populate('productIds', 'name price') // Populate productIds with specific fields if needed
-            .exec(); // Execute the query
+// const getOrderById = async (orderId) => {
+//     try {
+//         // Use Mongoose to find the order by its ID
+//         const order = await Order.findById(orderId)
+//             .populate('touristId', 'name email') // Populate touristId with specific fields if needed
+//             .populate('productIds', 'name price') // Populate productIds with specific fields if needed
+//             .exec(); // Execute the query
 
-        return order; // Return the found order, or null if not found
-    } catch (error) {
-        throw new Error(`Error retrieving order: ${error.message}`); // Throw an error if something goes wrong
-    }
-};
+//         return order; // Return the found order, or null if not found
+//     } catch (error) {
+//         throw new Error(`Error retrieving order: ${error.message}`); // Throw an error if something goes wrong
+//     }
+// };
 
 
 const addOrder = async (orderData) => {
@@ -326,6 +326,88 @@ const archiveProduct = async (product) => {
     await product.save();
 };
 
+
+const findOrdersByStatusAndTouristId = async (touristId, currency) => {
+    // Fetch orders for the given touristId
+    const orders = await Order.find({ touristId }).exec();
+    console.log(orders);
+  
+    // Fetch tourist information for the given touristId
+    const tourist = await Tourist.findById(touristId).exec();
+    if (!tourist) {
+        throw new Error("Tourist not found");
+    }
+    const customerName = tourist.username;
+  
+    // Create a map of product IDs to their names for efficient lookup
+    const productIds = [
+        ...new Set(
+            orders.flatMap(order => order.productsIdsQuantity.map(product => product.id))
+        )
+    ];
+    const products = await Product.find({ _id: { $in: productIds } }).exec();
+    const productMap = Object.fromEntries(
+        products.map(product => [product._id.toString(), product.name])
+    );
+  
+    // Map orders to the desired structure
+    const convertedOrders = orders.map((order, index) => {
+        // Convert price based on the specified currency
+        let convertedPrice = order.price;
+        switch (currency) {
+            case "euro":
+                convertedPrice = parseFloat((order.price / 55).toFixed(2));
+                break;
+            case "dollar":
+                convertedPrice = parseFloat((order.price / 50).toFixed(2));
+                break;
+            case "EGP":
+                // No conversion needed for EGP
+                break;
+            default:
+                throw new Error("Invalid currency specified");
+        }
+  
+        return {
+            id: index + 1, // Generate a unique ID starting from 1
+            orderDate: new Date(order.createdAt).toISOString().split("T")[0], // Format date as YYYY-MM-DD
+            status: order.status,
+            products: order.productsIdsQuantity.map((product, idx) => ({
+                id: idx + 1, // Product index in sequence
+                name: productMap[product.id] || "Unknown Product", // Fetch name from productMap
+                quantity: product.quantity,
+                price: convertedPrice, // Total price of the order
+            })),
+            customerName, // Fetched from the Tourist table
+            shippingAddress: `${order.addressToBeDelivered.street}, ${order.addressToBeDelivered.city}, ${order.addressToBeDelivered.country}`,
+            paymentType: order.paymentType,
+        };
+    });
+  
+    return convertedOrders;
+  };
+  
+  
+  
+  
+  // Fetch order by ID
+  const getOrderById = async (orderId) => {
+      return await Order.findById(orderId).exec();
+  };
+  
+  // Fetch tourist by ID
+  const getTouristById = async (touristId) => {
+      return await Tourist.findById(touristId).exec();
+  };
+  
+  // Delete order by ID
+  const deleteOrderById = async (orderId) => {
+      return await Order.findByIdAndDelete(orderId).exec();
+  };
+
+
+
+
 module.exports = {
     getAvailableProductsSortedByRatings,
     addProduct,
@@ -356,5 +438,8 @@ module.exports = {
     getAllOrders,
     getOrdersByTouristId,
     getOrderById,
-    getProductById2
+    getProductById2,
+    findOrdersByStatusAndTouristId,
+    getTouristById,
+    deleteOrderById
 };

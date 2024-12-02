@@ -222,6 +222,49 @@ const updateOrder = async (orderId, updatedOrderData) => {
 };
 
 
+
+// Service for retrieving orders by status and touristId
+const getOrdersByStatusAndTouristId = async (touristId,currency) => {
+    const orders = await checkoutRepository.findOrdersByStatusAndTouristId(touristId,currency);
+    console.log(orders);
+    return orders;
+};
+
+
+
+
+
+// Service to cancel an order
+const cancelOrder = async (orderId, touristId) => {
+    // Fetch the order details
+    const order = await checkoutRepository.getOrderById(orderId);
+
+    if (!order) {
+        throw new Error('Order not found');
+    }
+
+    if (order.touristId.toString() !== touristId) {
+        throw new Error('Order does not belong to the provided tourist.');
+    }
+
+    // Fetch the tourist
+    const tourist = await checkoutRepository.getTouristById(touristId);
+
+    if (!tourist) {
+        throw new Error('Tourist not found');
+    }
+    if (order.paymentType === 'wallet' || order.paymentType === 'card') {
+        // Refund the tourist wallet
+        tourist.wallet += order.price;
+        await tourist.save();
+    }
+    
+
+    // Delete the order
+    await checkoutRepository.deleteOrderById(orderId);
+};
+
+
 module.exports = {
     uploadImage,
     archiveProduct,
@@ -238,5 +281,7 @@ module.exports = {
     addOrder,
     getAllOrders,
     getOrdersByTouristId,
-    updateOrder
+    updateOrder,
+    getOrdersByStatusAndTouristId,
+    cancelOrder
 };
