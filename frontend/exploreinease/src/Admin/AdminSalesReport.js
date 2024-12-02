@@ -155,10 +155,11 @@ const SalesReport = () => {
                             </Grid>
                             <Grid item xs={12} sm={6} md={3}>
                                 <Button
-                                    variant="contained"
-                                    color="primary"
+                                    variant="outlined"
                                     size="small"
                                     fullWidth
+                                    backgroundColor="#1261A0"
+                                    borderColor="#1261A0"
                                     onClick={() => setFilterCriteria({ product: "", date: "", month: "" })}
                                     sx={{ minWidth: "100px", padding: "5px 10px" }}
                                 >
