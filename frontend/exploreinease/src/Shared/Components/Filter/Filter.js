@@ -304,7 +304,24 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     setFilteredData(data);
   };
 
-
+  const handleBookmarkClick = async (item) => {
+    const touristId = userId;
+    const id = item.id;  // 'Activity', 'Itinerary', 'HistoricalPlace'
+    const type = item.type;
+  
+    try {
+      const options = {
+        apiPath: `/bookmark/${touristId}`,  // POST request to the correct endpoint
+        useParams: { id, type },  // Pass id and type as parameters
+      };
+      
+      const response = await NetworkService.post(options);  // Use POST instead of PUT
+      console.log(response);
+    } catch (error) {
+      console.error('Error bookmarking event:', error);
+      alert('Failed to bookmark event. Please try again.');
+    }
+  };
   // Reset Filters
   const resetFilters = () => {
     setFilters({
@@ -770,6 +787,15 @@ const Filter = ({eventsG=[],typeeG=''}) => {
                      >
                       Share
                     </Button>
+                        
+                    <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleBookmarkClick(item)}
+              style={{ marginLeft: '10px' }}
+            >
+              Bookmark
+            </Button>
                    </div>
                 </>)}
 
