@@ -45,8 +45,6 @@ const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"
 const Booked=React.lazy(()=>import("./Tourist/booked"));
 const ProductPurchased= React.lazy(() => import("./Shared/Components/Product/PurchaseProduct"));
 const Transportion= React.lazy(() => import("./Advertier/transportation"));
-
-
 const BookTransportation= React.lazy(() => import("./Tourist/bookTransportation"));
 const BookHotel= React.lazy(() => import("./Tourist/hotels"));
 const BookFlight= React.lazy(() => import("./Tourist/flights"));
@@ -58,7 +56,7 @@ const Cart2=React.lazy(()=>import('./Tourist/cart2'));
 const TourGuideReport = React.lazy(() => import('./Shared/Components/Reports/TouristsReport'));
 const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesReport'));
 const OrderHistory = React.lazy(() => import('./Tourist/OrderHistory'));
-
+const MyBookmarks = React.lazy(() => import('./Shared/MyBookmarks'));
 
 
 const App = () => {
@@ -115,7 +113,7 @@ const App = () => {
           <Route path="/TouristsReport" element={<TourGuideReport />} />
           <Route path="/SalesReport" element={<SalesReport />} />
           <Route path="/OrderHistory" element={<OrderHistory />} />
-
+          <Route path="myBookmarks" element={<MyBookmarks />} />
         </Routes>
       </Suspense>
     </Router>
