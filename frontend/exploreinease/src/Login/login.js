@@ -72,13 +72,13 @@ const Login = () => {
         navigate('/GovernorHomePage', { state: { tourist: user,imageUrl: imageUrl } });
         break;
       case 'seller':
-        navigate('/SellerHomePage', { state: { User: user, imageUrl: imageUrl } });
+        navigate('/SalesReport', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'tourGuide':
-        navigate('/TourGuideHomePage', { state: { User: user, imageUrl: imageUrl } });
+        navigate('/SalesReport', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'advertiser':
-        navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
+        navigate('/SalesReport', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
         navigate('/TouristHomePage', { state: { tourist: user,imageUrl: imageUrl } });
