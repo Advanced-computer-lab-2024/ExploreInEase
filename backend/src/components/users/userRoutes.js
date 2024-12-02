@@ -1041,7 +1041,9 @@ router.put('/addInterestedIn/:_id/:eventId/:eventType', userController.addIntere
 router.post('/addAddresses/:userId', userController.addAddresses);
 router.get('/getAddresses/:userId', userController.getAddresses);
 
-router.get('/getTouristReport/:userId', userController.getTouristReport);
+router.get('/userReport/:userId', userController.userReport);
+
+router.get('/adminReport/:userId', userController.adminReport);
 module.exports = {
     router,
     setDBConnection,

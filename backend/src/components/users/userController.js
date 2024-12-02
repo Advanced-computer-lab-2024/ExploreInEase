@@ -863,13 +863,26 @@ const getAddresses = async (req, res) => {
     }
 }
 
-const getTouristReport = async (req, res) => {
+const userReport = async (req, res) => {
     const { userId } = req.params;
     if(!userId){
         return res.status(400).json({ message: "Missing parameters" });
     }
     try {
-        const result = await userService.getTouristReport(userId);
+        const result = await userService.userReport(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const adminReport = async (req, res) => {
+    const { userId } = req.params;
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.adminReport(userId);
         return res.status(200).json(result);
     } catch (error) {
         return res.status(400).json({ message: error.message });
@@ -877,7 +890,8 @@ const getTouristReport = async (req, res) => {
 }
 
 module.exports = {
-    getTouristReport,
+    adminReport,
+    userReport,
     getAddresses,
     addAddresses,
     verifyOtP,

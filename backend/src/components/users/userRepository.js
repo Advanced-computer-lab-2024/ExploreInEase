@@ -861,7 +861,7 @@ const getAddresses = async (user) => {
     }
 }
 
-const getTouristReport = async (user) => {
+const userReport = async (user) => {
     try {
         let tourists = [];
         let eventObject = [];
@@ -1004,10 +1004,20 @@ const getTouristReport = async (user) => {
     }
 };
 
-
+const fetchAllProductsPurchased = async (touristId) => {
+    const allOrders = await Order.find({touristId: touristId});
+    let totalPriceForOrders = 0;
+    allOrders.forEach(async (order) => {
+        if(order.status === 'delivered'){
+            totalPriceForOrders += order.price;
+        }
+    });
+    return totalPriceForOrders;
+}
 
 module.exports = {
-    getTouristReport,
+    fetchAllProductsPurchased,
+    userReport,
     getAddresses,
     addAddresses,
     addInterestedIn,

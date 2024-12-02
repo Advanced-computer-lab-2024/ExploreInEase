@@ -783,17 +783,60 @@ const getAddresses = async (userId) => {
     return addresses;
 }
 
-const getTouristReport = async (userId) => {
+const userReport = async (userId) => {
     const user = await userRepository.findUserById(userId);
     if (!user) {
         throw new Error('User not found');
     }
 
-    const report = await userRepository.getTouristReport(user);
+    const report = await userRepository.userReport(user);
     return report;
 }
+
+const adminReport = async (userId) => { 
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    let totalRevenue = 0;
+    let ActivityRevenue = 0; 
+    let ItineraryRevenue = 0;
+    let HistoricalPlaceRevenue = 0;
+    let OrdersRevenue = 0;
+
+    const tourists = await userRepository.fetchAllTourists();
+
+    for (const tourist of tourists) {
+        const allActivities = tourist.activityId || [];
+        const allItineraries = tourist.itineraryId || [];
+        const allHistoricalPlaces = tourist.historicalplaceId || [];
+
+        for (const activity of allActivities) {
+            totalRevenue += (activity.pricePaid * 0.1);
+            ActivityRevenue += (activity.pricePaid * 0.1);
+        }
+
+        for (const itinerary of allItineraries) {
+            totalRevenue += (itinerary.pricePaid * 0.1);
+            ItineraryRevenue += (itinerary.pricePaid * 0.1);
+        }
+
+        for (const historicalPlace of allHistoricalPlaces) {
+            totalRevenue += (historicalPlace.pricePaid * 0.1);
+            HistoricalPlaceRevenue += (historicalPlace.pricePaid * 0.1);
+        }
+
+        const totalPrice = await userRepository.fetchAllProductsPurchased(tourist._id);
+        totalRevenue += (totalPrice * 0.1);
+        OrdersRevenue += (totalPrice * 0.1);
+    }
+
+    return { ActivityRevenue, ItineraryRevenue, HistoricalPlaceRevenue, OrdersRevenue, totalRevenue };
+};
+
 module.exports = {
-    getTouristReport,
+    adminReport,
+    userReport,
     getAddresses,
     addAddresses,
     verifyOtP,
