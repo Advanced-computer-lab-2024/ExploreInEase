@@ -9,7 +9,10 @@ import HomePage from '../../../Advertier/AdvertiserNavbar';
 
 const SalesReport = () => {
   const location = useLocation();
-  const {Response,User}=location.state||{};
+
+  const {Response: initialData, User} = location.state || {};
+  const [data, setData] = useState(initialData || []); // Initialize with empty array if no data
+  
   console.log(User);
   console.log(Response);
   console.log("Sales Report Page:",User.type);
@@ -21,11 +24,14 @@ const SalesReport = () => {
   const itineraries = ['Hiking', 'Camping', 'City Tour', 'Beach Trip'];
   const activities = ['Weekend Package', 'Day Trip', 'Full Week Tour'];
   
-  const data = Response ;
+  //const data = Response ;
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   const filterData = () => {
+    // Guard against null/undefined data
+    if (!data || data.length === 0) return [];
+    
     let filteredData = [...data];
     
     if (selectedMonth !== 'all') {
@@ -43,9 +49,20 @@ const SalesReport = () => {
   };
 
   const calculateMetrics = (filteredData) => {
-    const totalRevenue = filteredData.reduce((sum, item) => sum + item.totalRevenue, 0);
+    if (!filteredData || filteredData.length === 0) {
+      return {
+        totalRevenue: 0,
+        avgRevenue: 0,
+        bestMonth: { month: 'N/A', totalRevenue: 0 }
+      };
+    }
+
+    const totalRevenue = filteredData.reduce((sum, item) => sum + (item.totalRevenue || 0), 0);
     const avgRevenue = Math.round(totalRevenue / filteredData.length);
-    const bestMonth = filteredData.reduce((max, item) => item.totalRevenue > max.totalRevenue ? item : max);
+    const bestMonth = filteredData.reduce((max, item) => 
+      (item.totalRevenue || 0) > (max.totalRevenue || 0) ? item : max, 
+      { month: 'N/A', totalRevenue: 0 }
+    );
     
     return { totalRevenue, avgRevenue, bestMonth };
   };
