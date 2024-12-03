@@ -718,6 +718,150 @@ const updateRequestDeletion = async (userId, type) => {
     return result;
 };
 
+
+const userReport = async (user) => {
+    try {
+        let tourists = [];
+        let eventObject = [];
+        let monthlyReport = {};
+
+        // Predefined array of months for sorting
+        const monthOrder = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        if (user.type === "tourGuide") {
+            const itineraries = await Itinerary.find({ created_by: user._id });
+            const itineraryIds = itineraries.map(itinerary => itinerary._id.toString());
+
+            tourists = await Tourist.find({
+                "itineraryId.id": { $in: itineraryIds }
+            });
+
+            for (const itinerary of itineraries) {
+                const count = tourists.filter(tourist => 
+                    tourist.itineraryId.some(itineraryRef => 
+                        itineraryRef.id.toString() === itinerary._id.toString()
+                    )
+                ).length;
+
+                eventObject.push({
+                    ItineraryName: itinerary.name,
+                    price: itinerary.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        } else if (user.type === "advertiser") {
+            const activities = await Activity.find({ created_by: user._id });
+            const activityIds = activities.map(activity => activity._id.toString());
+
+            tourists = await Tourist.find({
+                "activityId.id": { $in: activityIds }
+            });
+
+            for (const activity of activities) {
+                const count = tourists.filter(tourist => 
+                    tourist.activityId.some(activityRef => 
+                        activityRef.id.toString() === activity._id.toString()
+                    )
+                ).length;
+
+                eventObject.push({
+                    ActivityName: activity.name,
+                    price: activity.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        }
+        else{
+            if (user.type === "seller") {
+                // Fetch products created by the seller
+                const products = await Product.find({ sellerId: user._id });
+                const productIds = products.map(product => product._id.toString());
+            
+                // Fetch orders containing the seller's products
+                const orders = await Order.find({
+                    "productsIdsQuantity.id": { $in: productIds }
+                });
+            
+                // Process each product
+                for (const product of products) {
+                    // Count how many tourists ordered this product
+                    const count = orders.reduce((total, order) => {
+                        // Check if the product exists in the order
+                        const productExists = order.productsIdsQuantity.some(
+                            item => item.id.toString() === product._id.toString()
+                        );
+                        return productExists ? total + 1 : total; // Increment total by 1 if the product exists
+                    }, 0);
+                    
+            
+                    // Push event object for this product
+                    eventObject.push({
+                        ProductName: product.name,
+                        price: product.price * 0.9,
+                        totalPeople: count
+                    });
+                }
+            
+                // Add a default event if no products were found
+                if (eventObject.length === 0) {
+                    eventObject.push({
+                        ProductName: "",
+                        totalPeople: 0
+                    });
+                }
+            }
+            
+        }
+
+        // Group filtered tourists by their creation month and year
+        tourists.forEach((tourist) => {
+            const createdAt = new Date(tourist.createdAt);
+            const month = createdAt.toLocaleString('default', { month: 'long' });
+            const year = createdAt.getFullYear();
+            const key = `${month} ${year}`;
+
+            if (!monthlyReport[key]) {
+                monthlyReport[key] = 0;
+            }
+            monthlyReport[key]++;
+        });
+
+        // Transform and sort the monthlyReport into an array of objects
+        const monthlyReportArray = Object.keys(monthlyReport)
+            .map((key) => {
+                const [month, year] = key.split(" ");
+                return {
+                    Month: key,
+                    Tourists: monthlyReport[key],
+                    sortIndex: parseInt(year) * 12 + monthOrder.indexOf(month)
+                };
+            })
+            .sort((a, b) => a.sortIndex - b.sortIndex)
+            .map(({ Month, Tourists }) => ({ Month, Tourists }));
+
+        // Add default event object if no events were found
+        if (eventObject.length === 0) {
+            eventObject.push({
+                EventName: "",
+                totalPeople: 0
+            });
+        }
+
+        const totalTouristinEventObject = eventObject.reduce((total, event) => total + event.totalPeople, 0);
+
+        return {
+            eventObject,
+            monthlyReport: monthlyReportArray,
+            totalTourists: totalTouristinEventObject
+        };
+    } catch (error) {
+        throw new Error(`Error fetching tourist report: ${error.message}`);
+    }
+};
+
 module.exports = {
     getLoyalityLevel,
     pointsAfterPayment,
@@ -764,5 +908,7 @@ module.exports = {
     checkTourGuideItineraryDates,
     checkSellerProductStatus,
     checkAdvertiserActivityStatus,
-    getTouristByUsername
+    getTouristByUsername,
+    userReport
+
 };

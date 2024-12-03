@@ -186,7 +186,26 @@ const TourGuideHP = () => {
         navigate('/SalesReport', {state: { User }});
        }
        else if (title==='Tourists Report'){
-        navigate('/TouristsReport', {state: { User }});
+        try {
+          const options = {
+            apiPath: `/userReport/${userId}`,
+          };
+  
+          const response = await NetworkService.get(options);
+          console.log(response);
+  
+          setSuccess(response.message); // Set success message
+          const Type = 'tourist';
+          const Orders = response.data;
+          navigate('/TouristsReport', { state: { Response: response,User: Userr } });
+        } catch (err) {
+          if (err.response) {
+            console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }
        }
        else {
         navigate('/createItinerary', {state: { User }});

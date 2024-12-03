@@ -682,6 +682,18 @@ const login = async (req, res) => {
     }
 }
 
+const userReport = async (req, res) => {
+    const { userId } = req.params;
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.userReport(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
 
 module.exports = {
     changePassword,
@@ -718,5 +730,6 @@ module.exports = {
   redeemPoints,
   getUsersForDeletion,
   getNotAcceptedUsers,
-  updatingStatusUser
+  updatingStatusUser,
+  userReport
 };

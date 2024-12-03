@@ -6,7 +6,9 @@ import TourGuideHP from '../../../TourGuide/TourGuideNavbar';
 import HomePage from '../../../Advertier/AdvertiserNavbar';
 const TouristDashboard = () => {
   const location = useLocation();
-  const {User}=location.state||{};
+  const {Response,User}=location.state||{};
+  console.log(User);
+  console.log(Response);
   const [selectedMonth, setSelectedMonth] = useState('all');
 
   const fullData = [

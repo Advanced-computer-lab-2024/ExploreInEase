@@ -1027,6 +1027,8 @@ router.post('/login', userController.login);
 
 router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
 
+router.get('/userReport/:userId', userController.userReport);
+
 module.exports = {
     router,
     setDBConnection,

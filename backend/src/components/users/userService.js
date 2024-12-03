@@ -647,6 +647,17 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+
+const userReport = async (userId) => {
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const report = await userRepository.userReport(user);
+    return report;
+}
+
 module.exports = {
     changePassword,
     uploadImage,
@@ -685,7 +696,8 @@ module.exports = {
   redeemPoints,
   fetchUsersForDeletion,
   getNotAcceptedUsers,
-  updatingStatusUser
+  updatingStatusUser,
+  userReport
 
 };
 

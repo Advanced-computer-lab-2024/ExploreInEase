@@ -75,10 +75,10 @@ const Login = () => {
         navigate('/SalesReport', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'tourGuide':
-        navigate('/SalesReport', { state: { User: user, imageUrl: imageUrl } });
+        navigate('/TourGuideHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       case 'advertiser':
-        navigate('/SalesReport', { state: { User: user, imageUrl: imageUrl } });
+        navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
         navigate('/TouristHomePage', { state: { tourist: user,imageUrl: imageUrl } });
