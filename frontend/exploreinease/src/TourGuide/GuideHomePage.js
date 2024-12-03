@@ -55,7 +55,29 @@ const GovernorHomePage = () => {
       }
     }
     else if (title === 'Sales Report') {
-      navigate('/SalesReport', { state: { User: Userr } });
+      try {
+        const options = {
+          apiPath: `/userReport/${userId}`,
+        };
+
+        const response = await NetworkService.get(options);
+        const data = response.eventObject;
+        console.log(data);
+
+
+
+        setSuccess(response.message); // Set success message
+        const Type = 'tourist';
+        const Orders = response.data;
+        navigate('/SalesReport', { state: { Response: data,User: Userr } });
+      } catch (err) {
+        if (err.response) {
+          console.log(err.message);
+          setError(err.response.data.message); // Set error message from server response if exists
+        } else {
+          setError('An unexpected error occurred.'); // Generic error message
+        }
+      }
     }
     else if (title === 'Tourists Report') {
       try {

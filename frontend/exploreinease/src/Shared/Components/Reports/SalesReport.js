@@ -9,21 +9,19 @@ import HomePage from '../../../Advertier/AdvertiserNavbar';
 
 const SalesReport = () => {
   const location = useLocation();
-  const {User}=location.state||{};
+  const {Response,User}=location.state||{};
+  console.log(User);
+  console.log(Response);
   console.log("Sales Report Page:",User.type);
   const [selectedActivity, setSelectedActivity] = useState('all');
   const [selectedItinerary, setSelectedItinerary] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const activities = ['Hiking', 'Camping', 'City Tour', 'Beach Trip'];
-  const itineraries = ['Weekend Package', 'Day Trip', 'Full Week Tour'];
+  const itineraries = ['Hiking', 'Camping', 'City Tour', 'Beach Trip'];
+  const activities = ['Weekend Package', 'Day Trip', 'Full Week Tour'];
   
-  const data = [
-    { month: 'Jan', revenue: 45000, activities: { Hiking: 15000, Camping: 10000, 'City Tour': 12000, 'Beach Trip': 8000 } },
-    { month: 'Feb', revenue: 52000, activities: { Hiking: 18000, Camping: 12000, 'City Tour': 14000, 'Beach Trip': 8000 } },
-    // Add more months...
-  ];
+  const data = Response ;
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -37,7 +35,7 @@ const SalesReport = () => {
     if (selectedActivity !== 'all') {
       filteredData = filteredData.map(item => ({
         ...item,
-        revenue: item.activities[selectedActivity]
+        totalRevenue: item.itineraries[selectedActivity]
       }));
     }
     
@@ -45,9 +43,9 @@ const SalesReport = () => {
   };
 
   const calculateMetrics = (filteredData) => {
-    const totalRevenue = filteredData.reduce((sum, item) => sum + item.revenue, 0);
+    const totalRevenue = filteredData.reduce((sum, item) => sum + item.totalRevenue, 0);
     const avgRevenue = Math.round(totalRevenue / filteredData.length);
-    const bestMonth = filteredData.reduce((max, item) => item.revenue > max.revenue ? item : max);
+    const bestMonth = filteredData.reduce((max, item) => item.totalRevenue > max.totalRevenue ? item : max);
     
     return { totalRevenue, avgRevenue, bestMonth };
   };
@@ -55,9 +53,9 @@ const SalesReport = () => {
   const filteredData = filterData();
   const { totalRevenue, avgRevenue, bestMonth } = calculateMetrics(filteredData);
 
-  const pieData = activities.map(activity => ({
+  const pieData = itineraries.map(activity => ({
     name: activity,
-    value: data.reduce((sum, month) => sum + month.activities[activity], 0)
+    value: data.reduce((sum, month) => sum + month.itineraries[activity], 0)
   }));
 
   return (
@@ -83,7 +81,7 @@ const SalesReport = () => {
                     onChange={(e) => setSelectedActivity(e.target.value)}
                   >
                     <MenuItem value="all">All Activities</MenuItem>
-                    {activities.map(activity => (
+                    {itineraries.map(activity => (
                       <MenuItem key={activity} value={activity}>{activity}</MenuItem>
                     ))}
                   </Select>
@@ -169,7 +167,7 @@ const SalesReport = () => {
                 {bestMonth.month}
               </Typography>
               <Typography color="textSecondary">
-                ${bestMonth.revenue.toLocaleString()}
+                ${bestMonth.totalRevenue.toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
@@ -187,7 +185,7 @@ const SalesReport = () => {
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
-                    <Line type="monotone" dataKey="revenue" stroke="#1976d2" />
+                    <Line type="monotone" dataKey="totalRevenue" stroke="#1976d2" />
                   </LineChart>
                 </ResponsiveContainer>
               </Box>
@@ -195,7 +193,7 @@ const SalesReport = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        {/* <Grid item xs={12} md={4}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -223,7 +221,7 @@ const SalesReport = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
       </Grid>
     </Container>
     </div>
