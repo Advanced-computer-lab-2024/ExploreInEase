@@ -2,6 +2,8 @@ const Activity = require('../../models/activity');
 const Itinerary = require('../../models/itinerary');
 const Users = require('../../models/user');
 const HistoricalPlace = require('../../models/historicalPlace');
+const Order = require('../../models/order');
+const Products = require('../../models/product');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const path = require('path');
@@ -798,11 +800,15 @@ const adminReport = async (userId) => {
     if (!user) {
         throw new Error('User not found');
     }
+
     let totalRevenue = 0;
     let ActivityRevenue = 0; 
     let ItineraryRevenue = 0;
     let HistoricalPlaceRevenue = 0;
     let OrdersRevenue = 0;
+
+    // Prepare a map for product revenue grouped by month
+    const productRevenueByMonth = {};
 
     const tourists = await userRepository.fetchAllTourists();
 
@@ -811,28 +817,72 @@ const adminReport = async (userId) => {
         const allItineraries = tourist.itineraryId || [];
         const allHistoricalPlaces = tourist.historicalplaceId || [];
 
+        // Calculate activity revenue
         for (const activity of allActivities) {
-            totalRevenue += (activity.pricePaid * 0.1);
-            ActivityRevenue += (activity.pricePaid * 0.1);
+            const revenue = activity.pricePaid * 0.1;
+            totalRevenue += revenue;
+            ActivityRevenue += revenue;
         }
 
+        // Calculate itinerary revenue
         for (const itinerary of allItineraries) {
-            totalRevenue += (itinerary.pricePaid * 0.1);
-            ItineraryRevenue += (itinerary.pricePaid * 0.1);
+            const revenue = itinerary.pricePaid * 0.1;
+            totalRevenue += revenue;
+            ItineraryRevenue += revenue;
         }
 
+        // Calculate historical place revenue
         for (const historicalPlace of allHistoricalPlaces) {
-            totalRevenue += (historicalPlace.pricePaid * 0.1);
-            HistoricalPlaceRevenue += (historicalPlace.pricePaid * 0.1);
+            const revenue = historicalPlace.pricePaid * 0.1;
+            totalRevenue += revenue;
+            HistoricalPlaceRevenue += revenue;
         }
 
-        const totalPrice = await userRepository.fetchAllProductsPurchased(tourist._id);
-        totalRevenue += (totalPrice * 0.1);
-        OrdersRevenue += (totalPrice * 0.1);
+        // Fetch all orders for this tourist
+        const allOrders = await Order.find({ touristId: tourist._id, status: 'delivered' });
+
+        for (const order of allOrders) {
+            // Extract the month of the order and convert it to a full month name
+            const month = order.createdAt
+                ? new Date(order.createdAt).toLocaleString('en-US', { month: 'long' }) // e.g., "November"
+                : 'Unknown';
+
+            for (const productId of order.productIds) {
+                const product = await Products.findById(productId);
+
+                if (product) {
+                    // Initialize revenue structure for this product and month
+                    if (!productRevenueByMonth[product.name]) {
+                        productRevenueByMonth[product.name] = {};
+                    }
+
+                    if (!productRevenueByMonth[product.name][month]) {
+                        productRevenueByMonth[product.name][month] = 0;
+                    }
+
+                    // Calculate revenue for this product and add to the month
+                    const revenue = (order.price / order.productIds.length) * 0.1; // Assuming revenue split across products
+                    productRevenueByMonth[product.name][month] += revenue;
+                }
+            }
+
+            // Calculate total revenue for orders
+            OrdersRevenue += order.price * 0.1;
+            totalRevenue += order.price * 0.1;
+        }
     }
 
-    return { ActivityRevenue, ItineraryRevenue, HistoricalPlaceRevenue, OrdersRevenue, totalRevenue };
+    return { 
+        ActivityRevenue, 
+        ItineraryRevenue, 
+        HistoricalPlaceRevenue, 
+        OrdersRevenue, 
+        totalRevenue,
+        productRevenueByMonth
+    };
 };
+
+
 
 module.exports = {
     adminReport,
