@@ -14,7 +14,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Alert } from '@mui/material'; 
+import { Alert } from '@mui/material';
 import Delete from '@mui/icons-material/Delete';
 import '../Guest/GuestHP.css';
 import HomePageLogo from '../HomePageLogo.png';
@@ -33,8 +33,8 @@ const HomePage = () => {
     const { state } = location;
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
-    const User = state?.User || Userr;    
-    const imageUrl = state?.imageUrl ||imageUrll;
+    const User = state?.User || Userr;
+    const imageUrl = state?.imageUrl || imageUrll;
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
     const openNotfication = Boolean(anchorEl1);
@@ -44,7 +44,7 @@ const HomePage = () => {
     const userId = User.User?._id || User._id;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     const userType = User.User?.type || User.type;
-    const [menuItems,setMenuItems]=useState( [
+    const [menuItems, setMenuItems] = useState([
         { title: 'New Message', body: 'You have received a new message from Alex.' },
         { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
         { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
@@ -59,7 +59,7 @@ const HomePage = () => {
     const [showErrorMessage, setShowErrorMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    
+
     useEffect(() => {
         // Update the avatar URL when the component mounts if a new image URL exists
         if (savedAvatarUrl || imageUrl) {
@@ -69,22 +69,22 @@ const HomePage = () => {
         }
     }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
 
-         useEffect(() => {
-      if (showSuccessMessage) {
-        const timer = setTimeout(() => {
-          setShowSuccessMessage(false);
-        }, 5000);
-        return () => clearTimeout(timer);
-      }
-    }, [showSuccessMessage]);
-    
     useEffect(() => {
-      if (showErrorMessage) {
-        const timer = setTimeout(() => {
-          setShowErrorMessage(false);
-        }, 5000);
-        return () => clearTimeout(timer);
-      }
+        if (showSuccessMessage) {
+            const timer = setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessMessage]);
+
+    useEffect(() => {
+        if (showErrorMessage) {
+            const timer = setTimeout(() => {
+                setShowErrorMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
     }, [showErrorMessage]);
 
 
@@ -117,7 +117,7 @@ const HomePage = () => {
                     },
                 });
                 const uploadedImageUrl = response.data.imageUrl;
-                
+
                 // Update avatarImage and save the URL in localStorage
                 setAvatarImage(uploadedImageUrl);
                 localStorage.setItem(`${userId}`, uploadedImageUrl);
@@ -128,22 +128,22 @@ const HomePage = () => {
     };
     const handleClick = (event) => {
         setAnchorEl1(event.currentTarget);
-      };
-      const handleClose = () => {
+    };
+    const handleClose = () => {
         setAnchorEl1(null);
-      };
-    const handleRegisterClick = async (title) => {        
-     if (title === "Transportation") {
+    };
+    const handleRegisterClick = async (title) => {
+        if (title === "Transportation") {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
-                navigate(`/transportion`, { state: { allActivity: response.data ,advertiserId:userId} });
+                navigate(`/transportion`, { state: { allActivity: response.data, advertiserId: userId } });
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
-        } else if(title ==="Activities") {
+        } else if (title === "Activities") {
             console.log("heree");
-            
+
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
@@ -152,10 +152,29 @@ const HomePage = () => {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
         }
-        else if (title=="Tourists Report"){
-            navigate('/TouristsReport', {state: { User }});
-        }else if (title=="Sales Report"){
-            navigate('/SalesReport', {state: { User }});
+        else if (title == "Tourists Report") {
+            try {
+                const options = {
+                    apiPath: `/userReport/${userId}`,
+                };
+
+                const response = await NetworkService.get(options);
+                console.log(response);
+
+                setSuccess(response.message); // Set success message
+                const Type = 'tourist';
+                const Orders = response.data;
+                navigate('/TouristsReport', { state: { Response: response, User: Userr } });
+            } catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                    setError(err.response.data.message); // Set error message from server response if exists
+                } else {
+                    setError('An unexpected error occurred.'); // Generic error message
+                }
+            }
+        } else if (title == "Sales Report") {
+            navigate('/SalesReport', { state: { User } });
         }
         else {
             try {
@@ -171,37 +190,37 @@ const HomePage = () => {
 
     const handleDeleteAccount = async () => {
         try {
-          console.log(userId, userType);
-      
-          const options = {
-            apiPath: `/requestDeletion/${userId}/${userType}`,
-            useParams: userId,
-            userType,
-          };
-          const response = await NetworkService.put(options);
-          console.log(response);
-      
-          setSuccessMessage(response.message || "Delete Successfully!");
-          setShowSuccessMessage(true);
-      
-          if (response.success) {
-            setSuccess("Account deletion requested successfully.");
-          } else {
-            setError(response.message || "Account deletion request failed.");
-          }
+            console.log(userId, userType);
+
+            const options = {
+                apiPath: `/requestDeletion/${userId}/${userType}`,
+                useParams: userId,
+                userType,
+            };
+            const response = await NetworkService.put(options);
+            console.log(response);
+
+            setSuccessMessage(response.message || "Delete Successfully!");
+            setShowSuccessMessage(true);
+
+            if (response.success) {
+                setSuccess("Account deletion requested successfully.");
+            } else {
+                setError(response.message || "Account deletion request failed.");
+            }
         } catch (err) {
-          // Access the error message from the response data
-          const errorMessage = err.response?.data?.message || "An error occurred";
-          setErrorMessage(errorMessage);
-          setShowErrorMessage(true);
-          setError(errorMessage);
+            // Access the error message from the response data
+            const errorMessage = err.response?.data?.message || "An error occurred";
+            setErrorMessage(errorMessage);
+            setShowErrorMessage(true);
+            setError(errorMessage);
         }
-      };
-      
+    };
+
     const toggleDrawer = (open) => () => {
         setDrawerOpen(open);
     };
-       
+
     return (
         <div>
             <nav className="navbar">
@@ -209,63 +228,63 @@ const HomePage = () => {
                     <img src={HomePageLogo} alt="ExploreInEase Logo" className="logo" />
                     <span className="website-name">ExploreInEase</span>
                 </div>
-                
-                <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',alignContent:'center',alignItems:'center' }}>
-                <IconButton 
-                        onClick={handleClick} 
+
+                <div style={{ display: 'flex', flexDirection: 'row', marginLeft: '1450px', alignContent: 'center', alignItems: 'center' }}>
+                    <IconButton
+                        onClick={handleClick}
                         aria-controls={open ? 'basic-menu' : undefined}
                         aria-haspopup="true"
                         aria-expanded={open ? 'true' : undefined}
-                        className="menu-button" 
-                        style={{ 
-                            position:'absolute',
+                        className="menu-button"
+                        style={{
+                            position: 'absolute',
                             color: 'blue',      // Change icon color to blue
                             backgroundColor: '#e0f7fa', // Light blue background for contrast
                             right: '100px',
-                            alignItems:'center'
+                            alignItems: 'center'
                         }}>
                         <Badge badgeContent={4} color="success">
-                        <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
+                            <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
                         </Badge>
-             </IconButton>
-    <Menu
-    id="basic-menu"
-    anchorEl={anchorEl1}
-    open={openNotfication}
-    onClose={handleClose}
-    MenuListProps={{
-        'aria-labelledby': 'basic-button',
-    }}
-    PaperProps={{
-        style: {
-            maxHeight: '300px', // Set the maximum height for the menu
-            overflow: 'auto',   // Enable scrolling
-        },
-    }}
->
-    {menuItems && menuItems.length > 0 ? (
-        menuItems.map((item, index) => (
-            <MenuItem key={index}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong>{item.title}</strong>
-                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
-                </div>
-            </MenuItem>
-        ))
-    ) : (
-        <MenuItem disabled>No notifications available</MenuItem>
-    )}
-</Menu>
-                <IconButton 
-                    onClick={toggleDrawer(true)} 
-                    className="menu-button" 
-                    style={{ position: 'absolute', right: '40px', color: 'white', backgroundColor: '#3f51b5' }}>
-                    <MenuIcon />
-                </IconButton>
+                    </IconButton>
+                    <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl1}
+                        open={openNotfication}
+                        onClose={handleClose}
+                        MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                        }}
+                        PaperProps={{
+                            style: {
+                                maxHeight: '300px', // Set the maximum height for the menu
+                                overflow: 'auto',   // Enable scrolling
+                            },
+                        }}
+                    >
+                        {menuItems && menuItems.length > 0 ? (
+                            menuItems.map((item, index) => (
+                                <MenuItem key={index}>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <strong>{item.title}</strong>
+                                        <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
+                                    </div>
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <MenuItem disabled>No notifications available</MenuItem>
+                        )}
+                    </Menu>
+                    <IconButton
+                        onClick={toggleDrawer(true)}
+                        className="menu-button"
+                        style={{ position: 'absolute', right: '40px', color: 'white', backgroundColor: '#3f51b5' }}>
+                        <MenuIcon />
+                    </IconButton>
                 </div>
             </nav>
-            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 500,  overflowX: 'hidden',}}}>
-                <div style={{ padding: '16px', display: 'flex', alignItems: 'center',alignContent:'center' }}>
+            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 500, overflowX: 'hidden', } }}>
+                <div style={{ padding: '16px', display: 'flex', alignItems: 'center', alignContent: 'center' }}>
                     <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
                         {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
                     </Avatar>
@@ -286,7 +305,7 @@ const HomePage = () => {
                         </ListItemIcon>
                         <ListItemText primary="Delete Account" />
                     </ListItem>
-                    <ListItem component="label" sx={{ alignItems: 'center', padding: 0 , marginLeft: '8px'}}>
+                    <ListItem component="label" sx={{ alignItems: 'center', padding: 0, marginLeft: '8px' }}>
                         <ListItemIcon sx={{ minWidth: 0, marginRight: '8px' }}>
                             <UploadIcon />
                         </ListItemIcon>
@@ -312,9 +331,9 @@ const HomePage = () => {
                     <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
                     {[
                         "Activities",
-                        "Transportation",  
+                        "Transportation",
                         "Tourists Report",
-                        "Sales Report",             
+                        "Sales Report",
                         "My Profile",
                     ].map((text) => (
                         <ListItem key={text} disablePadding>
@@ -325,37 +344,37 @@ const HomePage = () => {
                     ))}
                 </List>
             </Drawer>
-      <div>
-      {showSuccessMessage && (
-        <Alert severity="success" 
-        sx={{
-          position: 'fixed',
-          top: 80, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-      {showErrorMessage && (
-        <Alert severity="error" 
-        sx={{
-          position: 'fixed',
-          top: 60, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {errorMessage}
-        </Alert>
-      )}
-      </div>
-      
+            <div>
+                {showSuccessMessage && (
+                    <Alert severity="success"
+                        sx={{
+                            position: 'fixed',
+                            top: 80, // You can adjust this value to provide space between success and error alerts
+                            right: 20,
+                            width: 'auto',
+                            fontSize: '1.2rem', // Adjust the size
+                            padding: '16px',
+                            zIndex: 9999, // Ensure it's visible above other content
+                        }}>
+                        {successMessage}
+                    </Alert>
+                )}
+                {showErrorMessage && (
+                    <Alert severity="error"
+                        sx={{
+                            position: 'fixed',
+                            top: 60, // You can adjust this value to provide space between success and error alerts
+                            right: 20,
+                            width: 'auto',
+                            fontSize: '1.2rem', // Adjust the size
+                            padding: '16px',
+                            zIndex: 9999, // Ensure it's visible above other content
+                        }}>
+                        {errorMessage}
+                    </Alert>
+                )}
+            </div>
+
         </div>
     );
 };

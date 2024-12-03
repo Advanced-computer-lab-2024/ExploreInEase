@@ -11,28 +11,15 @@ const TouristDashboard = () => {
   console.log(Response);
   const [selectedMonth, setSelectedMonth] = useState('all');
 
-  const fullData = [
-    { month: 'Jan', tourists: 45000 },
-    { month: 'Feb', tourists: 52000 },
-    { month: 'Mar', tourists: 58000 },
-    { month: 'Apr', tourists: 49000 },
-    { month: 'May', tourists: 63000 },
-    { month: 'Jun', tourists: 75000 },
-    { month: 'Jul', tourists: 89000 },
-    { month: 'Aug', tourists: 92000 },
-    { month: 'Sep', tourists: 78000 },
-    { month: 'Oct', tourists: 66000 },
-    { month: 'Nov', tourists: 54000 },
-    { month: 'Dec', tourists: 71000 }
-  ];
+  const fullData = Response;
 
   const data = selectedMonth === 'all' 
     ? fullData 
-    : fullData.filter(item => item.month === selectedMonth);
+    : fullData.filter(item => item.Month === selectedMonth);
 
-  const totalTourists = data.reduce((sum, item) => sum + item.tourists, 0);
+  const totalTourists = data.reduce((sum, item) => sum + item.Tourists, 0);
   const avgTourists = Math.round(totalTourists / data.length);
-  const peakMonth = data.reduce((max, item) => item.tourists > max.tourists ? item : max);
+  const peakMonth = data.reduce((max, item) => item.Tourists > max.Tourists ? item : max);
 
   return (
     <div>
@@ -55,7 +42,7 @@ const TouristDashboard = () => {
             >
               <MenuItem value="all">All Months</MenuItem>
               {fullData.map(item => (
-                <MenuItem key={item.month} value={item.month}>{item.month}</MenuItem>
+                <MenuItem key={item.Month} value={item.Month}>{item.Month}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -91,10 +78,10 @@ const TouristDashboard = () => {
                 Peak Month
               </Typography>
               <Typography variant="h4" component="div">
-                {peakMonth.month}
+                {peakMonth.Month}
               </Typography>
               <Typography color="textSecondary">
-                {peakMonth.tourists.toLocaleString()} visitors
+                {peakMonth.Tourists.toLocaleString()} visitors
               </Typography>
             </CardContent>
           </Card>
@@ -108,10 +95,10 @@ const TouristDashboard = () => {
               <Box sx={{ height: 400 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="Month" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="tourists" fill="#1976d2" />
+                    <Bar dataKey="Tourists" fill="#1976d2" />
                   </BarChart>
                 </ResponsiveContainer>
               </Box>

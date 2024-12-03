@@ -42,12 +42,12 @@ const AdvertiserHomePage = () => {
         };
 
         const response = await NetworkService.get(options);
-        console.log(response);
+        const data = response.data.monthlyReport;
 
         setSuccess(response.message); // Set success message
         const Type = 'tourist';
         const Orders = response.data;
-        navigate('/TouristsReport', { state: { Response: response,User: Userr } });
+        navigate('/TouristsReport', { state: { Response: data, User: Userr } });
       } catch (err) {
         if (err.response) {
           console.log(err.message);
