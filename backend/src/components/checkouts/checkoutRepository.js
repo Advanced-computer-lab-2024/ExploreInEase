@@ -249,7 +249,8 @@ const getOrdersByTouristId = async (touristId) => {
 
 const getProductById2 = async (productId) => {
     try {
-        const product = await Product.findById(productId);
+        const product = await Product.find({_id: productId});
+        console.log("Producttt: ",product);
         return product;
     } catch (error) {
         throw new Error(`Error fetching product by ID: ${error.message}`);
@@ -420,39 +421,50 @@ const getCart = async (touristId) => {
         const cart = await Cart.find({ touristId });
 
         if (!cart || cart.length === 0) {
-            return { cart: [], products: [] };
+            return { products: [] };
         }
 
         const allProducts = [];
 
         for (const cartItem of cart) {
-            console.log('CartItem Products:', cartItem.products);
-
             const products = await Promise.all(
                 cartItem.products.map(async (product) => {
-                    const getProduct = await getProductById2(product.productId.toString());
-                    if (!getProduct) {
-                        throw new Error(`Product with ID ${product.productId} not found.`);
+                    const getProduct = await getProductById2(product.productId);
+
+                    // Flatten product if it contains an indexed key
+                    const flattenedProduct = getProduct && getProduct['0'] ? getProduct['0'] : getProduct;
+
+                    if (!flattenedProduct) {
+                        return null; // Skip invalid product
                     }
 
                     return {
-                        ...getProduct._doc, 
+                        ...flattenedProduct._doc,
+                        quantity: product.quantity,
                     };
                 })
             );
 
-            allProducts.push(...products);
+            allProducts.push(...products.filter(Boolean)); // Add only valid products
         }
 
+        // Loop through `allProducts` and remove indexed keys
+        const cleanedProducts = allProducts.map((product) => {
+            if (product && product['0']) {
+                return { ...product['0'], quantity: product.quantity }; // Remove the indexed key
+            }
+            return product; // Return as-is if no indexed key
+        });
 
-        console.log(allProducts);
-
-        return { cart, products: allProducts };
+        return { products: cleanedProducts };
     } catch (error) {
         console.error(`Error fetching cart: ${error.message}`);
         throw new Error(`Error fetching cart: ${error.message}`);
     }
 };
+
+
+
 
 
 // const getCart = async (touristId) => {
