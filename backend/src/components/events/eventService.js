@@ -696,10 +696,6 @@ const bookedEvents = async (touristId) => {
   ];
 };
 
-const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {
-  
-  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice);
-};
 
 const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
     
@@ -904,6 +900,35 @@ const updateItineraryActivation = async (itineraryId, isActivated, userId, userT
   return await eventRepository.updateItineraryActivation(itineraryId, isActivated, userId);
 };
 
+
+
+
+
+//Buildo + saif apis 
+
+
+const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice,promoCode) => {
+  
+  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice,promoCode);
+};
+
+
+const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode) => {
+  return await eventRepository.bookEventWithCard(
+    touristId,
+    eventType,
+    eventId,
+    ticketType,
+    currency,
+    activityPrice,
+    cardNumber,
+    expMonth,
+    expYear,
+    cvc,promoCode
+  );
+};
+
+
 module.exports = {
   updateItineraryActivation,
   getHistoricalTagDetails,
@@ -954,6 +979,7 @@ module.exports = {
   bookTransportation,
   sendEventEmail,
   updateEventFlag,
-  getAllEvents
+  getAllEvents,
+  addEventToTouristWithCard
 };
 

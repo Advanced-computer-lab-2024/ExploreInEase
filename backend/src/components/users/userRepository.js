@@ -881,6 +881,19 @@ const userReport = async (user) => {
         throw new Error(`Error fetching tourist report: ${error.message}`);
     }
 };
+
+
+const findSellerById = async (id) => {
+    try {
+        const seller = await Users.findById({_id: id});
+        return seller;
+    } catch (error) {
+        console.error('Error fetching seller by ID:', error);
+        throw error;
+    }
+}
+
+
 module.exports = {
     getLoyalityLevel,
     pointsAfterPayment,
@@ -928,6 +941,7 @@ module.exports = {
     checkSellerProductStatus,
     checkAdvertiserActivityStatus,
     getTouristByUsername,
-    userReport
+    userReport,
+    findSellerById
 
 };

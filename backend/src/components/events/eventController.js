@@ -1,6 +1,10 @@
+require('dotenv').config();
 const eventService = require('../events/eventService');
 const { validationResult } = require('express-validator');
 const eventRepository = require('../events/eventRepository');
+const checkoutRepository = require('../checkouts/checkoutRepository');
+const nodemailer = require('nodemailer');
+
 
 
 
@@ -898,44 +902,6 @@ const bookedEvents = async (req, res) => {
 
 
 
-const bookEvent = async (req, res) => {
-  const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice } = req.body;
-
-  try {
-    if (userType !== 'tourist') {
-      throw new Error('User type must be tourist');
-    }
-    if (!touristId || !userType || !eventType || !eventID) {
-      console.log("touristId",touristId);
-      console.log("userType",userType);
-      console.log("eventType",eventType);
-      console.log("eventID",eventID);
-
-      
-      return res.status(400).json({ error: "All attributes are required in the request body" });
-    }
-
-    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Event booked successfully',
-      data: updatedTourist,
-    });
-  } catch (error) {
-    if (error.message.includes('already been booked')) {
-      return res.status(409).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 
 
@@ -1148,6 +1114,205 @@ const updateItineraryActivation = async (req, res) => {
 };
 
 
+
+//Buildo + saif apis 
+
+const bookEvent = async (req, res) => {
+  const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice,promoCode } = req.body;
+  try {
+    if (userType !== 'tourist') {
+      throw new Error('User type must be tourist');
+    }
+    if (!touristId || !userType || !eventType || !eventID) {
+      return res.status(400).json({ error: "All attributes are required in the request body" });
+    }
+
+    const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice,promoCode);
+
+    const allTourists = await eventRepository.findTourists();
+    
+
+    
+    allTourists.forEach(async tourist => {
+      console.log(tourist);
+      const isInterested = tourist.interestedIn.some(interested => 
+          interested.id.toString() === eventID && 
+          interested.type === eventType
+      );
+    
+      if (isInterested) {
+          const event = await eventRepository.findEventById(eventID, eventType);
+          console.log("Event: ",event);
+          const eventName = event.name;
+          console.log("Event Name: ",eventName);
+          if (event) {
+              if(!event.isBooked) {
+                const body = `${eventType} with Name ${eventName} started its first booking`;
+                const notificationData = {
+                    body,
+                    user: {
+                        user_id: tourist._id,
+                        user_type: "tourist"
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+                
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                console.log("Tourist email: ",tourist.email);
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: tourist.email,
+                    subject: 'Event Booking',
+                    text: `${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions); 
+              }
+            }
+        }
+      });
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Event booked successfully',
+      data: updatedTourist,
+    });
+  } catch (error) {
+    if (error.message.includes('already been booked')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+const bookEventWithCard = async (req, res) => {
+  const {
+    userType,
+    touristId,
+    eventType,
+    eventID,
+    ticketType,
+    currency,
+    activityPrice,
+    cardNumber,
+    expMonth,
+    expYear,
+    cvc,
+    promoCode
+  } = req.body;
+
+  try {
+    if (userType !== "tourist") {
+      throw new Error("User type must be tourist");
+    }
+    if (
+      !touristId ||
+      !userType ||
+      !eventType ||
+      !eventID ||
+      !cardNumber ||
+      !expMonth ||
+      !expYear ||
+      !cvc
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All attributes are required in the request body",
+      });
+    }
+
+    const result = await eventService.addEventToTouristWithCard(
+      userType,touristId,eventType,eventID,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode
+    );
+
+
+    const allTourists = await eventRepository.findTourists();
+    
+    allTourists.forEach(async tourist => {
+      const isInterested = tourist.interestedIn.some(interested => 
+          interested.id.toString() === eventID && 
+          interested.type === eventType
+      );
+    
+      if (isInterested) {
+          const event = await eventRepository.findEventById(eventID, eventType);
+          console.log("Event: ",event);
+          const eventName = event.name;
+          console.log("Event Name: ",eventName);
+          if (event) {
+              if(!event.isBooked) {
+                const body = `${eventType} with Name ${eventName} started its first booking`;
+                const notificationData = {
+                    body,
+                    user: {
+                        user_id: tourist._id,
+                        user_type: "tourist"
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+                
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                console.log("Tourist email: ",tourist.email);
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: tourist.email,
+                    subject: 'Event Booking',
+                    text: `${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions); 
+              }
+            }
+        }
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Event booked successfully, Payment successful and Email sent",
+      data: result.tourist,
+      paymentStatus: result.paymentStatus,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+
+
+
 module.exports = {
   updateItineraryActivation,
   getHistoricalTagDetails,
@@ -1195,6 +1360,7 @@ module.exports = {
   bookTransportation,
   sendEventEmail,
   updateEventFlagController,
-  getAllEvents
+  getAllEvents,
+  bookEventWithCard
   };
   

@@ -2628,4 +2628,10 @@ router.post('/bookTransportation', eventController.bookTransportation);
 router.put('/updateItineraryActivation/:itineraryId/:isActivated/:userId/:userType', eventController.updateItineraryActivation);
 
 
+//Buildo + saif apis 
+router.put('/bookEvent', eventController.bookEvent);
+router.post('/bookEventWithCard', eventController.bookEventWithCard);
+
+
+
 module.exports = router;

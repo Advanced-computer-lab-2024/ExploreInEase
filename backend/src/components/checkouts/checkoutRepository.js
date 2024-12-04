@@ -1,6 +1,8 @@
 const Product = require('../../models/product'); 
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const Notification = require('../../models/notification');
+require('dotenv').config();
 const Order = require('../../models/order');
 const path = require('path');
 const fs = require('fs');
@@ -407,6 +409,24 @@ const findOrdersByStatusAndTouristId = async (touristId, currency) => {
 
 
 
+  //Buildo+saif apis
+  
+const createOrder = async (orderData) => {
+    const order = new Order(orderData);
+    return await order.save();
+};
+
+const addNotification = async (notificationData) => {
+    const notification = new Notification(notificationData);
+    const newNotification = await notification.save();
+    return newNotification;
+};
+
+
+
+
+
+
 
 module.exports = {
     getAvailableProductsSortedByRatings,
@@ -441,5 +461,8 @@ module.exports = {
     getProductById2,
     findOrdersByStatusAndTouristId,
     getTouristById,
-    deleteOrderById
+    deleteOrderById,
+    createOrder,
+    addNotification
+
 };

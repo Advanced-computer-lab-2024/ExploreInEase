@@ -565,4 +565,19 @@ router.get('/myOrders/:touristId/:currency', checkoutController.viewMyOrders);
 // Route for canceling an order
 router.delete('/cancelOrders', checkoutController.cancelOrder);
 
+
+
+
+
+//Buildo + saif apis 
+
+// Route to create an order
+router.post('/createOrderWalletOrCod', checkoutController.createOrderWalletOrCod);
+
+
+// Route to create an order with card payment
+router.post('/createOrderCard', checkoutController.createOrderWithCard);
+
+
+
 module.exports = router;
