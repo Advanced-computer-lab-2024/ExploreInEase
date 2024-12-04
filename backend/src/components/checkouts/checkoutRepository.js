@@ -417,12 +417,42 @@ const addCart = async (touristId, productId, quantity) => {
 
 const getCart = async (touristId) => {
     try {
-        const cart = await Cart.find({ touristId: touristId });
-        return cart;
+        const cart = await Cart.find({ touristId });
+
+        if (!cart || cart.length === 0) {
+            return { cart: [], products: [] };
+        }
+
+        const allProducts = [];
+
+        for (const cartItem of cart) {
+            const products = await Promise.all(
+                cartItem.products.map(async (product) => {
+                    const getProduct = await getProductById2(product.productId.toString());
+                    if (!getProduct) {
+                        throw new Error(`Product with ID ${product.productId} not found.`);
+                    }
+
+                    return {
+                        ...getProduct._doc, 
+                    };
+                })
+            );
+
+            allProducts.push(...products);
+        }
+
+
+        console.log(allProducts);
+
+        return { cart, products: allProducts };
     } catch (error) {
-        throw new Error(`Error adding to cart: ${error.message}`);
+        console.error(`Error fetching cart: ${error.message}`);
+        throw new Error(`Error fetching cart: ${error.message}`);
     }
-}
+};
+
+
 
 const removeCart = async (touristId, cartItemId) => {
     try {
