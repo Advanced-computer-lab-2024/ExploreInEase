@@ -1,8 +1,9 @@
 const eventService = require('../events/eventService');
 const { validationResult } = require('express-validator');
 const eventRepository = require('../events/eventRepository');
-
-
+const checkoutRepository = require('../checkouts/checkoutRepository');
+const nodemailer = require('nodemailer');
+const userRepository = require('../users/userRepository');
 
 
 const getAllEvents= async(req, res) => {
@@ -27,6 +28,40 @@ const updateEventFlagController = async (req, res) => {
       if (!updatedEvent) {
           return res.status(404).json({ message: 'Event not found.' });
       }
+      const publisher = await eventRepository.getPublisher(updatedEvent.created_by);
+
+
+      const body = `${eventType} with ID ${eventID} has been flagged Inappropriate.`;
+        const notificationData = {
+            body,
+            user: {
+                user_id: publisher._id,     // Match the schema key
+                user_type: publisher.type   // Match the schema key
+            }
+        };
+        const notification = await checkoutRepository.addNotification(notificationData);
+        console.log("NOTIFICATION: ",notification);
+
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL2_USER,
+                pass: process.env.EMAIL2_PASS
+            }
+        });
+    
+        console.log("Transporter created");
+        
+        const mailOptions = {
+            from: process.env.EMAIL2_USER,
+            to: publisher.email,
+            subject: 'Product out of stock',
+            text: `Hello ${publisher.username},\n\n${body}\n\nBest regards,\n${process.env.EMAIL2_USER}`
+        };
+    
+        await transporter.sendMail(mailOptions);
+
       return res.status(200).json({ message: 'Event flag updated successfully.', updatedEvent });
   } catch (error) {
       console.error('Error updating event flag:', error.message);
@@ -36,7 +71,7 @@ const updateEventFlagController = async (req, res) => {
 
 // Get all user events by _id and userType
 const getUserEvents = async (req, res) => {
-  const { _id, userType } = req.body;
+  const { _id, userType } = req.params;
 
   // Validate input
   if (!_id || !userType) {
@@ -363,7 +398,12 @@ const getAllActivities = async (req, res) => {
 
 const addActivity = async (req, res) => {
   const { name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
-  console.log(tags);
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
   // Validate required fields
   if (!name || !date || !time || !location || !price || !category || !tags || typeof isOpen === 'undefined' || !created_by) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -541,6 +581,11 @@ const createItinerary = async (req, res) => {
     const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
     console.log("      ");
     console.log(req.body);
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).send('No file uploaded.');
+    }
     if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !pickupLocation || !dropoffLocation) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -682,6 +727,12 @@ const createHistoricalPlace = async (req, res) => {
     created_by,
     tags
   } = req.body;
+
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).send('No file uploaded.');
+  }
 
   // Validate required fields
   if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by || !tags) {
@@ -917,6 +968,52 @@ const bookEvent = async (req, res) => {
 
     const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice);
 
+    const allTourists = await eventRepository.findTourists();
+    
+    allTourists.forEach(async tourist => {
+      const isInterested = tourist.interestedIn.some(interested => 
+          interested.id.toString() === eventID && 
+          interested.type === eventType
+      );
+  
+      if (isInterested) {
+          const event = eventRepository.findEventById(eventID, eventType);
+          if (event) {
+              if(!event.isBooked) {
+                const body = `${eventType} with Name ${event.name} started its first booking`;
+                const notificationData = {
+                    body,
+                    user: {
+                        user_id: touristId,
+                        user_type: "tourist"
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+                
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: tourist.email,
+                    subject: 'Event Booking',
+                    text: `${eventType} with Name ${event.name} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions); 
+              }
+          }
+      }
+    });
+
     return res.status(200).json({
       success: true,
       message: 'Event booked successfully',
@@ -1148,7 +1245,26 @@ const updateItineraryActivation = async (req, res) => {
 };
 
 
+const notifyUpcomingEvents = async (req, res) => {
+  try {
+      const { userId } = req.params;
+      if (!userId) {
+          return res.status(400).json({ message: 'Missing userId' });
+      }
+      const user = await eventRepository.getTouist(userId);
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+      const result = await getUserEvents(userId, user.type);
+
+      return res.status(200).json(result);
+  } catch (error) {
+      return res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
+  notifyUpcomingEvents,
   updateItineraryActivation,
   getHistoricalTagDetails,
   getUserEvents,

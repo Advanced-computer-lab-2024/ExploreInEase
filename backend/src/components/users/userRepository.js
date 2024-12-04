@@ -1,9 +1,12 @@
+const mongoose = require('mongoose');
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
 const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const HistoricalPlace = require('../../models/historicalPlace');
+const PromoCode = require('../../models/promoCode');
 const Product = require('../../models/product');
+const Order = require('../../models/order');
 const fs = require('fs');
 const path = require('path');
 
@@ -423,7 +426,7 @@ const login = async (username, password) => {
             if (!isMatch) {
                 throw new Error('Incorrect username or password');
             }
-            return "user";
+            return {user: user, role: "user"};
         }
         else{
             if(tourist !== null){
@@ -432,7 +435,7 @@ const login = async (username, password) => {
                     throw new Error('Incorrect username or password');
                 }
                 console.log("Tourist: ",tourist);
-                return "tourist";
+                return {user: tourist, role: "tourist"};
             }
             else{
                 throw new Error('Incorrect username or password');
@@ -708,17 +711,323 @@ const checkAdvertiserActivityStatus = async (advertiserId) => {
     return futureActivities.length === 0; 
 };
 
-
-
-
-
 const updateRequestDeletion = async (userId, type) => {
     const Model = type === 'tourist' ? Tourist : Users;
     const result = await Model.findByIdAndUpdate(userId, { requestDeletion: true }, { new: true });
     return result;
 };
 
+
+
+
+const findUserByEmail = async (email) => {
+    try {
+        const user = await Users.findOne({ email });
+        const tourist = await Tourist.findOne({ email });
+        if (user) {
+            return user;
+        } else if (tourist) {
+            return tourist;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        throw new Error(`Error finding user by email: ${error.message}`);
+    }
+};
+
+const updateUserOtp = async (email, otp) => {
+    try {
+        const user = await findUserByEmail(email);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        user.otp = otp;
+        await user.save();
+    } catch (error) {
+        throw new Error(`Error updating user OTP: ${error.message}`);
+    }
+}
+
+const findSellerById = async (id) => {
+    try {
+        const seller = await Users.findById({_id: id});
+        return seller;
+    } catch (error) {
+        console.error('Error fetching seller by ID:', error);
+        throw error;
+    }
+}
+
+const savePromoCode = async (promoCodes) => {
+    try {
+        const promoCode = {
+            promoCodes: promoCodes
+        }
+        const newPromoCode = new PromoCode(promoCode);
+        const savedPromoCode = await newPromoCode.save();
+        return savedPromoCode;
+    } catch (error) {
+        throw new Error(`Error saving promo code: ${error.message}`);
+    }
+};
+
+const updatePromoCode = async (touristIds, promoCodes) => {
+    try {
+        if (touristIds.length !== promoCodes.length) {
+            throw new Error('Number of tourist IDs and promo codes must be the same');
+        }
+        console.log('Tourist IDs:', touristIds);
+
+        // Validate that all touristIds are valid MongoDB ObjectIDs
+        touristIds.forEach((id) => {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                throw new Error(`Invalid tourist ID: ${id}`);
+            }
+        });
+
+        // Perform updates
+        const updates = touristIds.map(async (touristId, index) => {
+            const promoCode = promoCodes[index].promoCodes; // Fetch promo code directly
+
+            // Find the tourist by ID
+            const tourist = await Tourist.findOne({ _id: touristId });
+            if (!tourist) {
+                throw new Error(`Tourist with ID ${touristId} not found`);
+            }
+
+            // Add the promoCode to the tourist's promoCodes array
+            tourist.promoCodes.push(promoCode ); // Adjust based on your schema
+
+            // Save the updated tourist
+            const updatedTourist = await tourist.save();
+            return updatedTourist;
+        });
+
+        // Wait for all updates to complete
+        const updatedTourists = await Promise.all(updates);
+
+        return updatedTourists; // Return updated tourists
+    } catch (error) {
+        console.error(`Error updating promo codes: ${error.message}`);
+        throw new Error(`Error updating promo codes: ${error.message}`);
+    }
+};
+
+
+const fetchAllPromoCodes = async () => {
+    try {
+        const promoCodes = await PromoCode.find().select('promoCodes');
+        return promoCodes;
+    } catch (error) {
+        throw new Error(`Error fetching first user: ${error.message}`);
+    }
+};
+
+
+
+
+
+
+const addInterestedIn = async (user, eventId, eventType) => {
+    try {
+        const event = {
+            id: eventId,
+            type: eventType
+        };
+        user.interestedIn.push(event);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding interestedIn: ${error.message}`);
+    }
+};
+
+const addAddresses = async (user, address) => {
+    try {
+        user.addresses.push(address);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding address: ${error.message}`);
+    }
+}
+
+const getAddresses = async (user) => {
+    try {
+        return user.addresses;
+    } catch (error) {
+        throw new Error(`Error fetching user addresses: ${error.message}`);
+    }
+}
+
+const userReport = async (user) => {
+    try {
+        let tourists = [];
+        let eventObject = [];
+        let monthlyReport = {};
+
+        // Predefined array of months for sorting
+        const monthOrder = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        if (user.type === "tourGuide") {
+            const itineraries = await Itinerary.find({ created_by: user._id });
+            const itineraryIds = itineraries.map(itinerary => itinerary._id.toString());
+
+            tourists = await Tourist.find({
+                "itineraryId.id": { $in: itineraryIds }
+            });
+
+            for (const itinerary of itineraries) {
+                const count = tourists.filter(tourist => 
+                    tourist.itineraryId.some(itineraryRef => 
+                        itineraryRef.id.toString() === itinerary._id.toString()
+                    )
+                ).length;
+
+                eventObject.push({
+                    ItineraryName: itinerary.name,
+                    price: itinerary.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        } else if (user.type === "advertiser") {
+            const activities = await Activity.find({ created_by: user._id });
+            const activityIds = activities.map(activity => activity._id.toString());
+
+            tourists = await Tourist.find({
+                "activityId.id": { $in: activityIds }
+            });
+
+            for (const activity of activities) {
+                const count = tourists.filter(tourist => 
+                    tourist.activityId.some(activityRef => 
+                        activityRef.id.toString() === activity._id.toString()
+                    )
+                ).length;
+
+                eventObject.push({
+                    ActivityName: activity.name,
+                    price: activity.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        }
+        else{
+            if (user.type === "seller") {
+                // Fetch products created by the seller
+                const products = await Product.find({ sellerId: user._id });
+                const productIds = products.map(product => product._id.toString());
+            
+                // Fetch orders containing the seller's products
+                const orders = await Order.find({
+                    "productsIdsQuantity.id": { $in: productIds }
+                });
+            
+                // Process each product
+                for (const product of products) {
+                    // Count how many tourists ordered this product
+                    const count = orders.reduce((total, order) => {
+                        // Check if the product exists in the order
+                        const productExists = order.productsIdsQuantity.some(
+                            item => item.id.toString() === product._id.toString()
+                        );
+                        return productExists ? total + 1 : total; // Increment total by 1 if the product exists
+                    }, 0);
+                    
+            
+                    // Push event object for this product
+                    eventObject.push({
+                        ProductName: product.name,
+                        price: product.price * 0.9,
+                        totalPeople: count
+                    });
+                }
+            
+                // Add a default event if no products were found
+                if (eventObject.length === 0) {
+                    eventObject.push({
+                        ProductName: "",
+                        totalPeople: 0
+                    });
+                }
+            }
+            
+        }
+
+        // Group filtered tourists by their creation month and year
+        tourists.forEach((tourist) => {
+            const createdAt = new Date(tourist.createdAt);
+            const month = createdAt.toLocaleString('default', { month: 'long' });
+            const year = createdAt.getFullYear();
+            const key = `${month} ${year}`;
+
+            if (!monthlyReport[key]) {
+                monthlyReport[key] = 0;
+            }
+            monthlyReport[key]++;
+        });
+
+        // Transform and sort the monthlyReport into an array of objects
+        const monthlyReportArray = Object.keys(monthlyReport)
+            .map((key) => {
+                const [month, year] = key.split(" ");
+                return {
+                    Month: key,
+                    Tourists: monthlyReport[key],
+                    sortIndex: parseInt(year) * 12 + monthOrder.indexOf(month)
+                };
+            })
+            .sort((a, b) => a.sortIndex - b.sortIndex)
+            .map(({ Month, Tourists }) => ({ Month, Tourists }));
+
+        // Add default event object if no events were found
+        if (eventObject.length === 0) {
+            eventObject.push({
+                EventName: "",
+                totalPeople: 0
+            });
+        }
+
+        const totalTouristinEventObject = eventObject.reduce((total, event) => total + event.totalPeople, 0);
+
+        return {
+            eventObject,
+            monthlyReport: monthlyReportArray,
+            totalTourists: totalTouristinEventObject
+        };
+    } catch (error) {
+        throw new Error(`Error fetching tourist report: ${error.message}`);
+    }
+};
+
+const fetchAllProductsPurchased = async (touristId) => {
+    const allOrders = await Order.find({touristId: touristId});
+    let totalPriceForOrders = 0;
+    allOrders.forEach(async (order) => {
+        if(order.status === 'delivered'){
+            totalPriceForOrders += order.price;
+        }
+    });
+    return totalPriceForOrders;
+}
+
 module.exports = {
+    fetchAllProductsPurchased,
+    userReport,
+    getAddresses,
+    addAddresses,
+    addInterestedIn,
+    fetchAllPromoCodes,
+    updatePromoCode,
+    updatePromoCode,
+    savePromoCode,
+    findSellerById,
+    updateUserOtp,
+    findUserByEmail,
     getLoyalityLevel,
     pointsAfterPayment,
     updateTermsAndConditions,

@@ -11,6 +11,8 @@ const historicalPlace = require('../../models/historicalPlace');
 const Transportation = require('../../models/transportation');
 const BookedFlight = require('../../models/bookedFlights');
 const BookedHotel = require('../../models/bookedHotels');
+const path = require('path');
+const fs = require('fs');
 
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
@@ -271,6 +273,65 @@ const createActivity = async (activityData) => {
   console.log(createdActivity);
   return createdActivity;
 };
+
+const updateActivityImage = async (id, fileName) => {
+  try {
+    const activity = await Activity.findById(id);
+    if (!activity) {
+        throw new Error('activity not found');
+    }
+    activity.picture = fileName;
+    await activity.save();
+} catch (error) {
+    throw new Error(`Error updating activity picture: ${error.message}`);
+}
+}
+
+const updateItineraryImage = async (id, fileName) => {
+  try {
+    const itinerary = await Itinerary.findById(id);
+    if (!itinerary) {
+        throw new Error('itinerary not found');
+    }
+    itinerary.picture = fileName;
+    await itinerary.save();
+} catch (error) {
+    throw new Error(`Error updating itinerary picture: ${error.message}`);
+}
+}
+
+const updateHistorialPlaceImage = async (id, fileName) => {
+  try {
+    const historicalPlace = await HistoricalPlace.findById(id);
+    if (!historicalPlace) {
+        throw new Error('historicalPlace not found');
+    }
+    historicalPlace.picture = fileName;
+    await historicalPlace.save();
+} catch (error) {
+    throw new Error(`Error updating historicalPlace picture: ${error.message}`);
+}
+}
+
+const uploadImage = async (fileName, fileBuffer) => {
+  try {
+    const imagesDir = path.join(__dirname, '../images');
+    
+    // Check if the 'images' directory exists, and create it if it doesn't
+    if (!fs.existsSync(imagesDir)) {
+        fs.mkdirSync(imagesDir, { recursive: true });
+    }
+
+    const filePath = path.join(imagesDir, fileName);
+    
+    // Write the file to the filesystem
+    await fs.promises.writeFile(filePath, fileBuffer);
+
+    return { message: 'Image uploaded successfully', fileName: fileName };
+} catch (error) {
+    throw new Error(`Error uploading image: ${error.message}`);
+}
+}
 
 const findCategoryById = async (categoryId) => {
   return await ActivityCategory.findById(categoryId);
@@ -842,7 +903,52 @@ const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
   return updatedItinerary; 
 };
 
+
+
+const getPublisher = async (userId) => {
+  return await Users.findById(userId);
+};
+
+const getTouist = async (userId) => {
+  return await Tourist.findById(userId);
+};
+
+const findTourists = async () => {
+  return await Tourist.find();
+};
+
+
+
+
+const findEventById = async (eventId) => {
+  const activity = await Activity.findById(eventId);
+  const historicalPlace = await HistoricalPlace.findById(eventId);
+  const itinerary = await Itinerary.findById(eventId);
+
+  if(activity){
+    return activity;
+  }
+
+  if(historicalPlace){
+    return historicalPlace;
+  }
+
+  if(itinerary){
+    return itinerary;
+  }
+
+  return null;
+}
+
 module.exports = {
+  updateHistorialPlaceImage,
+  updateItineraryImage,
+  uploadImage,
+  updateActivityImage,
+  findEventById,
+  findTourists,
+  getTouist,
+  getPublisher,
   updateItineraryActivation,
   getHistoricalTagDetails,
   createCategory,

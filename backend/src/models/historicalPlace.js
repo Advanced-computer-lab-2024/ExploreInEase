@@ -10,8 +10,8 @@ const historicalPlaceSchema = new Schema({
     type: String,
     required: true,
   },
-  pictures: {
-    type: [String], // Array of picture URLs or file paths
+  picture: {
+    type: String, // Array of picture URLs or file paths
   },
   location: {
     type: {
@@ -78,8 +78,11 @@ const historicalPlaceSchema = new Schema({
   tags: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'HistoricalTags', // Update this to match the corrected model name
-  }
-  
+  },
+  isBooked: {
+    type: Boolean,
+    default: false,
+  },
   
 });
 

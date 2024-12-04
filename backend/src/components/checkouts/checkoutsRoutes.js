@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const checkTouristRole  = require('../../middlewares/checkTouristRole');
 const checkoutController = require('../checkouts/checkoutController');
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -550,9 +551,23 @@ router.post('/addOrder', checkoutController.addOrder);
 router.get('/getOrders/:userId', checkoutController.getOrders);
 router.put('/editOrder/:userId', checkoutController.updateOrder);
 
+router.get('/allNotifications/:userId/:type', checkoutController.getAllNotifications);
+
 router.post('/product/uploadImage/:productId/:userId', upload.single('image'), checkoutController.uploadImage);
 router.get('/getArchivedProducts/:userId', checkoutController.getArchivedProducts);
 router.put('/archiveProduct/:userId/:productId', checkoutController.archiveProduct);
 router.get('/availableQuantityAndSales/:userType/:productId/:currency', checkoutController.availableQuantityAndSales);
+
+
+
+router.post('/addWishlist/:userId', checkoutController.addWishlist);
+router.get('/getWishlist/:userId', checkoutController.getWishlist);
+router.delete('/removeWishlist/:userId/:productId', checkoutController.removeWishlist);
+
+router.post('/addCart/:userId', checkoutController.addCart);
+router.get('/getCart/:userId', checkoutController.getCart);
+router.delete('/removeCart/:userId/:cartItemId', checkoutController.removeCart);
+router.put('/editQuantityInCart/:userId/:cartItemId/:quantity', checkoutController.editQuantityInCart);
+
 
 module.exports = router;

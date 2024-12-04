@@ -5,6 +5,7 @@ const HistoricalPlace = require('../../models/historicalPlace');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 
 const getUserById = async (id) => {
@@ -600,7 +601,7 @@ const requestDeletion = async (userId, type) => {
     return updateResult;
 };
 
-const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession) => {
+const registerTourist = async (email, username, password, mobileNum, nation, dob,  profession,currency) => {
     const touristExists = await userRepository.checkTouristExists(username);
     if (touristExists) {
         return { status: 409, response: {message: "Tourist already exists"} };
@@ -614,14 +615,15 @@ const registerTourist = async (email, username, password, mobileNum, nation, dob
         nation: nation,
         dob: dob,
         profession: profession,
-        wallet: 1000000
+        wallet: 1000000,
+        currency
     };
     const tourist = await userRepository.saveTourist(newTourist);
     return { status: tourist.status, response: {message: "Turist registered successfully", tourist: tourist.tourist, type: 'tourist'} };
     
 }
 
-const registerUser = async (type, email, username, password) => {
+const registerUser = async (type, email, username, password, currency) => {
     try {
         // Check if a user with the same email or username already exists
         const existingUser = await userRepository.findUserByUsername(username);
@@ -636,6 +638,7 @@ const registerUser = async (type, email, username, password) => {
             password: password,
             type,
             docStatus: 'pending',
+            currency
         };
 
         // Save the user using the repository
@@ -647,7 +650,247 @@ const registerUser = async (type, email, username, password) => {
     }
 };
 
+const forgetPassword = async (email) => {
+    const user = await userRepository.findUserByEmail(email);
+    if (!user) {
+        return { status: 400, response: { message: "User not found" } };
+    }
+
+    // Generate an OTP and send it to the user's email
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    console.log(otp);
+    // Send the OTP to the user's email
+    await sendEmail(user.username, user.email, `Your OTP is: ${otp}`);
+    console.log("Email sent");
+    // Update the user's OTP in the database
+    await userRepository.updateUserOtp(email, otp);
+
+    return { status: 200, response: { message: "User found", user: user } };
+};
+
+const sendEmail = async (username, email, message) => {
+    console.log(username);
+    console.log(email);
+    console.log(message);
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL2_USER,
+            pass: process.env.EMAIL2_PASS
+        }
+    });
+
+    console.log("Transporter created");
+    
+    const mailOptions = {
+        from: process.env.EMAIL2_USER,
+        to: email,
+        subject: 'Your Account Password',
+        text: `Hello ${username},\n\n ${message}\n\nBest regards,\n${process.env.EMAIL2_USER}`
+    };
+
+    await transporter.sendMail(mailOptions);
+}
+
+const creatingPromoCode = async (promoCode) => {
+    console.log(promoCode);
+    const promoCodeResult = await userRepository.savePromoCode(promoCode);
+    return promoCodeResult;
+}
+
+const updatePromoCode = async (birthdayTourists) => {
+    const allPromoCodes = await userRepository.fetchAllPromoCodes(); // Fetch users with adminPromoCodes
+    console.log("All PromoCodes: ",allPromoCodes);
+
+    if (!allPromoCodes || allPromoCodes.length === 0) {
+        throw new Error('No promo codes available in adminPromoCodes.');
+    }
+
+    // Randomly assign a promo code for each birthday tourist
+    const assignedPromoCodes = birthdayTourists.map(() => {
+        const randomIndex = Math.floor(Math.random() * allPromoCodes.length);
+        return allPromoCodes[randomIndex]; // Randomly select a promo code
+    });
+
+    console.log("Assigned: ", assignedPromoCodes);
+
+    // Update promo codes for the birthday tourists
+    const promoCodeResult = await userRepository.updatePromoCode(birthdayTourists, assignedPromoCodes);
+    return promoCodeResult;
+};
+
+
+
+
+
+const addInterestedIn = async (userId, eventId, eventType) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const updatedUser = await userRepository.addInterestedIn(user, eventId, eventType);
+    return updatedUser;
+}
+
+const changePasswordAfterOTP = async (_id, newPassword) => {
+    let user = await userRepository.findUserById(_id);
+    if (!user) {
+        user = await userRepository.findTouristById(_id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+    }
+
+    const updatedUser = await userRepository.updateUserPassword(user, newPassword);
+    return updatedUser;
+}
+
+const verifyOtP = async (_id, otp) => {
+    let user = await userRepository.findUserById(_id);
+    if (!user) {
+        user = await userRepository.findTouristById(_id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+    }
+    const savedOTP = user.otp;
+    if (savedOTP === otp) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+const addAddresses = async (userId, address) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const updatedUser = await userRepository.addAddresses(user, address);
+    return updatedUser;
+}
+
+const getAddresses = async (userId) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const addresses = await userRepository.getAddresses(user);
+    return addresses;
+}
+
+const userReport = async (userId) => {
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const report = await userRepository.userReport(user);
+    return report;
+}
+
+const adminReport = async (userId) => { 
+    const user = await userRepository.findUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    let totalRevenue = 0;
+    let ActivityRevenue = 0; 
+    let ItineraryRevenue = 0;
+    let HistoricalPlaceRevenue = 0;
+    let OrdersRevenue = 0;
+
+    // Prepare a map for product revenue grouped by month
+    const productRevenueByMonth = {};
+
+    const tourists = await userRepository.fetchAllTourists();
+
+    for (const tourist of tourists) {
+        const allActivities = tourist.activityId || [];
+        const allItineraries = tourist.itineraryId || [];
+        const allHistoricalPlaces = tourist.historicalplaceId || [];
+
+        // Calculate activity revenue
+        for (const activity of allActivities) {
+            const revenue = activity.pricePaid * 0.1;
+            totalRevenue += revenue;
+            ActivityRevenue += revenue;
+        }
+
+        // Calculate itinerary revenue
+        for (const itinerary of allItineraries) {
+            const revenue = itinerary.pricePaid * 0.1;
+            totalRevenue += revenue;
+            ItineraryRevenue += revenue;
+        }
+
+        // Calculate historical place revenue
+        for (const historicalPlace of allHistoricalPlaces) {
+            const revenue = historicalPlace.pricePaid * 0.1;
+            totalRevenue += revenue;
+            HistoricalPlaceRevenue += revenue;
+        }
+
+        // Fetch all orders for this tourist
+        const allOrders = await Order.find({ touristId: tourist._id, status: 'delivered' });
+
+        for (const order of allOrders) {
+            // Extract the month of the order and convert it to a full month name
+            const month = order.createdAt
+                ? new Date(order.createdAt).toLocaleString('en-US', { month: 'long' }) // e.g., "November"
+                : 'Unknown';
+
+            for (const productId of order.productIds) {
+                const product = await Products.findById(productId);
+
+                if (product) {
+                    // Initialize revenue structure for this product and month
+                    if (!productRevenueByMonth[product.name]) {
+                        productRevenueByMonth[product.name] = {};
+                    }
+
+                    if (!productRevenueByMonth[product.name][month]) {
+                        productRevenueByMonth[product.name][month] = 0;
+                    }
+
+                    // Calculate revenue for this product and add to the month
+                    const revenue = (order.price / order.productIds.length) * 0.1; // Assuming revenue split across products
+                    productRevenueByMonth[product.name][month] += revenue;
+                }
+            }
+
+            // Calculate total revenue for orders
+            OrdersRevenue += order.price * 0.1;
+            totalRevenue += order.price * 0.1;
+        }
+    }
+
+    return { 
+        ActivityRevenue, 
+        ItineraryRevenue, 
+        HistoricalPlaceRevenue, 
+        OrdersRevenue, 
+        totalRevenue,
+        productRevenueByMonth
+    };
+};
+
 module.exports = {
+    adminReport,
+    userReport,
+    getAddresses,
+    addAddresses,
+    verifyOtP,
+    changePasswordAfterOTP,
+    addInterestedIn,
+    updatePromoCode,
+    creatingPromoCode,
+    forgetPassword,
     changePassword,
     uploadImage,
     acceptTerms,

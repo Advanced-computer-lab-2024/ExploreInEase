@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,37 +10,64 @@ import {
 } from "@mui/material";
 import { Remove, Add, Close } from "@mui/icons-material";
 import StepperNavigation from "./StepperNavigation";
-
+import axios from "axios";
 
 const CartPage = () => {
 
     const [activeStep] = useState(1); // Active step for stepper navigation
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Apple AirPods Pro",
-      color: "White",
-      price: 249.99,
-      count: 1,
-      image: "https://via.placeholder.com/80", // Replace with real image
-    },
-    {
-      id: 2,
-      name: "Apple AirPods Max",
-      color: "Silver",
-      price: 549.99,
-      count: 1,
-      image: "https://via.placeholder.com/80", // Replace with real image
-    },
-    {
-      id: 3,
-      name: "Apple HomePod Mini",
-      color: "Silver",
-      price: 99.99,
-      count: 1,
-      image: "https://via.placeholder.com/80", // Replace with real image
-    },
-  ]);
+    const [cartItems, setCartItems] = useState([
+      {
+        id: 1,
+        product_id: '674f4e9b8006151a00273857',
+        name: "Apple AirPods Pro",
+        color: "White",
+        price: 249.99,
+        count: 1,
+        image: "https://via.placeholder.com/80", // Replace with real image
+      },
+      {
+        id: 2,
+        product_id: '672dd6c967508f11dffd2cb0',
+        name: "Apple AirPods Max",
+        color: "Silver",
+        price: 549.99,
+        count: 1,
+        image: "https://via.placeholder.com/80", // Replace with real image
+      },
+      {
+        id: 3,
+        product_id: '672dd732b51b7f8d0b3ef36c',
+        name: "Apple HomePod Mini",
+        color: "Silver",
+        price: 99.99,
+        count: 1,
+        image: "https://via.placeholder.com/80", // Replace with real image
+      },
+    ]);
+
+  const UserId= localStorage.getItem("UserId");
+
+  
+
+
+
+
+  useEffect(()=>{
+    
+      //Fetch cart items from API
+
+  
+  
+      const fetchCart = async ()=>{
+        await axios.get(`http://localhost:3030/getCart/${UserId}`).then((res) => {
+        console.log(res.data);
+      }).catch((err) => {
+        console.log(err);
+      });}
+
+      fetchCart();
+    
+  }, []);
 
   const [promoCode, setPromoCode] = useState("");
 
@@ -62,7 +89,16 @@ const CartPage = () => {
     );
   };
 
-  const handleRemove = (id) => {
+  const handleRemove = async (id) => {
+
+    await axios.delete(`http://localhost:3030/removeCart/${UserId}/${id}`).then((res) => {
+      console.log(res.data);
+    }
+    ).catch((err) => {
+      console.log(err);
+    });
+
+
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 

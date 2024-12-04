@@ -1,7 +1,10 @@
 const Product = require('../../models/product'); 
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
+const Notification = require('../../models/notification');
+const PromoCode = require('../../models/promoCode');
 const Order = require('../../models/order');
+const Cart = require('../../models/cart');
 const path = require('path');
 const fs = require('fs');
 
@@ -326,7 +329,218 @@ const archiveProduct = async (product) => {
     await product.save();
 };
 
+const addNotification = async (notificationData) => {
+    const notification = new Notification(notificationData);
+    const newNotification = await notification.save();
+    return newNotification;
+};
+
+
+
+
+const getAllNotifications = async (id, type) => {
+
+    try {
+        const allnotifications = await Notification.find();
+        console.log(allnotifications);
+        const notifications = await Notification.find({ 'user.user_id': id, 'user.user_type': type });
+        return notifications;
+    } catch (error) {
+        throw new Error(`Error retrieving notifications: ${error.message}`);
+    }
+};
+
+const getPromoCode = async (promoCode) => {
+    try {
+        const promoCode = await PromoCode.findOne({ promoCodes: promoCode });
+        return promoCode.promoCodes;
+    } catch (error) {
+        throw new Error(`Error retrieving notifications: ${error.message}`);
+    }
+};
+
+const addWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.push(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const getWishlist = async (touristId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        const wishlistProducts = tourist.wishlists;
+        const products = await Product.find({ _id: { $in: wishlistProducts } });
+        return products;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const removeWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.pull(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const addCart = async (touristId, productId, quantity) => {
+    try {
+        const cartTourists = await Cart.find({ touristId: touristId });
+        if(cartTourists.length != 0){
+            cartTourists[0].products.push({ productId: productId, quantity: quantity });
+            await cartTourists[0].save();
+            return cartTourists[0];
+        }
+        const cartItem = {
+            touristId: touristId,
+            products: {
+                productId:productId,
+                quantity:quantity
+            }
+        };
+        const cart = new Cart(cartItem);
+        await cart.save();
+        return cart;
+    } catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
+
+const getCart = async (touristId) => {
+    try {
+        const cart = await Cart.find({ touristId });
+
+        if (!cart || cart.length === 0) {
+            return { cart: [], products: [] };
+        }
+
+        const allProducts = [];
+
+        for (const cartItem of cart) {
+            console.log('CartItem Products:', cartItem.products);
+
+            const products = await Promise.all(
+                cartItem.products.map(async (product) => {
+                    const getProduct = await getProductById2(product.productId.toString());
+                    if (!getProduct) {
+                        throw new Error(`Product with ID ${product.productId} not found.`);
+                    }
+
+                    return {
+                        ...getProduct._doc, 
+                    };
+                })
+            );
+
+            allProducts.push(...products);
+        }
+
+
+        console.log(allProducts);
+
+        return { cart, products: allProducts };
+    } catch (error) {
+        console.error(`Error fetching cart: ${error.message}`);
+        throw new Error(`Error fetching cart: ${error.message}`);
+    }
+};
+
+
+// const getCart = async (touristId) => {
+//     try {
+//         const cart = await Cart.find({ touristId });
+
+//         if (!cart || cart.length === 0) {
+//             return { cart: [], products: [] };
+//         }
+
+//         const allProducts = [];
+
+//         for (const cartItem of cart) {
+//             console.log('CartItem Products:', cartItem.products); // Debug log
+
+//             const products = await Promise.all(
+//                 cartItem.products.map(async (product) => {
+//                     if (!product || !product.productId) {
+//                         console.warn('Invalid product structure:', product); // Warning for invalid product
+//                         return null;
+//                     }
+
+//                     try {
+//                         const getProduct = await getProductById2(product.productId.toString());
+//                         if (!getProduct) {
+//                             throw new Error(`Product with ID ${product.productId} not found.`);
+//                         }
+
+//                         return {
+//                             ...getProduct._doc,
+//                         };
+//                     } catch (error) {
+//                         console.error(`Error fetching product with ID ${product.productId}: ${error.message}`);
+//                         return null; // Skip this product on error
+//                     }
+//                 })
+//             );
+
+//             // Filter out null results (invalid or failed products)
+//             allProducts.push(...products.filter(Boolean));
+//         }
+
+//         console.log('All Products:', allProducts);
+
+//         return { cart, products: allProducts };
+//     } catch (error) {
+//         console.error(`Error fetching cart: ${error.message}`);
+//         throw new Error(`Error fetching cart: ${error.message}`);
+//     }
+// };
+
+const removeCart = async (touristId, cartItemId) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products.splice(cartItemId, 1); // Removes the item at the given index
+        if(cart.products.length == 0){
+            await Cart.deleteOne({ touristId: touristId });
+        }
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error removing from cart: ${error.message}`);
+    }
+}
+
+const editQuantityInCart = async (touristId, cartItemId, quantity) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products[cartItemId].quantity = quantity;
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
+
 module.exports = {
+    editQuantityInCart,
+    removeCart,
+    getCart,
+    addCart,
+    removeWishlist,
+    getWishlist,
+    addWishlist,
+    getAllNotifications,
+    addNotification,
     getAvailableProductsSortedByRatings,
     addProduct,
     getAllAvailableProducts,
