@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import HomePage from './SellerNavbar';
-import { FaCar, FaUserCircle, FaTasks, FaChartLine, FaBox, FaTags, FaArchive, FaFolderOpen } from 'react-icons/fa';
+import { FaUserCircle, FaBox, FaFolderOpen } from 'react-icons/fa';
 import NetworkService from '../NetworkService';
-import LogoutSharpIcon from '@mui/icons-material/LogoutSharp';
 import "../TouristGovernor/GovernorHomePage.css"; 
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const AdvertiserHomePage = () => {
     const Userr = JSON.parse(localStorage.getItem('User'));
     const navigate= useNavigate();
-    const [success, setSuccess] = useState('');
-    const [error, setError] = useState('');
+    const [ setSuccess] = useState('');
+    const [setError] = useState('');
     async function handleClick(title) {
-        if (title=="My Profile"){
+        if (title==="My Profile"){
          try {
            const options = {
              apiPath: `/getSeller/${Userr.User?._id}`,
@@ -21,7 +19,6 @@ const AdvertiserHomePage = () => {
            
            const response = await NetworkService.get(options);
            setSuccess(response.message); // Set success message
-           const tourist=response.seller;
            console.log(response.seller);
            navigate(`/viewSellerProfile`,{state:{tourist:response.seller}});     
  
@@ -35,7 +32,7 @@ const AdvertiserHomePage = () => {
          }
        }
        else {
-         if (title=="View List of Available Products"){
+         if (title==="View List of Available Products"){
          try {
            const options = {
              apiPath: `/getAvailableProducts/${Userr.User?._id}`,

@@ -7,7 +7,7 @@ const ArchiveProduct = React.lazy(() => import("./Shared/Components/Product/Arch
 const TermsAcceptance = React.lazy(() => import('./TermsAcceptance'));
 const ChangePassword=React.lazy(()=>import("./TouristGovernor/changePassword"))
 const Signup = React.lazy(() => import('./SignUp/Signup'));
-const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
+// const RoleSelection = React.lazy(() => import('./SignUp/RoleSelection'));
 const TourGuideProfile = React.lazy(() => import('./Shared/Components/TourGuideProfile/TourGuideProfile'));
 const AdvertiserProfile = React.lazy(() => import('./Shared/Components/advertiserProfile/advertiserProfile'));
 const SellerProfile = React.lazy(() => import('./Shared/Components/SellerProfile/sellerProfile'));
@@ -28,19 +28,17 @@ const ActivityList = React.lazy(() => import('./Advertier/ActivityList'));
 const ItineraryList = React.lazy(() => import('./TourGuide/ItineraryList'));
 const CreateItinerary = React.lazy(() => import('./TourGuide/CreateItinerary'));
 const GuestNavbar = React.lazy(() => import("./Guest/GuestNavbar"));
-const AdminNavbar = React.lazy(() => import('./Admin/AdminNavbar'));
 
 
 
 
 const AdvertiserNavbar = React.lazy(() => import("./Advertier/AdvertiserNavbar"));
-const TouristNavbar = React.lazy(() => import('./Tourist/TouristNavbar'));
-const SellerNavbar = React.lazy(() => import('./Seller/SellerNavbar'));
-const TourGuideNavbar = React.lazy(() => import("./TourGuide/TourGuideNavbar"));
+// const TouristNavbar = React.lazy(() => import('./Tourist/TouristNavbar'));
+// const SellerNavbar = React.lazy(() => import('./Seller/SellerNavbar'));
+// const TourGuideNavbar = React.lazy(() => import("./TourGuide/TourGuideNavbar"));
+// const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar"));
 const Product = React.lazy(() => import("./Shared/Components/Product/Product"));
-const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar"));
 const SignIn = React.lazy(() => import("./Login/login"));
-const AdminHomePage=React.lazy(()=>import("./Admin/AdminNavbar"));
 const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"));
 const Booked=React.lazy(()=>import("./Tourist/booked"));
 const ProductPurchased= React.lazy(() => import("./Shared/Components/Product/PurchaseProduct"));

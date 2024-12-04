@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
-import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -11,12 +10,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Alert } from '@mui/material'; 
-import { Tooltip, IconButton } from '@mui/material';
-import { Typography, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Menu, MenuItem } from '@mui/material';
-import dayjs from 'dayjs';
-import SortIcon from '@mui/icons-material/Sort';
+import {  IconButton } from '@mui/material';
+import { Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CircularProgress from '@mui/material/CircularProgress';
 //
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     // Styling for table header cells
@@ -35,8 +31,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 
 
-let adminid = localStorage.getItem('UserId');
-
+// let adminid = localStorage.getItem('UserId');
 
 const RegistringUsers = () => {
 
@@ -51,26 +46,17 @@ const RegistringUsers = () => {
             "users": [],
             "tourists": []
         }
-
-
-
-
     ])
 
     const [loaded, setLoaded] = useState(false);
-
-
-    const [optionsAnchorEl, setOptionsAnchorEl] = useState(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [showErrorMessage, setShowErrorMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
-
         const getReqs = async () => {
-
-            const res = await axios.get(`http://localhost:3030/notAcceptedUsers`)            
+         await axios.get(`http://localhost:3030/notAcceptedUsers`)            
                 .then(response => {
                     setUsers(response.data);
                     console.log(response.data);

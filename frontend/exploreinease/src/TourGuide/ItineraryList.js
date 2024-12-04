@@ -17,17 +17,13 @@ const ItineraryList = () => {
   // console.log(TourGuideItinerary);
 
   const userId = User._id;
-  const userType = User.type;
-
   const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary?.Itineraries);
   const [activitiesData, setActivitiesData] = useState({});
-  const [selectedActivity, setSelectedActivity] = useState(null);
   const [editItineraryData, setEditItineraryData] = useState(null);
   const [newDateModalOpen, setNewDateModalOpen] = useState(false);
   const [newDate, setNewDate] = useState(null);
   const [removeDateModalOpen, setRemoveDateModalOpen] = useState(false);
   const [dateToRemove, setDateToRemove] = useState(null);
-  const [error, setError] = useState();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -142,12 +138,6 @@ const ItineraryList = () => {
     }));
   };
 
-  const handleDateChange = (dates) => {
-    setEditItineraryData((prevData) => ({
-      ...prevData,
-      dateTimeAvailable: dates,
-    }));
-  };
 
   const handleAddDate = () => {
     if (newDate) {
@@ -228,19 +218,6 @@ const ItineraryList = () => {
         console.error("Error deleting itinerary:", error);
       }
   };
-
-  const toggleStatus = async (itineraryId, currentStatus) => {
-    const newStatus = currentStatus === 0 ? 1 : 0;
-    try {
-      const options = {
-        apiPath: `/updateItineraryActivation/${itineraryId}/${newStatus}/${userId}/${userType}`,
-      };
-      const response = await NetworkService.put(options);
-    } catch (err) {
-      setError(err.response?.data?.message || 'An unexpected error occurred.');
-    }
-  };
-  
 
   return (
     <div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
-import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -148,8 +147,7 @@ const DeletionRequests = () => {
     useEffect(() => {
 
         const getReqs = async () => {
-
-            const res = await axios.get(`http://localhost:3030/deletionrequests`)
+            await axios.get(`http://localhost:3030/deletionrequests`)
                 .then(response => {
                     setRequest(response.data);
                     console.log(response.data);

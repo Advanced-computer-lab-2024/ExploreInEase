@@ -5,7 +5,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import axios from 'axios'; // Ensure Axios is imported
 import Button from '@mui/material/Button';
 import Tooltip from "@mui/material/Tooltip";
 import AddIcon from "@mui/icons-material/Add";
@@ -32,8 +31,7 @@ function Preferencetags() {
   const [open, setOpen] = React.useState(false);
   const [newTag, setNewTag] = React.useState('');
   const [prevTag, setPrevTag] = React.useState('');
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [ setSuccess] = useState('');
   const [editingTagIndex, setEditingTagIndex] = React.useState(null);
   const location = useLocation();
  const {adminId}=location.state || adminIdd;
@@ -112,7 +110,7 @@ console.log("preference",PreferenceTag);
                   tags: newTag
                 }
               }
-              const response = await NetworkService.post(options);
+               await NetworkService.post(options);
               // Add new tag
               setTags((prevTags) => [...prevTags, newTag]);
               setCheckPreferenceTag(true);

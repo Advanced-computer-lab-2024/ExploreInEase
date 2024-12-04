@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom';
 import './AddUser.css'; // Import the CSS file for styling
 import NetworkService from "../NetworkService";
 const AddUser = () => {
-  const navigate = useNavigate();
   const [user, setUser] = useState({
     type: "admin", // Default role as admin (lowercase to match API enum)
     username: "",

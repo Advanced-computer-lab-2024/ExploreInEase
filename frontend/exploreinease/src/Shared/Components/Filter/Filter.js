@@ -16,7 +16,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle
 } from "@mui/material";
 import Alert from '@mui/material/Alert';
@@ -24,15 +23,11 @@ import AlertTitle from '@mui/material/AlertTitle';
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import debounce from 'lodash.debounce';
 import NetworkService from "../../../NetworkService";
 import TravelItemsShareDialog from './TravelItemsShareDialog';
 import TouristNavbar from "../../../Tourist/TouristNavbar";
 // Sample data with 'type' field added
-const itemList = [];
-const addressCache = {};
-
 // Role-based fields
 const roleFields = {
   HistoricalPlaces: ['Tag'],
@@ -44,7 +39,6 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const location = useLocation();
   const { events,userId=null,typee } = location.state || {};  
   const itemList = events?.flat() ||eventsG?.flat()|| []; // Flatten the array and ensure it's initialized
-  const [tagsList, setTagsList] = useState([]);
   const [filters, setFilters] = useState({
     budget: '',
     price: '',
@@ -59,9 +53,8 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   });
   const [filteredData, setFilteredData] = useState([]);
   const [role, setRole] = useState('Activities'); // Default to Main to show all
-  const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
-  const [addressCache, setAddressCache] = useState({});
-  const [historicalTags, setHistoricalTags] = useState({});
+  const [addressCache] = useState({});
+  // const [historicalTags, setHistoricalTags] = useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -71,7 +64,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const [success,setSuccess]=useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [ setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
@@ -99,54 +92,50 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const handleShareDialogClose = () => {
     setShareDialogOpen(false);
   };
-  const showSuccess=()=>{
-      setSuccess(true);
-      return true;
-  }
-  const getAddressFromCoordinates = async (coordinates) => {
-    if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
-      return 'Location not available';
-    }
-    const [longitude, latitude] = coordinates;
+  // const getAddressFromCoordinates = async (coordinates) => {
+  //   if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+  //     return 'Location not available';
+  //   }
+  //   const [longitude, latitude] = coordinates;
 
-    // Check cache first
-    const cacheKey = `${latitude},${longitude}`;
-    if (addressCache[cacheKey]) {
-      return addressCache[cacheKey];
-    }
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-        {
-          headers: {
-            'Accept-Language': 'en-US,en;q=0.9',
-          },
-        }
-      );
+  //   // Check cache first
+  //   const cacheKey = `${latitude},${longitude}`;
+  //   if (addressCache[cacheKey]) {
+  //     return addressCache[cacheKey];
+  //   }
+  //   try {
+  //     const response = await fetch(
+  //       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+  //       {
+  //         headers: {
+  //           'Accept-Language': 'en-US,en;q=0.9',
+  //         },
+  //       }
+  //     );
       
-      if (!response.ok) {
-        throw new Error('Geocoding failed');
-      }
+  //     if (!response.ok) {
+  //       throw new Error('Geocoding failed');
+  //     }
 
-      const data = await response.json();
+  //     const data = await response.json();
       
-      // Create a readable address from the response
-      const address = data.display_name.split(',').slice(0, 3).join(',');
-      addressCache[cacheKey] = address;
+  //     // Create a readable address from the response
+  //     const address = data.display_name.split(',').slice(0, 3).join(',');
+  //     addressCache[cacheKey] = address;
 
-      // Cache the result
-      setAddressCache(prev => ({
-        ...prev,
-        [cacheKey]: address
-      }));
+  //     // Cache the result
+  //     setAddressCache(prev => ({
+  //       ...prev,
+  //       [cacheKey]: address
+  //     }));
 
-      return address;
-    } catch (error) {
-      console.error('Error fetching address:', error);
-      // Fallback to coordinate display if geocoding fails
-      return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
-    }
-  };
+  //     return address;
+  //   } catch (error) {
+  //     console.error('Error fetching address:', error);
+  //     // Fallback to coordinate display if geocoding fails
+  //     return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
+  //   }
+  // };
   const fetchAddressFromAPI = async (latitude, longitude) => {
     try {
       const response = await fetch(
@@ -349,18 +338,18 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     return roleFields[role]?.includes(field);
   };
 
-  const getHistoricalTags = async (tagId) => {
-    try {
-      const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
-      const response = await axios.get(apiPath);
-      const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
-      setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
-      console.log("Historical Tags",historicalTags);
+  // const getHistoricalTags = async (tagId) => {
+  //   try {
+  //     const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
+  //     const response = await axios.get(apiPath);
+  //     const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
+  //     setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
+  //     console.log("Historical Tags",historicalTags);
       
-    } catch (err) {
-      console.log(err.response ? err.message : 'An unexpected error occurred.');
-    }
-  };
+  //   } catch (err) {
+  //     console.log(err.response ? err.message : 'An unexpected error occurred.');
+  //   }
+  // };
   // const getAllTags=async ()=>{
   //   try {
   //     const apiPath = `http://localhost:3030/getAllPreferenceTags/${id}`;  // Ensure this matches your API route
@@ -390,17 +379,17 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   //     }
   //   }
   // }
-  const renderTags = (tagId) => {
-    console.log("Historical Tags",historicalTags);
+  // const renderTags = (tagId) => {
+  //   console.log("Historical Tags",historicalTags);
     
-    if (!historicalTags[tagId]) {
-      // Fetch tags only if they haven't been fetched yet
-      getHistoricalTags(tagId);
-      return 'Loading...';
-    }
-    // Display the cached tags
-    return historicalTags[tagId].join(', ');
-  };
+  //   if (!historicalTags[tagId]) {
+  //     // Fetch tags only if they haven't been fetched yet
+  //     getHistoricalTags(tagId);
+  //     return 'Loading...';
+  //   }
+  //   // Display the cached tags
+  //   return historicalTags[tagId].join(', ');
+  // };
   const handleClose = () => {
     setOpen(false);
     setType(null);
@@ -602,7 +591,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
             fullWidth
             style={{ marginBottom: '20px' }}
           />
-          {role == 'Itineraries' && (
+          {role ==='Itineraries' && (
             <FormControl fullWidth style={{ marginBottom: '20px' }}>
               <InputLabel>Sort By</InputLabel>
               <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
@@ -611,7 +600,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
               </Select>
             </FormControl>
           )}
-          {role == 'Activities' && (
+          {role === 'Activities' && (
             <FormControl fullWidth style={{ marginBottom: '20px' }}>
               <InputLabel>Sort By</InputLabel>
               <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
@@ -751,7 +740,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
                       <Typography ><strong>Activities:</strong> {item.activities.join(', ')}</Typography>
                       <Typography ><strong>Locations:</strong> {item.locations.join(', ')}</Typography>   
                       <Typography><strong>Price: </strong>{item.price}</Typography>
-                      <Typography><strong>Rating:</strong> {item.rating.length ==0 ?0:item.rating}</Typography>
+                      <Typography><strong>Rating:</strong> {item.rating.length ===0 ?0:item.rating}</Typography>
                       <Typography><strong>Language:</strong> {item.language}</Typography>
                       <Typography><strong>Dropoff location:</strong> {item.dropoffLocation}</Typography>
                       <Typography><strong>Pickup location:</strong>{item.pickupLocation}</Typography>
@@ -775,7 +764,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
                       </Typography>           */}
                     </>
                   )}
-                      {typee=="tourist" && (<>
+                      {typee==="tourist" && (<>
                       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
                        <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
                          Book a ticket 

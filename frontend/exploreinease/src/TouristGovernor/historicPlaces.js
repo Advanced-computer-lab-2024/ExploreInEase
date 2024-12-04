@@ -15,16 +15,12 @@ import IconButton from '@mui/material/IconButton';
 import NetworkService from '../NetworkService';
 import dayjs from 'dayjs';
 import { SingleInputTimeRangeField } from '@mui/x-date-pickers-pro/SingleInputTimeRangeField';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
 import AccessAlarmsOutlinedIcon from '@mui/icons-material/AccessAlarmsOutlined';
 import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import PriceChangeOutlinedIcon from '@mui/icons-material/PriceChangeOutlined';
 import Tooltip from "@mui/material/Tooltip";
 import InfoIcon from '@mui/icons-material/Info';
 import axios from 'axios';
-import CircularProgress from '@mui/material/CircularProgress';
-import Backdrop from '@mui/material/Backdrop';
 import GovernorNavbar from './GovernorNavbar';
 const containerStyle = {
   width: '100%',
@@ -37,22 +33,20 @@ const defaultCenter = {
 function HistoricalPlaces() {
   const location = useLocation();
   const governorId = location.state?.governorId || '';
-  const response = location.state?.response || [];  
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [historicPlaces, setHistoricPlaces] = useState([]);
   const [open, setOpen] = useState(false);
   const [mapCenter, setMapCenter] = useState({lat:defaultCenter.lat, lng: defaultCenter.lng});
   const [markerPosition, setMarkerPosition] = useState(null);
-  const [map, setMap] = useState(null);
-  const [placesService, setPlacesService] = useState(null);
+  const [ setMap] = useState(null);
+  const [ setPlacesService] = useState(null);
   const [currentPlace, setCurrentPlace] = useState(null);
   const [tags, setTags] = React.useState([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [showInfo, setShowInfo] = useState(false);
+  const [ setSuccessMessage] = useState('');
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state
   const [newHistoricPlace, setNewHistoricPlace] = useState({
@@ -406,15 +400,6 @@ const getAllTags=async ()=>{
       [name]: value,
     }));
   };
-
-  const handleLocationChange = (event) => {
-    const { name, value } = event.target;
-    setNewHistoricPlace((prev) => ({
-      ...prev,
-      location: { ...prev.location, [name]: value },
-    }));
-  };
-
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
     setImages(files);

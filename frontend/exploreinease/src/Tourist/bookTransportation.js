@@ -1,34 +1,14 @@
-import React, { useState, useCallback,useEffect } from 'react';
+import React, { useState,useEffect } from 'react';
 import {
     Dialog,DialogTitle,DialogContent,DialogActions,Button,Card, CardContent,Typography,CardActions,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import dayjs from 'dayjs';
-import axios from 'axios'; // Ensure Axios is imported
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';  
 import { useLocation } from 'react-router-dom';
 import TouristNavbar from './TouristNavbar';
 import NetworkService from '../NetworkService';
-const containerStyle = {
-  width: '100%',
-  height: '400px',
-};
-const defaultCenter = {
-  lat: 30.033333, // Default to Egypt's latitude
-  lng: 31.233334, // Default to Egypt's longitude
-};
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
 function BookTransportation() {
     const location = useLocation();
     const {userId,transportationData} = location.state || {};

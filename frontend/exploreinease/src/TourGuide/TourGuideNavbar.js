@@ -34,7 +34,7 @@ const TourGuideHP = () => {
 
  const navigate = useNavigate();
     const location = useLocation();
-    const [menuItems,setMenuItems]=useState( [
+    const [menuItems]=useState( [
       { title: 'New Message', body: 'You have received a new message from Alex.' },
       { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
       { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
@@ -44,9 +44,9 @@ const TourGuideHP = () => {
       { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
     const { state } = location;
     const User = state?.User || Userr;    
-    const imageUrl = state?.imageUrl ||imageUrll;
-    const [success,setSuccess]=useState();
-    const [error,setError]=useState();
+    const imageUrl = state?.useMemo(imageUrl) ||imageUrll;
+    const [setSuccess]=useState();
+    const [setError]=useState();
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -92,9 +92,7 @@ const TourGuideHP = () => {
     }
   }, [showErrorMessage]);
 
-    const handleMenuOpen = (event) => {
-      setAnchorEl(event.currentTarget);
-   };
+
 
    const handleMenuClose = () => {
       setAnchorEl(null);
@@ -195,8 +193,6 @@ const TourGuideHP = () => {
   
   
           setSuccess(response.message); // Set success message
-          const Type = 'tourist';
-          const Orders = response.data;
           navigate('/SalesReport', { state: { Response: data,User: Userr } });
         } catch (err) {
           if (err.response) {
@@ -217,8 +213,6 @@ const TourGuideHP = () => {
           console.log(response);
   
           setSuccess(response.message); // Set success message
-          const Type = 'tourist';
-          const Orders = response.data;
           navigate('/TouristsReport', { state: { Response: response,User: Userr } });
         } catch (err) {
           if (err.response) {

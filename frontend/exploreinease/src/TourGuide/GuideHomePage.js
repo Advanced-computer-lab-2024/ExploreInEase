@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TourGuideHP from '../TourGuide/TourGuideNavbar';
-import { FaCar, FaPassport, FaUserCircle, FaTasks, FaChartLine, FaBox, FaTags, FaArchive, FaFolderOpen } from 'react-icons/fa';
+import {FaPassport, FaTasks, FaChartLine,FaFolderOpen } from 'react-icons/fa';
 import NetworkService from '../NetworkService';
-import LogoutSharpIcon from '@mui/icons-material/LogoutSharp';
 import "../TouristGovernor/GovernorHomePage.css"; // Import CSS file for styling
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const GovernorHomePage = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
   const userId = Userr?.User?._id || Userr?._id;
 
-  const [success, setSuccess] = useState();
-  const [error, setError] = useState();
+  const [setSuccess] = useState();
+  const [setError] = useState();
   const navigate = useNavigate();
   async function handleRegisterClick(title) {
     if (title === "My Profile") {
@@ -67,8 +66,7 @@ const GovernorHomePage = () => {
 
 
         setSuccess(response.message); // Set success message
-        const Type = 'tourist';
-        const Orders = response.data;
+  
         navigate('/SalesReport', { state: { Response: data,User: Userr } });
       } catch (err) {
         if (err.response) {
@@ -92,8 +90,6 @@ const GovernorHomePage = () => {
 
 
         setSuccess(response.message); // Set success message
-        const Type = 'tourist';
-        const Orders = response.data;
         navigate('/TouristsReport', { state: { Response: data, User: Userr } });
       } catch (err) {
         if (err.response) {

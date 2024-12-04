@@ -58,7 +58,6 @@ const TouristSignUp = () => {
       console.log(options);
       
       const response = await NetworkService.post(options);
-      const tourist = response.tourist;
       setSuccess(response.message);
       navigate(`/Login`);
 

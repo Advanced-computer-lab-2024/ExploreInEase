@@ -1,26 +1,16 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
-import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import { useNavigate } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
-import LogoutIcon from '@mui/icons-material/Logout';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-
 import HomeIcon from "@mui/icons-material/Home";
-
 import MailIcon from '@mui/icons-material/Mail';
-import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import { useEffect,useState } from 'react';
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -30,10 +20,8 @@ import ComplaintsTable from './AdminComplaintsTable';
 import RegistringUsers from './AdminRegistringUsers';
 import DeletionRequests from './DeletionRequests';
 import EventsAndItineraries from './EventsAndItenararies';
-
 import AdminHomePage from './AdminHomePage';
 import AdminSalesReport from './AdminSalesReport';
-
 import ActivityCategory from './activityCategories';//done
 import AddUser from './AddUser';//done
 import Preferencetags from './preferenceTags';//done
@@ -41,8 +29,6 @@ import AdminUserProfiles from './adminUserProfiles';  //done
 import ArchiveProduct from '../Shared/Components/Product/ArchiveProduct';
 import ViewProduct from '../Shared/Components/Product/Product';
 import ChangePassword from '../TouristGovernor/changePassword';
-import Login from '../Login/login';
-
 // import AdminHomePage from './AdminHomePage';
 
 
@@ -52,12 +38,10 @@ const drawerWidth = 240;
 
 
 const ResponsiveDrawer = (props) => {
-  const adminId = localStorage.getItem("UserId");
+  // const adminId = localStorage.getItem("UserId");
 
   const { window } = props;
-  const navigate = useNavigate(); // Use useNavigate hook
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [collapseOpen, setCollapseOpen] = useState(false);
 
   const handleCollapseToggle = () => {

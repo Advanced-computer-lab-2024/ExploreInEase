@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import HomePage from './AdvertiserNavbar';
-import { FaCar, FaUserCircle, FaTasks, FaRoute } from 'react-icons/fa'; // Example icon library
-import { FaChartLine, FaFileInvoiceDollar, FaMoneyBillWave, FaPassport, FaPlaneDeparture, FaGlobeAmericas } from 'react-icons/fa';
+import { FaCar, FaTasks,FaChartLine, FaPassport } from 'react-icons/fa'; // Example icon library
 import NetworkService from '../NetworkService';
-import LogoutSharpIcon from '@mui/icons-material/LogoutSharp';
 import "../TouristGovernor/GovernorHomePage.css"; // Import CSS file for styling
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -13,8 +11,8 @@ const AdvertiserHomePage = () => {
   const userId = Userr.User?._id || Userr._id;
 
   const navigate = useNavigate();
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [ setSuccess] = useState('');
+  const [ setError] = useState('');
   const handleRegisterClick = async (title) => {
     if (title === "Transportation") {
       try {
@@ -25,8 +23,6 @@ const AdvertiserHomePage = () => {
         setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
       }
     } else if (title === "Activities") {
-      console.log("heree");
-
       try {
         const apiPath = `http://localhost:3030/activity/user/${Userr.User?._id}/allActivities`;
         const response = await axios.get(apiPath);
@@ -35,18 +31,14 @@ const AdvertiserHomePage = () => {
         setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
       }
     }
-    else if (title == "Tourists Report") {
+    else if (title === "Tourists Report") {
       try {
         const options = {
           apiPath: `/userReport/${userId}`,
         };
-
         const response = await NetworkService.get(options);
         const data = response.data.monthlyReport;
-
         setSuccess(response.message); // Set success message
-        const Type = 'tourist';
-        const Orders = response.data;
         navigate('/TouristsReport', { state: { Response: data, User: Userr } });
       } catch (err) {
         if (err.response) {
@@ -57,7 +49,7 @@ const AdvertiserHomePage = () => {
         }
       }
 
-    } else if (title == "Sales Report") {
+    } else if (title === "Sales Report") {
       try {
         const options = {
           apiPath: `/userReport/${userId}`,
@@ -70,8 +62,6 @@ const AdvertiserHomePage = () => {
 
 
         setSuccess(response.message); // Set success message
-        const Type = 'tourist';
-        const Orders = response.data;
         navigate('/SalesReport', { state: { Response: data,User: Userr } });
       } catch (err) {
         if (err.response) {

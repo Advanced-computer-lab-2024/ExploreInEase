@@ -1,18 +1,15 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import NetworkService from '../../../NetworkService';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import {
   TextField, InputAdornment, IconButton, Grid, Card, CardMedia, CardContent,
-  DialogContentText, Fab, Dialog, DialogTitle, DialogContent, DialogActions,
+  DialogContentText, Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Typography, Slider, Box,Tooltip 
 } from '@mui/material';
 import {
   Search as SearchIcon,
   FilterList as FilterListIcon,
-  Edit as EditIcon,
-  Add as AddIcon,
 } from '@mui/icons-material';
 import { Alert } from '@mui/material'; 
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
@@ -46,20 +43,20 @@ const ArchiveProduct = () => {
 
 
   const [selectedProductName, setSelectedProductName] = useState('');
-  const [selectedProductPrice, setSelectedProductPrice] = useState('');
-  const [selectedProductSales, setSelectedProductSales] = useState('');
-  const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
+  const [ setSelectedProductPrice] = useState('');
+  const [ setSelectedProductSales] = useState('');
+  const [ setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
   const [productInterval,setProductInterval]=useState([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [checkProductArchived,setCheckProductArchived]=useState(true);
+  const [checkProductArchived]=useState(true);
   const Product = location.state?.Product || productInterval;
 
 
-  const [productData, setProductData] = useState({
+  const [ setProductData] = useState({
     _id: null,
     name: '',
     price: '',
@@ -69,8 +66,6 @@ const ArchiveProduct = () => {
     originalQuantity: '',
     picture: null,
   },);
-  const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
   useEffect(()=>{
     handleGetAllProduct();
   },[checkProductArchived]);

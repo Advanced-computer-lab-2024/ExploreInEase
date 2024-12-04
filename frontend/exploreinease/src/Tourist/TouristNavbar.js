@@ -21,23 +21,22 @@ import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { Delete } from '@mui/icons-material';
-import axios from 'axios';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { AddShoppingCart } from "@mui/icons-material";
 
 const TouristNavbar = () => {
    const Userr = JSON.parse(localStorage.getItem('User'));
-  // const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
+   const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
+    const imageUrl = state?.imageUrl || imageUrll;
     const  tourist  = state?.tourist ||Userr.User|| {};
-    const imageUrl = state?.imageUrl ||{};
-    const [success,setSuccess]=useState();
-    const [error,setError]=useState();
+    const [setSuccess]=useState();
+    const [setError]=useState();
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [currency, setCurrency] = useState("EGP"); // default currency
+    const [currency] = useState("EGP"); // default currency
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
     const openNotfication = Boolean(anchorEl1);
@@ -54,7 +53,7 @@ const TouristNavbar = () => {
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
-     const [menuItems,setMenuItems]=useState( [
+     const [menuItems]=useState( [
       { title: 'New Message', body: 'You have received a new message from Alex.' },
       { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
       { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
@@ -89,14 +88,6 @@ const TouristNavbar = () => {
         return () => clearTimeout(timer);
       }
     }, [showErrorMessage]);
-
-     const handleMenuOpen = (event) => {
-      setAnchorEl(event.currentTarget);
-   };
-
-   const handleCurrencyChange = (event) => {
-    setCurrency(event.target.value);
-};
 const handleClick = (event) => {
   setAnchorEl1(event.currentTarget);
 };
@@ -118,9 +109,8 @@ const handleClose = () => {
    };
 
     const  handleRegisterClick=async(title)=> {
-       if(title =="Book a Transportation") {
+       if(title ==="Book a Transportation") {
         try {
-          const touristId=userId;
           const options = { 
             apiPath: `/getTransportations/EGP`
            };
@@ -133,7 +123,7 @@ const handleClose = () => {
           console.log('Error:', error);
         }
       }
-       else if (title == "View Products") {
+       else if (title === "View Products") {
             try {
                 const options = {
                   apiPath: `/getAvailableProducts/${userId}`,
@@ -154,7 +144,7 @@ const handleClose = () => {
                 }
               }
         }
-      else if (title=="My Profile"){
+      else if (title==="My Profile"){
         try {
             const options = {
               apiPath: `/getTourist/${userId}`,
@@ -173,7 +163,7 @@ const handleClose = () => {
               setError('An unexpected error occurred.'); // Generic error message
             }
           }
-      }      else if(title =="View Booked items") {
+      }      else if(title ==="View Booked items") {
         try {
           const touristId=userId;
           const options = { 
@@ -186,7 +176,7 @@ const handleClose = () => {
           console.log('Error:', error);
         }
       }
-      else if(title =="View/Rate Purchased Product") {
+      else if(title ==="View/Rate Purchased Product") {
         console.log("hereeeee");
         console.log("heree");
 
@@ -211,13 +201,13 @@ const handleClose = () => {
           }
         }
       }
-      else if(title =="Book Hotels") {
+      else if(title ==="Book Hotels") {
        navigate(`/BookHotel`,{state:{userId}});          
       }
-      else if(title =="Book Flights") {
+      else if(title ==="Book Flights") {
         navigate(`/BookFlight`,{state:{userId}});          
       }
-      else if (title =="Complaints"){
+      else if (title ==="Complaints"){
         try { 
           const options = {
             apiPath: `/myComplaints/${userId}`,
@@ -238,7 +228,7 @@ const handleClose = () => {
           }
         }
       }
-      else if(title =="Order History"){
+      else if(title ==="Order History"){
         try {
           const options = {
             apiPath: `/myOrders/${userId}/${currency}`,
@@ -313,31 +303,6 @@ const handleClose = () => {
           setError(errorMessage);
         }
       };
-      
-
-    const handleAvatarUpload = async (event) => {
-      const file = event.target.files[0];
-      if (file) {
-          const formData = new FormData();
-          formData.append('image', file);
-          console.log('Uploading image:', formData);
-          try {
-              const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
-                  headers: {
-                      'Content-Type': 'multipart/form-data',
-                  },
-              });
-              console.log('Image uploaded successfully:', response);
-              const uploadedImageUrl = response.data.imageUrl;
-              
-              // Update avatarImage and save the URL in localStorage
-              setAvatarImage(uploadedImageUrl);
-              localStorage.setItem(`${userId}`, uploadedImageUrl);
-          } catch (err) {
-              console.error('Error uploading image:', err);
-          }
-      }
-  };
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
 };

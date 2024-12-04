@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import NetworkService from '../../../NetworkService';
 import axios from 'axios';
 import { Alert } from '@mui/material'; 
@@ -53,7 +53,7 @@ const ProductCard = () => {
   const [checkProductAdd,setCheckProductAdd]=useState(true);
   const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
-  const [productInterval,setProductInterval]=useState([]);
+  const [productInterval]=useState([]);
   const  Product = location.state?.Product || productInterval||[];
   console.log("Product",Product);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -72,7 +72,6 @@ const ProductCard = () => {
     picture: null,
   });
   const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
 
   useEffect(()=>{
     handleGetAllProduct();

@@ -1,13 +1,8 @@
-import { React, useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Button, IconButton, Tooltip, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@mui/material';
+import { React, useState } from 'react';
+import { Card, CardContent, Typography, Button, IconButton, Tooltip, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { format, parseISO } from 'date-fns';
 import FlagIcon from '@mui/icons-material/Flag';
 import axios from 'axios';
-
-
-
-
-
 
 
 const ItineraryCard = ({ item }) => {
@@ -57,11 +52,6 @@ const ItineraryCard = ({ item }) => {
     });
 
   }
-
-
-
-
-
 
   return (
     <Card sx={{ maxWidth: 345, margin: '16px auto', boxShadow: 3, position: 'relative', maxHeight:"400px" }}>

@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { Edit as EditIcon, Save as SaveIcon, Visibility, VisibilityOff, AccountCircle as AccountCircleIcon, Email as EmailIcon, Lock as LockIcon, Language as LanguageIcon, Phone as PhoneIcon, LinkedIn as LinkedInIcon, Work as WorkIcon, Group as GroupIcon, Event as EventIcon  } from '@mui/icons-material';
+import { Edit as EditIcon, Save as SaveIcon, Visibility, VisibilityOff, AccountCircle as AccountCircleIcon, Email as EmailIcon, Lock as LockIcon   } from '@mui/icons-material';
 import axios from 'axios';
-import dayjs from 'dayjs';
 import NetworkService from '../../../NetworkService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import StarIcon from '@mui/icons-material/Star';
 import Sky from '../Sky2.jpeg';
-import { styled } from '@mui/system';
 import '../TourGuideProfile/tourGuideProfile.css';
 const SellerProfile = (props) => {
   const initialData = {

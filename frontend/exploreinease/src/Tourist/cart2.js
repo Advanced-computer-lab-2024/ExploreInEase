@@ -37,7 +37,6 @@ const CartPage = () => {
     const theme = useTheme();
     const [selectedDates, setSelectedDates] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [isBackVisible, setIsBackVisible] = useState(false);
     const [deliveryInfo, setDeliveryInfo] = useState({
       name: '',
       mobile: '',
@@ -84,11 +83,6 @@ const CartPage = () => {
           [field]: value,
         }));
       };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setCardDetails((prev) => ({ ...prev, [name]: value }));
-      };
     const getDaysInMonth = (date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
@@ -110,11 +104,11 @@ const CartPage = () => {
       };
     
       const handleOnClickButton=(title)=>{
-         if (title=='Continue to Checkout'){
+         if (title==='Continue to Checkout'){
             setIsPaymentProceed(false);
             setActiveStep(1);
             setIsCheckoutView(true);
-        } else if (title =='Proceed to Payment'){
+        } else if (title ==='Proceed to Payment'){
             setIsCheckoutView(false);
             setActiveStep(2);
             setIsPaymentProceed(true);

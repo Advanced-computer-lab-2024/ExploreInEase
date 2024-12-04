@@ -22,7 +22,7 @@
 
 .historicalPlaces-background {
    min-height: 100vh !important;
-   background-image: url('../template.jpg')  !important;
+   /* background-image: url('../template.jpg')  !important; */
    background-size: cover  !important;
    background-position: center  !important;
    background-repeat: no-repeat  !important;

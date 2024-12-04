@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Button, List, ListItem, ListItemText, Typography, Divider, Grid } from '@mui/material';
-import NetworkService from '../NetworkService';
+import { Button, Typography, Divider, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { Alert } from '@mui/material';
 
 const MyBookmarks = () => {
     const { state } = useLocation();
-    const { events, userId } = state || {}; // Get events and userId from navigation state
+    const { events } = state || {}; // Get events and userId from navigation state
 
     const [activeCategory, setActiveCategory] = useState('activities'); // Default to 'activities'
     const [filteredEvents, setFilteredEvents] = useState([]);
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-    const [showErrorMessage, setShowErrorMessage] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+    const [showSuccessMessage] = useState(false);
+    const [showErrorMessage ] = useState(false);
+    const [errorMessage] = useState('');
+    const [successMessage] = useState('');
 
     useEffect(() => {
         // Filter events based on the selected category

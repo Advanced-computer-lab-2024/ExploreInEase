@@ -78,7 +78,7 @@ const Complaints = () => {
         };
 
         try {
-            const response = await NetworkService.post(option);
+             await NetworkService.post(option);
             setSuccessMessage("Complaint added successfully!");
             setShowSuccessMessage(true);
 

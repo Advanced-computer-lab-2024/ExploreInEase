@@ -9,8 +9,8 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import './login.css';
 import backgroundImage1 from '../rerere.jpg';
-import { Password, Visibility, VisibilityOff } from '@mui/icons-material';
-import { Box, InputAdornment, IconButton } from '@mui/material';
+import {  Visibility, VisibilityOff } from '@mui/icons-material';
+import {  InputAdornment, IconButton } from '@mui/material';
 
 const ResetPassword = () => {
     const navigate = useNavigate(); // Move useNavigate inside the component

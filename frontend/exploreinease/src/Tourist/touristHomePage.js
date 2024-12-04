@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TouristNavbar from '../Tourist/TouristNavbar';
-import { FaCar, FaUserCircle, FaTasks, FaChartLine, FaBed,FaBox,FaRunning,FaSwimmer,FaHistory,FaPlane, FaTags, FaArchive, FaFolderOpen } from 'react-icons/fa';
+import {  FaBed,FaBox,FaRunning,FaHistory,FaPlane } from 'react-icons/fa';
 import NetworkService from '../NetworkService';
-import LogoutSharpIcon from '@mui/icons-material/LogoutSharp';
 import "../TouristGovernor/GovernorHomePage.css"; 
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const TouristHomePage = () => {
     const currency='EGY';
     const Userr = JSON.parse(localStorage.getItem('User'));
     const navigate= useNavigate();
-    const [success, setSuccess] = useState('');
-    const [error, setError] = useState('');
+    const [ setSuccess] = useState('');
+    const [setError] = useState('');
     const  handleRegisterClick=async(title)=> {
-        if(title =="Book a Transportation") {
+        if(title ==="Book a Transportation") {
          try {
-           const touristId=Userr.User?._id;
            const options = { 
              apiPath: `/getTransportations/EGP`
             };
@@ -29,7 +26,7 @@ const TouristHomePage = () => {
            console.log('Error:', error);
          }
        }
-         if (title == "View Products") {
+         if (title === "View Products") {
              try {
                  const options = {
                    apiPath: `/getAvailableProducts/${Userr.User?._id}`,
@@ -50,7 +47,7 @@ const TouristHomePage = () => {
                  }
                }
          }
-       else if (title=="My Profile"){
+       else if (title==="My Profile"){
          try {
              const options = {
                apiPath: `/getTourist/${Userr.User?._id}`,
@@ -69,7 +66,7 @@ const TouristHomePage = () => {
                setError('An unexpected error occurred.'); // Generic error message
              }
            }
-       }      else if(title =="View Booked items") {
+       }      else if(title ==="View Booked items") {
          try {
            const touristId=Userr.User?._id;
            const options = { 
@@ -82,7 +79,7 @@ const TouristHomePage = () => {
            console.log('Error:', error);
          }
        }
-       else if(title =="View/Rate Purchased Product") {
+       else if(title ==="View/Rate Purchased Product") {
          console.log("hereeeee");
          console.log("heree");
  
@@ -107,13 +104,13 @@ const TouristHomePage = () => {
            }
          }
        }
-       else if(title =="Book Hotels") {
+       else if(title ==="Book Hotels") {
         navigate(`/BookHotel`,{state:{userId:Userr.User?._id}});          
        }
-       else if(title =="Book Flights") {
+       else if(title ==="Book Flights") {
          navigate(`/BookFlight`,{state:{userId:Userr.User?._id}});          
        }
-       else if (title =="Complaints"){
+       else if (title ==="Complaints"){
          try { 
            const options = {
              apiPath: `/myComplaints/${Userr.User?._id}`,
@@ -134,7 +131,7 @@ const TouristHomePage = () => {
            }
          }
        }
-       else if(title =="Order History"){
+       else if(title ==="Order History"){
          try {
            const options = {
              apiPath: `/myOrders/${Userr.User?._id}/${currency}`,

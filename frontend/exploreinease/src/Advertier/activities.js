@@ -10,7 +10,7 @@ import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { LoadScript, GoogleMap, Marker,PlacesService } from '@react-google-maps/api';
+import { LoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 import Slider from '@mui/material/Slider';
 import dayjs from 'dayjs';
 import axios from 'axios'; 
@@ -43,16 +43,8 @@ const defaultCenter = {
   lat: 30.033333, // Default to Egypt's latitude
   lng: 31.233334, // Default to Egypt's longitude
 };
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
+
+
 function Activity() {
   const location = useLocation();
   const { allActivity} = location.state||{};
@@ -61,8 +53,8 @@ function Activity() {
   const [activities, setActivities] = useState(allActivity); 
   const [open, setOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
-  const [map, setMap] = useState(null);
-  const [placesService, setPlacesService] = useState(null);
+  const [setMap] = useState(null);
+  const [ setPlacesService] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
@@ -71,6 +63,8 @@ function Activity() {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [ setSearchInput] = useState('');
+  const [ setIsApiLoaded] = useState(false);
   const [activityForm, setActivityForm] = useState({
     _id: '',
     name: '',
@@ -87,8 +81,7 @@ function Activity() {
     specialDiscounts: null,
     isOpen: true,
   });
-  const [searchInput, setSearchInput] = useState('');
-  const [isApiLoaded, setIsApiLoaded] = useState(false);
+
 
   useEffect(() => {
     getAllTags();
@@ -278,13 +271,7 @@ function convertTimeToFullDate(timeString) {
 // console.log("Data",activities);
 
 const handleSaveActivity = async () => {
-  try {
-    const updatedPrice =
-      activityForm.price[0] === activityForm.price[1]
-        ? activityForm.price[0]
-        : activityForm.price;
-        // console.log("updatedPrice",activityForm.price[0]);
-        
+  try {        
     const updatedActivity = {
       ...activityForm,
       tags: Array.isArray(activityForm.tags) ? activityForm.tags : [], // Ensure tags is always an array of objects
@@ -411,7 +398,7 @@ const handleEditActivity = (activity) => {
       const options ={
          apiPath:`/activity/${activityid}/${id}`,
       };
-      const response = NetworkService.delete(options);
+      NetworkService.delete(options);
       setSuccessMessage("Deleted Activity Successfully!");
       setShowSuccessMessage(true);
        setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
@@ -446,42 +433,6 @@ const handleEditActivity = (activity) => {
     else {
       setActivityForm((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const handlePriceChange = (event, newValue) => {
-    setActivityForm((prev) => ({ ...prev, price: newValue }));
-  };
-
-  const handleSearchInputChange = (event) => {
-    setSearchInput(event.target.value);
-  };
-
-  const handleSearch = () => {
-    const service = new window.google.maps.places.PlacesService(document.createElement('div'));
-    const request = {
-      query: searchInput,
-      fields: ['name', 'geometry'],
-    };
-
-    service.findPlaceFromQuery(request, (results, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        const place = results[0]; // Get the first result
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-
-        setActivityForm((prev) => ({
-          ...prev,
-          location: {
-            latitude: lat,
-            longitude: lng
-          },
-        }));
-        setMapCenter({ lat, lng });
-
-      } else {
-        console.log('Place search failed due to: ' + status);
-      }
-    });
   };
 
   const handleMapClick = useCallback((event) => {

@@ -31,8 +31,8 @@ const HomePage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
-    const [success, setSuccess] = useState('');
-    const [error, setError] = useState('');
+    const [ setSuccess] = useState('');
+    const [setError] = useState('');
     const User = state?.User || Userr;
     const imageUrl = state?.imageUrl || imageUrll;
     const [anchorEl, setAnchorEl] = useState(null);
@@ -44,7 +44,7 @@ const HomePage = () => {
     const userId = User.User?._id || User._id;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     const userType = User.User?.type || User.type;
-    const [menuItems, setMenuItems] = useState([
+    const [menuItems] = useState([
         { title: 'New Message', body: 'You have received a new message from Alex.' },
         { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
         { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
@@ -86,11 +86,6 @@ const HomePage = () => {
             return () => clearTimeout(timer);
         }
     }, [showErrorMessage]);
-
-
-    const handleMenuOpen = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
 
     const handleMenuClose = () => {
         setAnchorEl(null);
@@ -152,7 +147,7 @@ const HomePage = () => {
                 setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
         }
-        else if (title == "Tourists Report") {
+        else if (title === "Tourists Report") {
             try {
                 const options = {
                     apiPath: `/userReport/${userId}`,
@@ -162,8 +157,7 @@ const HomePage = () => {
                 console.log(response);
 
                 setSuccess(response.message); // Set success message
-                const Type = 'tourist';
-                const Orders = response.data;
+        
                 navigate('/TouristsReport', { state: { Response: response, User: Userr } });
             } catch (err) {
                 if (err.response) {
@@ -173,7 +167,7 @@ const HomePage = () => {
                     setError('An unexpected error occurred.'); // Generic error message
                 }
             }
-        } else if (title == "Sales Report") {
+        } else if (title === "Sales Report") {
             try {
                 const options = {
                   apiPath: `/userReport/${userId}`,
@@ -186,8 +180,7 @@ const HomePage = () => {
         
         
                 setSuccess(response.message); // Set success message
-                const Type = 'tourist';
-                const Orders = response.data;
+            
                 navigate('/SalesReport', { state: { Response: data,User: Userr } });
               } catch (err) {
                 if (err.response) {

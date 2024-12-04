@@ -33,7 +33,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 const SalesReport = () => {
-    const [sales, setSales] = useState([
+    const [sales] = useState([
         {
             id: 1,
             product: "Gift Shop Item A",

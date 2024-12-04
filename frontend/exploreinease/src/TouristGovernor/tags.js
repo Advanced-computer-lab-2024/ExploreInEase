@@ -3,21 +3,9 @@ import { useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import { Typography } from "@mui/material";
-import Button from "@mui/material/Button";
-import { Alert } from "@mui/material";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import ListSubheader from "@mui/material/ListSubheader";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
 import axios from "axios";
 import GovernorNavbar from "./GovernorNavbar";
 import Tooltip from "@mui/material/Tooltip";
@@ -26,22 +14,16 @@ import IconButton from "@mui/material/IconButton";
 import TagIcon from "@mui/icons-material/Tag";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
-import bgImage from "../BG.jpg";
 import "./changePassword.css";
 
 function Tags() {
   const location = useLocation();
   const { governorId } = location.state || {};
-  const [period, setPeriod] = useState(""); // State for period
   const [tags, setTags] = React.useState([]);
   const [loading, setLoading] = useState(true); // Loading state
-  const [open, setOpen] = React.useState(false);
-  const [tagType, setTagType] = React.useState(""); // State for tag type
-  const [Name, setName] = React.useState(""); // State for Name
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [setOpen] = React.useState(false);
+  // const [ setTagType] = React.useState(""); // State for tag type
+  // const [ setName] = React.useState(""); // State for Name
 
   useEffect(() => {
     getAllTags();
@@ -75,33 +57,33 @@ function Tags() {
     setOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setTagType("");
-    setName("");
-  };
+  // const handleClose = () => {
+  //   setOpen(false);
+  //   setTagType("");
+  //   setName("");
+  // };
 
-  const handleSaveTag = async () => {
-    if (tagType && period.trim()) {
-      const body = {
-        type: tagType,
-        period: period,
-      };
-      const apiPath = `http://localhost:3030/createHistoricalTag/${governorId}`;
+  // const handleSaveTag = async () => {
+  //   if (tagType && period.trim()) {
+  //     const body = {
+  //       type: tagType,
+  //       period: period,
+  //     };
+  //     const apiPath = `http://localhost:3030/createHistoricalTag/${governorId}`;
 
-      try {
-        const response = await axios.post(apiPath, body);
-        getAllTags();
-        setSuccessMessage(response.data.message || "Successfully!");
-        setShowSuccessMessage(true);
-        handleClose();
-      } catch (error) {
-        setErrorMessage("An error occurred");
-        setShowErrorMessage(true);
-        console.error("Error while saving the tag:", error);
-      }
-    }
-  };
+  //     try {
+  //       const response = await axios.post(apiPath, body);
+  //       getAllTags();
+  //       setSuccessMessage(response.data.message || "Successfully!");
+  //       setShowSuccessMessage(true);
+  //       handleClose();
+  //     } catch (error) {
+  //       setErrorMessage("An error occurred");
+  //       setShowErrorMessage(true);
+  //       console.error("Error while saving the tag:", error);
+  //     }
+  //   }
+  // };
 
   return (
     <div>

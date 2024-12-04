@@ -7,36 +7,20 @@ import {
   CardContent,
   Typography,
   Grid,
-  Slider,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Button,
   Box,
-  Paper,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
-  List,
-  ListItem,
-  ListItemText,Divider,
 } from '@mui/material';
 import { Alert } from '@mui/material'; 
 
 
 const ProductPurchased = () => {
   const location = useLocation();
-  const { Product,Type, userId } = location.state || {};
-  const isSellerOrAdmin = Type === 'seller' || Type === 'admin';
-  const [initialProductList, setInitialProductList] = useState(Product);
-  const [maxPrice, setMaxPrice] = useState(0);
-  const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [priceRange, setPriceRange] = useState([0, 0]);
-  const [sortOption, setSortOption] = useState('');
+  const { Product, userId } = location.state || {};
+  const [initialProductList] = useState(Product);
   const [openRate, setOpenRate] = useState(false);
   const [openReview, setOpenReview] = useState(false);
   const [rating, setRating] = useState('');
@@ -45,18 +29,6 @@ const ProductPurchased = () => {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [productData, setProductData] = useState({
-    productIds: [
-     { description: '',
-      price: '',
-      name:'',
-      _id:''}
-    ],
-    status:'',
-    _id:''
-  });
-  const [errors, setErrors] = useState({});
-  const [nextId, setNextId] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState([]);
   
  
@@ -98,28 +70,6 @@ useEffect(() => {
     setReview('');
     setRating('');
   };
- const handleUpdateStatus=async()=>{
-  try {
-    console.log("selectedProduct",selectedProduct,selectedProduct.productIds[0]._id);    
-    const options = { 
-      apiPath: `/editOrder/${userId}`,
-      body:
-      {
-        orderId:selectedProduct.productIds[0]._id,
-        updatedOrderData:selectedProduct
-      }
-     };
-    const response = await NetworkService.put(options);
-    setSuccessMessage("Edit Successfully!");
-    setShowSuccessMessage(true);
-      console.log("UpdateOrder",response);
-      
-  } catch (error) {
-    setErrorMessage( 'An error occurred');
-    setShowErrorMessage(true);
-    console.log('Error fetching historical places:', error);
-  }
- };
   const handleRatingValuesChange=(event)=>{
     setRating(event.target.value);
 }
@@ -175,16 +125,6 @@ const handleSaveReview =async(review)=>{
   handleClose();
 
 }
-
-  const filteredProducts = products.filter((product) => {
-    const nameMatch = product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
-    return nameMatch && priceMatch;
-  }).sort((a, b) => {
-    if (sortOption === 'ratingsAsc') return a.ratings - b.ratings;
-    if (sortOption === 'ratingsDesc') return b.ratings - a.ratings;
-    return 0;
-  });
 
 // const 
 

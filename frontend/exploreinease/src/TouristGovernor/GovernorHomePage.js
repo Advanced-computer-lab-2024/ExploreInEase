@@ -1,9 +1,9 @@
 import GovernorNavbar from './GovernorNavbar';
-import { FaCar, FaUserCircle, FaTasks, FaChartLine, FaBox, FaTags, FaArchive, FaFolderOpen } from 'react-icons/fa';
+import { FaUserCircle, FaTasks, FaTags } from 'react-icons/fa';
 import NetworkService from '../NetworkService';
 import LogoutSharpIcon from '@mui/icons-material/LogoutSharp';
 import "./GovernorHomePage.css"; // Import CSS file for styling
-import { Navigate, useNavigate } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom';
 
 const GovernorHomePage = () => {
     const Userr = JSON.parse(localStorage.getItem('User'));
@@ -13,7 +13,7 @@ const GovernorHomePage = () => {
         
         const governorId=Userr?._id;
 
-        if (title=="Historical Places"){ 
+        if (title==="Historical Places"){ 
             console.log("herereee");
 
             try{
@@ -28,13 +28,13 @@ const GovernorHomePage = () => {
             catch {
               console.log('An unexpected error occurred.'); // Generic error message
             }     
-        }else if (title=="Historical Tags"){
+        }else if (title==="Historical Tags"){
             navigate(`/viewHistoricalTags`,{state:{governorId}});          
 
-        }else if (title=="Change Password"){
+        }else if (title==="Change Password"){
             navigate('/change-password', { state: { userId:governorId}});;
 
-        }else if (title=="Log Out") {
+        }else if (title==="Log Out") {
             navigate('/');
         }
     }

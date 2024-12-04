@@ -23,13 +23,12 @@ import {
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 
 
 const OrdersDashboard = () => {
 
   const location = useLocation();
-  const { Orders ,User } = location.state || {};
+  const { Orders  } = location.state || {};
   const [currentTab, setCurrentTab] = useState(0);
   const [orders, setOrders] = useState(Orders);
   console.log(orders)

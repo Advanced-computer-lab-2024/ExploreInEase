@@ -10,7 +10,6 @@ import NetworkService from '../../../NetworkService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import Sky from '../Sky2.jpeg';
-import { styled } from '@mui/system';
 import '../TourGuideProfile/tourGuideProfile.css';
 const AdvertiserProfile = (props) => {
   const initialData = {

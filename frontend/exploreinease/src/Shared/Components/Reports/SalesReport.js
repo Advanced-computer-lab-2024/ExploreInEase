@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Card, CardContent, Typography, Grid, Container, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import {  XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { useLocation } from 'react-router-dom';
@@ -11,7 +11,7 @@ const SalesReport = () => {
   const location = useLocation();
 
   const {Response: initialData, User} = location.state || {};
-  const [data, setData] = useState(initialData || []); // Initialize with empty array if no data
+  const [data] = useState(initialData || []); // Initialize with empty array if no data
   
   console.log(User);
   console.log(Response);
@@ -22,11 +22,8 @@ const SalesReport = () => {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const itineraries = ['Hiking', 'Camping', 'City Tour', 'Beach Trip'];
-  const activities = ['Weekend Package', 'Day Trip', 'Full Week Tour'];
   
   //const data = Response ;
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   const filterData = () => {
     // Guard against null/undefined data
@@ -70,10 +67,10 @@ const SalesReport = () => {
   const filteredData = filterData();
   const { totalRevenue, avgRevenue, bestMonth } = calculateMetrics(filteredData);
 
-  const pieData = itineraries.map(activity => ({
-    name: activity,
-    value: data.reduce((sum, month) => sum + month.itineraries[activity], 0)
-  }));
+  // const pieData = itineraries.map(activity => ({
+  //   name: activity,
+  //   value: data.reduce((sum, month) => sum + month.itineraries[activity], 0)
+  // }));
 
   return (
     <div>

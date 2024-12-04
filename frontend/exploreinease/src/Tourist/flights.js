@@ -4,7 +4,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useLocation } from 'react-router-dom';
-import dayjs from 'dayjs';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -19,7 +18,6 @@ const Flights = () => {
   const { userId } = location.state || {};
   const [iatCodeTo,setIatCodeTo]=useState([]);
   const [iatCodeFrom,setIatCodeFrom]=useState([]);
-  const [iatCode,setIatCode]=useState([]);
   const[flightDataa,setFlightDataa]=useState([]);
     const flightsImage=[flight];
   const [searchParams, setSearchParams] = useState({

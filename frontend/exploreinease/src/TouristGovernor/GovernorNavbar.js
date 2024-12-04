@@ -3,7 +3,6 @@ import React ,{useState}from 'react';
 import Avatar from '@mui/material/Avatar';
 import '../Guest/GuestHP.css'; 
 import HomePageLogo from '../HomePageLogo.png';
-import axios from 'axios'; 
 import List from '@mui/material/List';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ListItem from '@mui/material/ListItem';
@@ -27,12 +26,10 @@ const GovernorNavbar = () => {
    const location = useLocation();
    const { state } = location;
    const tourist = state?.tourist || Userr;    
-   const {error,setError}=useState();
-   const {success,setSuccess}=useState();
-   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-   const [showErrorMessage, setShowErrorMessage] = useState(false);
-   const [errorMessage, setErrorMessage] = useState('');
-   const [successMessage, setSuccessMessage] = useState('');
+   const [showSuccessMessage ] = useState(false);
+   const [showErrorMessage ] = useState(false);
+   const [errorMessage] = useState('');
+   const [successMessage] = useState('');
    const [drawerOpen, setDrawerOpen] = useState(false);
    const initialUsername = tourist?.username;
    const governorId=tourist?._id;
@@ -40,7 +37,7 @@ const GovernorNavbar = () => {
    console.log(governorId);
    const avatarImage="";
    async function handleRegisterClick(title) {
-      if (title=="Create Historical Locations Tags") {
+      if (title==="Create Historical Locations Tags") {
          navigate(`/viewHistoricalTags`,{state:{governorId}});          
       }
       else if (title === 'changePassword') {

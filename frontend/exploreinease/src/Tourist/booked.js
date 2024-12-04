@@ -5,7 +5,6 @@ import {
   InputLabel,
   FormControl,
   Button,
-  Rating,
   Card,
   CardContent,
   Typography,
@@ -16,26 +15,15 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
+
   DialogTitle
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import { differenceInHours } from 'date-fns'; // Use date-fns or a similar library
-import axios from "axios";
 import { Alert } from '@mui/material'; 
 import NetworkService from "../NetworkService";
-// Sample data with 'type' field added
-const itemList = [];
-
-// Role-based fields
-const roleFields = {
-  HistoricalPlaces: ['Tag'],
-  Activities: ['budget', 'date', 'category', 'rating'],
-  Itineraries: ['budget', 'date', 'preferences', 'language'],
-};
-
 const Booked = () => {
   const location = useLocation();
   const { events ,userId} = location.state || {};
@@ -50,7 +38,7 @@ const Booked = () => {
   console.log("user",userId);
   console.log("itemList",itemList);
 
-  const [filters, setFilters] = useState({
+  const [filters] = useState({
     budget: '',
     price: '',
     date: '',
@@ -64,9 +52,7 @@ const Booked = () => {
   });
   const [filteredData, setFilteredData] = useState([]);
   const [role, setRole] = useState('Activities'); // Default to Main to show all
-  const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
-  const [addressCache, setAddressCache] = useState({});
-  const [historicalTags, setHistoricalTags] = useState({});
+  const [historicalTags] = useState({});
   const [openCancelation, setOpenCancelation] = React.useState(false);
   const [openComment, setOpenComment] = React.useState(false);
   const [openRate, setOpenRate] = React.useState(false);
@@ -74,9 +60,7 @@ const Booked = () => {
   const [rateType, setRateType] = useState(''); 
   const [rating, setRating] = useState(''); 
   const [commentType, setCommentType] = useState(''); 
-  const [comment, setComment] = useState(''); 
-  const [budget, setBudget] = useState('');
-   
+  const [comment, setComment] = useState('');    
    
   useEffect(() => {
     if (showSuccessMessage) {
@@ -95,79 +79,80 @@ const Booked = () => {
       return () => clearTimeout(timer);
     }
   }, [showErrorMessage]);
-  const getAddressFromCoordinates = async (coordinates) => {
-    if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
-      return 'Location not available';
-    }
-    const [longitude, latitude] = coordinates;
 
-    // Check cache first
-    const cacheKey = `${latitude},${longitude}`;
-    if (addressCache[cacheKey]) {
-      return addressCache[cacheKey];
-    }
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-        {
-          headers: {
-            'Accept-Language': 'en-US,en;q=0.9',
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Geocoding failed');
-      }
+  // const getAddressFromCoordinates = async (coordinates) => {
+  //   if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+  //     return 'Location not available';
+  //   }
+  //   const [longitude, latitude] = coordinates;
 
-      const data = await response.json();
+  //   // Check cache first
+  //   const cacheKey = `${latitude},${longitude}`;
+  //   if (addressCache[cacheKey]) {
+  //     return addressCache[cacheKey];
+  //   }
+  //   try {
+  //     const response = await fetch(
+  //       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+  //       {
+  //         headers: {
+  //           'Accept-Language': 'en-US,en;q=0.9',
+  //         },
+  //       }
+  //     );
       
-      // Create a readable address from the response
-      const address = data.display_name.split(',').slice(0, 3).join(',');
-      
-      // Cache the result
-      setAddressCache(prev => ({
-        ...prev,
-        [cacheKey]: address
-      }));
+  //     if (!response.ok) {
+  //       throw new Error('Geocoding failed');
+  //     }
 
-      return address;
-    } catch (error) {
-      console.error('Error fetching address:', error);
-      // Fallback to coordinate display if geocoding fails
-      return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
-    }
-  };
+  //     const data = await response.json();
+      
+  //     // Create a readable address from the response
+  //     const address = data.display_name.split(',').slice(0, 3).join(',');
+      
+  //     // Cache the result
+  //     setAddressCache(prev => ({
+  //       ...prev,
+  //       [cacheKey]: address
+  //     }));
+
+  //     return address;
+  //   } catch (error) {
+  //     console.error('Error fetching address:', error);
+  //     // Fallback to coordinate display if geocoding fails
+  //     return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
+  //   }
+  // };
   
-  const LocationDisplay = ({ coordinates }) => {
-    const [address, setAddress] = useState('Loading...');
+  // const LocationDisplay = ({ coordinates }) => {
+  //   const [address, setAddress] = useState('Loading...');
 
-      useEffect(() => {
-        const fetchAddress = async () => {
-          const result = await getAddressFromCoordinates(coordinates);
-          console.log(result);
+  //     useEffect(() => {
+  //       const fetchAddress = async () => {
+  //         const result = await getAddressFromCoordinates(coordinates);
+  //         console.log(result);
           
-          setAddress(result);
-        };
-        fetchAddress();
-      }, [coordinates]);
-    return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {address}
-        <Button
-          size="small"
-          onClick= 
-          {() => {
-            const [longitude,latitude] = coordinates;
-            window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
-          }}
-          style={{ minWidth: 'auto', padding: '4px' }}
-        >
-          🗺️
-        </Button>
-      </span>
-    );
-  };
+  //         setAddress(result);
+  //       };
+  //       fetchAddress();
+  //     }, [coordinates]);
+  //   return (
+  //     <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+  //       {address}
+  //       <Button
+  //         size="small"
+  //         onClick= 
+  //         {() => {
+  //           const [longitude,latitude] = coordinates;
+  //           window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
+  //         }}
+  //         style={{ minWidth: 'auto', padding: '4px' }}
+  //       >
+  //         🗺️
+  //       </Button>
+  //     </span>
+  //   );
+  // };
 
   useEffect(() => {
     const initialData = itemList.filter(item =>
@@ -178,21 +163,7 @@ const Booked = () => {
     setFilteredData(initialData);
   }, []);
 
-  // Handle Input Change
-  const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   // Handle Rating Change
-  const handleRatingChange = (event, newRating) => {
-    setFilters({
-      ...filters,
-      rating: newRating,
-    });
-  };
 
   const handleRoleChange = (event, newValue) => {
     setRole(newValue);
@@ -262,48 +233,7 @@ const Booked = () => {
     setFilteredData(data);
   };
 
-
-  // Reset Filters
-  const resetFilters = () => {
-    setFilters({
-      budget: '',
-      price: '',
-      date: '',
-      rating: 0,
-      category: '',
-      language: '',
-      preferences: '',
-      Tag: '',
-      search: '',
-      sortBy: '',
-    });
-
-    // Filter items based on the current role
-    const resetData = itemList.filter(item => {
-      if (role === 'Activities') return item.type === 'Activity';
-      if (role === 'Itineraries') return item.type === 'Itinerary';
-      if (role === 'HistoricalPlaces') return item.type === 'HistoricalPlace';
-      return false;
-    });
-
-    setFilteredData(resetData);
-  };
-
   // Helper function to check if a field should be displayed for the current role
-  const shouldDisplayField = (field) => {
-    return roleFields[role]?.includes(field);
-  };
-
-  const getHistoricalTags = async (tagId) => {
-    try {
-      const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
-      const response = await axios.get(apiPath);
-      const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
-      setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
-    } catch (err) {
-      console.log(err.response ? err.message : 'An unexpected error occurred.');
-    }
-  };
   const handleClose = () => {
     setOpenCancelation(false);
     setOpenComment(false);
@@ -337,9 +267,6 @@ const Booked = () => {
     const handleCommentValuesChange = (event) => {
       setComment(event.target.value);
     };
-  const handleBudgetChange = (event) => {
-    setBudget(event.target.value);
-  };
   const handleRatingValuesChange=(event)=>{
       setRating(event.target.value);
   }
@@ -626,7 +553,7 @@ const Booked = () => {
                       <Typography ><strong>Activities: </strong>{item.activities.join(', ')}</Typography>
                       <Typography ><strong> Locations:</strong> {item.locations.join(', ')}</Typography>
                       <Typography ><strong> Price:</strong> {item.price}</Typography>
-                      <Typography ><strong> Rating: </strong> {item.rating.length ==0 ?0:item.rating}</Typography>
+                      <Typography ><strong> Rating: </strong> {item.rating.length ===0 ?0:item.rating}</Typography>
                       <Typography ><strong> Language:</strong> {item.language}</Typography>
                       <Typography ><strong>Dropoff location:</strong>  {item.dropoffLocation}</Typography>
                       <Typography ><strong>Pickup location:</strong>  {item.pickupLocation}</Typography>

@@ -1,6 +1,6 @@
 // src/Login/TermsAcceptance.js
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import NetworkService from './NetworkService';
 
 import './TermsAcceptance.css';

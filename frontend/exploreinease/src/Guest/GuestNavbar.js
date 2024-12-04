@@ -2,25 +2,18 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
 import './GuestHP.css'; // Import the CSS file
-import Avatar from '@mui/material/Avatar';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import NetworkService from '../NetworkService';
-import Filter from '../Shared/Components/Filter/Filter';
-import Alert from '@mui/material/Alert';
-import { Login } from '@mui/icons-material';
 import "../TouristGovernor/GovernorHomePage.css"; // Import CSS file for styling
-import { FaCar, FaUserCircle, FaTasks, FaChartLine, FaBox, FaTags, FaArchive, FaFolderOpen, FaCalendarAlt, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
-import { FaBookOpen, FaClipboardList, FaListOl, FaHandsHelping } from 'react-icons/fa';
+import { FaSignInAlt,FaClipboardList } from 'react-icons/fa';
 import { FaRegUser, FaRegCalendarCheck } from 'react-icons/fa';
 
 const HomePage = () => {
   const navigate = useNavigate(); // Hook for navigation
-  const initialUsername ="TAST";
-  const [currency, setCurrency] = useState("EGP"); // default currency
+  const [currency, ] = useState("EGP"); // default currency
   const [events, setEvents] = useState([]); // State for storing events
   const [error,setError]=useState();
-  const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
   async function fetchEvents() {
     try {
       const options = {

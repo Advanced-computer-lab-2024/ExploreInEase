@@ -32,7 +32,7 @@ const HomePage = () => {
   const location = useLocation();
   const { state } = location;
   const navigate = useNavigate();
-  const [menuItems, setMenuItems] = useState([
+  const [menuItems] = useState([
     { title: 'New Message', body: 'You have received a new message from Alex.' },
     { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
     { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
@@ -40,9 +40,9 @@ const HomePage = () => {
     { title: 'Project Deadline', body: 'Project submission is due next week.' },
     { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
     { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
-  const [success, setSuccess] = useState();
+  const [ setSuccess] = useState();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [error, setError] = useState();
+  const [ setError] = useState();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -87,11 +87,6 @@ const HomePage = () => {
       return () => clearTimeout(timer);
     }
   }, [showErrorMessage]);
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -134,7 +129,7 @@ const HomePage = () => {
     setAnchorEl1(event.currentTarget);
   };
   async function handleClick(title) {
-    if (title == "My Profile") {
+    if (title === "My Profile") {
       try {
         const options = {
           apiPath: `/getSeller/${userId}`,
@@ -142,7 +137,6 @@ const HomePage = () => {
 
         const response = await NetworkService.get(options);
         setSuccess(response.message); // Set success message
-        const tourist = response.seller;
         console.log(response.seller);
         navigate(`/viewSellerProfile`, { state: { tourist: response.seller } });
 
@@ -156,7 +150,7 @@ const HomePage = () => {
       }
     }
     else {
-      if (title == "View List of Available Products") {
+      if (title === "View List of Available Products") {
         try {
           const options = {
             apiPath: `/getAvailableProducts/${userId}`,
@@ -188,8 +182,6 @@ const HomePage = () => {
   
   
           setSuccess(response.message); // Set success message
-          const Type = 'tourist';
-          const Orders = response.data;
           navigate('/SalesReport', { state: { Response: data,User: Userr } });
         } catch (err) {
           if (err.response) {

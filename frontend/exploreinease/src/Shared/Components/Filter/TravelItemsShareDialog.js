@@ -6,14 +6,12 @@ import { Alert } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../../../NetworkService';
 const TravelItemsShareDialog = ({ item, onClose }) => {
-  const [address,setAddress]=useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const location = useLocation();
   const { userId } = location.state || {};
-  const price = item.budget;
   console.log(item);
   const item2 = {
     name: item.name,

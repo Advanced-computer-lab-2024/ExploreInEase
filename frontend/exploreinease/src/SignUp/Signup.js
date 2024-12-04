@@ -1,6 +1,6 @@
 // src/components/Signup.js
 import React, { useState } from 'react';
-import { Box, Typography, Button, Tabs, Tab, Paper } from '@mui/material';
+import { Box, Typography, Tabs, Tab, Paper } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom'; // Import the hook
 import TouristSignUp from './TouristSignUp';
