@@ -31,6 +31,40 @@ const updateEventFlagController = async (req, res) => {
       if (!updatedEvent) {
           return res.status(404).json({ message: 'Event not found.' });
       }
+      const publisher = await eventRepository.getPublisher(updatedEvent.created_by);
+
+
+      const body = `${eventType} with ID ${eventID} has been flagged Inappropriate.`;
+        const notificationData = {
+            body,
+            user: {
+                user_id: publisher._id,     // Match the schema key
+                user_type: publisher.type   // Match the schema key
+            }
+        };
+        const notification = await checkoutRepository.addNotification(notificationData);
+        console.log("NOTIFICATION: ",notification);
+
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL2_USER,
+                pass: process.env.EMAIL2_PASS
+            }
+        });
+    
+        console.log("Transporter created");
+        
+        const mailOptions = {
+            from: process.env.EMAIL2_USER,
+            to: publisher.email,
+            subject: 'Product out of stock',
+            text: `Hello ${publisher.username},\n\n${body}\n\nBest regards,\n${process.env.EMAIL2_USER}`
+        };
+    
+        await transporter.sendMail(mailOptions);
+
       return res.status(200).json({ message: 'Event flag updated successfully.', updatedEvent });
   } catch (error) {
       console.error('Error updating event flag:', error.message);
@@ -1247,10 +1281,11 @@ const bookEventWithCard = async (req, res) => {
     const allTourists = await eventRepository.findTourists();
     
     allTourists.forEach(async tourist => {
-      const isInterested = tourist.interestedIn.some(interested => 
+      const isInterested = Array.isArray(tourist.interestedIn) && 
+        tourist.interestedIn.some(interested => 
           interested.id.toString() === eventID && 
           interested.type === eventType
-      );
+        );
     
       if (isInterested) {
           const event = await eventRepository.findEventById(eventID, eventType);

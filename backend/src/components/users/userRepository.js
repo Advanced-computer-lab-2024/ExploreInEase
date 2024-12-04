@@ -4,6 +4,9 @@ const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const HistoricalPlace = require('../../models/historicalPlace');
 const Product = require('../../models/product');
+const Order = require('../../models/order');
+const PromoCode = require('../../models/promoCode');
+const Notification = require('../../models/notification');
 const fs = require('fs');
 const path = require('path');
 
@@ -883,6 +886,35 @@ const userReport = async (user) => {
 };
 
 
+const findUserByEmail = async (email) => {
+    try {
+        const user = await Users.findOne({ email });
+        const tourist = await Tourist.findOne({ email });
+        if (user) {
+            return user;
+        } else if (tourist) {
+            return tourist;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        throw new Error(`Error finding user by email: ${error.message}`);
+    }
+};
+
+const updateUserOtp = async (email, otp) => {
+    try {
+        const user = await findUserByEmail(email);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        user.otp = otp;
+        await user.save();
+    } catch (error) {
+        throw new Error(`Error updating user OTP: ${error.message}`);
+    }
+}
+
 const findSellerById = async (id) => {
     try {
         const seller = await Users.findById({_id: id});
@@ -893,8 +925,128 @@ const findSellerById = async (id) => {
     }
 }
 
+const savePromoCode = async (promoCodes) => {
+    try {
+        const promoCode = {
+            promoCodes: promoCodes
+        }
+        const newPromoCode = new PromoCode(promoCode);
+        const savedPromoCode = await newPromoCode.save();
+        return savedPromoCode;
+    } catch (error) {
+        throw new Error(`Error saving promo code: ${error.message}`);
+    }
+};
+
+const updatePromoCode = async (touristIds, promoCodes) => {
+    try {
+        if (touristIds.length !== promoCodes.length) {
+            throw new Error('Number of tourist IDs and promo codes must be the same');
+        }
+        console.log('Tourist IDs:', touristIds);
+
+        // Validate that all touristIds are valid MongoDB ObjectIDs
+        touristIds.forEach((id) => {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                throw new Error(`Invalid tourist ID: ${id}`);
+            }
+        });
+
+        // Perform updates
+        const updates = touristIds.map(async (touristId, index) => {
+            const promoCode = promoCodes[index].promoCodes; // Fetch promo code directly
+
+            // Find the tourist by ID
+            const tourist = await Tourist.findOne({ _id: touristId });
+            if (!tourist) {
+                throw new Error(`Tourist with ID ${touristId} not found`);
+            }
+
+            // Add the promoCode to the tourist's promoCodes array
+            tourist.promoCodes.push(promoCode ); // Adjust based on your schema
+
+            // Save the updated tourist
+            const updatedTourist = await tourist.save();
+            return updatedTourist;
+        });
+
+        // Wait for all updates to complete
+        const updatedTourists = await Promise.all(updates);
+
+        return updatedTourists; // Return updated tourists
+    } catch (error) {
+        console.error(`Error updating promo codes: ${error.message}`);
+        throw new Error(`Error updating promo codes: ${error.message}`);
+    }
+};
+
+
+const fetchAllPromoCodes = async () => {
+    try {
+        const promoCodes = await PromoCode.find().select('promoCodes');
+        return promoCodes;
+    } catch (error) {
+        throw new Error(`Error fetching first user: ${error.message}`);
+    }
+};
+
+
+
+
+
+
+const addInterestedIn = async (user, eventId, eventType) => {
+    try {
+        const event = {
+            id: eventId,
+            type: eventType
+        };
+        user.interestedIn.push(event);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding interestedIn: ${error.message}`);
+    }
+};
+
+const addAddresses = async (user, address) => {
+    try {
+        user.addresses.push(address);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding address: ${error.message}`);
+    }
+}
+
+const getAddresses = async (user) => {
+    try {
+        return user.addresses;
+    } catch (error) {
+        throw new Error(`Error fetching user addresses: ${error.message}`);
+    }
+}
+
+const getAllNotifications = async (user) => {
+    try {
+        const notifications = await Notification.find({ 'user.user_id': user._id });
+        return notifications;
+    } catch (error) {
+        throw new Error(`Error fetching notifications: ${error.message}`);
+    }
+}
 
 module.exports = {
+    getAllNotifications,
+    addAddresses,
+    getAddresses,
+    addInterestedIn,
+    fetchAllPromoCodes,
+    updatePromoCode,
+    savePromoCode,
+    findSellerById,
+    updateUserOtp,
+    findUserByEmail,
     getLoyalityLevel,
     pointsAfterPayment,
     updateTermsAndConditions,

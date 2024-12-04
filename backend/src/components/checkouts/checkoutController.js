@@ -143,7 +143,7 @@ const reviewProduct = async (req, res) => {
 }
 
 const addOrder = async (req, res) => {
-    const { touristId, productIds, quantities, totalPrice } = req.body;
+    const { touristId, productIds, quantities, totalPrice, promoCode } = req.body;
     console.log("BODY: ",req.body);
 
     // Ensure all required fields are provided
@@ -166,7 +166,8 @@ const addOrder = async (req, res) => {
         touristId,
         productIds,
         quantities,
-        status: 'delivered', // Default status
+        price: totalPrice,
+        status: 'pending', // Default status
         dateDelivered: null // Initially null, can be updated later
     };
 
@@ -175,16 +176,71 @@ const addOrder = async (req, res) => {
         return res.status(404).json({ message: "Product not found" });
     }
     console.log("PRODUCT: ",product);
-    product.takenQuantity = product.takenQuantity + quantities[0];
-    console.log("Quantity: ",product.takenQuantity);
-    product.save();
-
     try {
         // Call the service function to add the order
         const newOrder = await checkoutService.addOrder(orderData);
         const tourist = await userRepository.findTouristById(touristId);
-        tourist.wallet = tourist.wallet - totalPrice;
-        tourist.save();
+        if(promoCode){
+            const promo = await checkoutRepository.getPromoCode(promoCode);
+            console.log("PROMO: ",promo);
+            if(promo){
+                if(tourist.promoCodes.includes(promo)){
+                    tourist.wallet = tourist.wallet - (totalPrice * (30 / 100));
+                    tourist.save();
+                }
+                else{
+                    throw new Error("Invalid Promo Code");
+                }
+            }
+        }
+        else{
+            tourist.wallet = tourist.wallet - totalPrice;
+            tourist.save();
+        }
+
+        product.takenQuantity = product.takenQuantity + quantities[0];
+        console.log("Quantity: ",product.takenQuantity);
+        product.save();
+        console.log("SAVED PRODUCT: ",product);
+    
+        if(product.takenQuantity === product.originalQuantity){
+            const publisherId = product.sellerId.toString();
+            const publisher = await userRepository.findSellerById(publisherId);
+            console.log("PUBLISHER: ",publisher);
+    
+    
+            const body = `Product ${product.name} is out of stock`;
+            const notificationData = {
+                body,
+                user: {
+                    user_id: publisher._id,     // Match the schema key
+                    user_type: publisher.type   // Match the schema key
+                }
+            };
+            const notification = await checkoutRepository.addNotification(notificationData);
+            console.log("NOTIFICATION: ",notification);
+    
+    
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL2_USER,
+                    pass: process.env.EMAIL2_PASS
+                }
+            });
+        
+            console.log("Transporter created");
+            
+            const mailOptions = {
+                from: process.env.EMAIL2_USER,
+                to: publisher.email,
+                subject: 'Product out of stock',
+                text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+            };
+        
+            await transporter.sendMail(mailOptions);
+    
+        }
         res.status(201).json({ message: "Order added successfully", order: newOrder });
     } catch (error) {
         res.status(500).json({ message: error.message });
