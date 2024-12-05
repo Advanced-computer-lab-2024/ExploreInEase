@@ -70,8 +70,8 @@ const Signup = () => {
           </span>
         </LoginPrompt>
         <LoginPrompt>
-        Back to 
-        <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>
+        Back to  
+        <span className="signup-link" style={{ cursor: 'pointer', color: '#007bff', marginLeft: '5px' }} onClick={() => navigate('/')}> Home Page</span>
 
         </LoginPrompt>
         {/* <p className="signup-prompt">

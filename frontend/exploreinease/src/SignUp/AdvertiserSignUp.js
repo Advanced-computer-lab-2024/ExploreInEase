@@ -11,6 +11,7 @@ const GuideAdvertiserSignUp = () => {
     username: '',
     password: '',
     type: 'tourGuide',
+    currency:'',
     id: null,
     taxRegistry: null,
     certificates: null,
@@ -104,6 +105,12 @@ const GuideAdvertiserSignUp = () => {
       <input type="text" name="username" value={formData.username} onChange={handleInputChange} required />
       <label>Password:</label>
       <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
+      <label>Currency prefered:</label>
+      <select name="currency" value={formData.currency} onChange={handleInputChange} required>
+        <option value="EGP">EGP</option>
+        <option value="euro">Euro</option>
+        <option value="dollar">Dollar</option>
+      </select>
       <label>Select Role:</label>
       <select name="type" value={formData.type} onChange={handleInputChange} required>
         <option value="tourGuide">Tour Guide</option>

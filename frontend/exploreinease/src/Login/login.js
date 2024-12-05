@@ -41,6 +41,8 @@ const Login = () => {
 
     try {
       const response = await NetworkService.post(options);
+      console.log(response);
+      
       if(response.message === 'Terms and Conditions not accepted') {
         navigate('/TermsAcceptance', { state: { User: response.user } });
       }
@@ -48,9 +50,9 @@ const Login = () => {
       if (response.message === 'Logged in Successfully') {
         console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-        navigateToHomePage(response.user, response.imageUrl);
+         navigateToHomePage(response.user, response.imageUrl);
       }
-    } catch (error) {
+    } catch (error)  {
       setError(
         error.response?.status === 404
           ? 'Invalid username or password'
@@ -96,15 +98,6 @@ const Login = () => {
           <input type="text" name="email" value={formData.email} onChange={handleInputChange} required />
           <label>Password:</label>
           <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
-          <label>Role:</label>
-          <select name="role" value={formData.role} onChange={handleInputChange} required>
-            <option value="admin">Admin</option>
-            <option value="tourismGovernor">tourism Governor</option>
-            <option value="tourist">Tourist</option>
-            <option value="tourGuide">Tour Guide</option>
-            <option value="advertiser">Advertiser</option>
-            <option value="seller">Seller</option>
-          </select>
           <div className="button-group">
             <button type="submit" className="login-button">Sign In</button>
           </div>

@@ -13,7 +13,8 @@ const TouristSignUp = () => {
     mobileNumber: '',
     nationality: '',
     dob: '',
-    jobOrStudent: ''
+    jobOrStudent: '',
+    currency:''
   });
 
   const [error, setError] = useState('');
@@ -86,7 +87,13 @@ const TouristSignUp = () => {
       <input type="text" name="nationality" value={formData.nationality} onChange={handleInputChange} required />
       <label>Date of Birth:</label>
       <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} required />
-      <label>Job/Student:</label>
+      <label>Currency prefered:</label>
+      <select name="currency" value={formData.currency} onChange={handleInputChange} required>
+        <option value="EGP">EGP</option>
+        <option value="euro">Euro</option>
+        <option value="dollar">Dollar</option>
+      </select>
+      <label>Job/Student:</label> 
       <input type="text" name="jobOrStudent" value={formData.jobOrStudent} onChange={handleInputChange} required />
       <button type="submit">Register as Tourist</button>
     </form>

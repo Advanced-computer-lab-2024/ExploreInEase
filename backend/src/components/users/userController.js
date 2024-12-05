@@ -698,10 +698,6 @@ const login = async (req, res) => {
     }
 }
 
-
-
-
-
 const forgetPassword = async (req, res) => {
     const { email } = req.body;
     if (!email) {
