@@ -70,7 +70,7 @@ const App = () => {
       {/* Wrapping Routes with Suspense to handle loading */}
       <Suspense fallback={<div>Loading</div>}>
         <Routes>
-          <Route path="/" element={<GuestNavbar />} />
+          <Route path="/" element={<Events />} />
           <Route path="/register" element={<Signup />} />
           <Route path="/explore" element={<Filter />} />
           <Route path="/viewProduct" element={<Product />} />

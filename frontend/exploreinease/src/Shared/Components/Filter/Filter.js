@@ -29,7 +29,6 @@ import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import debounce from 'lodash.debounce';
 import NetworkService from "../../../NetworkService";
-import TravelItemsShareDialog from './TravelItemsShareDialog';
 import TouristNavbar from "../../../Tourist/TouristNavbar";
 // Sample data with 'type' field added
 // Role-based fields
@@ -63,7 +62,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   // const [historicalTags, setHistoricalTags] = useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [ setShareDialogOpen] = useState(false);
   const [type, setType] = useState(''); 
   const [budget, setBudget] = useState('');
   const [currency, setCurrency] = useState('');

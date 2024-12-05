@@ -5,26 +5,18 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { useLocation } from 'react-router-dom';
 import TourGuideHP from '../../../TourGuide/TourGuideNavbar';
-import HomePage from '../../../Advertier/AdvertiserNavbar';
-
+import AHomePage from '../../../Advertier/AdvertiserNavbar';
+import SHomePage from '../../../Seller/SellerNavbar';
+import GovernorNavbar from '../../../TouristGovernor/GovernorNavbar';
 const SalesReport = () => {
   const location = useLocation();
-
   const {Response: initialData, User} = location.state || {};
   const [data] = useState(initialData || []); // Initialize with empty array if no data
-  
-  console.log(User);
-  console.log(Response);
-  console.log("Sales Report Page:",User.type);
   const [selectedActivity, setSelectedActivity] = useState('all');
   const [selectedItinerary, setSelectedItinerary] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedDate, setSelectedDate] = useState(null);
-
   const itineraries = ['Hiking', 'Camping', 'City Tour', 'Beach Trip'];
-  
-  //const data = Response ;
-
   const filterData = () => {
     // Guard against null/undefined data
     if (!data || data.length === 0) return [];
@@ -75,11 +67,7 @@ const SalesReport = () => {
   return (
     <div>
       <div>
-        {User.type==="advertiser"?(
-          <HomePage/>
-        ):(
-        <TourGuideHP/>
-        )}
+<SHomePage/>
       </div>
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>

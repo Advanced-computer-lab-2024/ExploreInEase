@@ -26,7 +26,7 @@ import Drawer from '@mui/material/Drawer';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 
-const HomePage = () => {
+const SHomePage = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
   const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
   const location = useLocation();
@@ -408,4 +408,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default SHomePage;
