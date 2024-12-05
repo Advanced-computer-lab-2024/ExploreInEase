@@ -18,7 +18,8 @@ import {
     IconButton,
     Dialog,
     DialogContent,
-    DialogTitle
+    DialogTitle,
+    Tooltip
 } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
 // import { format, parseISO } from 'date-fns';
@@ -166,34 +167,38 @@ const Events = () => {
   };
   // Fetch events from the server when component mounts
   useEffect(() => {
-    async function fetchEvents() {
-      try {
-        const options = {
-          apiPath: `/upcomingEvents/${currency}`,
-          urlParam: { currency },
-        };
-
-        const response = await NetworkService.get(options); // Fetch data from NetworkService
-        console.log(response);
-        
-        setEvents(response); // Store events in state
-      } catch (err) {
-        console.error("Error fetching events:", err);
-        setError("An unexpected error occurred.");
-      }
-    }
     fetchEvents();
-    fetchEvents(); // Trigger the fetch on component mount
-  },);
+  },[currency]);
+
   useEffect(() => {
     const initialData = itemList.filter(item =>
       (role === 'Activities' && item.type === 'Activity') ||
       (role === 'Itineraries' && item.type === 'Itinerary') ||
       (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
     );
+    console.log("itemList",itemList);
+    console.log("initalData",initialData);
+    
+    
     setFilteredData(initialData);
-  }, []);
+  },[events]);
 
+  const  fetchEvents=async()=> {
+    try {
+      const options = {
+        apiPath: `/upcomingEvents/${currency}`,
+        urlParam: { currency },
+      };
+
+      const response = await NetworkService.get(options); // Fetch data from NetworkService
+      console.log(response);
+      
+      setEvents(response); // Store events in state
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setError("An unexpected error occurred.");
+    }
+  }
   const applyFilters = (roleToFilter = role) => {
     let data = itemList;
 
@@ -438,13 +443,15 @@ const Events = () => {
                         />
 
                <CardContent>
-                <div style={{ display: 'flex', alignItems: 'center',marginLeft:"120px"}}>  
+                <div style={{ display: 'flex', alignItems: 'center',gap:"25px"}}>  
                  <Typography variant="h5" component="div">
                    {item.name}
                  </Typography>
+                 <Tooltip title="More Info">
                  <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '8px' }}>
                     <InfoIcon color="primary" />
-                  </IconButton></div>
+                  </IconButton>
+                  </Tooltip></div>
                  {item.type === 'Activity' && (
                    <>
                      <Typography><strong>Locations:</strong>
@@ -480,7 +487,7 @@ const Events = () => {
                  </CardContent>
                  </Card>   
                  <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>More Details</DialogTitle>
+        <DialogTitle>More Details about</DialogTitle>
         <DialogContent>
           {dialogData && (
             <div>
@@ -523,12 +530,34 @@ const Events = () => {
              </div>
            </div>
         ) : (
-            
-            <div className="no-data-container">
-            <img src={NodataFound} alt="No Data Found" className="no-data-image" />
+          <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            backgroundColor: "#f0f0f0", // Optional: Set a background color for better visibility
+          }}
+        >
+          <div
+            style={{
+              width: "200px", // Set a fixed width for the GIF
+              height: "200px", // Set a fixed height to match the width
+              position: "relative",
+            }}
+          >
+            <iframe
+              src="https://giphy.com/embed/xTk9ZvMnbIiIew7IpW"
+              width="100%"
+              height="100%"
+              style={{ position: "absolute" }}
+              frameBorder="0"
+              className="giphy-embed"
+              allowFullScreen
+            ></iframe>
           </div>
-              
-        //   <p>No events available at the moment.</p>
+        </div>
+                  
         )}
       </div>
     </div>
