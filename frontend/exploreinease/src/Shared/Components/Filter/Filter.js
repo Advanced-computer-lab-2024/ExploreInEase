@@ -16,11 +16,15 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle
+  DialogTitle,
+  CardMedia,
+  IconButton
 } from "@mui/material";
+import InfoIcon from '@mui/icons-material/Info';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';  
 import { useLocation } from "react-router-dom";
+// import NodataFound from "frontend/exploreinease/src/No data Found.avif";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import debounce from 'lodash.debounce';
@@ -37,6 +41,8 @@ const roleFields = {
 
 const Filter = ({eventsG=[],typeeG=''}) => {
   const location = useLocation();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogData, setDialogData] = useState(null);
   const { events,userId=null,typee } = location.state || {};  
   const itemList = events?.flat() ||eventsG?.flat()|| []; // Flatten the array and ensure it's initialized
   const [filters, setFilters] = useState({
@@ -553,7 +559,15 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   // }, [filteredData, historicalTags]);
 // getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
 // console.log("filteredData",filteredData);
+const handleOpenDialog = (data) => {
+  setDialogData(data);
+  setDialogOpen(true);
+};
 
+const handleCloseDialog = () => {
+  setDialogOpen(false);
+  setDialogData(null);
+};
   return (
 <div>
     {typee==='tourist' &&(
@@ -712,14 +726,39 @@ const Filter = ({eventsG=[],typeeG=''}) => {
           {filteredData.map((item) => (
             <Grid item xs={12} sm={6} md={4} key={item.id}>
               <Card    
-               style={{
-                 width: item.type === 'Activity' ? '400px' : item.type === 'Itinerary' ? '380px' : '400px',
-                 height: item.type === 'Activity' ? '280px' : item.type === 'Itinerary' ? '380px' : '380px',
-                }}>
+                style={{
+                  width: item.type === 'Activity' ? '380px' : item.type === 'Itinerary' ? '360px' : '380px',
+                  height: 'auto',
+                  margin: '16px',
+                  padding: '16px',
+                  border: '1px solid #ddd',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '8px',
+              }}
+              onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                }}
+                >
+                 <CardMedia
+                        component="img"
+                        height="150"
+                        image={item.imageUrl || '../No data Found.avif'} // Default placeholder if no image URL is provided
+                        alt={item.name}
+                        style={{ borderRadius: '8px 8px 0 0' }}
+                />
                 <CardContent>
-                  <Typography variant="h5" component="div">
-                    {item.name}
-                  </Typography>
+                <div style={{ display: 'flex', alignItems: 'center', marginLeft: '120px' }}>  
+                 <Typography variant="h5" component="div">
+                   {item.name}
+                 </Typography>
+                 <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '8px' }}>
+                    <InfoIcon color="primary" />
+                  </IconButton></div>
                   {item.type === 'Activity' && (
                     <>
                       <Typography ><strong>Budget:</strong>{item.budget}</Typography>
@@ -788,15 +827,52 @@ const Filter = ({eventsG=[],typeeG=''}) => {
             </Button>
                    </div>
                 </>)}
-
-                   {shareDialogOpen && (
-                    <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
-                  )}
                   </CardContent>
-                  </Card>    
+
+                  </Card> 
+                  <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+        <DialogTitle>More Details</DialogTitle>
+        <DialogContent>
+          {dialogData && (
+            <div>
+              {item.type === 'Activity' && (
+                <>
+                  <Typography><strong>Budget:</strong> {dialogData.budget}</Typography>
+                  <Typography><strong>Date:</strong> {dialogData.date}</Typography>
+                  <Typography><strong>Category:</strong> {dialogData.category}</Typography>
+                  {dialogData.specialDiscount && (
+                    <Typography><strong>Special Discount:</strong> {dialogData.specialDiscount}%</Typography>
+                  )}
+                </>
+              )}
+              {item.type === 'Itinerary' && (
+                <>
+                  <Typography><strong>Price:</strong> {dialogData.price}</Typography>
+                  <Typography><strong>Rating:</strong> {dialogData.rating.length === 0 ? 0 : dialogData.rating}</Typography>
+                  <Typography><strong>Language:</strong> {dialogData.language}</Typography>
+                  <Typography><strong>Dropoff location:</strong> {dialogData.dropoffLocation}</Typography>
+                  <Typography><strong>Pickup location:</strong> {dialogData.pickupLocation}</Typography>
+                  <Typography><strong>Directions:</strong> {dialogData.directions}</Typography>
+                </>
+              )}
+              {item.type === 'HistoricalPlace' && (
+                <>
+                  <Typography><strong>Students ticket price:</strong> {dialogData.ticketPrice[0]}</Typography>
+                  <Typography><strong>Native ticket price:</strong> {dialogData.ticketPrice[1]}</Typography>
+                  <Typography><strong>Foreign ticket price:</strong> {dialogData.ticketPrice[2]}</Typography>
+                </>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>   
                 </Grid>
                   ))}
+
                 </Grid>
+
+                  
+                
                 <Dialog
                   open={open}
                   onClose={handleClose}
