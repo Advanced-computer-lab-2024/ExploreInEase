@@ -328,7 +328,6 @@ const updateTourist = async (req, res) => {
     }
 };
 
-
 const checkUsername = (username) => {
     return /^[a-zA-Z0-9]+$/.test(username);
 }
@@ -476,8 +475,6 @@ const changePassword = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
-
 
 const uploadImage = async (req, res) => {
     const { userId } = req.params;
@@ -782,14 +779,6 @@ const updatePromoCode = async (req, res) => {
         });
     }
 };
-
-
-
-
-
-
-
-
 
 const addInterestedIn = async (req, res) => {
     const { _id, eventId, eventType } = req.params;
