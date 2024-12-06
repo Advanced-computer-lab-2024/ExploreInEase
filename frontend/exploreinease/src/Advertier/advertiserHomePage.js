@@ -88,39 +88,6 @@ const AdvertiserHomePage = () => {
       <div>
         <HomePage />
       </div>
-      <div className="photo-background-advertiser" />
-
-      <div className="card-container">
-        {/* Card 1 - Activity */}
-        <div className="card">
-          <div className="card-icon">
-            <FaTasks /> {/* You can change the icon to suit your needs */}
-          </div>
-          <button className="card-button" onClick={() => handleRegisterClick("Activities")}>Activities</button>
-        </div>
-
-        {/* Card 2 - Transportation */}
-        <div className="card">
-          <div className="card-icon">
-            <FaCar /> {/* Icon for Transportation */}
-          </div>
-          <button className="card-button" onClick={() => handleRegisterClick("Transportation")}>Transportation</button>
-        </div>
-
-        {/* Card 3 - My Profile */}
-        <div className="card">
-          <div className="card-icon">
-            <FaPassport />
-          </div>
-          <button className="card-button" onClick={() => handleRegisterClick("Tourists Report")}>Tourists Report</button>
-        </div>
-        <div className="card">
-          <div className="card-icon">
-            <FaChartLine />
-          </div>
-          <button className="card-button" onClick={() => handleRegisterClick("Sales Report")}>Sales Report</button>
-        </div>
-      </div>
     </div>
   );
 };

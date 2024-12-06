@@ -1,28 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import HomePageLogo from '../HomePageLogo.png';
 import '../Guest/GuestHP.css';
+import "../TouristGovernor/GovernorHomePage.css"; 
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import LockIcon from '@mui/icons-material/Lock';
-import LogoutIcon from '@mui/icons-material/Logout';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { Alert } from '@mui/material';
-import UploadIcon from '@mui/icons-material/Upload';
-import { Delete } from '@mui/icons-material';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import Drawer from '@mui/material/Drawer';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 
@@ -31,6 +18,8 @@ const SHomePage = () => {
   const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
   const location = useLocation();
   const { state } = location;
+  const [anchorProfileEl, setAnchorProfileEl] = useState(null);
+  
   const navigate = useNavigate();
   const [menuItems] = useState([
     { title: 'New Message', body: 'You have received a new message from Alex.' },
@@ -45,13 +34,14 @@ const SHomePage = () => {
   const [ setError] = useState();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [setErrorMessage] = useState('');
+  const [setSuccessMessage] = useState('');
   const User = state?.User || Userr;
   const imageUrl = state?.imageUrl || imageUrll;
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [anchorEl1, setAnchorEl1] = React.useState(null);
+  const [selectedTab, setSelectedTab] = useState("Sales Report");
   const openNotfication = Boolean(anchorEl1);
   const initialUsername = User.User?.username || User.username;
   const userId = User.User?._id || User._id;
@@ -78,7 +68,12 @@ const SHomePage = () => {
       return () => clearTimeout(timer);
     }
   }, [showSuccessMessage]);
-
+  const handleOpenMenu = (event) => {
+    setAnchorProfileEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setAnchorProfileEl(null);
+  };
   useEffect(() => {
     if (showErrorMessage) {
       const timer = setTimeout(() => {
@@ -249,162 +244,112 @@ const SHomePage = () => {
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
+  const handleTabClick = (tabName) => {
+    setSelectedTab(tabName);
+  };
   return (
-    <div>
-      <nav className="navbar">
-        <div className="logo-container">
-          <img
-            src={HomePageLogo} // Use the imported logo
-            alt="ExploreInEase Logo"
-            className="logo"
-          />
-          <span className="website-name">ExploreInEase</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'row', marginLeft: '1450px', alignContent: 'center', alignItems: 'center' }}>
-          <IconButton
-            onClick={handleClickNotification}
-            aria-controls={open ? 'basic-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
-            className="menu-button"
-            style={{
-              position: 'absolute',
-              color: 'blue',      // Change icon color to blue
-              backgroundColor: '#e0f7fa', // Light blue background for contrast
-              right: '100px',
-              alignItems: 'center'
-            }}>
-            <Badge badgeContent={4} color="success">
-              <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
-            </Badge>
-          </IconButton>
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl1}
-            open={openNotfication}
-            onClose={handleClose}
-            MenuListProps={{
-              'aria-labelledby': 'basic-button',
-            }}
-            PaperProps={{
-              style: {
-                maxHeight: '300px', // Set the maximum height for the menu
-                overflow: 'auto',   // Enable scrolling
-              },
-            }}
-          >
-            {menuItems && menuItems.length > 0 ? (
-              menuItems.map((item, index) => (
-                <MenuItem key={index}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong>{item.title}</strong>
-                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
-                  </div>
-                </MenuItem>
-              ))
-            ) : (
-              <MenuItem disabled>No notifications available</MenuItem>
-            )}
-          </Menu>
-          <IconButton
-            onClick={toggleDrawer(true)}
-            className="menu-button"
-            style={{ position: 'absolute', right: '40px', color: 'white', backgroundColor: '#3f51b5' }}>
-            <MenuIcon />
-          </IconButton>
-        </div>
-      </nav>
-      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 250, overflowX: 'hidden', } }}>
-        <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
-          <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
-            {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
-          </Avatar>
-          <Typography variant="h6" style={{ marginLeft: '10px' }}>{initialUsername}</Typography>
-        </div>
-        <Divider />
-        <List>
-          <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
-          <ListItem button onClick={() => handleMenuClick('changePassword')}>
-            <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-              <LockIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Change Password" />
-          </ListItem>
-          <ListItem button onClick={handleDeleteAccount}>
-            <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-              <Delete fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Delete Account" />
-          </ListItem>
-          <ListItem component="label" sx={{ alignItems: 'center', padding: 0, marginLeft: '8px' }}>
-            <ListItemIcon sx={{ minWidth: 0, marginRight: '8px' }}>
-              <UploadIcon />
-            </ListItemIcon>
-            Upload Image
-            <input
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleAvatarUpload}
-            />
-          </ListItem>
-          <ListItem button onClick={() => handleMenuClick('logout')}>
-            <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-              <LogoutIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Logout" />
-          </ListItem>
-        </List>
-        <Divider />
-        <Divider />
-        <List>
-          <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
-          {[
-            "View List of Available Products",
-            "View Archived Product",
-            "My Profile",
-            "Sales Report"
-          ].map((text) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton onClick={() => handleClick(text)}>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-      <div>
-        {showSuccessMessage && (
-          <Alert severity="success"
-            sx={{
-              position: 'fixed',
-              top: 80, // You can adjust this value to provide space between success and error alerts
-              right: 20,
-              width: 'auto',
-              fontSize: '1.2rem', // Adjust the size
-              padding: '16px',
-              zIndex: 9999, // Ensure it's visible above other content
-            }}>
-            {successMessage}
-          </Alert>
-        )}
-        {showErrorMessage && (
-          <Alert severity="error"
-            sx={{
-              position: 'fixed',
-              top: 60, // You can adjust this value to provide space between success and error alerts
-              right: 20,
-              width: 'auto',
-              fontSize: '1.2rem', // Adjust the size
-              padding: '16px',
-              zIndex: 9999, // Ensure it's visible above other content
-            }}>
-            {errorMessage}
-          </Alert>
-        )}
-      </div>
-      {/* Other homepage content goes here */}
+    <>
+    <nav className="navbarMain">
+    <div className="navbar-left">
+    <div className="logo-container">
+      <img
+        src={HomePageLogo} // Replace with your logo's import
+        alt="ExploreInEase Logo"
+        className="logo"
+      />
+      <span className="website-name">ExploreInEase</span>
     </div>
+      </div>
+    <div className="navbar-right">
+                    <Avatar sx={{ bgcolor: 'darkblue', color: 'white',cursor:'pointer' ,marginRight:'25px'}} src={avatarImage || undefined} onClick={handleOpenMenu} >
+                        {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Menu
+                            anchorEl={anchorProfileEl}
+                            open={Boolean(anchorProfileEl)}
+                            onClose={handleCloseMenu}
+                            anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                            }}
+                        >
+                            <MenuItem onClick={handleCloseMenu}>View Profile</MenuItem>
+                            <MenuItem onClick={handleCloseMenu}>Change Password</MenuItem>
+                            <MenuItem onClick={handleCloseMenu}>Delete Account</MenuItem>
+                            <MenuItem onClick={handleCloseMenu}>Log Out</MenuItem>
+                        </Menu>
+                        <IconButton
+                            onClick={handleClickNotification}
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            style={{
+                                position: 'absolute', // Keeps the button positioned relative to its parent
+                                color: 'blue',        // Icon color
+                                backgroundColor: '#e0f7fa', // Light blue background
+                                right: '100px',       // Distance from the right of the parent
+                                alignItems: 'center',
+                                margin:'3px'
+                            }}
+                        >
+                            <Badge badgeContent={4} color="success">
+                                <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
+                            </Badge>
+                        </IconButton>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorEl1}
+                            open={openNotfication}
+                            onClose={handleClose}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                            }}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            PaperProps={{
+                                style: {
+                                    maxHeight: '300px', // Set the maximum height for the menu
+                                    overflow: 'auto',   // Enable scrolling
+                                },
+                            }}
+                        >
+                            {menuItems && menuItems.length > 0 ? (
+                                        menuItems.map((item, index) => (
+                                            <MenuItem key={index}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <strong>{item.title}</strong>
+                                                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
+                                                </div>
+                                            </MenuItem>
+                                        ))
+                                    ) : (
+                                        <MenuItem disabled>No notifications available</MenuItem>
+                                    )}
+                        </Menu>
+     </div>
+    </nav>
+    <nav className="navbarSecondary">
+    {["Sales Report","Products","Archieved Products"].map((tab) => (
+          <div
+            key={tab}
+            className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}
+            onClick={() => handleTabClick(tab)}
+          >
+            {tab}
+          </div>
+        ))}
+    </nav>
+    </>
   );
 };
 

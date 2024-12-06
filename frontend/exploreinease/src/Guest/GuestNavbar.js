@@ -61,7 +61,6 @@ const HomePage = () => {
       <span className="website-name">ExploreInEase</span>
     </div>
   </div>
-
   <div className="navbar-center">
     <div className="card-container">
       {/* Tab 3 - Step-by-Step Guide */}
@@ -80,7 +79,6 @@ const HomePage = () => {
       </div>
     </div>
   </div>
-
   <div className="navbar-right">
     <button className="navbar-button" onClick={() => navigate('/login')}>
       Login

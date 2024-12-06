@@ -33,10 +33,10 @@ const GuestNavbar = React.lazy(() => import("./Guest/GuestNavbar"));
 
 
 const AdvertiserNavbar = React.lazy(() => import("./Advertier/AdvertiserNavbar"));
-// const TouristNavbar = React.lazy(() => import('./Tourist/TouristNavbar'));
-// const SellerNavbar = React.lazy(() => import('./Seller/SellerNavbar'));
-// const TourGuideNavbar = React.lazy(() => import("./TourGuide/TourGuideNavbar"));
-// const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar"));
+const TouristNavbar = React.lazy(() => import('./Tourist/TouristNavbar'));
+const SellerNavbar = React.lazy(() => import('./Seller/SellerNavbar'));
+const TourGuideNavbar = React.lazy(() => import("./TourGuide/TourGuideNavbar"));
+const GovernorNavbar = React.lazy(() => import("./TouristGovernor/GovernorNavbar"));
 const Product = React.lazy(() => import("./Shared/Components/Product/Product"));
 const SignIn = React.lazy(() => import("./Login/login"));
 const TouristGovernorHP=React.lazy(()=>import("./TouristGovernor/GovernorNavbar"));
@@ -95,7 +95,7 @@ const App = () => {
           <Route path="/AdminHomePage" element={<AdminSideMenu/>} />
           <Route path="/AdvertiserNavbar" element={<AdvertiserNavbar />} />
           <Route path="/GovernorHomePage" element={<GovernT />} />
-          <Route path="AdvertiserHomePage" element={<AdvertiserHP/>}/>
+          <Route path="/AdvertiserHomePage" element={<AdvertiserHP/>}/>
           <Route path="/Activities" element={<Activity />} />
           <Route path="/Login" element={<SignIn />} />
           {/* <Route path="/AdminHomePage" element={<AdminHomePage />} /> */}
@@ -118,6 +118,7 @@ const App = () => {
           <Route path="/OrderHistory" element={<OrderHistory />} />
           <Route path="/myBookmarks" element={<MyBookmarks/>}/>
           <Route path="/Events" element={<Events/>}/>
+          <Route path="/SellerNavbar" element={<TouristNavbar/>}/>
         </Routes>
       </Suspense>
     </Router>

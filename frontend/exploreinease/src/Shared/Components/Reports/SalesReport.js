@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 import TourGuideHP from '../../../TourGuide/TourGuideNavbar';
 import AHomePage from '../../../Advertier/AdvertiserNavbar';
 import SHomePage from '../../../Seller/SellerNavbar';
-import GovernorNavbar from '../../../TouristGovernor/GovernorNavbar';
+
 const SalesReport = () => {
   const location = useLocation();
   const {Response: initialData, User} = location.state || {};
@@ -66,9 +66,8 @@ const SalesReport = () => {
 
   return (
     <div>
-      <div>
-<SHomePage/>
-      </div>
+      <SHomePage/>
+    <div>
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
@@ -226,6 +225,7 @@ const SalesReport = () => {
         </Grid> */}
       </Grid>
     </Container>
+    </div>
     </div>
   );
 };

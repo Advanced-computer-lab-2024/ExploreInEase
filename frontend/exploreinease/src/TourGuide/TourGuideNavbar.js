@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import "../TouristGovernor/GovernorHomePage.css"; 
 
 
 const TourGuideHP = () => {
@@ -42,6 +43,9 @@ const TourGuideHP = () => {
       { title: 'Project Deadline', body: 'Project submission is due next week.' },
       { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
       { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
+    
+      const [anchorProfileEl, setAnchorProfileEl] = useState(null);
+    const [selectedTab, setSelectedTab] = useState("Sales Report");  
     const { state } = location;
     const User = state?.User || Userr;    
     const imageUrl = state?.useMemo(imageUrl) ||imageUrll;
@@ -52,16 +56,13 @@ const TourGuideHP = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const open = Boolean(anchorEl);
     const openNotfication = Boolean(anchorEl1);
-
     const initialUsername = User?.User?.username || User?.username;
     const userId = User?.User?._id || User?._id;
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     const userType = User?.User?.type || User?.type;
-
     // Retrieve avatar URL from localStorage or fallback to the default avatar
     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
     const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
-
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [showErrorMessage, setShowErrorMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -92,7 +93,9 @@ const TourGuideHP = () => {
     }
   }, [showErrorMessage]);
 
-
+  const handleOpenMenu = (event) => {
+    setAnchorProfileEl(event.currentTarget);
+  };
 
    const handleMenuClose = () => {
       setAnchorEl(null);
@@ -112,7 +115,9 @@ const TourGuideHP = () => {
   const handleClose = () => {
     setAnchorEl1(null);
   };
-
+  const handleCloseMenu = () => {
+    setAnchorProfileEl(null);
+  };
    const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -138,7 +143,9 @@ const TourGuideHP = () => {
         }
     }
 };
-
+const handleClickNotification = (event) => {
+  setAnchorEl1(event.currentTarget);
+};
     async function handleRegisterClick(title) {
         if (title === "My Profile"){
           try {
@@ -257,178 +264,282 @@ const TourGuideHP = () => {
       }
     };
     
-  const toggleDrawer = (open) => () => {
-    setDrawerOpen(open);
-};
-
+    const toggleDrawer = (open) => () => {
+      setDrawerOpen(open);
+    };
+    const handleTabClick = (tabName) => {
+      setSelectedTab(tabName);
+    };
 
 
   return (
-    <div >
-      <nav className="navbar">
-        <div className="logo-container">
-          <img
-            src={HomePageLogo} // Use the imported logo
-            alt="ExploreInEase Logo"
-            className="logo"
-          />
-          <span className="website-name">ExploreInEase</span>
-        </div>
-
-        <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',gap: '10px', }}>
-    {/* Notifications Button */}
-    <IconButton 
-        onClick={handleClick} 
-        aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        className="menu-button" 
-        style={{ 
-            color: 'blue',      // Change icon color to blue
-            backgroundColor: '#e0f7fa', // Light blue background for contrast
-          }}
-    >
-          <Badge badgeContent={4} color="success">
-          <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
-          </Badge>
-
-    </IconButton>
-   
-    <Menu
-    id="basic-menu"
-    anchorEl={anchorEl1}
-    open={openNotfication}
-    onClose={handleClose}
-    MenuListProps={{
-        'aria-labelledby': 'basic-button',
-    }}
-    PaperProps={{
-        style: {
-            maxHeight: '300px', // Set the maximum height for the menu
-            overflow: 'auto',   // Enable scrolling
-        },
-    }}
->
-    {menuItems && menuItems.length > 0 ? (
-        menuItems.map((item, index) => (
-            <MenuItem key={index}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong>{item.title}</strong>
-                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
-                </div>
-            </MenuItem>
-        ))
-    ) : (
-        <MenuItem disabled>No notifications available</MenuItem>
-    )}
-</Menu>
-
-
-    {/* Menu Button */}
-    <IconButton 
-        onClick={toggleDrawer(true)} 
-        className="menu-button" 
-        style={{ 
-            color: 'blue',      // Change icon color to blue
-            backgroundColor: '#e0f7fa', // Light blue background for contrast
-        }}
-    >
-        <MenuIcon sx={{ fontSize: 30 }} />
-    </IconButton>
-</div>
-
-</nav>
-<Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 250,  overflowX: 'hidden',}}}>
-<div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
-              <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
-                  {avatarImage ? '' :defaultAvatarUrl }
-              </Avatar>
-              <Typography variant="h6" style={{ marginLeft: '10px' }}>{initialUsername}</Typography>
-          </div>
-          <Divider />
-          <List>
-  <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
-  <ListItem button onClick={() => handleMenuClick('changePassword')}>
-    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-      <LockIcon fontSize="small" />
-    </ListItemIcon>
-    <ListItemText primary="Change Password" />
-  </ListItem>
-  <ListItem button onClick={handleDeleteAccount}>
-    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-      <Delete fontSize="small" />
-    </ListItemIcon>
-    <ListItemText primary="Delete Account" />
-  </ListItem>
-  <ListItem component="label" sx={{ alignItems: 'center', padding: 0 , marginLeft: '8px'}}>
-                        <ListItemIcon sx={{ minWidth: 0, marginRight: '8px' }}>
-                            <UploadIcon />
-                        </ListItemIcon>
-                        Upload Image
-                        <input
-                            type="file"
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            onChange={handleAvatarUpload}
-                        />
-                    </ListItem>
-  <ListItem button onClick={() => handleMenuClick('logout')}>
-    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-      <LogoutIcon fontSize="small" />
-    </ListItemIcon>
-    <ListItemText primary="Logout" />
-  </ListItem>
-</List>
-
-          <Divider />
-          <List>
-              <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
-              {[
-                  "Create an Itinerary",
-                  "View My Created Itineraries",
-                  "Sales Report",
-                  "Tourists Report",
-                  "My Profile"
-              ].map((text) => (
-                  <ListItem key={text} disablePadding>
-                      <ListItemButton onClick={() => handleRegisterClick(text)}>
-                          <ListItemText primary={text} />
-                      </ListItemButton>
-                  </ListItem>
-              ))}
-          </List>
-      </Drawer>
-            <div>
-      {showSuccessMessage && (
-        <Alert severity="success" 
-        sx={{
-          position: 'fixed',
-          top: 80, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-      {showErrorMessage && (
-        <Alert severity="error" 
-        sx={{
-          position: 'fixed',
-          top: 60, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {errorMessage}
-        </Alert>
-      )}
+    <>
+    <nav className="navbarMain">
+    <div className="navbar-left">
+    <div className="logo-container">
+      <img
+        src={HomePageLogo} // Replace with your logo's import
+        alt="ExploreInEase Logo"
+        className="logo"
+      />
+      <span className="website-name">ExploreInEase</span>
+    </div>
       </div>
-  </div>
+    <div className="navbar-right">
+                    <Avatar sx={{ bgcolor: 'darkblue', color: 'white',cursor:'pointer' ,marginRight:'25px'}} src={avatarImage || undefined} onClick={handleOpenMenu} >
+                        {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Menu
+                            anchorEl={anchorProfileEl}
+                            open={Boolean(anchorProfileEl)}
+                            onClose={handleCloseMenu}
+                            anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                            }}
+                        >
+                            <MenuItem onClick={handleCloseMenu}>View Profile</MenuItem>
+                            <MenuItem onClick={handleCloseMenu}>Change Password</MenuItem>
+                            <MenuItem onClick={handleCloseMenu}>Delete Account</MenuItem>
+                            <MenuItem onClick={handleCloseMenu}>Log Out</MenuItem>
+                        </Menu>
+                        <IconButton
+                            onClick={handleClickNotification}
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            style={{
+                                position: 'absolute', // Keeps the button positioned relative to its parent
+                                color: 'blue',        // Icon color
+                                backgroundColor: '#e0f7fa', // Light blue background
+                                right: '100px',       // Distance from the right of the parent
+                                alignItems: 'center',
+                                margin:'3px'
+                            }}
+                        >
+                            <Badge badgeContent={4} color="success">
+                                <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
+                            </Badge>
+                        </IconButton>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorEl1}
+                            open={openNotfication}
+                            onClose={handleClose}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                            }}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            PaperProps={{
+                                style: {
+                                    maxHeight: '300px', // Set the maximum height for the menu
+                                    overflow: 'auto',   // Enable scrolling
+                                },
+                            }}
+                        >
+                            {menuItems && menuItems.length > 0 ? (
+                                        menuItems.map((item, index) => (
+                                            <MenuItem key={index}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <strong>{item.title}</strong>
+                                                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
+                                                </div>
+                                            </MenuItem>
+                                        ))
+                                    ) : (
+                                        <MenuItem disabled>No notifications available</MenuItem>
+                                    )}
+                        </Menu>
+     </div>
+    </nav>
+    <nav className="navbarSecondary">
+    {["Sales Report","Tourists Report","Intinerary","View Itinerary"].map((tab) => (
+          <div
+            key={tab}
+            className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}
+            onClick={() => handleTabClick(tab)}
+          >
+            {tab}
+          </div>
+        ))}
+    </nav>
+    </>
+//     <div >
+//       <nav className="navbar">
+//         <div className="logo-container">
+//           <img
+//             src={HomePageLogo} // Use the imported logo
+//             alt="ExploreInEase Logo"
+//             className="logo"
+//           />
+//           <span className="website-name">ExploreInEase</span>
+//         </div>
+
+//         <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',gap: '10px', }}>
+//     {/* Notifications Button */}
+//     <IconButton 
+//         onClick={handleClick} 
+//         aria-controls={open ? 'basic-menu' : undefined}
+//         aria-haspopup="true"
+//         aria-expanded={open ? 'true' : undefined}
+//         className="menu-button" 
+//         style={{ 
+//             color: 'blue',      // Change icon color to blue
+//             backgroundColor: '#e0f7fa', // Light blue background for contrast
+//           }}
+//     >
+//           <Badge badgeContent={4} color="success">
+//           <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
+//           </Badge>
+
+//     </IconButton>
+   
+//     <Menu
+//     id="basic-menu"
+//     anchorEl={anchorEl1}
+//     open={openNotfication}
+//     onClose={handleClose}
+//     MenuListProps={{
+//         'aria-labelledby': 'basic-button',
+//     }}
+//     PaperProps={{
+//         style: {
+//             maxHeight: '300px', // Set the maximum height for the menu
+//             overflow: 'auto',   // Enable scrolling
+//         },
+//     }}
+// >
+//     {menuItems && menuItems.length > 0 ? (
+//         menuItems.map((item, index) => (
+//             <MenuItem key={index}>
+//                 <div style={{ display: 'flex', flexDirection: 'column' }}>
+//                     <strong>{item.title}</strong>
+//                     <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
+//                 </div>
+//             </MenuItem>
+//         ))
+//     ) : (
+//         <MenuItem disabled>No notifications available</MenuItem>
+//     )}
+// </Menu>
+
+
+//     {/* Menu Button */}
+//     <IconButton 
+//         onClick={toggleDrawer(true)} 
+//         className="menu-button" 
+//         style={{ 
+//             color: 'blue',      // Change icon color to blue
+//             backgroundColor: '#e0f7fa', // Light blue background for contrast
+//         }}
+//     >
+//         <MenuIcon sx={{ fontSize: 30 }} />
+//     </IconButton>
+// </div>
+
+// </nav>
+// <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: 250,  overflowX: 'hidden',}}}>
+// <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
+//               <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
+//                   {avatarImage ? '' :defaultAvatarUrl }
+//               </Avatar>
+//               <Typography variant="h6" style={{ marginLeft: '10px' }}>{initialUsername}</Typography>
+//           </div>
+//           <Divider />
+//           <List>
+//   <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
+//   <ListItem button onClick={() => handleMenuClick('changePassword')}>
+//     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+//       <LockIcon fontSize="small" />
+//     </ListItemIcon>
+//     <ListItemText primary="Change Password" />
+//   </ListItem>
+//   <ListItem button onClick={handleDeleteAccount}>
+//     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+//       <Delete fontSize="small" />
+//     </ListItemIcon>
+//     <ListItemText primary="Delete Account" />
+//   </ListItem>
+//   <ListItem component="label" sx={{ alignItems: 'center', padding: 0 , marginLeft: '8px'}}>
+//                         <ListItemIcon sx={{ minWidth: 0, marginRight: '8px' }}>
+//                             <UploadIcon />
+//                         </ListItemIcon>
+//                         Upload Image
+//                         <input
+//                             type="file"
+//                             accept="image/*"
+//                             style={{ display: 'none' }}
+//                             onChange={handleAvatarUpload}
+//                         />
+//                     </ListItem>
+//   <ListItem button onClick={() => handleMenuClick('logout')}>
+//     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
+//       <LogoutIcon fontSize="small" />
+//     </ListItemIcon>
+//     <ListItemText primary="Logout" />
+//   </ListItem>
+// </List>
+
+//           <Divider />
+//           <List>
+//               <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
+//               {[
+//                   "Create an Itinerary",
+//                   "View My Created Itineraries",
+//                   "Sales Report",
+//                   "Tourists Report",
+//                   "My Profile"
+//               ].map((text) => (
+//                   <ListItem key={text} disablePadding>
+//                       <ListItemButton onClick={() => handleRegisterClick(text)}>
+//                           <ListItemText primary={text} />
+//                       </ListItemButton>
+//                   </ListItem>
+//               ))}
+//           </List>
+//       </Drawer>
+//             <div>
+//       {showSuccessMessage && (
+//         <Alert severity="success" 
+//         sx={{
+//           position: 'fixed',
+//           top: 80, // You can adjust this value to provide space between success and error alerts
+//           right: 20,
+//           width: 'auto',
+//           fontSize: '1.2rem', // Adjust the size
+//           padding: '16px',
+//           zIndex: 9999, // Ensure it's visible above other content
+//         }}>
+//           {successMessage}
+//         </Alert>
+//       )}
+//       {showErrorMessage && (
+//         <Alert severity="error" 
+//         sx={{
+//           position: 'fixed',
+//           top: 60, // You can adjust this value to provide space between success and error alerts
+//           right: 20,
+//           width: 'auto',
+//           fontSize: '1.2rem', // Adjust the size
+//           padding: '16px',
+//           zIndex: 9999, // Ensure it's visible above other content
+//         }}>
+//           {errorMessage}
+//         </Alert>
+//       )}
+//       </div>
+//   </div>
   );
 };
 

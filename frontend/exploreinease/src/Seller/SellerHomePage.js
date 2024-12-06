@@ -5,7 +5,7 @@ import NetworkService from '../NetworkService';
 import "../TouristGovernor/GovernorHomePage.css"; 
 import { useNavigate } from 'react-router-dom';
 
-const AdvertiserHomePage = () => {
+const SellerHomePage = () => {
     const Userr = JSON.parse(localStorage.getItem('User'));
     const navigate= useNavigate();
     const [ setSuccess] = useState('');
@@ -79,35 +79,36 @@ const AdvertiserHomePage = () => {
       <div>
         <HomePage />
       </div>
-      <div className="photo-background-advertiser" />
+      
+      {/* <div className="photo-background-advertiser" />
 
       <div className="card-container">
-        {/* Card 1 - Activity */}
+      
         <div className="card">
           <div className="card-icon">
-            <FaBox /> {/* You can change the icon to suit your needs */}
+            <FaBox /> 
           </div>
           <button className="card-button" onClick={()=>handleClick("View List of Available Products")}>View List of Available Products</button>
         </div>
 
-        {/* Card 2 - Transportation */}
+   
         <div className="card">
           <div className="card-icon">
-            <FaFolderOpen /> {/* Icon for Transportation */}
+            <FaFolderOpen /> 
           </div>
           <button className="card-button" onClick={()=>handleClick("View Archived Product")}>View Archived Product</button>
         </div>
 
-        {/* Card 3 - My Profile */}
+      
         <div className="card">
           <div className="card-icon">
             <FaUserCircle /> 
           </div>
           <button className="card-button" onClick={()=>handleClick("My Profile")}>My Profile</button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
 
-export default AdvertiserHomePage;
+export default SellerHomePage;

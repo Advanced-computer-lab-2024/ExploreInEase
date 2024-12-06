@@ -624,7 +624,7 @@ const registerUser = async (req, res) => {
     // }
 
     if(type == 'tourist') {
-        if (!email||!username||!password||!mobileNum||!nation||!dob||!profession) {
+        if (!email||!username||!password||!mobileNum||!nation||!dob||!profession||!currency) {
             return res.status(400).json({ message: "Missing Input" });
         }
         try {

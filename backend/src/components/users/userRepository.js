@@ -419,8 +419,6 @@ const login = async (username, password) => {
     try {
         const user = await Users.findOne({ username });
         const tourist = await Tourist.findOne({ username });
-        console.log(tourist);
-        console.log(user);
         if (user !== null) {
             const isMatch = await password === user.password;
             if (!isMatch) {

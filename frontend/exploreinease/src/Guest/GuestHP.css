@@ -12,15 +12,9 @@
     background-color: #ffffff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-.navbarMain {
-    display: flex;
-    justify-content: space-between;
-    height: '100%';
-    align-items: center;
-    padding: 20px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
+
+
+
 .logo-container {
     display: flex;
     align-items: center;
@@ -87,6 +81,7 @@
 .MuiTypography-root {
     margin: 10px 0;
 }
+
 .card-tab {
     display: flex;
     flex-direction: column;
@@ -111,8 +106,6 @@
   width: 300px; /* Set the desired size */
 }
 
-
-
 /* No data found */
 .no-data-container {
     display: flex;
@@ -126,6 +119,45 @@
     max-width: 100%;
     height: auto;
     width: 300px; /* Set the desired size */
+  }
+  .navbarMain {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Full width */
+    padding: 20px 40px; /* Add some horizontal padding */
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    /* position: sticky; Sticky to top */
+    top: 0; /* Fixes it to the top of the viewport */
+    z-index: 1000; /* Ensures it stays above content */
+    box-sizing: border-box;
+  }
+  .navbarSecondary {
+    display: flex;
+    justify-content: center;
+    background-color: #003580;
+    padding: 5px 0;
+    /* border-top: 2px solid white; */
+  }
+  
+  .navbar-tab {
+    color: white;
+    padding: 8px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 20px;
+    margin: 0 10px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .navbar-tab:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .navbar-tab.selected {
+    border: 1px solid white;
+    background-color: rgba(255, 255, 255, 0.1);
   }
   
 
