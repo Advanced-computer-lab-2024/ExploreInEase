@@ -11,7 +11,7 @@ const GuideAdvertiserSignUp = () => {
     username: '',
     password: '',
     type: 'tourGuide',
-    currency:'',
+    currency:'EGP',
     id: null,
     taxRegistry: null,
     certificates: null,
@@ -40,6 +40,7 @@ const GuideAdvertiserSignUp = () => {
             username: formData.username,
             password: formData.password,
             type: formData.type,
+            currency:formData.currency
         };
 
         // Step 2: Register user

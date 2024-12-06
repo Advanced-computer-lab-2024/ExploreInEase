@@ -14,7 +14,7 @@ const TouristSignUp = () => {
     nationality: '',
     dob: '',
     jobOrStudent: '',
-    currency:''
+    currency:'EGP'
   });
 
   const [error, setError] = useState('');
@@ -53,12 +53,15 @@ const TouristSignUp = () => {
           mobileNum: formData.mobileNumber,
           nation: formData.nationality,
           dob: formData.dob,
-          profession: formData.jobOrStudent
+          profession: formData.jobOrStudent,
+          currency:formData.currency
         }
       };
       console.log(options);
       
       const response = await NetworkService.post(options);
+      console.log(response);
+      
       setSuccess(response.message);
       navigate(`/Login`);
 
