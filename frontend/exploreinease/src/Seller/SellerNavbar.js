@@ -11,8 +11,14 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import UploadIcon from '@mui/icons-material/Upload';
+import Divider from '@mui/material/Divider';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-
+import Delete from '@mui/icons-material/Delete';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 const SHomePage = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
   const imageUrll = localStorage.getItem('imageUrl');
@@ -124,7 +130,7 @@ const SHomePage = () => {
     setAnchorEl1(event.currentTarget);
   };
   async function handleClick(title) {
-    if (title === "My Profile") {
+    if (title === "Profile") {
       try {
         const options = {
           apiPath: `/getSeller/${userId}`,
@@ -138,14 +144,14 @@ const SHomePage = () => {
       } catch (err) {
         if (err.response) {
           console.log(err.message);
-          setError(err.response.data.message); // Set error message from server response if exists
+          console.log(err.response.data.message); // Set error message from server response if exists
         } else {
-          setError('An unexpected error occurred.'); // Generic error message
+          console.log('An unexpected error occurred.'); // Generic error message
         }
       }
     }
     else {
-      if (title === "View List of Available Products") {
+      if (title === "Products") {
         try {
           const options = {
             apiPath: `/getAvailableProducts/${userId}`,
@@ -181,11 +187,45 @@ const SHomePage = () => {
         } catch (err) {
           if (err.response) {
             console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
+            console.log(err.response.data.message); // Set error message from server response if exists
           } else {
-            setError('An unexpected error occurred.'); // Generic error message
+            console.log('An unexpected error occurred.'); // Generic error message
           }
         }
+      }
+      else if(title==='Change Password'){
+        navigate('/change-password', { state: { userId: userId } });;
+      }
+      else if(title==='Delete Account'){
+        try {
+          console.log(userId, userType);
+    
+          const options = {
+            apiPath: `/requestDeletion/${userId}/${userType}`,
+            useParams: userId,
+            userType,
+          };
+          const response = await NetworkService.put(options);
+          console.log(response);
+    
+          setSuccessMessage(response.message || "Delete Successfully!");
+          setShowSuccessMessage(true);
+    
+          if (response.success) {
+            setSuccess("Account deletion requested successfully.");
+          } else {
+            console.log(response.message || "Account deletion request failed.");
+          }
+        } catch (err) {
+          // Access the error message from the response data
+          const errorMessage = err.response?.data?.message || "An error occurred";
+          setErrorMessage(errorMessage);
+          setShowErrorMessage(true);
+          console.log(errorMessage);
+        }
+      }
+      else if(title==='Log Out'){
+        navigate('/');
       }
       else {
         try {
@@ -201,9 +241,9 @@ const SHomePage = () => {
         } catch (err) {
           if (err.response) {
             console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
+            console.log(err.response.data.message); // Set error message from server response if exists
           } else {
-            setError('An unexpected error occurred.'); // Generic error message
+            console.log('An unexpected error occurred.'); // Generic error message
           }
         }
       }
@@ -277,10 +317,38 @@ const SHomePage = () => {
                             horizontal: 'center',
                             }}
                         >
-                            <MenuItem onClick={handleCloseMenu}>View Profile</MenuItem>
-                            <MenuItem onClick={handleCloseMenu}>Change Password</MenuItem>
-                            <MenuItem onClick={handleCloseMenu}>Delete Account</MenuItem>
-                            <MenuItem onClick={handleCloseMenu}>Log Out</MenuItem>
+                            <MenuItem onClick={()=>handleClick('Profile')}>
+                           <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <PersonOutlineIcon />
+                              </ListItemIcon>Profile</MenuItem>
+                            <Divider/>
+                            <MenuItem onClick={()=>handleClick('Change Password')}>     
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <PasswordOutlinedIcon />
+                              </ListItemIcon>Change Password</MenuItem>
+                            <Divider/>
+                            <MenuItem component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <UploadIcon />
+                              </ListItemIcon>
+                                Upload Profile Picture
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={handleAvatarUpload}
+                                />
+                            </MenuItem>
+                            <Divider/>
+                            <MenuItem onClick={()=>handleClick('Delete Account')}>
+                            <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <Delete />
+                              </ListItemIcon>Delete Account</MenuItem>
+                            <Divider/>
+                            <MenuItem onClick={()=>handleClick('Log Out m')}>
+                            <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <LogoutOutlinedIcon />
+                              </ListItemIcon>Log Out</MenuItem>
                         </Menu>
                         <IconButton
                             onClick={handleClickNotification}
@@ -343,7 +411,7 @@ const SHomePage = () => {
           <div
             key={tab}
             className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}
-            onClick={() => handleTabClick(tab)}
+            onClick={() => handleClick(tab)}
           >
             {tab}
           </div>

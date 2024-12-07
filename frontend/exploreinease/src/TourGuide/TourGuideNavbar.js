@@ -367,6 +367,8 @@ const handleClickNotification = async(event) => {
                                     onChange={handleAvatarUpload}
                                 />
                             </MenuItem>
+
+                            
                             <Divider/>
                             <MenuItem onClick={()=>handleRegisterClick('Log Out')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
                               <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
