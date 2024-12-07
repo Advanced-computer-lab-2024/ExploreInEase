@@ -881,6 +881,52 @@ const userReport = async (user) => {
         throw new Error(`Error fetching tourist report: ${error.message}`);
     }
 };
+
+
+//api 64
+const getTouristHistoryFromDb = async (touristId) => {
+    const tourist = await Tourist.findById(touristId)
+      .populate("itineraryId.id", "name description price")
+      .populate("activityId.id", "name description price")
+      .populate("historicalplaceId.id", "name description price")
+      .populate("transportationId.id", "name description price");
+  
+    if (!tourist) {
+      throw new Error("Tourist not found");
+    }
+  
+    return tourist;
+  };
+
+  //65 and 66
+const addBookmark = async (touristId, bookmark) => {
+    try {
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        throw new Error("Tourist not found");
+      }
+  
+      tourist.bookmark.push(bookmark);
+      await tourist.save();
+  
+      return {
+        message: "Bookmark added successfully",
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+  
+  const getBookmarks = async (touristId) => {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      throw new Error("Tourist not found");
+    }
+  
+    // tourist.bookmark is an array of objects: { id: ObjectId, type: String }
+    return tourist.bookmark;
+  };
+
 module.exports = {
     getLoyalityLevel,
     pointsAfterPayment,
@@ -928,6 +974,9 @@ module.exports = {
     checkSellerProductStatus,
     checkAdvertiserActivityStatus,
     getTouristByUsername,
-    userReport
+    userReport,
+    getTouristHistoryFromDb,
+    addBookmark,
+    getBookmarks
 
 };

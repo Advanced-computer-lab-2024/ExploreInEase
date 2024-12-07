@@ -259,6 +259,23 @@ const handleClose = () => {
             setError('An unexpected error occurred.'); // Generic error message
           }
         } 
+      }else if(title =="View Bookmarks") {
+        try { 
+          const options = {
+            apiPath: `/fetchbookmark/${userId}`,
+          };
+          const response = await NetworkService.get(options);
+          setSuccess(response.message); // Set success message
+          const events=response.data;
+          navigate(`/MyBookmarks`,{state:{events:events,userId}});  
+        } catch (err) {
+          if (err.response) {
+              console.log(err.message);
+            setError(err.response.data.message); // Set error message from server response if exists
+          } else {
+            setError('An unexpected error occurred.'); // Generic error message
+          }
+        }        
       }
       else{
         try {
@@ -467,7 +484,8 @@ return (
                   "Book Flights",
                   "Complaints",
                   "Order History",
-                  "My Profile"
+                  "My Profile",
+                  "View Bookmarks"
               ].map((text) => (
                   <ListItem key={text} disablePadding>
                       <ListItemButton onClick={() => handleRegisterClick(text)}>

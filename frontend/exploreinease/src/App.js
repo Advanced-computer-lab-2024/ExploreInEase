@@ -60,7 +60,7 @@ const Cart2=React.lazy(()=>import('./Tourist/cart2'));
 const TourGuideReport = React.lazy(() => import('./Shared/Components/Reports/TouristsReport'));
 const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesReport'));
 const OrderHistory = React.lazy(() => import('./Tourist/OrderHistory'));
-const MyBookmarks = React.lazy(() => import('./Shared/MyBookmarks'));
+const MyBookmarks = React.lazy(() => import('./Shared/Components/Filter/MyBookmarks'));
 
 
 const App = () => {
@@ -118,7 +118,7 @@ const App = () => {
           <Route path="/TouristsReport" element={<TourGuideReport />} />
           <Route path="/SalesReport" element={<SalesReport />} />
           <Route path="/OrderHistory" element={<OrderHistory />} />
-          <Route path="myBookmarks" element={<MyBookmarks />} />
+          <Route path="/MyBookmarks" element={<MyBookmarks />} />
         </Routes>
       </Suspense>
     </Router>

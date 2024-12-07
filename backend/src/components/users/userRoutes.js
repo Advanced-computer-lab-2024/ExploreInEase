@@ -1029,6 +1029,12 @@ router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
 
 router.get('/userReport/:userId', userController.userReport);
 
+router.get("/touristPaidHistory/:touristId", userController.getTouristHistory);
+
+router.post("/bookmark/:touristId/:id/:type", userController.addBookmark);
+
+router.get("/fetchbookmark/:touristId", userController.getBookmarks);
+
 module.exports = {
     router,
     setDBConnection,

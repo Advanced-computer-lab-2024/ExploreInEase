@@ -658,6 +658,80 @@ const userReport = async (userId) => {
     return report;
 }
 
+//api64
+const getTouristHistory = async (touristId) => {
+    try {
+      const tourist = await userRepository.getTouristHistoryFromDb(touristId);
+  
+      const paidHistory = {
+        itineraries: tourist.itineraryId.filter((item) => item.pricePaid > 0),
+        activities: tourist.activityId.filter((item) => item.pricePaid > 0),
+        historicalPlaces: tourist.historicalplaceId.filter(
+          (item) => item.pricePaid > 0
+        ),
+        transportation: tourist.transportationId.filter(
+          (item) => item.pricePaid > 0
+        ),
+      };
+  
+      return paidHistory;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+
+const addBookmark = async (touristId, bookmarks) => {
+    try {
+      // Call the repository to update the tourist's bookmarks
+      return await userRepository.addBookmark(touristId, bookmarks);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  
+  const getBookmarks = async (touristId) => {
+    try {
+      const bookmarks = await userRepository.getBookmarks(touristId);
+  
+      // Enrich each bookmark with the corresponding model data
+      const enrichedBookmarks = await Promise.all(
+        bookmarks.map(async (bookmark) => {
+          let Model;
+          switch (bookmark.type) {
+            case "Itinerary":
+              Model = Itinerary;
+              break;
+            case "Activity":
+              Model = Activity;
+              break;
+            case "HistoricalPlace":
+              Model = HistoricalPlace;
+              break;
+            default:
+              // If type doesn't match known models, return null data
+              return { ...bookmark, type: bookmark.type, data: null };
+          }
+  
+          // Fetch the detailed document
+          const doc = await Model.findById(bookmark.id).lean();
+          return { ...bookmark, type: bookmark.type, data: doc };
+        })
+      );
+  
+      // Return objects with type and data fields
+      return enrichedBookmarks.map((bookmark) => ({
+        type: bookmark.type,
+        data: bookmark.data,
+      }));
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+    
+
+
+
 module.exports = {
     changePassword,
     uploadImage,
@@ -697,7 +771,10 @@ module.exports = {
   fetchUsersForDeletion,
   getNotAcceptedUsers,
   updatingStatusUser,
-  userReport
+  userReport,
+  getTouristHistory,
+  addBookmark,
+  getBookmarks
 
 };
-
+    

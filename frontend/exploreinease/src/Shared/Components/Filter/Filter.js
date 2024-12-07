@@ -28,7 +28,6 @@ import axios from "axios";
 import debounce from 'lodash.debounce';
 import NetworkService from "../../../NetworkService";
 import TravelItemsShareDialog from './TravelItemsShareDialog';
-import TouristNavbar from "../../../Tourist/TouristNavbar";
 // Sample data with 'type' field added
 const itemList = [];
 const addressCache = {};
@@ -40,10 +39,15 @@ const roleFields = {
   Itineraries: ['budget', 'date', 'preferences', 'language'],
 };
 
-const Filter = ({eventsG=[],typeeG=''}) => {
+const Filter = () => {
   const location = useLocation();
-  const { events,userId=null,typee } = location.state || {};  
-  const itemList = events?.flat() ||eventsG?.flat()|| []; // Flatten the array and ensure it's initialized
+  const { events,userId } = location.state || {};
+  console.log("userId",userId);
+  
+  const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
+  console.log(events);
+  console.log(itemList);
+  // console.log("User:",User);
   const [tagsList, setTagsList] = useState([]);
   const [filters, setFilters] = useState({
     budget: '',
@@ -299,16 +303,18 @@ const Filter = ({eventsG=[],typeeG=''}) => {
 
     setFilteredData(data);
   };
-
   const handleBookmarkClick = async (item) => {
     const touristId = userId;
     const id = item.id;  // 'Activity', 'Itinerary', 'HistoricalPlace'
     const type = item.type;
+    console.log(item);
+    console.log(id);
+    console.log(type);
+
   
     try {
       const options = {
-        apiPath: `/bookmark/${touristId}`,  // POST request to the correct endpoint
-        useParams: { id, type },  // Pass id and type as parameters
+        apiPath: `/bookmark/${touristId}/${id}/${type}` ,// POST request to the correct endpoint
       };
       
       const response = await NetworkService.post(options);  // Use POST instead of PUT
@@ -318,6 +324,14 @@ const Filter = ({eventsG=[],typeeG=''}) => {
       alert('Failed to bookmark event. Please try again.');
     }
   };
+  
+  
+   
+    
+   
+ 
+
+
   // Reset Filters
   const resetFilters = () => {
     setFilters({
@@ -563,13 +577,9 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   //   });
   // }, [filteredData, historicalTags]);
 // getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
-// console.log("filteredData",filteredData);
+console.log("filteredData",filteredData);
 
   return (
-<div>
-    {typee==='tourist' &&(
-      <TouristNavbar/>
-    )}
 
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
      <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>
@@ -724,8 +734,8 @@ const Filter = ({eventsG=[],typeeG=''}) => {
             <Grid item xs={12} sm={6} md={4} key={item.id}>
               <Card    
                style={{
-                 width: item.type === 'Activity' ? '400px' : item.type === 'Itinerary' ? '380px' : '400px',
-                 height: item.type === 'Activity' ? '280px' : item.type === 'Itinerary' ? '380px' : '380px',
+                 width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
+                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '340px',
                 }}>
                 <CardContent>
                   <Typography variant="h5" component="div">
@@ -770,25 +780,22 @@ const Filter = ({eventsG=[],typeeG=''}) => {
                       <Typography><strong>Students ticket price: </strong> {item.ticketPrice[0]}</Typography>
                       <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
                       <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography>
-                      {/* <Typography><strong> Tags:</strong>
+                      <Typography><strong> Tags:</strong>
                           {item.tags ? renderTags(item.tags) : 'No tags available'}
-                      </Typography>           */}
-                    </>
+                      </Typography>                      </>
                   )}
-                      {typee=="tourist" && (<>
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
-                       <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
-                         Book a ticket 
-                        </Button> 
-                      <Button
+                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                 <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
+                 Book a ticket 
+                  </Button> 
+                  <Button
                       variant="contained"
                       color="primary"
                       onClick={() => handleShareClick(item)}
                       style={{ marginLeft: '10px' }}
-                     >
+                    >
                       Share
                     </Button>
-                        
                     <Button
               variant="contained"
               color="primary"
@@ -797,9 +804,8 @@ const Filter = ({eventsG=[],typeeG=''}) => {
             >
               Bookmark
             </Button>
-                   </div>
-                </>)}
 
+                   </div>
                    {shareDialogOpen && (
                     <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
                   )}
@@ -808,6 +814,9 @@ const Filter = ({eventsG=[],typeeG=''}) => {
                 </Grid>
                   ))}
                 </Grid>
+
+
+
                 <Dialog
                   open={open}
                   onClose={handleClose}
@@ -922,7 +931,6 @@ const Filter = ({eventsG=[],typeeG=''}) => {
           {errorMessage}
         </Alert>
       )} */}
-            </div>
             </div>
           );
         };

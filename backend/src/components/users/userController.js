@@ -695,6 +695,80 @@ const userReport = async (req, res) => {
     }
 }
 
+const getTouristHistory = async (req, res) => {
+    const { touristId } = req.params;
+    if (!touristId) {
+      return res.status(400).json({
+        success: false,
+        message: "tourist Id is required",
+      });
+    }
+    try {
+      const paidHistory = await userService.getTouristHistory(touristId);
+  
+      res.status(200).json({
+        data: paidHistory,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+
+  const addBookmark = async (req, res) => {
+    const { touristId,id,type } = req.params;
+    console.log(touristId);
+    console.log(type);
+    console.log(id);
+
+    
+  
+    if (!id || !type) {
+      return res.status(400).json({
+        success: false,
+        message: "Both id and type are required",
+      });
+    }
+  
+    try {
+      const bookmark = { id, type };
+      console.log(bookmark);
+      const updatedBookmarks = await userService.addBookmark(touristId, bookmark);
+      res.status(201).json({
+        success: true,
+        data: updatedBookmarks,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+  
+  // Controller method to handle retrieving all bookmarks
+  const getBookmarks = async (req, res) => {
+    const { touristId } = req.params;
+  
+    try {
+      const bookmarks = await userService.getBookmarks(touristId);
+  
+      res.status(200).json({
+        success: true,
+        data: bookmarks,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+
 module.exports = {
     changePassword,
     uploadImage,
@@ -731,5 +805,8 @@ module.exports = {
   getUsersForDeletion,
   getNotAcceptedUsers,
   updatingStatusUser,
-  userReport
+  userReport,
+  getTouristHistory,
+  addBookmark,
+  getBookmarks
 };
