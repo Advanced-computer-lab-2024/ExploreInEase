@@ -5,9 +5,12 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './changePassword.css';
 import { useLocation, useNavigate } from 'react-router-dom'; 
 import NetworkService from "../NetworkService";
-import GovernorNavbar from './GovernorNavbar';
+import TourGuideHP from '../TourGuide/TourGuideNavbar';
+import AHomePage from '../Advertier/AdvertiserNavbar';
+import SHomePage from '../Seller/SellerNavbar';
 
 const ChangePassword = () => {
+   const User = JSON.parse(localStorage.getItem('User'));
    const adminIdd=localStorage.getItem('UserId');
    const [currentPassword, setCurrentPassword] = useState('');
    const [newPassword, setNewPassword] = useState('');
@@ -55,7 +58,15 @@ const ChangePassword = () => {
    return (
       <div>
       <div>
-      <GovernorNavbar/>
+      {User?.type==='seller' &&(
+        <SHomePage/>
+      )}
+      {User?.type==='advertiser'&&(
+                <AHomePage/>
+      )}
+      {User?.type==='tourGuide' &&(
+        <TourGuideHP/>
+      )}
    </div>
       <Box className="change-password-background">
        

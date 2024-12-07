@@ -650,7 +650,8 @@ const registerUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const { username, password, role } = req.body;
+    const { username, password } = req.body;
+
     if (!username || !password) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
@@ -658,42 +659,88 @@ const login = async (req, res) => {
     if (typeof username !== 'string' || typeof password !== 'string') {
         return res.status(400).json({ error: 'Invalid parameter types' });
     }
-    try{
-        const user = await userService.login(username, password);
-        if (!(user.role == "user") && !(user.role == "tourist")) {
+
+    try {
+        // Fetch user or tourist from the service
+        const { user, userType } = await userService.login(username, password);
+        
+        if (!user || !userType) {
             return res.status(404).json({ error: 'Invalid username or password' });
         }
-        if(user.role == "user"){
-            if(!(user.user.type == role)){
-                return res.status(404).json({ error: 'Invalid Credentials' });
-            }
-        }
-        else{
-            if(!(role == "tourist")){
-                return res.status(404).json({ error: 'Invalid Credentials' });
-            }
-        }
-        let imageUrl;
-        const allUser = await userRepository.getUserbyUsername(username);
-        if(user.role != 'tourist'){
-            imageUrl = await userRepository.getUserProfilePicture(allUser._id);
-            if(!allUser.termsAndConditions){
-                return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
+
+        let imageUrl = null;
+        if (userType !== 'tourist') {
+            imageUrl = await userRepository.getUserProfilePicture(user._id);
+
+            // If terms and conditions are not accepted, return the formatted response
+            if (!user.termsAndConditions) {
+                return res.status(200).json({
+                    message: "Terms and Conditions not accepted",
+                    user: {
+                        documents: user.documents,
+                        photo: user.photo,
+                        _id: user._id,
+                        username: user.username,
+                        password: user.password,
+                        email: user.email,
+                        ratingSum: user.ratingSum,
+                        ratingCount: user.ratingCount,
+                        hotline: user.hotline,
+                        type: user.type,
+                        comment: user.comment,
+                        docStatus: user.docStatus,
+                        termsAndConditions: user.termsAndConditions,
+                        requestDeletion: user.requestDeletion,
+                        specialist: user.specialist,
+                        status: user.status,
+                        otp: user.otp,
+                        currency: user.currency,
+                        sellerType: user.sellerType,
+                        promoCodes: user.promoCodes,
+                        createdAt: user.createdAt,
+                        updatedAt: user.updatedAt
+                    },
+                    userType: user.type
+                });
             }
         }
 
-        const userToken = {
-            id: allUser._id,
-            type: role,
-        };
+        // If terms and conditions are accepted or for tourists
+        return res.status(200).json({
+            message: "Logged in Successfully",
+            user: {
+                documents: user.documents || {},
+                photo: user.photo || {},
+                _id: user._id,
+                username: user.username,
+                password: user.password,
+                email: user.email,
+                ratingSum: user.ratingSum,
+                ratingCount: user.ratingCount,
+                hotline: user.hotline || '',
+                type: user.type,
+                comment: user.comment || [],
+                docStatus: user.docStatus || '',
+                termsAndConditions: user.termsAndConditions || false,
+                requestDeletion: user.requestDeletion || false,
+                specialist: user.specialist || '',
+                status: user.status || false,
+                otp: user.otp || 0,
+                currency: user.currency || 'EGP',
+                sellerType: user.sellerType || '',
+                promoCodes: user.promoCodes || [],
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt
+            },
+            userType: userType,
+            imageUrl
+        });
 
-        const accessToken = generateToken(userToken);
-
-        return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl, accessToken: accessToken});
-    }catch(error){
+    } catch (error) {
+        console.error("Error in login controller:", error.message);  // Log the error message
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
-}
+};
 
 const forgetPassword = async (req, res) => {
     const { email } = req.body;

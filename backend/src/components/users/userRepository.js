@@ -417,50 +417,56 @@ const updateHistoricalPlacesComments = async (historicalPlaceId, updateOperation
 
 const login = async (username, password) => {
     try {
+        console.log(`Looking for user with username: ${username}`);
+        
         const user = await Users.findOne({ username });
-        const tourist = await Tourist.findOne({ username });
         if (user !== null) {
-            const isMatch = await password === user.password;
+            console.log(`User found in Users table. Checking password for ${username}`);
+            const isMatch = password === user.password;
             if (!isMatch) {
+                console.log('Password mismatch for user');
                 throw new Error('Incorrect username or password');
             }
-            return "user";
-        }
-        else{
-            if(tourist !== null){
-                const isMatch = await password === tourist.password;
+            console.log(`Password matched for user: ${username}`);
+            return { user, userType: user.type };  // Return user object and type
+        } else {
+            console.log(`User not found in Users table. Checking Tourist table for ${username}`);
+            const tourist = await Tourist.findOne({ username });
+            if (tourist !== null) {
+                console.log(`Tourist found. Checking password for ${username}`);
+                const isMatch = password === tourist.password;
                 if (!isMatch) {
+                    console.log('Password mismatch for tourist');
                     throw new Error('Incorrect username or password');
                 }
-                console.log("Tourist: ",tourist);
-                return "tourist";
-            }
-            else{
+                console.log(`Password matched for tourist: ${username}`);
+                return { user: tourist, userType: "tourist" };  // Return tourist object and type
+            } else {
+                console.log(`User not found in either Users or Tourist tables for ${username}`);
                 throw new Error('Incorrect username or password');
             }
         }
-        
     } catch (error) {
-        console.error(`Error logging in: ${error.message}`);
-        return null;
+        console.error(`Error logging in: ${error.message}`);  // Log the error message
+        return { user: null, userType: null };
     }
-}
+};
+
+
 
 const getUserbyUsername = async (username) => {
-        const user = await Users.findOne({ username: username });
-        if(user){
-            return user;
+    const user = await Users.findOne({ username: username });
+    if (user) {
+        return user;
+    } else {
+        const tourist = await Tourist.findOne({ username: username });
+        if (tourist) {
+            return tourist;
+        } else {
+            return null;
         }
-        else{
-            const tourist = await Tourist.findOne({ username: username });
-            if(tourist){
-                return tourist;
-            }
-            else{
-                return null;
-            }
-        }
-}
+    }
+};
 
 const updateUserPassword = async (user, password) => {
     try {

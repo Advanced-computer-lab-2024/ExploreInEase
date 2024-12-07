@@ -30,6 +30,7 @@ const getStyles = (name, selectedActivities, theme) => {
 const CreateItinerary = () => {
   const theme = useTheme();
   const [itineraryName, setItineraryName] = useState("");
+  const[imageUrl,setImageUrl]=useState('');
   const [activities, setActivities] = useState([]); // List of all activities from backend
   const [selectedActivityNames, setSelectedActivityNames] = useState([]); // Store selected activity names
   const [selectedActivityIds, setSelectedActivityIds] = useState([]); // Store corresponding selected activity IDs
@@ -50,6 +51,8 @@ const CreateItinerary = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const location = useLocation();
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const { User } = location.state || {};
   console.log("User",User);
   
@@ -72,7 +75,36 @@ const CreateItinerary = () => {
 
     fetchActivities();
   }, []);
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if(file){
+    const formData = new FormData();
+    formData.append('image', file);
+    // try {
+    //   setError(null);
+    //     const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+    //         headers: {
+    //             'Content-Type': 'multipart/form-data',
+    //         },
+    //     });
+    //     console.log('Image uploaded successfully:', response);
+    //     const uploadedImageUrl = response.data.imageUrl;
+        
+    //     // Update avatarImage and save the URL in localStorage
+    //     setImageUrl(uploadedImageUrl);
+    //     setSuccess('Image uploaded successfully!');
+    // }   
+   }else{
+    console.log('no file uploaded');
+    
+   }
+     
+  
+  };
+  console.log("setImage",Image);
+  console.log("imagePreviews",imagePreviews);
 
+  
   useEffect(() => {
     if (showSuccessMessage) {
       const timer = setTimeout(() => {
@@ -186,8 +218,6 @@ const CreateItinerary = () => {
       setErrorMessage(error.response?.data?.message || 'An error occurred');
       setShowErrorMessage(true);
     }
-
-    // Handle success/failure here
   };
 
   return (
@@ -212,12 +242,13 @@ const CreateItinerary = () => {
 
         <div className="form-group">
           <label>Select Activities:</label>
-          <FormControl sx={{ m: 1, width: 300 }}>
+          <FormControl sx={{  width: 470,height:35 }}>
             {/* <InputLabel id="activity-multiple-select-label">Activities</InputLabel> */}
             <Select
               labelId="activity-multiple-select-label"
               id="activity-multiple-select"
               multiple
+              sx={{height:35}}
               value={selectedActivityNames}
               onChange={handleActivityChange}
               // input={<OutlinedInput label="Activities" />}
@@ -264,26 +295,6 @@ const CreateItinerary = () => {
             </div>
           </div>
         ))}
-
-        <div className="form-group">
-          <label>Available Dates:</label>
-          {availableDates.map((date, index) => (
-            <div key={index} className="date-input-group">
-              <input
-                type="datetime-local"
-                value={date}
-                onChange={(e) => handleDateChange(index, e.target.value)}
-                required
-              />
-              <button type="button" className="remove-date-button" onClick={() => removeDateInput(index)}>
-                x
-              </button>
-            </div>
-          ))}
-          <button type="button" className="add-date-button" onClick={addDateInput}>
-            +
-          </button>
-        </div>
 
         <div className="form-group">
           <label>
@@ -356,6 +367,52 @@ const CreateItinerary = () => {
             />
           </label>
         </div>
+        <div className="form-group">
+          <label>Available Dates:</label>
+          {availableDates.map((date, index) => (
+            <div key={index} className="date-input-group">
+              <input
+                type="datetime-local"
+                value={date}
+                onChange={(e) => handleDateChange(index, e.target.value)}
+                required
+              />
+              <button type="button" className="remove-date-button" onClick={() => removeDateInput(index)}>
+                x
+              </button>
+            </div>
+          ))}
+          <button type="button" className="add-date-button" onClick={addDateInput} > 
+            +
+          </button>
+        </div>
+        <div>
+        <input
+        accept="image/*"
+        id="raised-button-file"
+        type="file"
+        onChange={handleImageChange}
+        style={{ display: 'none' }}
+      />
+      {/* Label that triggers the input */}
+      <label
+        htmlFor="raised-button-file"
+        style={{
+          display: 'inline-block',
+          padding: '5px 5px',
+          backgroundColor: 'DarkBlue',
+          color: '#fff',
+          textAlign: 'center',
+          cursor: 'pointer',
+          borderRadius: '4px',
+        }}
+      >
+        Upload Image
+      </label>
+                
+                
+        </div>
+      
 
         <div className="form-group">
           <label>
@@ -390,11 +447,31 @@ const CreateItinerary = () => {
           </label>
         </div>
 
-        <div className="form-group">
-          <button type="submit" className="submit-button">
-            Create Itinerary
-          </button>
-        </div>
+                <div className="form-group">
+                    <button
+                      type="submit"
+                      style={{
+                        width: '100%',
+                        padding: '14px 20px',
+                        backgroundColor: 'Darkblue', // Updated color for a fresher look
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px', // Fixed typo and added smooth corners
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold', // Makes text bold for better readability
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Adds a subtle shadow for depth
+                        transition: 'background-color 0.3s ease, transform 0.2s ease', // Adds hover and click effects
+                      }}
+                      onMouseOver={(e) => (e.target.style.backgroundColor = 'Darkblue')} // Hover effect
+                      onMouseOut={(e) => (e.target.style.backgroundColor = 'Darkblue')} // Revert hover effect
+                      onMouseDown={(e) => (e.target.style.transform = 'scale(0.98)')} // Click effect
+                      onMouseUp={(e) => (e.target.style.transform = 'scale(1)')} // Revert click effect
+                    >
+                      Create Itinerary
+                    </button>
+                  </div>
+
       </form>
       {showSuccessMessage && (
         <Alert severity="success" 

@@ -577,7 +577,7 @@ const getItineraryById = async (req, res) => {
 const createItinerary = async (req, res) => {
   try {
     const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
-    console.log("      ");
+    console.log("");
     console.log(req.body);
     if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !pickupLocation || !dropoffLocation) {
       return res.status(400).json({ message: 'Missing required fields' });

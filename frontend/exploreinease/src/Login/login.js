@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import {Tabs,Tab} from '@mui/material';
 import { AiFillCheckCircle, AiFillCloseCircle } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 import NetworkService from '../NetworkService';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import './login.css';
 
 const Login = () => {
+  const [activeTab, setActiveTab] = useState('Admin'); // Default to tourist
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -13,6 +17,30 @@ const Login = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const decodeToken =(token)=> {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid token structure');
+      }
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Invalid token:', error);
+      return null;
+    }
+  }
+  // console.log("Token",decodeToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'));
+  
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -60,12 +88,48 @@ const Login = () => {
     }
   };
 
+  // onSubmit() {
+  //   if (this.loginForm.valid) {
+  //     const emailValue = this.loginForm.controls.email.value;
+  //     const updatedEmail = `${emailValue}@khazna.app`;
+  //     const body = { ...this.loginForm.value, email: updatedEmail };
+  //     this.networkService.post({ apiPath: '/login', body }).subscribe({
+  //       next: (res: any) => {
+  //         const token = res.accessToken;
+  //         localStorage.setItem('tokenKey', token);
+  //         const decodedToken: any = this.decodeToken(token);
+  //         const role = decodedToken.role.role;
+  //         if (role === 'employee') {
+  //           this.router.navigate(['/user'], {
+  //             queryParams: { id: decodedToken.employeeId, name: decodedToken.name ,team:decodedToken.team.type},
+  //           });
+  //         } else {
+  //           this.router.navigate(['/admin'], {
+  //             queryParams: { id: decodedToken.employeeId, name: decodedToken.name,team:decodedToken.team.type },
+  //           });
+  //         }  
+  //         this.messageService.add({
+  //           severity: 'success',
+  //           summary: 'Login Successed',
+  //           detail:'Login successfully',
+  //         });     
+  //       },
+  //       error: (err) => {
+  //         this.messageService.add({
+  //           severity: 'error',
+  //           summary: 'Login Failed',
+  //           detail: err.error.message || 'Login failed. Please try again.',
+  //         });
+  //       },
+  //     });
+  //   }
+
   const navigateToHomePage = (user, imageUrl) => {
     localStorage.setItem('User',JSON.stringify(user));
-    localStorage.setItem('imageUrl',JSON.stringify(imageUrl));
+    localStorage.setItem('imageUrl',imageUrl);    
     localStorage.setItem('UserId',user._id);
     localStorage.setItem('UserType',user.type);
-    switch (formData.role) {
+    switch (user.type) {
       case 'admin':
         navigate('/AdminHomePage', { state: { tourist: user } });
         break;
@@ -92,6 +156,16 @@ const Login = () => {
         <h2>Sign In</h2>
         {error && <p className="error"><AiFillCloseCircle /> {error}</p>}
         {success && <p className="success"><AiFillCheckCircle /> {success}</p>}
+        <Tabs
+          value={activeTab}
+          onChange={(event, newValue) => setActiveTab(newValue)}
+          textColor="primary"
+          indicatorColor="primary"
+          centered
+        >
+          <Tab label="Admin" value="Admin" />
+          <Tab label="Others" value="Others" />
+        </Tabs>
         <form onSubmit={handleSubmit}>
           <label>Username:</label>
           <input type="text" name="email" value={formData.email} onChange={handleInputChange} required />

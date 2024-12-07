@@ -9,6 +9,7 @@ import { Alert } from '@mui/material';
 import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
 import TourGuideHP from "./TourGuideNavbar";
 import "./ItineraryList.css"; 
+import NodataFound from '../No data Found.avif';
 
 const ItineraryList = () => {
   const location = useLocation();
@@ -224,6 +225,8 @@ const ItineraryList = () => {
       <div>
       <TourGuideHP/>
       </div>
+      {        itinerariesData.length>0?(
+    
     <div className="itinerary-list-container">
       <h2>Your Created Itineraries</h2>
       <div className="itinerary-cards">
@@ -434,6 +437,29 @@ const ItineraryList = () => {
       )}
 </div>
     </div>
+    ):(   <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        backgroundColor: "#f0f0f0", // Optional: Set a background color for better visibility
+      }}
+    >
+      <div
+        style={{
+          width: "200px", // Set a fixed width for the GIF
+          height: "200px", // Set a fixed height to match the width
+          position: "relative",
+        }}
+      >
+        <img
+          src={NodataFound}
+          width="100%"
+          height="100%"
+        ></img>
+      </div>
+    </div>)} 
     </div>
   );
 };

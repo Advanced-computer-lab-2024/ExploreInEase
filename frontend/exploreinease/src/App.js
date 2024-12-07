@@ -90,15 +90,14 @@ const App = () => {
           <Route path="/viewAddedUsers" element={<AddUser />} />
           <Route path="/viewAllUserProfiles" element={<AdminUserProfiles />} />
           <Route path="/TouristHomePage" element={<TouristHomePage />} />
-          <Route path="/SellerHomePage" element={<SellerHomePage />} />
-          <Route path="/TourGuideHomePage" element={<TourGuideHomePage />} />
+          <Route path="/SellerHomePage" element={<SalesReport />} />
+          <Route path="/TourGuideHomePage" element={<SalesReport />} />
           <Route path="/AdminHomePage" element={<AdminSideMenu/>} />
           <Route path="/AdvertiserNavbar" element={<AdvertiserNavbar />} />
-          <Route path="/GovernorHomePage" element={<GovernT />} />
-          <Route path="/AdvertiserHomePage" element={<AdvertiserHP/>}/>
+          <Route path="/GovernorHomePage" element={<HistoricalPlaces />} />
+          <Route path="/AdvertiserHomePage" element={<SalesReport/>}/>
           <Route path="/Activities" element={<Activity />} />
           <Route path="/Login" element={<SignIn />} />
-          {/* <Route path="/AdminHomePage" element={<AdminHomePage />} /> */}
           <Route path="/TouristGovernorHP" element={<TouristGovernorHP />} />
           <Route path="/AddUser" element={<AddUser />} />
           <Route path="/ViewListofBooked" element={<Booked />} />

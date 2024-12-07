@@ -11,15 +11,16 @@ const TouristDashboard = () => {
   console.log(Response);
   const [selectedMonth, setSelectedMonth] = useState('all');
 
-  const fullData = Response;
+  const fullData = Array.isArray(Response) ? Response : [];
 
   const data = selectedMonth === 'all' 
     ? fullData 
     : fullData.filter(item => item.Month === selectedMonth);
+    const isDataArray = Array.isArray(data) && data.length > 0;
 
-  const totalTourists = data.reduce((sum, item) => sum + item.Tourists, 0);
-  const avgTourists = Math.round(totalTourists / data.length);
-  const peakMonth = data.reduce((max, item) => item.Tourists > max.Tourists ? item : max);
+    const totalTourists = isDataArray ? data.reduce((sum, item) => sum + item.Tourists, 0) : 0;
+    const avgTourists = isDataArray ? Math.round(totalTourists / data.length) : 0;
+    const peakMonth = isDataArray ? data.reduce((max, item) => item.Tourists > max.Tourists ? item : max, { Month: 'N/A', Tourists: 0 }) : { Month: 'N/A', Tourists: 0 };
 
   return (
     <div>

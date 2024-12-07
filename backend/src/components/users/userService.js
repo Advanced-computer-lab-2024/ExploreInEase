@@ -116,8 +116,8 @@ const getTouristUpcommingEvents = async (username) => {
 };
 
 const login = async (username, password) => {
-    const user = await userRepository.login(username, password);
-    return user;
+    const { user, userType } = await userRepository.login(username, password);
+    return { user, userType };
 }
 // Tour Guide
 const createTourGuide = async (_id,tourGuideData) => {

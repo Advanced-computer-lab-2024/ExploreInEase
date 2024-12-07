@@ -11,15 +11,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import "../TouristGovernor/GovernorHomePage.css"; 
-
+import ListItemIcon from '@mui/material/ListItemIcon';
+import UploadIcon from '@mui/icons-material/Upload';
+import Delete from '@mui/icons-material/Delete';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import Divider from '@mui/material/Divider';
 const HomePage = () => {
     const Userr = JSON.parse(localStorage.getItem('User'));
-    const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
+    const imageUrll = localStorage.getItem('imageUrl');
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
     const [ setSuccess] = useState('');
-    const [setError] = useState('');
+    const [setError] = useState(null);
     const User = state?.User || Userr;
     const imageUrl = state?.imageUrl || imageUrll;
     const [anchorEl, setAnchorEl] = useState(null);
@@ -133,7 +139,7 @@ const HomePage = () => {
                 const response = await axios.get(apiPath);
                 navigate(`/transportion`, { state: { allActivity: response.data, advertiserId: userId } });
             } catch (err) {
-                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+                console.log(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
         } else if (title === "Activities") {
             console.log("heree");
@@ -143,92 +149,109 @@ const HomePage = () => {
                 const response = await axios.get(apiPath);
                 navigate(`/Activities`, { state: { allActivity: response.data, id: userId } });
             } catch (err) {
-                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+                console.log(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
         }
-        else if (title === "Tourists Report") {
+        else if (title === 'Sales Report'){
             try {
-                const options = {
-                    apiPath: `/userReport/${userId}`,
-                };
-
-                const response = await NetworkService.get(options);
-                console.log(response);
-
-                setSuccess(response.message); // Set success message
-        
-                navigate('/TouristsReport', { state: { Response: response, User: Userr } });
+              const options = {
+                apiPath: `/userReport/${userId}`,
+              };
+      
+              const response = await NetworkService.get(options);
+              const data = response.eventObject;
+              console.log(data);
+      
+      
+      
+              console.log(response.message); // Set success message
+              setSelectedTab(title);
+              localStorage.setItem('selectedTab', title); // Save selected tab
+              navigate('/SalesReport', { state: { Response: data,User: Userr } });
             } catch (err) {
-                if (err.response) {
-                    console.log(err.message);
-                    setError(err.response.data.message); // Set error message from server response if exists
-                } else {
-                    setError('An unexpected error occurred.'); // Generic error message
-                }
-            }
-        } else if (title === "Sales Report") {
-            try {
-                const options = {
-                  apiPath: `/userReport/${userId}`,
-                };
-        
-                const response = await NetworkService.get(options);
-                const data = response.eventObject;
-                console.log(data);
-        
-        
-        
-                setSuccess(response.message); // Set success message
-            
-                navigate('/SalesReport', { state: { Response: data,User: Userr } });
-              } catch (err) {
-                if (err.response) {
-                  console.log(err.message);
-                  setError(err.response.data.message); // Set error message from server response if exists
-                } else {
-                  setError('An unexpected error occurred.'); // Generic error message
-                }
+              if (err.response) {
+                console.log(err.message);
+                console.log(err.response.data.message); // Set error message from server response if exists
+              } else {
+                console.log('An unexpected error occurred.'); // Generic error message
               }
-        }
-        else {
+            }
+           }
+           else if (title==='Tourists Report'){
+            try {
+              const options = {
+                apiPath: `/userReport/${userId}`,
+              };
+      
+              const response = await NetworkService.get(options);
+              console.log(response);
+      
+              console.log(response.message); // Set success message
+              setSelectedTab(title);
+              localStorage.setItem('selectedTab', title); // Save selected tab
+              navigate('/TouristsReport', { state: { Response: response,User: Userr } });
+            } catch (err) {
+              if (err.response) {
+                console.log(err.message);
+                console.log(err.response.data.message); // Set error message from server response if exists
+              } else {
+                console.log('An unexpected error occurred.'); // Generic error message
+              }
+            }
+           }
+        else if(title==='profile'){
             try {
                 const options = { apiPath: `/getAdvertiser/${userId}` };
                 const response = await NetworkService.get(options);
                 setSuccess(response.message);
                 navigate(`/viewAdvertiserProfile`, { state: { advertiser: response } });
             } catch (err) {
-                setError(err.response ? err.response.data.message : 'An unexpected error occurred.');
+                console.log(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
         }
-    };
+       else if(title==='Log Out'){
+            console.log('yes here');
+            localStorage.removeItem('User');
+            localStorage.removeItem('imageUrl');
+            localStorage.removeItem('UserId');
+            localStorage.removeItem('UserType');
+            navigate('/');
+           }
+           else if(title==='password'){
+            navigate('/change-password', { state: { userId: Userr._id } });
 
-    const handleDeleteAccount = async () => {
-        try {
-            console.log(userId, userType);
-
-            const options = {
-                apiPath: `/requestDeletion/${userId}/${userType}`,
+           }
+  else if(title==='Delete Account'){
+            console.log('hereee');
+            
+            try {
+              console.log(userId, userType);
+              const options = {
+                apiPath: `/requestDeletion/${Userr._id}/${Userr.type}`,
                 useParams: userId,
                 userType,
-            };
-            const response = await NetworkService.put(options);
-            console.log(response);
-
-            setSuccessMessage(response.message || "Delete Successfully!");
-            setShowSuccessMessage(true);
-
-            if (response.success) {
+              };
+              const response = await NetworkService.put(options);
+              console.log(response);
+          
+              setSuccessMessage(response.message || "Delete Successfully!");
+              setShowSuccessMessage(true);
+          
+              if (response.success) {
                 setSuccess("Account deletion requested successfully.");
-            } else {
-                setError(response.message || "Account deletion request failed.");
+              } else {
+                console.log(response.message || "Account deletion request failed.");
+              }
+            } catch (err) {
+              // Access the error message from the response data
+              const errorMessage = err.response?.data?.message || "An error occurred";
+            //   setErrorMessage(errorMessage);
+            //   setShowErrorMessage(true);
+              console.log(err);
             }
-        } catch (err) {
-            // Access the error message from the response data
-            const errorMessage = err.response?.data?.message || "An error occurred";
-            setErrorMessage(errorMessage);
-            setShowErrorMessage(true);
-            setError(errorMessage);
-        }
+           }
+           
+    
     };
 
     return (
@@ -261,10 +284,47 @@ const HomePage = () => {
                             horizontal: 'center',
                             }}
                         >
-                            <MenuItem onClick={handleCloseMenu}>View Profile</MenuItem>
-                            <MenuItem onClick={handleCloseMenu}>Change Password</MenuItem>
-                            <MenuItem onClick={handleCloseMenu}>Delete Account</MenuItem>
-                            <MenuItem onClick={handleCloseMenu}>Log Out</MenuItem>
+                            <MenuItem onClick={()=>handleRegisterClick('profile')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <PersonOutlineIcon />
+                              </ListItemIcon>
+                              profile
+                       </MenuItem>
+                        <Divider/>
+                            <MenuItem onClick={()=>handleRegisterClick('password')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <PasswordOutlinedIcon />
+                              </ListItemIcon>
+                              Change Password
+                       </MenuItem>
+                            <Divider/>
+                            <MenuItem onClick={()=>handleRegisterClick('Delete Account')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <Delete />
+                              </ListItemIcon>
+                              Delete Account  
+                            </MenuItem>
+                            <Divider/>
+                            
+                            <MenuItem component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <UploadIcon />
+                              </ListItemIcon>
+                                Upload Profile Picture
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={handleAvatarUpload}
+                                />
+                            </MenuItem>
+                            <Divider/>
+                            <MenuItem onClick={()=>handleRegisterClick('Log Out')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <LogoutOutlinedIcon />
+                              </ListItemIcon>
+                              Log Out
+                            </MenuItem>
                         </Menu>
                         <IconButton
                             onClick={handleClick}
@@ -328,7 +388,7 @@ const HomePage = () => {
           <div
             key={tab}
             className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}
-            onClick={() => handleTabClick(tab)}
+            onClick={() => handleRegisterClick(tab)}
           >
             {tab}
           </div>

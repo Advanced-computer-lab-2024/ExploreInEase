@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NetworkService from '../NetworkService';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+
 import './Signup.css';
 
 const TouristSignUp = () => {
@@ -75,7 +78,21 @@ const TouristSignUp = () => {
   };
 
   return (
+    
     <form onSubmit={handleSubmit}>
+      {success!='' && (
+          <div>   <Alert severity="success">
+          <AlertTitle>Success</AlertTitle>
+         {success}
+        </Alert></div>
+              )}
+     {error!='' && (
+          <div>   <Alert severity="error">
+          <AlertTitle>Error</AlertTitle>
+         {error}
+        </Alert></div>
+              )}
+        
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {success && <p style={{ color: 'green' }}>{success}</p>}
       <label>Email:</label>
@@ -99,6 +116,8 @@ const TouristSignUp = () => {
       <label>Job/Student:</label> 
       <input type="text" name="jobOrStudent" value={formData.jobOrStudent} onChange={handleInputChange} required />
       <button type="submit">Register as Tourist</button>
+  
+   
     </form>
   );
 };

@@ -404,7 +404,6 @@ const getAllTags=async ()=>{
     const files = Array.from(event.target.files);
     setImages(files);
     setImagePreviews(files.map((file) => URL.createObjectURL(file)));
-
   };
   const handleTagChange = (event) => {
     const selectedTagId = event.target.value;

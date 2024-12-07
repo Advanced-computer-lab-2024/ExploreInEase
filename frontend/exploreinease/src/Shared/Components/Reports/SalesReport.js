@@ -9,6 +9,7 @@ import AHomePage from '../../../Advertier/AdvertiserNavbar';
 import SHomePage from '../../../Seller/SellerNavbar';
 
 const SalesReport = () => {
+  const Userr = JSON.parse(localStorage.getItem('User'));
   const location = useLocation();
   const {Response: initialData, User} = location.state || {};
   const [data] = useState(initialData || []); // Initialize with empty array if no data
@@ -65,8 +66,17 @@ const SalesReport = () => {
   // }));
 
   return (
-    <div>
-      <SHomePage/>
+    <div> 
+      {Userr?.type==='seller' &&(
+        <SHomePage/>
+      )}
+      {Userr?.type==='advertiser'&&(
+                <AHomePage/>
+      )}
+      {Userr?.type==='tourGuide' &&(
+        <TourGuideHP/>
+      )}
+      
     <div>
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
