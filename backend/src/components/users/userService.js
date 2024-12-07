@@ -794,12 +794,18 @@ const userReport = async (userId) => {
 }
 
 const getAllNotifications = async (userId) => {
-    const user = await userRepository.findTouristById(userId);
-    if (!user) {
+    const tourist = await userRepository.findTouristById(userId);
+    const user = await userRepository.findUserById(userId);
+    if (!user && !tourist) {
         throw new Error('User not found');
     }
-
-    const notifications = await userRepository.getAllNotifications(user);
+    let notifications;
+    if(user){
+        notifications = await userRepository.getAllNotifications(user);
+    }
+    if(tourist){
+        notifications = await userRepository.getAllNotifications(tourist);
+    }
     return notifications;
 }
 

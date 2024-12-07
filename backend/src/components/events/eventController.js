@@ -1344,7 +1344,18 @@ const bookEventWithCard = async (req, res) => {
 };
 
 
-
+const notifyUpcomingEvents = async (req, res) => {
+  try {
+    const { touristId } = req.params;
+    if (!touristId) {
+      return res.status(400).json({ error: "touristId is required" });
+    }
+    const result = await eventService.notifyUpcomingEvents(touristId);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 
 
@@ -1396,6 +1407,7 @@ module.exports = {
   sendEventEmail,
   updateEventFlagController,
   getAllEvents,
-  bookEventWithCard
+  bookEventWithCard,
+  notifyUpcomingEvents
   };
   

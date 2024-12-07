@@ -2634,4 +2634,9 @@ router.post('/bookEventWithCard', eventController.bookEventWithCard);
 
 
 
+router.get('/notifyUpcomingEvents/:touristId', eventController.notifyUpcomingEvents);
+
+
+
+
 module.exports = router;
