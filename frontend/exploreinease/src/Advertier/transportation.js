@@ -13,6 +13,7 @@ import NetworkService from '../NetworkService';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import HomePage from './AdvertiserNavbar';
+import NodataFound from '../No data Found.avif';
 
 function Transportation() {
   const location = useLocation();
@@ -197,21 +198,43 @@ function Transportation() {
         </Dialog>
 
         <Grid container spacing={2} style={{ marginTop: 20 }}>
-          {transportation.map((trans, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card>
-              <CardContent>
-  <Typography variant="body2"><strong>Date:</strong> {dayjs(trans.date).format('DD-MM-YYYY')}</Typography>
-  <Typography variant="body2"><strong>Time: </strong>{dayjs(trans.time).format('HH:mm A')}</Typography>
-  <Typography variant="body2"><strong>Price:</strong> {trans.price}</Typography>
-  <Typography variant="body2"><strong>Transportation Type:</strong> {trans.transportationType}</Typography>
-  <Typography variant="body2"><strong>Pickup Location:</strong> {trans.pickupLocation}</Typography>
-  <Typography variant="body2"><strong>Dropoff Location:</strong> {trans.dropoffLocation}</Typography>
+          {transportation.length>0?(
+         transportation.map((trans, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+            <Card>
+            <CardContent>
+<Typography variant="body2"><strong>Date:</strong> {dayjs(trans.date).format('DD-MM-YYYY')}</Typography>
+<Typography variant="body2"><strong>Time: </strong>{dayjs(trans.time).format('HH:mm A')}</Typography>
+<Typography variant="body2"><strong>Price:</strong> {trans.price}</Typography>
+<Typography variant="body2"><strong>Transportation Type:</strong> {trans.transportationType}</Typography>
+<Typography variant="body2"><strong>Pickup Location:</strong> {trans.pickupLocation}</Typography>
+<Typography variant="body2"><strong>Dropoff Location:</strong> {trans.dropoffLocation}</Typography>
 </CardContent>
 
-              </Card>
-            </Grid>
-          ))}
+            </Card>
+          </Grid>
+        ))
+          ):(
+            <div
+            style={{
+              width: "400px", // Set a fixed width for the GIF
+              height: "400px", // Set a fixed height to match the width
+              position: "relative",
+              marginLeft:'600px',
+              marginTop:'100px',
+              alignContent:'center',
+              alignItems:'center'
+            }}
+          >
+            <img
+              src={NodataFound}
+              width="100%"
+              height="100%"
+    
+            ></img>
+          </div>
+          )}
+ 
         </Grid>
         <div>
         {showSuccessMessage && (

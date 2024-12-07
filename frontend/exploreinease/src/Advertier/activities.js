@@ -32,6 +32,7 @@ import JetSki from './ActivityImage/JetSki.jpg';
 import Mountain from './ActivityImage/Mountain.jpg';
 import Skater from './ActivityImage/Skater.jpg';
 import HomePage from './AdvertiserNavbar';
+import NodataFound from '../No data Found.avif';
 
   const activityImage =[Basketball,Bowling,Fishing,Cycling,Football,Handball,Hiking,JetSki,Mountain,Skater];
 
@@ -53,8 +54,8 @@ function Activity() {
   const [activities, setActivities] = useState(allActivity); 
   const [open, setOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
-  const [setMap] = useState(null);
-  const [ setPlacesService] = useState(null);
+  const [map,setMap] = useState(null);
+  const [ placesService,setPlacesService] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
@@ -63,8 +64,11 @@ function Activity() {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [ setSearchInput] = useState('');
-  const [ setIsApiLoaded] = useState(false);
+  const [ searachInput,setSearchInput] = useState('');
+  const [ Location,setLocation] = useState('');
+
+  const [ isApiLoaded,setIsApiLoaded] = useState(false);
+  const [addresslocation,setAdressLocation]=useState('');
   const [activityForm, setActivityForm] = useState({
     _id: '',
     name: '',
@@ -113,7 +117,20 @@ useEffect(() => {
   }
 }, [showErrorMessage]);
 
+useEffect(() => {  
+  const fetchAddress = async () => {    
+    if (activityForm?.location?.latitude && activityForm?.location?.longitude) {
+      const fetchedAddress = await fetchAddressFromCoordinates(
+        activityForm.location.latitude,
+        activityForm.location.longitude
+      ).then((address) => {
+        setAdressLocation(address);
+      });;
+    }
+  };
 
+  fetchAddress();
+},[activities]);
 
 
 const getRandomImage = () => {
@@ -168,7 +185,32 @@ const getAllActivities =async()=>{
     setOpen(false);
     setSearchInput('');
   };
-
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if(file){
+    const formData = new FormData();
+    formData.append('image', file);
+    // try {
+    //   setError(null);
+    //     const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+    //         headers: {
+    //             'Content-Type': 'multipart/form-data',
+    //         },
+    //     });
+    //     console.log('Image uploaded successfully:', response);
+    //     const uploadedImageUrl = response.data.imageUrl;
+        
+    //     // Update avatarImage and save the URL in localStorage
+    //     setImageUrl(uploadedImageUrl);
+    //     setSuccess('Image uploaded successfully!');
+    // }   
+   }else{
+    console.log('no file uploaded');
+    
+   }
+     
+  
+  };
   const onLoad = (mapInstance) => {
     setMap(mapInstance);
     if(window.google){
@@ -217,7 +259,25 @@ const getAllTags=async ()=>{
     }
   }
 }
+async function fetchAddressFromCoordinates (  latitude, longitude)  {
+  const apiKey = "AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM";
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
 
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status === "OK") {
+      const address = data.results[0]?.formatted_address || "Address not found";
+      return address;
+    } else {
+      throw new Error(data.error_message || "Failed to fetch address");
+    }
+  } catch (error) {
+    console.error("Error fetching address:", error);
+    return "Error fetching address";
+  }
+};
 const getAllCategory=async ()=>{
   try {
     const apiPath = `http://localhost:3030/getAllCategories/advertiser`;  // Ensure this matches your API route
@@ -247,8 +307,6 @@ const getAllCategory=async ()=>{
     }
   }
 }
-
-
 function convertTimeToFullDate(timeString) {
   // Step 1: Get the current date
   const currentDate = new Date(); // This gives us the current date
@@ -475,7 +533,6 @@ const handleEditActivity = (activity) => {
   const handleCheckboxChange = (event) => {
     setActivityForm((prev) => ({ ...prev, isOpen: event.target.checked }));
   };
-console.log("Address mn Map",address);
 
   return (
     <div>
@@ -605,7 +662,7 @@ console.log("Address mn Map",address);
                         />
                       )}
               </GoogleMap>
-
+              
             <TextField
               fullWidth
               margin="normal"
@@ -614,6 +671,31 @@ console.log("Address mn Map",address);
               value={activityForm.specialDiscounts}
               onChange={handleInputChange}
             />
+            
+       <div>
+        <input
+        accept="image/*"
+        id="raised-button-file"
+        type="file"
+        onChange={handleImageChange}
+        style={{ display: 'none' }}
+      />
+      {/* Label that triggers the input */}
+      <label
+        htmlFor="raised-button-file"
+        style={{
+          display: 'inline-block',
+          padding: '5px 5px',
+          backgroundColor: 'DarkBlue',
+          color: '#fff',
+          textAlign: 'center',
+          cursor: 'pointer',
+          borderRadius: '4px',
+        }}
+      >
+        Upload Image
+      </label>    
+        </div>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
@@ -624,36 +706,61 @@ console.log("Address mn Map",address);
         </Dialog>
 
         <Grid container style={{ marginTop: 10}}>
-          {activities.map((activity, index) => (
+       {activities.length>0?(
+       activities.map((activity, index) => (
             
-            <Grid item xs={12} sm={6} md={4} key={index} >
-              <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
-              <CardMedia
-                  component="img"
-                  height="180"
-                  image={getRandomImage()}
-                  alt={activityImage?.name||"Image"}
-                />
-                <CardContent>
-                  <Typography variant="h5">{activity.name}</Typography>
-                  <Typography variant="body2"><strong>Date:</strong> {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
-                  <Typography variant="body2"><strong>Time:</strong> {activity.time}</Typography>
-                  <Typography variant="body2"><strong>Price: </strong>{activity.price}</Typography>
-                  <Typography variant="body2"><strong>Category:</strong> {categoryList.find(item =>item.id===activity.category)?.name}</Typography> 
-                  <Typography variant="body2"><strong>Tags:</strong> { activity.tags.map(tagId => { const tag = tagsList.find(t => t.id === tagId); return tag ? tag.name : 'No tag';}).filter(Boolean).join(', ') }</Typography>  
-                  <Typography variant="body2"><strong>Discounts:</strong> {activity.specialDiscounts}</Typography>
-                  <Typography variant="body2"><strong></strong>Location longitude: {activity.location?.longitude || mapCenter.lng}</Typography>
-                  <Typography variant="body2"><strong></strong>Location latitude: {activity.location?.latitude|| mapCenter.lat}</Typography>
-                  <Typography variant="body2"><strong>Booking:</strong> {activity.isOpen?"true":"false"}</Typography>
+    <Grid item xs={12} sm={6} md={4} key={index} >
+      <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
+      <CardMedia
+          component="img"
+          height="180"
+          image={getRandomImage()}
+          alt={activityImage?.name||"Image"}
+        />
+        <CardContent>
+          <Typography variant="h5">{activity.name}</Typography>
+          <Typography variant="body2"><strong>Date:</strong> {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
+          <Typography variant="body2"><strong>Time:</strong> {activity.time}</Typography>
+          <Typography variant="body2"><strong>Price: </strong>{activity.price}</Typography>
+          <Typography variant="body2"><strong>Category:</strong> {categoryList.find(item =>item.id===activity.category)?.name}</Typography> 
+          <Typography variant="body2"><strong>Tags:</strong> { activity.tags.map(tagId => { const tag = tagsList.find(t => t.id === tagId); return tag ? tag.name : 'No tag';}).filter(Boolean).join(', ') }</Typography>  
+          <Typography variant="body2"><strong>Discounts:</strong> {activity.specialDiscounts}</Typography>
+          <Typography variant="body2"><strong>Location:</strong> {addresslocation}</Typography>
+          <Typography variant="body2"><strong>Booking:</strong> {activity.isOpen?"true":"false"}</Typography>
 
-                </CardContent>
-                <CardActions style={{ justifyContent: 'center' }}>
-                  <Button size="meduim" onClick={() => handleEditActivity(activity)}>Edit</Button>
-                  <Button container='filled' color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
+        </CardContent>
+        <CardActions style={{ justifyContent: 'center' }}>
+          <Button size="meduim" onClick={() => handleEditActivity(activity)}>Edit</Button>
+          <Button container='filled' color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
+        </CardActions>
+      </Card>
+    </Grid>
+  ))
+       ):(
+        <div
+        style={{
+          width: "400px", // Set a fixed width for the GIF
+          height: "400px", // Set a fixed height to match the width
+          position: "relative",
+          marginLeft:'600px',
+          marginTop:'100px',
+          alignContent:'center',
+          alignItems:'center'
+        }}
+      >
+        <img
+          src={NodataFound}
+          width="100%"
+          height="100%"
+
+        ></img>
+      </div>
+       )}
+       
+
+
+
+
         {showSuccessMessage && (
         <Alert severity="success" 
         sx={{

@@ -15,7 +15,7 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 
 const SHomePage = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
-  const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
+  const imageUrll = localStorage.getItem('imageUrl');
   const location = useLocation();
   const { state } = location;
   const [anchorProfileEl, setAnchorProfileEl] = useState(null);
@@ -36,7 +36,7 @@ const SHomePage = () => {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [setErrorMessage] = useState('');
   const [setSuccessMessage] = useState('');
-  const User = state?.User || Userr;
+  const User = state?.User || Userr|| '';
   const imageUrl = state?.imageUrl || imageUrll;
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);

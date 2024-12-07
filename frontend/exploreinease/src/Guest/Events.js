@@ -417,7 +417,7 @@ const Events = () => {
            <Grid item xs={12} sm={6} md={4} key={item.id}>
              <Card    
                     style={{
-                        width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '340px',
+                        width: 'auto',
                         height: 'auto',
                         margin: '16px',
                         padding: '16px',

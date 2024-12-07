@@ -68,7 +68,10 @@ const SalesReport = () => {
   return (
     <div> 
       {Userr?.type==='seller' &&(
+        <>
+        
         <SHomePage/>
+        </>
       )}
       {Userr?.type==='advertiser'&&(
                 <AHomePage/>
