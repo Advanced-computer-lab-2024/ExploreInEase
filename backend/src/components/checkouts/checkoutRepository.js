@@ -3,6 +3,8 @@ const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
 const Notification = require('../../models/notification');
 const PromoCode = require('../../models/promoCode');
+const Activity = require('../../models/activity');
+const Itinerary = require('../../models/itinerary');
 const Order = require('../../models/order');
 const Cart = require('../../models/cart');
 const path = require('path');
@@ -313,12 +315,12 @@ const updateEventImage = async (eventId, fileName, type) => {
         else{
             throw new Error('Invalid Type');
         }
-        if (!eventId) {
+        if (!event) {
             throw new Error('eventId not found');
         }
         
-        eventId.picture = fileName;
-        await eventId.save();
+        event.picture = fileName;
+        await event.save();
     } catch (error) {
         throw new Error(`Error updating profile picture: ${error.message}`);
     }

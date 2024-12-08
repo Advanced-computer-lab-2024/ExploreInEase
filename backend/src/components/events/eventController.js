@@ -3,6 +3,7 @@ const eventService = require('../events/eventService');
 const { validationResult } = require('express-validator');
 const eventRepository = require('../events/eventRepository');
 const checkoutRepository = require('../checkouts/checkoutRepository');
+const checkoutService = require('../checkouts/checkoutService');
 const nodemailer = require('nodemailer');
 
 
@@ -400,11 +401,23 @@ const getAllActivities = async (req, res) => {
 };
 
 const addActivity = async (req, res) => {
-  const { name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
+  const { name, date, time, latitude, longitude, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
   const file = req.file;
 
+  console.log(latitude);
+  console.log(longitude);
+
+  const location = {
+    latitude,
+    longitude,
+  }
+
+  console.log("File:", file);
+  console.log("Body:", req.body);
+
+  
   if (!file) {
-    return res.status(400).send('No file uploaded.');
+    return res.status(400).json({ message: 'No file uploaded' });
   }
 
   // Validate required fields
@@ -418,30 +431,33 @@ const addActivity = async (req, res) => {
   }
 
   try {
-    // Call service layer to add the activity
     const activity = await eventService.addActivity({
       name,
       date,
       time,
       location,
-      price,
+      price: JSON.parse(price),
       category,
-      tags,
+      tags: JSON.parse(tags),
       specialDiscounts,
       isOpen,
-      created_by
+      created_by,
     });
 
-    const activityImage = await checkoutService.uploadEventImage(activity._id, file, "Activity");
-    if(activityImage.message != 'Image uploaded successfully') {
+    const activityImage = await checkoutService.uploadEventImage(activity._id, file, 'Activity');
+    if (activityImage.message !== 'Image uploaded successfully') {
       return res.status(400).json({ message: 'Error uploading image' });
     }
-    return res.status(200).json({message: 'Activity created successfully', activity: activity });
+
+    const finalActivity = await eventService.getActivityById(activity._id);
+
+    return res.status(200).json({ message: 'Activity created successfully', finalActivity, imageUrl: activityImage.imageUrl });
   } catch (error) {
     console.error('Error creating activity:', error.message);
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 const getAllActivitiesInDatabase = async (req, res) => {
   try {

@@ -60,6 +60,7 @@ function Activity() {
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
  const [address,setAddress]=useState('');
+ const [selectedImage, setSelectedImage] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -84,6 +85,7 @@ function Activity() {
     tags: [],
     specialDiscounts: null,
     isOpen: true,
+    picture: null,
   });
 
 
@@ -133,10 +135,6 @@ useEffect(() => {
 },[activities]);
 
 
-const getRandomImage = () => {
-  const randomIndex = Math.floor(Math.random() * activityImage.length);
-  return activityImage[randomIndex];
-};
 const getAllActivities =async()=>{
   try {
     // Construct the API path
@@ -148,9 +146,16 @@ const getAllActivities =async()=>{
     // console.log('API Response:', response);
 
     // Pass the fetched activities to the Activities page
-      setActivities(response.data);
-      console.log("Activities:",response.data);
-            
+    console.log(response.data);
+      const adjustedActivities = response.data.map((activity) => ({
+        ...activity,
+        picture: localStorage.getItem(`activity-image-${activity._id}`) || null,
+      }));
+
+      setActivities(adjustedActivities);
+
+
+
   } catch (err) {
     // Check if there is a response from the server and handle error
     if (err.response) {
@@ -186,31 +191,9 @@ const getAllActivities =async()=>{
     setSearchInput('');
   };
   const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if(file){
-    const formData = new FormData();
-    formData.append('image', file);
-    // try {
-    //   setError(null);
-    //     const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
-    //         headers: {
-    //             'Content-Type': 'multipart/form-data',
-    //         },
-    //     });
-    //     console.log('Image uploaded successfully:', response);
-    //     const uploadedImageUrl = response.data.imageUrl;
-        
-    //     // Update avatarImage and save the URL in localStorage
-    //     setImageUrl(uploadedImageUrl);
-    //     setSuccess('Image uploaded successfully!');
-    // }   
-   }else{
-    console.log('no file uploaded');
-    
-   }
-     
-  
+    setSelectedImage(event.target.files[0]); // Save the selected file to state
   };
+  
   const onLoad = (mapInstance) => {
     setMap(mapInstance);
     if(window.google){
@@ -378,28 +361,39 @@ const handleSaveActivity = async () => {
       const rangeArray = updatedActivity.price;
       const priceObject = Array.isArray(rangeArray) ? rangeArray.join('-') : "0-0"; // Default to "0-0" or any other fallback
       // console.log("hehhe");
-      try{
-        const apiPath = `http://localhost:3030/activity`;
-        const body = {
-          name: updatedActivity.name,
-          date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-          // dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-          time: dayjs(updatedActivity.time).format('hh:mm A'),
-          location: updatedActivity.location,
-          price: priceObject,
-          category: updatedActivity.categoryId,
-          tags: tagIds ||[],
-          specialDiscounts: updatedActivity.specialDiscounts||0,
-          isOpen: updatedActivity.isOpen || false,
-          created_by: id
-        }
-        const response = await axios.post(apiPath, body);
-        console.log(response);
+      try {
+        const formData = new FormData();
+        formData.append("file", selectedImage); // Attach the selected image file
+        formData.append("name", updatedActivity.name);
+        formData.append("date", dayjs(updatedActivity.date).format('YYYY-MM-DD'));
+        formData.append("time", dayjs(updatedActivity.time).format('hh:mm A'));
+        formData.append("latitude", updatedActivity.location.latitude);   
+        formData.append("longitude", updatedActivity.location.longitude);     
+        formData.append("price", JSON.stringify(priceObject)); // Convert objects to JSON strings
+        formData.append("category", updatedActivity.categoryId);
+        formData.append("tags", JSON.stringify(tagIds || []));
+        formData.append("specialDiscounts", updatedActivity.specialDiscounts || 0);
+        formData.append("isOpen", updatedActivity.isOpen || false);
+        formData.append("created_by", id);
+    
+        const response = await axios.post('http://localhost:3030/activity', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data', // Important for file uploads
+          },
+        });
+    
+        console.log(response.data);
+        const uploadedImageUrl = response.data.imageUrl;
+        localStorage.setItem(`activity-image-${response.data.finalActivity._id}`, uploadedImageUrl);
+        console.log(`activity-image-${response.data.finalActivity._id}`);
+        console.log('Image uploaded successfully:', uploadedImageUrl);
+
         getAllActivities();
         handleClose();
-        setSuccessMessage(response.data.message||"Edit Successfully!");
-        setShowSuccessMessage(true); 
-      }catch(error){
+        setSuccessMessage(response.data.message || "Activity Created Successfully!");
+        setShowSuccessMessage(true);
+      } catch (error) {
+        console.error('Error submitting activity:', error);
         setErrorMessage(error.response?.data?.message || 'An error occurred');
         setShowErrorMessage(true);
       }
@@ -714,7 +708,7 @@ const handleEditActivity = (activity) => {
       <CardMedia
           component="img"
           height="180"
-          image={getRandomImage()}
+          image={activity.picture}
           alt={activityImage?.name||"Image"}
         />
         <CardContent>
