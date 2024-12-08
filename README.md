@@ -16,7 +16,15 @@ This project uses 2-space indentation for all JavaScript and JSON files. Formatt
 
 ## Screenshots
 
-As the saying goes, a picture is equal to a thousand words. Most people will be interested if there is a visual representation of what the project is about. It helps them understand better. A visual representation can be snapshots of the project or a video of the functioning of the project.
+```markdown
+Here are some screenshots of the application:
+
+![addGovernorOrAdmin](../ExploreInEase/screenshots/addGovernorOrAdmin.png)
+![Screenshot 2](../screenshots/screenshot2.png)
+![Screenshot 3](../screenshots/screenshot3.png)
+![Screenshot 4](../screenshots/screenshot4.png)
+![Screenshot 5](../screenshots/screenshot5.png)
+```
 
 ## Tech/Framework Used
 
@@ -28,6 +36,49 @@ Other Tools: Postman
 ## Features
 
 This is where you write what all extra features have been done in your project. Basically, this is where you try to make your project stand out from the rest.
+
+### Tourist
+
+1. Book Hotel
+2. Book Flight
+3. Book an Event (Activity/Itinerary/Historical Place)
+4. Book Transportation
+5. Purchase a Product
+6. Pay through wallet/visa/cod
+7. Submit Complaints
+8. View Order History
+
+### Tour Guide
+
+1. Create/Read/Update/Delete an Itinerary
+2. View Sales Report
+3. View Number of Tourists Report
+
+### Advertiser
+
+1. Create/Read/Update/Delete an Activity
+2. Create/Read/Update/Delete a Transportation
+3. View Sales Report
+4. View Number of Tourists Report
+
+### Seller
+
+1. Create/Read/Update/Delete a Product
+2. Archive/Unarchive a Product
+3. View Sales Report
+
+### Tourism Governor
+
+1. Create/Read/Update/Delete a Historical Place
+2. Create/Read/Update/Delete a Historical Location Tag
+
+### Admin
+
+1. Create/Read/Update/Delete an Activity Category
+2. Create/Read/Update/Delete a Preference Tag
+3. Create/Read/Update/Delete a Product
+4. Add User
+5. Delete an Account
 
 ## Code Examples
 
