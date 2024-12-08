@@ -1,6 +1,8 @@
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const Product = require('../../models/product'); 
 const Order = require('../../models/order');
+const Tourist = require('../../models/tourist');
+
 const path = require('path');
 
 const addProduct = async (productData) => {
@@ -264,6 +266,111 @@ const cancelOrder = async (orderId, touristId) => {
     await checkoutRepository.deleteOrderById(orderId);
 };
 
+const createOrderWithCard = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType }) => {
+    // Create the order
+    const order = await checkoutRepository.createOrder({
+        touristId,
+        productIds: productsIdsQuantity.map(product => product.id),
+        productsIdsQuantity,
+        price,
+        addressToBeDelivered,
+        paymentType,
+    });
+
+    return order;
+};
+
+
+
+const createOrderWalletOrCod = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType,promoCode,currency }) => {
+    if (paymentType === 'wallet') {
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            throw new Error('Tourist not found.');
+        }
+        switch (currency) {
+            case 'euro':
+                price = (price * 55).toFixed(2); 
+                break;
+            case 'dollar':
+                price = (price * 50).toFixed(2); 
+                break;
+            case 'EGP':
+                price = price.toFixed(2); 
+                break;
+            default:
+                throw new Error('Invalid currency'); 
+        }
+        
+        if (promoCode) {
+            const validPromo = tourist.promoCodes.includes(promoCode); // Correct validation
+            if (validPromo) {
+              // Remove the promo code from the array
+              tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+              await tourist.save(); // Save the updated promo codes
+            } else {
+              throw new Error("Invalid promo code");
+            }
+        }
+        // Apply discount if promo code was valid
+        if (promoCode) {
+            price *= 0.7; // Apply 30% discount
+        } 
+        
+        if (tourist.wallet < price) {
+            throw new Error('Insufficient wallet balance.');
+        }
+
+
+
+        // Deduct the amount from the tourist's wallet
+        tourist.wallet -= price;
+        await tourist.save();
+    }
+
+    // Create the order
+    const order = await checkoutRepository.createOrder({
+        touristId,
+        productIds: productsIdsQuantity.map(product => product.id),
+        productsIdsQuantity,
+        price,
+        addressToBeDelivered,
+        paymentType,
+    });
+
+    return order;
+};
+
+const addWishlist = async (userId, productId) => {
+    return await checkoutRepository.addWishlist(userId, productId);
+}
+
+const getWishlist = async (userId) => {
+    return await checkoutRepository.getWishlist(userId);
+}
+
+const removeWishlist = async (userId, productId) => {
+    return await checkoutRepository.removeWishlist(userId, productId);
+}
+
+const addCart = async (userId, productId, quantity) => {
+    return await checkoutRepository.addCart(userId, productId, quantity);
+}
+
+const getCart = async (userId) => {
+    return await checkoutRepository.getCart(userId);
+}
+
+const removeCart = async (userId, cartItemId) => {
+    return await checkoutRepository.removeCart(userId, cartItemId);
+}
+
+const editQuantityInCart = async (userId, cartItemId, quantity) => {
+    return await checkoutRepository.editQuantityInCart(userId, cartItemId, quantity);
+}
+
+
 
 module.exports = {
     uploadImage,
@@ -283,5 +390,14 @@ module.exports = {
     getOrdersByTouristId,
     updateOrder,
     getOrdersByStatusAndTouristId,
-    cancelOrder
+    cancelOrder,
+    createOrderWithCard,
+    createOrderWalletOrCod,
+    addWishlist,
+    getWishlist,
+    removeWishlist,
+    addCart,
+    getCart,
+    removeCart,
+    editQuantityInCart
 };

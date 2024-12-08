@@ -948,6 +948,16 @@ const getAddresses = async (user) => {
     }
 }
 
+const findSellerById = async (id) => {
+    try {
+        const seller = await Users.findById({_id: id});
+        return seller;
+    } catch (error) {
+        console.error('Error fetching seller by ID:', error);
+        throw error;
+    }
+}
+
 
 
 
@@ -1003,6 +1013,7 @@ module.exports = {
     addBookmark,
     getBookmarks,
     addAddresses,
-    getAddresses
+    getAddresses,
+    findSellerById
 
 };

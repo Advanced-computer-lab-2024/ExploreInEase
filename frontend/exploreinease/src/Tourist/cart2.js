@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -18,7 +18,8 @@ import {
   FormLabel,
   Select,
   MenuItem,
-  useTheme
+  useTheme,
+  Modal
 } from '@mui/material';
 import {
   ChevronLeft,
@@ -31,12 +32,15 @@ import { useLocation } from "react-router-dom";
 
 import StepperNavigation from "./StepperNavigtion";
 import NetworkService from "../NetworkService";
+import axios from "axios";
+import AddToWishListButton from "./AddToWishListButton";
+import AddToCartButton from "./AddToCartButton";
 
 // import CheckoutPage from "./CheckoutPage";
 import './Payment.css'; // Add your styles here
 const CartPage = () => {
   const location = useLocation();
-  const { userId } = location.state || {};
+  const { userId, currency } = location.state || {};
   const [promoCode, setPromoCode] = useState("");
   const [activeStep, setActiveStep] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -46,7 +50,8 @@ const CartPage = () => {
   const [selectedDates, setSelectedDates] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isBackVisible, setIsBackVisible] = useState(false);
-
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
+  const [isOrderConfirmed, setIsOrderConfirmed] = useState(false);
 
 
   const [selectedAddressId, setSelectedAddressId] = useState('new');
@@ -66,7 +71,7 @@ const CartPage = () => {
 
   const handleAddressSelect = (event) => {
     const selectedAddress = event.target.value;
-    
+
     if (selectedAddress === 'new') {
       setDeliveryInfo({
         name: '',
@@ -85,36 +90,74 @@ const CartPage = () => {
     }
   };
   const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Apple AirPods Pro",
-      color: "White",
-      price: 249.99,
-      count: 1,
-      image: "https://via.placeholder.com/80", // Replace with real image
-    },
-    {
-      id: 2,
-      name: "Apple AirPods Max",
-      color: "Silver",
-      price: 549.99,
-      count: 1,
-      image: "https://via.placeholder.com/80", // Replace with real image
-    },
-    {
-      id: 3,
-      name: "Apple HomePod Mini",
-      color: "Silver",
-      price: 99.99,
-      count: 1,
-      image: "https://via.placeholder.com/80", // Replace with real image
-    },
+    // {
+    //   id: 1,
+    //   name: "Apple AirPods Pro",
+    //   color: "White",
+    //   price: 249.99,
+    //   count: 1,
+    //   image: "https://via.placeholder.com/80", // Replace with real image
+    // },
+    // {
+    //   id: 2,
+    //   name: "Apple AirPods Max",
+    //   color: "Silver",
+    //   price: 549.99,
+    //   count: 1,
+    //   image: "https://via.placeholder.com/80", // Replace with real image
+    // },
+    // {
+    //   id: 3,
+    //   name: "Apple HomePod Mini",
+    //   color: "Silver",
+    //   price: 99.99,
+    //   count: 1,
+    //   image: "https://via.placeholder.com/80", // Replace with real image
+    // },
   ]);
+
+  localStorage.setItem("UserId", "6752e7c65f08a3b694655e6b");
+  const UserId = localStorage.getItem("UserId");
+  console.log(UserId);
   const [cardDetails, setCardDetails] = useState({
     number: '',
     name: '',
     cvv: '',
   });
+
+  useEffect(() => {
+
+    //Fetch cart items from API
+
+
+
+    const fetchCart = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3030/getCart/${UserId}`);
+        const fetchedProducts = res.data.products || [];
+
+        const formattedItems = fetchedProducts.map((product) => ({
+          id: product._id,
+          product_id: product._id,
+          name: product.name,
+          color: product.color || "N/A", // If no color provided
+          price: product.price,
+          count: product.quantity,
+          image: `http://localhost:3030/uploads/${product.picture}` // Adjust base URL as needed
+        }));
+
+        console.log(formattedItems);
+
+        setCartItems(formattedItems);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchCart();
+
+  }, []);
+
   const handleChange = (field, value) => {
     setCardDetails((prev) => ({
       ...prev,
@@ -148,43 +191,93 @@ const CartPage = () => {
 
   const handleOnClickButton = async (title) => {
     console.log(deliveryInfo);
-
-
-    if (title == 'Continue to Checkout') {
+    if (title === 'Continue to Checkout') {
       try {
         const options = {
-          apiPath: `/getAddresses/${userId}`,// POST request to the correct endpoint
+          apiPath: `/getAddresses/${userId}`,
         };
-
-        const response = await NetworkService.get(options);  // Use POST instead of PUT
+        const response = await NetworkService.get(options);
         console.log(response);
         setsavedAddresses(response);
       } catch (error) {
-        console.error('Error bookmarking event:', error);
-        alert('Failed to bookmark event. Please try again.');
+        console.error('Error fetching addresses:', error);
+        alert('Failed to fetch addresses. Please try again.');
       }
       setIsPaymentProceed(false);
       setActiveStep(1);
       setIsCheckoutView(true);
-    } else if (title == 'Proceed to Payment') {
-      // Only add address if it's a new one and not already in savedAddresses
-    if (selectedAddressId === 'new' && !savedAddresses.includes(deliveryInfo.address)) {
+    } else if (title === 'Proceed to Payment') {
+      // Only add address if it's a new one
+      if (selectedAddressId === 'new' && !savedAddresses.includes(deliveryInfo.address)) {
+        try {
+          const options = {
+            apiPath: `/addAddresses/${userId}/${deliveryInfo.address}`,
+          };
+          await NetworkService.post(options);
+        } catch (error) {
+          console.error('Error adding address:', error);
+          alert('Failed to add address. Please try again.');
+          return;
+        }
+      }
+
+      setActiveStep(2);
+      setIsCheckoutView(false);
+
+      if (selectedPaymentMethod === 'cash') {
+        // For cash on delivery, show the confirmation view
+        setIsPaymentProceed(true);
+      } else if (selectedPaymentMethod === 'online') {
+        // For online payment, proceed to payment gateway
+        setIsPaymentProceed(true);
+      }
+    } else if (title === 'Confirm Order') {
       try {
-        const options = {
-          apiPath: `/addAddresses/${userId}/${deliveryInfo.address}`,
-        };
-        const response = await NetworkService.post(options);
+        console.log(selectedPaymentMethod);
+        const response = await NetworkService.post({
+          apiPath: `/createOrderWalletOrCod`,
+          body: {
+            touristId: userId,
+            productsIdsQuantity: cartItems,
+            addressToBeDelivered: deliveryInfo,
+            paymentType: selectedPaymentMethod,
+            price: calculateTotal(),
+            currency: currency
+          }
+        });
         console.log(response);
+
+        if (response.success) {
+          setIsOrderConfirmed(true); // Show the popup
+        } else {
+          alert('Failed to confirm order. Please try again.');
+        }
+
+        setActiveStep(3);
+        // Clear cart or navigate to success page
       } catch (error) {
-        console.error('Error adding address:', error);
-        alert('Failed to add address. Please try again.');
+        console.error('Error confirming order:', error);
+        alert('Failed to confirm order. Please try again.');
       }
     }
-    setIsCheckoutView(false);
-    setActiveStep(2);
-    setIsPaymentProceed(true);
-  }
-};
+  };
+  // Add payment method change handler
+  const handlePaymentMethodChange = (event) => {
+    setSelectedPaymentMethod(event.target.value);
+  };
+
+  // Add a confirmation handler for non-online payments
+  const handleConfirmOrder = async () => {
+    try {
+      // Add your order confirmation API call here
+      console.log('Order confirmed with', selectedPaymentMethod);
+      setActiveStep(3);
+      // You might want to navigate to a success page or clear the cart
+    } catch (error) {
+      console.error('Error confirming order:', error);
+      alert('Failed to confirm order. Please try again.');
+    }
+  };
 
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
@@ -197,25 +290,69 @@ const CartPage = () => {
       setSelectedDates([...selectedDates, date]);
     }
   };
-  const handleIncrease = (id) => {
+  const handleIncrease = async (id) => {
+    const itemIndex = cartItems.findIndex((item) => item.id === id);
+    let newCount; // to store the updated quantity
+
     setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, count: item.count + 1 } : item
-      )
+      prev.map((item) => {
+        if (item.id === id) {
+          newCount = item.count + 1;
+          return { ...item, count: newCount };
+        }
+        return item;
+      })
     );
+
+    // Use newCount in the request URL
+    await axios
+      .put(`http://localhost:3030/editQuantityInCart/${UserId}/${itemIndex}/${newCount}`)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+
   };
 
-  const handleDecrease = (id) => {
+  const handleDecrease = async (id) => {
+    const itemIndex = cartItems.findIndex((item) => item.id === id);
+    let newCount; // to store the updated quantity
+
     setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id && item.count > 1
-          ? { ...item, count: item.count - 1 }
-          : item
-      )
+      prev.map((item) => {
+        if (item.id === id) {
+          newCount = item.count - 1;
+          return { ...item, count: newCount };
+        }
+        return item;
+      })
     );
+
+    // Use newCount in the request URL
+    await axios
+      .put(`http://localhost:3030/editQuantityInCart/${UserId}/${itemIndex}/${newCount}`)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  const handleRemove = (id) => {
+
+  const handleRemove = async (id) => {
+
+    await axios.delete(`http://localhost:3030/removeCart/${UserId}/${id}`).then((res) => {
+      console.log(res.data);
+    }
+    ).catch((err) => {
+      console.log(err);
+    });
+
+
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -225,6 +362,40 @@ const CartPage = () => {
 
   return (
     <Box sx={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+      <div>
+        {/* Order Confirmation Popup */}
+        <Modal
+          open={isOrderConfirmed}
+          onClose={() => setIsOrderConfirmed(false)}
+          aria-labelledby="order-confirmed-title"
+          aria-describedby="order-confirmed-description"
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+              textAlign: 'center',
+            }}
+          >
+            <h2 id="order-confirmed-title">Order Confirmed</h2>
+            <p id="order-confirmed-description">
+              Your order has been successfully placed!
+            </p>
+            <button onClick={() => setIsOrderConfirmed(false)}>Close</button>
+          </Box>
+        </Modal>
+
+        
+      </div>
+      
+
+
       {/* Add StepperNavigation */}
       <StepperNavigation activeStep={activeStep} />
       {isCheckoutView && !isPaymentProceed && (
@@ -258,10 +429,10 @@ const CartPage = () => {
                     <MenuItem value="new">Enter New Address</MenuItem>
                     <Divider />
                     {savedAddresses.map((address, index) => (
-  <MenuItem key={index} value={address}>
-    {address}
-  </MenuItem>
-))}
+                      <MenuItem key={index} value={address}>
+                        {address}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </Box>
 
@@ -418,7 +589,7 @@ const CartPage = () => {
                   </Grid>
                 </Box>
 
-                {/* Payment Method */}
+                {/* Update the Payment Method section */}
                 <Box sx={{ mt: 4 }}>
                   <FormControl component="fieldset">
                     <FormLabel component="legend">
@@ -426,7 +597,11 @@ const CartPage = () => {
                         Payment Method
                       </Typography>
                     </FormLabel>
-                    <RadioGroup row defaultValue="cash">
+                    <RadioGroup
+                      row
+                      value={selectedPaymentMethod}
+                      onChange={handlePaymentMethodChange}
+                    >
                       <FormControlLabel
                         value="online"
                         control={<Radio />}
@@ -442,13 +617,53 @@ const CartPage = () => {
                       <FormControlLabel
                         value="pos"
                         control={<Radio />}
-                        label="POS on Delivery"
+                        label="Pay with Wallet"
                       />
                     </RadioGroup>
                   </FormControl>
                 </Box>
               </Paper>
             </Grid>
+
+            {/* Updated non-online payment confirmation view */}
+            {isPaymentProceed && !isCheckoutView && selectedPaymentMethod !== 'online' && (
+              <Container maxWidth="xl" sx={{ py: 4 }}>
+                <Grid container spacing={4} justifyContent="center">
+                  <Grid item xs={12} md={8}>
+                    <Card variant="outlined" sx={{ borderRadius: 2, p: 4, textAlign: 'center' }}>
+                      <Typography variant="h5" sx={{ mb: 3 }}>
+                        {selectedPaymentMethod === 'cash' ? 'Cash on Delivery' : 'Wallet Payment'} Selected
+                      </Typography>
+                      <Typography variant="body1" sx={{ mb: 4 }}>
+                        {selectedPaymentMethod === 'cash'
+                          ? 'Your order will be delivered to the specified address. Please keep the exact amount ready for payment.'
+                          : 'Your order will be processed using your wallet balance.'}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        onClick={handleConfirmOrder}
+                        sx={{
+                          bgcolor: "#1261A0",
+                          '&:hover': { bgcolor: "#0D4F8B" },
+                          py: 1.5,
+                          px: 4,
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontSize: '1rem'
+                        }}
+                      >
+                        Confirm Order
+                      </Button>
+                    </Card>
+                  </Grid>
+
+                  {/* Keep the order summary section */}
+                  <Grid item xs={12} md={4}>
+                    {/* ... (existing order summary code) */}
+                  </Grid>
+                </Grid>
+              </Container>
+            )}
 
             {/* Right Section - Order Summary */}
             <Grid item xs={12} lg={4}>
@@ -560,6 +775,82 @@ const CartPage = () => {
             </Grid>
           </Grid>
         </Container>)}
+
+      {/* Cash on Delivery Confirmation View */}
+      {isPaymentProceed && selectedPaymentMethod === 'cash' && (
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid item xs={12} md={8}>
+              <Card variant="outlined" sx={{ borderRadius: 2, p: 4, textAlign: 'center' }}>
+                <Typography variant="h5" sx={{ mb: 3 }}>
+                  Cash on Delivery Selected
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 4 }}>
+                  Your order will be delivered to the specified address.
+                  Please keep the exact amount of ${calculateTotal().toFixed(2)} ready for payment.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => handleOnClickButton('Confirm Order')}
+                  sx={{
+                    bgcolor: "#1261A0",
+                    '&:hover': { bgcolor: "#0D4F8B" },
+                    py: 1.5,
+                    px: 4,
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                >
+                  Confirm Order
+                </Button>
+              </Card>
+            </Grid>
+            {/* Order Summary Section */}
+            <Grid item xs={12} md={4}>
+              {/* ... (your existing order summary code) ... */}
+            </Grid>
+          </Grid>
+        </Container>
+      )}
+
+      {/* Cash on Delivery Confirmation View */}
+      {isPaymentProceed && selectedPaymentMethod === 'pos' && (
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid item xs={12} md={8}>
+              <Card variant="outlined" sx={{ borderRadius: 2, p: 4, textAlign: 'center' }}>
+                <Typography variant="h5" sx={{ mb: 3 }}>
+                  Wallet Selected
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 4 }}>
+                  Your order will be delivered to the specified address.
+                  Please keep the exact amount of ${calculateTotal().toFixed(2)} ready for payment.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => handleOnClickButton('Confirm Order')}
+                  sx={{
+                    bgcolor: "#1261A0",
+                    '&:hover': { bgcolor: "#0D4F8B" },
+                    py: 1.5,
+                    px: 4,
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                >
+                  Confirm Order
+                </Button>
+              </Card>
+            </Grid>
+            {/* Order Summary Section */}
+            <Grid item xs={12} md={4}>
+              {/* ... (your existing order summary code) ... */}
+            </Grid>
+          </Grid>
+        </Container>
+      )}
       {!isCheckoutView && !isPaymentProceed &&
         (
           <>
@@ -696,7 +987,7 @@ const CartPage = () => {
               </Grid>
             </Grid></>
         )}
-      {isPaymentProceed && !isCheckoutView &&
+      {isPaymentProceed && !isCheckoutView && selectedPaymentMethod === 'online' &&
         (
 
           <Grid container spacing={4}>

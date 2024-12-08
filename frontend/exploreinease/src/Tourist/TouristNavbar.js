@@ -212,7 +212,7 @@ const handleClose = () => {
         }
       }
       else if(title =="Book Hotels") {
-       navigate(`/cart`,{state:{userId}});          
+       navigate(`/cart`,{state:{currency:currency,userId}});          
       }
       else if(title =="Book Flights") {
         navigate(`/BookFlight`,{state:{userId}});          

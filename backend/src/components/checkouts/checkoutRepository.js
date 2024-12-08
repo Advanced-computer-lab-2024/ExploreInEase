@@ -4,6 +4,10 @@ const Tourist = require('../../models/tourist');
 const Order = require('../../models/order');
 const path = require('path');
 const fs = require('fs');
+const Cart = require('../../models/cart');
+const Notification = require('../../models/notification');
+const nodemailer = require("nodemailer");
+
 
 const addProduct = async (productData) => {
     try {
@@ -405,6 +409,148 @@ const findOrdersByStatusAndTouristId = async (touristId, currency) => {
       return await Order.findByIdAndDelete(orderId).exec();
   };
 
+  const createOrder = async (orderData) => {
+    const order = new Order(orderData);
+    return await order.save();
+};
+
+const addNotification = async (notificationData) => {
+    const notification = new Notification(notificationData);
+    const newNotification = await notification.save();
+    return newNotification;
+};
+
+
+const addWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.push(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const getWishlist = async (touristId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        const wishlistProducts = tourist.wishlists;
+        const products = await Product.find({ _id: { $in: wishlistProducts } });
+        return products;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const removeWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.pull(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const addCart = async (touristId, productId, quantity) => {
+    try {
+        const cartTourists = await Cart.find({ touristId: touristId });
+        if(cartTourists.length != 0){
+            cartTourists[0].products.push({ productId: productId, quantity: quantity });
+            await cartTourists[0].save();
+            return cartTourists[0];
+        }
+        const cartItem = {
+            touristId: touristId,
+            products: {
+                productId:productId,
+                quantity:quantity
+            }
+        };
+        const cart = new Cart(cartItem);
+        await cart.save();
+        return cart;
+    } catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
+
+const getCart = async (touristId) => {
+    try {
+        const cart = await Cart.find({ touristId });
+
+        if (!cart || cart.length === 0) {
+            return { products: [] };
+        }
+
+        const allProducts = [];
+
+        for (const cartItem of cart) {
+            const products = await Promise.all(
+                cartItem.products.map(async (product) => {
+                    const getProduct = await getProductById2(product.productId);
+
+                    // Flatten product if it contains an indexed key
+                    const flattenedProduct = getProduct && getProduct['0'] ? getProduct['0'] : getProduct;
+
+                    if (!flattenedProduct) {
+                        return null; // Skip invalid product
+                    }
+
+                    return {
+                        ...flattenedProduct._doc,
+                        quantity: product.quantity,
+                    };
+                })
+            );
+
+            allProducts.push(...products.filter(Boolean)); // Add only valid products
+        }
+
+        // Loop through `allProducts` and remove indexed keys
+        const cleanedProducts = allProducts.map((product) => {
+            if (product && product['0']) {
+                return { ...product['0'], quantity: product.quantity }; // Remove the indexed key
+            }
+            return product; // Return as-is if no indexed key
+        });
+
+        return { products: cleanedProducts };
+    } catch (error) {
+        console.error(`Error fetching cart: ${error.message}`);
+        throw new Error(`Error fetching cart: ${error.message}`);
+    }
+};
+
+
+const removeCart = async (touristId, cartItemId) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products.splice(cartItemId, 1); // Removes the item at the given index
+        if(cart.products.length == 0){
+            await Cart.deleteOne({ touristId: touristId });
+        }
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error removing from cart: ${error.message}`);
+    }
+}
+
+const editQuantityInCart = async (touristId, cartItemId, quantity) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products[cartItemId].quantity = quantity;
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
 
 
 
@@ -441,5 +587,14 @@ module.exports = {
     getProductById2,
     findOrdersByStatusAndTouristId,
     getTouristById,
-    deleteOrderById
+    deleteOrderById,
+    createOrder,
+    addNotification,
+    addWishlist,
+    getWishlist,
+    removeWishlist,
+    addCart,
+    getCart,
+    removeCart,
+    editQuantityInCart
 };
