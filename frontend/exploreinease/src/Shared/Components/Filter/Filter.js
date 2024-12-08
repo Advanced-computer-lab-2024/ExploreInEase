@@ -24,14 +24,14 @@ import InfoIcon from '@mui/icons-material/Info';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';  
 import { useLocation } from "react-router-dom";
-// import NodataFound from "frontend/exploreinease/src/No data Found.avif";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import debounce from 'lodash.debounce';
 import NetworkService from "../../../NetworkService";
 import TouristNavbar from "../../../Tourist/TouristNavbar";
-// Sample data with 'type' field added
-// Role-based fields
+import TravelItemsShareDialog from './TravelItemsShareDialog';
+import nodata from "../../../Shared/nodata.avif";
+import NodataFound from "../../../No data Found.avif";
 const roleFields = {
   HistoricalPlaces: ['Tag'],
   Activities: ['budget', 'date', 'category', 'rating'],
@@ -46,7 +46,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState(null);
   const { events,userId=null,typee} = location.state || {};  
-  const itemList = events?.flat() ||eventsG?.flat()|| []; // Flatten the array and ensure it's initialized
+  const [itemList,setItemList] = useState(events?.flat() ||eventsG?.flat()|| []); // Flatten the array and ensure it's initialized
   const [filters, setFilters] = useState({
     budget: '',
     price: '',
@@ -59,6 +59,9 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     search: '',
     sortBy: '',
   });
+  console.log('events',events);
+  console.log('itemList',itemList);
+  
   const [filteredData, setFilteredData] = useState([]);
   const [role, setRole] = useState('Activities'); // Default to Main to show all
   const [addressCache] = useState({});
@@ -68,7 +71,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const [ shareDialogOpen,setShareDialogOpen] = useState(false);
   const [type, setType] = useState(''); 
   const [budget, setBudget] = useState('');
-  const [currency, setCurrency] = useState('');
+  const [currency, setCurrency] = useState(Userr.currency);
   const [success,setSuccess]=useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
@@ -102,15 +105,40 @@ const Filter = ({eventsG=[],typeeG=''}) => {
       return () => clearTimeout(timer); // Clean up the timer on component unmount
     }
   }, [success]);
-
   useEffect(() => {
     const initialData = itemList.filter(item =>
       (role === 'Activities' && item.type === 'Activity') ||
       (role === 'Itineraries' && item.type === 'Itinerary') ||
       (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
     );
+    console.log("itemList",itemList);
+    console.log("initalData",initialData);
+    
+    
     setFilteredData(initialData);
-  }, []);
+  },[itemList]);
+
+  useEffect(() => {
+    fetchEvents();
+  },[currency]);
+
+  const  fetchEvents=async()=> {
+    try {
+      let currency=Userr.currency;
+      const options = {
+        apiPath: `/upcomingEvents/${Userr.currency}`,
+        urlParam: { currency },
+      };
+
+      const response = await NetworkService.get(options); // Fetch data from NetworkService
+      setItemList(response.flat());
+      console.log(response);
+        // setFilteredData(response.flat());
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      console.log("An unexpected error occurred.");
+    }
+  }
   const handleShareClick = (item) => {
     setSelectedItem(item);
     setShareDialogOpen(true);
@@ -678,157 +706,169 @@ const handleCloseDialog = () => {
           </div>
         </div>
 
-        <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
-          {filteredData.map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item.id}>
-              <Card    
-                style={{
-                  width: 'auto',
-                  height: 'auto',
-                  margin: '16px',
-                  padding: '16px',
-                  border: '1px solid #ddd',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '8px',
-              }}
-              onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                }}
-                >
-                 <CardMedia
+{filteredData.length>0 ?(
+  <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
+  {filteredData.map((item) => (
+    <Grid item xs={12} sm={6} md={4} key={item.id}>
+      <Card    
+        style={{
+          width: 'auto',
+          height: 'auto',
+          margin: '16px',
+          padding: '16px',
+          border: '1px solid #ddd',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '8px',
+      }}
+      onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.2)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+        }}
+        >
+       <CardMedia
                         component="img"
                         height="150"
-                        image={item.imageUrl || '../No data Found.avif'} // Default placeholder if no image URL is provided
+                        image={item.imageUrl || nodata} // Default placeholder if no image URL is provided
                         alt={item.name}
                         style={{ borderRadius: '8px 8px 0 0' }}
-                />
-                <CardContent>
-                <div style={{ display: 'flex', alignItems: 'center'}}>  
-                 <Typography variant="h5" component="div">
-                   {item.name}
-                 </Typography>
-                 <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '8px' }}>
-                    <InfoIcon color="primary" />
-                  </IconButton>
-                  </div>
-                  {item.type === 'Activity' && (
-                    <>
-                      {/* <Typography ><strong>Budget:</strong>{item.budget}</Typography>
-                      <Typography ><strong>Date:</strong> {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
-                      <Typography><strong>Category:</strong> {item.category}</Typography> */}
-                      <Typography><strong>Locations:</strong>
-                           { 
-                              <LocationDisplay coordinates={item.location} />
-                         }
-                      </Typography> 
-                       {item.specialDiscount && (
-                        <Typography ><strong>Special Discount:</strong> {item.specialDiscount}%</Typography>
-                      )}
-                    </>
-                  )}
-                  {item.type === 'Itinerary' && (
-                    <>
-                      <Typography ><strong>Activities:</strong> {item.activities.join(', ')}</Typography>
-                      <Typography ><strong>Locations:</strong> {item.locations.join(', ')}</Typography>   
-                      {/* <Typography><strong>Price: </strong>{item.price}</Typography>
-                      <Typography><strong>Rating:</strong> {item.rating.length ===0 ?0:item.rating}</Typography>
-                      <Typography><strong>Language:</strong> {item.language}</Typography>
-                      <Typography><strong>Dropoff location:</strong> {item.dropoffLocation}</Typography>
-                      <Typography><strong>Pickup location:</strong>{item.pickupLocation}</Typography>
-                      <Typography><strong>Directions:</strong> {item.directions}</Typography> */}
-                    </>
-                  )}
-                  {item.type === 'HistoricalPlace' && (
-                    <>
-                      <Typography><strong>Description:</strong> {item.description}</Typography>
-                      <Typography><strong>Locations:</strong>
-                          { 
-                              <LocationDisplay coordinates={item.location} />
-                         }
-                      </Typography>
-                      {/* <Typography><strong>Opening Hours:</strong> {item.openingHours}</Typography>
-                      <Typography><strong>Students ticket price: </strong> {item.ticketPrice[0]}</Typography>
-                      <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
-                      <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography> */}
-                      {/* <Typography><strong> Tags:</strong>
-                          {item.tags ? renderTags(item.tags) : 'No tags available'}
-                      </Typography>           */}
-                    </>
-                  )}
-                      {userTypee==="tourist" && (<>
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
-                       <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
-                         Book a ticket 
-                        </Button> 
-                      <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleShareClick(item)}
-                      style={{ marginLeft: '10px' }}
-                     >
-                      Share
-                    </Button>
-                        
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleBookmarkClick(item)}
-                      style={{ marginLeft: '10px' }}
-                    >
-                      Bookmark
-                    </Button>
-                   </div>
-                </>)}
-                  </CardContent>
-                  <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>More Details  </DialogTitle>
-        <DialogContent>
-          {dialogData && (
-            <div>
-              {item.type === 'Activity' && (
-                <>
-                  <Typography><strong>Budget:</strong> {dialogData.budget}</Typography>
-                  <Typography><strong>Date:</strong> {dialogData.date}</Typography>
-                  <Typography><strong>Category:</strong> {dialogData.category}</Typography>
-                  {dialogData.specialDiscount && (
-                    <Typography><strong>Special Discount:</strong> {dialogData.specialDiscount}%</Typography>
-                  )}
-                </>
+                        />
+        <CardContent>
+        <div style={{ display: 'flex', alignItems: 'center'}}>  
+         <Typography variant="h5" component="div">
+           {item.name}
+         </Typography>
+         <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '8px' }}>
+            <InfoIcon color="primary" />
+          </IconButton>
+          </div>
+          {item.type === 'Activity' && (
+            <>
+              <Typography><strong>Locations:</strong>
+                   { 
+                      <LocationDisplay coordinates={item.location} />
+                 }
+              </Typography> 
+               {item.specialDiscount && (
+                <Typography ><strong>Special Discount:</strong> {item.specialDiscount}%</Typography>
               )}
-              {item.type === 'Itinerary' && (
-                <>
-                  <Typography><strong>Price:</strong> {dialogData.price}</Typography>
-                  <Typography><strong>Rating:</strong> {dialogData.rating.length === 0 ? 0 : dialogData.rating}</Typography>
-                  <Typography><strong>Language:</strong> {dialogData.language}</Typography>
-                  <Typography><strong>Dropoff location:</strong> {dialogData.dropoffLocation}</Typography>
-                  <Typography><strong>Pickup location:</strong> {dialogData.pickupLocation}</Typography>
-                  <Typography><strong>Directions:</strong> {dialogData.directions}</Typography>
-                </>
-              )}
-              {item.type === 'HistoricalPlace' && (
-                <>
-                  <Typography><strong>Students ticket price:</strong> {dialogData.ticketPrice[0]}</Typography>
-                  <Typography><strong>Native ticket price:</strong> {dialogData.ticketPrice[1]}</Typography>
-                  <Typography><strong>Foreign ticket price:</strong> {dialogData.ticketPrice[2]}</Typography>
-                </>
-              )}
-            </div>
+            </>
           )}
-        </DialogContent>
-      </Dialog> 
-                  </Card> 
-             
-                </Grid>
-                  ))}
+          {item.type === 'Itinerary' && (
+            <>
+              <Typography ><strong>Activities:</strong> {item.activities.join(', ')}</Typography>
+              <Typography ><strong>Locations:</strong> {item.locations.join(', ')}</Typography>   
+     
+            </>
+          )}
+          {item.type === 'HistoricalPlace' && (
+            <>
+              <Typography><strong>Description:</strong> {item.description}</Typography>
+              <Typography><strong>Locations:</strong>
+                  { 
+                      <LocationDisplay coordinates={item.location} />
+                 }
+              </Typography>
+            </>
+          )}
+              {userTypee==="tourist" && (<>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+               <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
+                 Book a ticket 
+                </Button> 
+              <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleShareClick(item)}
+              style={{ marginLeft: '10px' }}
+             >
+              Share
+            </Button>
+                
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleBookmarkClick(item)}
+              style={{ marginLeft: '10px' }}
+            >
+              Bookmark
+            </Button>
+           </div>
+        
+      
+                       <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+<DialogTitle>More Details  </DialogTitle>
+<DialogContent>
+  {dialogData && (
+    <div>
+      {item.type === 'Activity' && (
+        <>
+          <Typography><strong>Budget:</strong> {dialogData.budget}</Typography>
+          <Typography><strong>Date:</strong> {dialogData.date}</Typography>
+          <Typography><strong>Category:</strong> {dialogData.category}</Typography>
+          {dialogData.specialDiscount && (
+            <Typography><strong>Special Discount:</strong> {dialogData.specialDiscount}%</Typography>
+          )}
+        </>
+      )}
+      {item.type === 'Itinerary' && (
+        <>
+          <Typography><strong>Price:</strong> {dialogData.price}</Typography>
+          <Typography><strong>Rating:</strong> {dialogData.rating.length === 0 ? 0 : dialogData.rating}</Typography>
+          <Typography><strong>Language:</strong> {dialogData.language}</Typography>
+          <Typography><strong>Dropoff location:</strong> {dialogData.dropoffLocation}</Typography>
+          <Typography><strong>Pickup location:</strong> {dialogData.pickupLocation}</Typography>
+          <Typography><strong>Directions:</strong> {dialogData.directions}</Typography>
+        </>
+      )}
+      {item.type === 'HistoricalPlace' && (
+        <>
+          <Typography><strong>Students ticket price:</strong> {dialogData.ticketPrice[0]}</Typography>
+          <Typography><strong>Native ticket price:</strong> {dialogData.ticketPrice[1]}</Typography>
+          <Typography><strong>Foreign ticket price:</strong> {dialogData.ticketPrice[2]}</Typography>
+        </>
+      )}
+    </div>
+  )}
+</DialogContent>
+</Dialog> 
+        </>)}
+          </CardContent>
 
-                </Grid>
+          </Card> 
+     
+        </Grid>
+          ))}
 
-                  
+        </Grid>
+):(
+  <div
+  style={{
+    width: "400px", // Set a fixed width for the GIF
+    height: "400px", // Set a fixed height to match the width
+    position: "relative",
+    marginLeft:'600px',
+    marginTop:'100px',
+    alignContent:'center',
+    alignItems:'center'
+  }}
+>
+  <img
+    src={NodataFound}
+    width="100%"
+    height="100%"
+
+  ></img>
+</div>
+ )}
+      
+
+                {shareDialogOpen && (
+                    <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
+                  )} 
                 
                 <Dialog
                   open={open}
@@ -930,20 +970,6 @@ const handleCloseDialog = () => {
           {successMessage}
         </Alert>
       )}
-      {/* {showErrorMessage && (
-        <Alert severity="error" 
-        sx={{
-          position: 'fixed',
-          top: 60, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {errorMessage}
-        </Alert>
-      )} */}
             </div>
             </div>
           );

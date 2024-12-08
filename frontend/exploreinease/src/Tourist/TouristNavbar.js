@@ -329,7 +329,7 @@ const  handleRegisterClick=async(title)=> {
               localStorage.removeItem('UserType');
               navigate('/');
             }
-            else if(title==='Events'){              
+            else if(title==='Events') {              
               try {
                   const options = {
                     apiPath: `/upcomingEvents/${currency}`,

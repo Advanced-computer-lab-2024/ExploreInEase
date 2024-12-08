@@ -96,11 +96,9 @@ function Activity() {
     getAllCategory();
   }, []);
 
-useEffect(()=>
-{
+useEffect(()=>{
   getAllActivities();
-},[]
-);
+},[]);
 useEffect(() => {
   if (showSuccessMessage) {
     const timer = setTimeout(() => {
@@ -360,10 +358,9 @@ const handleSaveActivity = async () => {
       const tagIds = tagsList.filter(tag => updatedActivity.tags.includes(tag.name)).map(tag => tag.id);
       const rangeArray = updatedActivity.price;
       const priceObject = Array.isArray(rangeArray) ? rangeArray.join('-') : "0-0"; // Default to "0-0" or any other fallback
-      // console.log("hehhe");
       try {
         const formData = new FormData();
-        formData.append("file", selectedImage); // Attach the selected image file
+        formData.append("file", selectedImage); 
         formData.append("name", updatedActivity.name);
         formData.append("date", dayjs(updatedActivity.date).format('YYYY-MM-DD'));
         formData.append("time", dayjs(updatedActivity.time).format('hh:mm A'));
