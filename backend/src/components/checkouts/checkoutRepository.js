@@ -7,6 +7,8 @@ const fs = require('fs');
 const Cart = require('../../models/cart');
 const Notification = require('../../models/notification');
 const nodemailer = require("nodemailer");
+require('dotenv').config(); 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 
 const addProduct = async (productData) => {

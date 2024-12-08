@@ -123,6 +123,8 @@ const CartPage = () => {
     number: '',
     name: '',
     cvv: '',
+    expMonth: '',
+    expYear:'',
   });
 
   useEffect(() => {
@@ -191,6 +193,8 @@ const CartPage = () => {
 
   const handleOnClickButton = async (title) => {
     console.log(deliveryInfo);
+    console.log(selectedPaymentMethod);
+
     if (title === 'Continue to Checkout') {
       try {
         const options = {
@@ -227,8 +231,8 @@ const CartPage = () => {
       if (selectedPaymentMethod === 'cash') {
         // For cash on delivery, show the confirmation view
         setIsPaymentProceed(true);
-      } else if (selectedPaymentMethod === 'online') {
-        // For online payment, proceed to payment gateway
+      } else if (selectedPaymentMethod === 'card') {
+        // For card payment, proceed to payment gateway
         setIsPaymentProceed(true);
       }
     } else if (title === 'Confirm Order') {
@@ -259,6 +263,39 @@ const CartPage = () => {
         console.error('Error confirming order:', error);
         alert('Failed to confirm order. Please try again.');
       }
+    }else if (title === 'Confirm Details') {
+      try {
+        console.log(selectedPaymentMethod);
+        console.log(cardDetails);
+        const response = await NetworkService.post({
+          apiPath: `/createOrderCard`,
+          body: {
+            touristId: userId,
+            productsIdsQuantity: cartItems,
+            addressToBeDelivered: deliveryInfo,
+            paymentType: selectedPaymentMethod,
+            price: calculateTotal(),
+            currency: currency,
+            cardNumber: cardDetails.number,
+            expMonth: cardDetails.expMonth,
+            expYear: cardDetails.expYear,
+            cvc: cardDetails.cvv
+          }
+        });
+        console.log(response);
+
+        if (response.success) {
+          setIsOrderConfirmed(true); // Show the popup
+        } else {
+          alert('Failed to confirm order. Please try again.');
+        }
+
+        setActiveStep(3);
+        // Clear cart or navigate to success page
+      } catch (error) {
+        console.error('Error confirming order:', error);
+        alert('Failed to confirm order. Please try again.');
+      }
     }
   };
   // Add payment method change handler
@@ -266,7 +303,7 @@ const CartPage = () => {
     setSelectedPaymentMethod(event.target.value);
   };
 
-  // Add a confirmation handler for non-online payments
+  // Add a confirmation handler for non-card payments
   const handleConfirmOrder = async () => {
     try {
       // Add your order confirmation API call here
@@ -603,7 +640,7 @@ const CartPage = () => {
                       onChange={handlePaymentMethodChange}
                     >
                       <FormControlLabel
-                        value="online"
+                        value="card"
                         control={<Radio />}
                         label="Online Payment"
                         sx={{ mr: 4 }}
@@ -625,8 +662,8 @@ const CartPage = () => {
               </Paper>
             </Grid>
 
-            {/* Updated non-online payment confirmation view */}
-            {isPaymentProceed && !isCheckoutView && selectedPaymentMethod !== 'online' && (
+            {/* Updated non-card payment confirmation view */}
+            {isPaymentProceed && !isCheckoutView && selectedPaymentMethod !== 'card' && (
               <Container maxWidth="xl" sx={{ py: 4 }}>
                 <Grid container spacing={4} justifyContent="center">
                   <Grid item xs={12} md={8}>
@@ -987,7 +1024,7 @@ const CartPage = () => {
               </Grid>
             </Grid></>
         )}
-      {isPaymentProceed && !isCheckoutView && selectedPaymentMethod === 'online' &&
+      {isPaymentProceed && !isCheckoutView && selectedPaymentMethod === 'card' &&
         (
 
           <Grid container spacing={4}>
@@ -1094,29 +1131,36 @@ const CartPage = () => {
                       type="text"
                       inputProps={{ maxLength: 19 }}
                       placeholder="1234 5678 9012 3456"
-                      value={cardDetails.cardNumber}
+                      value={cardDetails.number}
                       onChange={(e) =>
                         handleChange(
-                          "cardNumber",
+                          "number",
                           e.target.value.replace(/[^0-9]/g, "").replace(/(.{4})/g, "$1 ").trim()
                         )
                       }
                       onFocus={() => setIsFlipped(false)} // Ensure card stays on front
                     />
                     <TextField
-                      label="Expiry Date"
+                      label="Expiry Month"
                       type="text"
                       placeholder="MM/YY"
-                      value={cardDetails.expiryDate}
-                      onChange={(e) => handleChange("expiryDate", e.target.value)}
+                      value={cardDetails.expMonth}
+                      onChange={(e) => handleChange("expMonth", e.target.value)}
                       onFocus={() => setIsFlipped(false)} // Ensure card stays on front
-                    />
+                    /><TextField
+                    label="Expiry Year"
+                    type="text"
+                    placeholder="MM/YY"
+                    value={cardDetails.expYear}
+                    onChange={(e) => handleChange("expYear", e.target.value)}
+                    onFocus={() => setIsFlipped(false)} // Ensure card stays on front
+                  />
                     <TextField
                       label="Cardholder Name"
                       type="text"
                       placeholder="John Doe"
-                      value={cardDetails.cardholderName}
-                      onChange={(e) => handleChange("cardholderName", e.target.value)}
+                      value={cardDetails.name}
+                      onChange={(e) => handleChange("name", e.target.value)}
                       onFocus={() => setIsFlipped(false)} // Ensure card stays on front
                     />
                     <TextField
@@ -1250,9 +1294,9 @@ const CartPage = () => {
                       textTransform: 'none',
                       fontSize: '1rem'
                     }}
-                    onClick={() => handleOnClickButton("Proceed to Payment")}
+                    onClick={() => handleOnClickButton("Confirm Details")}
                   >
-                    Proceed to Payment
+                    Confirm Details
                   </Button>
                 </CardContent>
               </Card>

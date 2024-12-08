@@ -1,7 +1,12 @@
 const checkoutService = require('../checkouts/checkoutService');
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const userRepository = require('../users/userRepository');
 const nodemailer = require("nodemailer");
+const Tourist = require('../../models/tourist');
+require('dotenv').config();
+
+
 const addProduct = async (req, res) => {
     const { price, description, originalQuantity, name } = req.body;
     console.log(req.body)
