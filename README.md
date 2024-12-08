@@ -16,15 +16,79 @@ This project uses 2-space indentation for all JavaScript and JSON files. Formatt
 
 ## Screenshots
 
-```markdown
 Here are some screenshots of the application:
 
-![stripe](https://github.com/user-attachments/assets/e17eaec8-3b1c-496c-a24f-da22a0db8ab5)
-![Screenshot 2](../screenshots/screenshot2.png)
-![Screenshot 3](../screenshots/screenshot3.png)
-![Screenshot 4](../screenshots/screenshot4.png)
-![Screenshot 5](../screenshots/screenshot5.png)
-```
+### Add Governor or Admin
+
+![Add Governor or Admin](screenshots/addGovernorOrAdmin.png)
+
+### Add Product
+
+![Add Product](screenshots/AddProduct.png)
+
+### Book Event With Card
+
+![Book Event Card](screenshots/bookEventCard.png)
+
+### Book Event By Wallet
+
+![Book Event Wallet](screenshots/bookEventWallet.png)
+
+### Create Transportation
+
+![Create Transportation](screenshots/createtransportation.png)
+
+### Create Order (Wallet or COD)
+
+![Create Order Wallet or COD](screenshots/createOrderWalletOrCod.png)
+
+### Delete User
+
+![Delete User](screenshots/deleteuser.png)
+
+### Deletion Requests
+
+![Deletion Requests](screenshots/deletionrequestsfortheadmin.png)
+
+### Email Sent for verifying Booking
+
+![Email Sent for Booking](screenshots/emailsentforbooking.png)
+
+### Flight Offers
+
+![Flight Offers](screenshots/flightOffers.png)
+
+### Get All Events Part 1
+
+![Get All Events Part 1](screenshots/getAllEventspart1.png)
+
+### Get All Events Part 2
+
+![Get All Events Part 2](screenshots/getAllEventspart2.png)
+
+### Get All Events Part 3
+
+![Get All Events Part 3](screenshots/getAllEventspart3.png)
+
+### Hotel Offers
+
+![Hotel Offers](screenshots/hotelOffers.png)
+
+### Login Page
+
+![Login Page](screenshots/login.png)
+
+### My Orders
+
+![My Orders](screenshots/myOrders.png)
+
+### Request Deletion
+
+![Request Deletion](screenshots/requestDeletion.png)
+
+### Stripe Payment
+
+![Stripe Payment](screenshots/stripe.png)
 
 ## Tech/Framework Used
 
