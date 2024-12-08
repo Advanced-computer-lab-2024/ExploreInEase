@@ -39,7 +39,7 @@ const SHomePage = () => {
   const [ setSuccess] = useState();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [ setError] = useState();
-  const [selectedTab, setSelectedTab] = useState("Sales Report");  
+  let [selectedTab, setSelectedTab] = useState("Sales Report");  
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [setErrorMessage] = useState('');

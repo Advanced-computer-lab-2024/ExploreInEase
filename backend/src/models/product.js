@@ -17,7 +17,6 @@ const ProductsSchema = new Schema({
     description: {
         type: String,
         required: [true, 'Description is required'],
-        minlength: 10               // Minimum length for description
     },
     sellerId: {
         type: mongoose.Schema.Types.ObjectId, // Foreign key to reference the seller
