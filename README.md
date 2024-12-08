@@ -19,7 +19,7 @@ This project uses 2-space indentation for all JavaScript and JSON files. Formatt
 ```markdown
 Here are some screenshots of the application:
 
-![addGovernorOrAdmin](https://github.com/Advanced-computer-lab-2024/ExploreInEase/screenshots/addGovernorOrAdmin.png)
+![addGovernorOrAdmin](https://github.com/Advanced-computer-lab-2024/ExploreInEase/raw/Mohamed's/screenshots/addGovernorOrAdmin.png)
 ![Screenshot 2](../screenshots/screenshot2.png)
 ![Screenshot 3](../screenshots/screenshot3.png)
 ![Screenshot 4](../screenshots/screenshot4.png)
