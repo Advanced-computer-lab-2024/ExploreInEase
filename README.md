@@ -1,8 +1,6 @@
 # Project Title
 
-## Brief
-
-A little brief about what the project is about. It should be like a small summary format informing about the main purpose of the project.
+ExploreInEase
 
 ## Motivation
 
@@ -14,7 +12,7 @@ This basically explains the current build status of the project. If there is a b
 
 ## Code Style
 
-This lets the users know that you have used a particular code style and helps them when contributing to your project so that the whole project code style stays the same. Some common code styles: standard, xo, etc.
+This project uses 2-space indentation for all JavaScript and JSON files. Formatting is enforced with Prettier to maintain consistency and uses the routes-controller-service-repository architecture to ensure separation of concerns
 
 ## Screenshots
 
@@ -22,7 +20,10 @@ As the saying goes, a picture is equal to a thousand words. Most people will be 
 
 ## Tech/Framework Used
 
-This is used to help the reader understand which tech or frameworks have been used to do the project. It helps the reader understand which all tech stack he has to be familiar with to understand the whole project.
+Frontend: React.js
+Backend: Node.js, Express.js
+Database: MongoDB
+Other Tools: Postman
 
 ## Features
 
@@ -34,7 +35,103 @@ This is where you try to compress your project and make the reader understand wh
 
 ## Installation
 
-If your project needs the installation of certain software or configurations to the system, mention it in this section as it helps a lot for the reader to use your project. The steps mentioned should be precise and explanatory. If possible, you can add links that can help them better understand how to configure/install the necessary files or software.
+This is the installation guidelines in order to be able to run the project normally.
+
+### Prerequisites
+
+Node.js (v16 or later recommended)
+MongoDB (Installed locally or use a MongoDB cloud service like MongoDB Atlas)
+npm (comes with Node.js)
+
+### Backend Installation
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/Advanced-computer-lab-2024/ExploreInEase.git
+    cd backend
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    npm install
+    npm install stripe
+    npm install amadues
+    npm install jsonwebtoken
+    ```
+
+3. Start the backend server:
+
+    ```bash
+    node main.js
+    ```
+
+### Frontend Installation
+
+1. Navigate to the frontend directory:
+
+    ```bash
+    cd frontend
+    cd exploreinease
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    npm install
+    npm install recharts
+    ```
+
+3. Start the frontend server:
+
+    ```bash
+    npm run start
+    ```
+
+### .env Configuration
+
+1. Create a `.env` file in the root directory of backend and frontend .
+2. Add the necessary environment variables. For example:
+
+    ```plaintext
+    # Backend .env
+
+    MONGO_URI =mongodb+srv://Mahmoudd2:2292003-Ma@acl.neyvc.mongodb.net/?retryWrites=true&w=majority&appName=ACL
+    PORT=3030
+
+    EMAIL_USER=aclproject7@gmail.com
+    EMAIL_PASS=Buildo12
+    RAPIDAPI_KEY=6710fd7b1ac0ed805eec0fce
+
+
+    AMADEUS_CLIENT_ID= 0ZNDWQAtjqdGQcAMpVIl4zMR9IJwYgbR
+    AMADEUS_CLIENT_SECRET= 986AX1xyZejDvN51
+
+    AMADEUS_CLIENT_ID2= SmzXGDuf2RMIZDLllUYQZ29a0SWGsQvF
+    AMADEUS_CLIENT_SECRET2= oM96OTLUtHWjKzpQ
+
+
+    AMADEUS_CLIENT_ID3 = yzOW0nOROG5brSafY83NWEXUiudjmLdo
+    AMADEUS_CLIENT_SECRET3 = p6wllMcKcTi84yGe
+
+    AMADEUS_CLIENT_ID4= 6odeGdyTrngv1iK4MTGLV1ZA3e5DGpaQ
+    AMADEUS_CLIENT_SECRET4=5C6yUMriUDBvwtdK
+
+    STRIPE_SECRET_KEY=sk_test_51QOfrZP3C1ta6TKcaY6MeeVy0DTG00poVlhmfQkuSyCxqjzdqoy9fIlQmCuPpBCMVEgZxvWrPdfgVZooxmki6ATI00dNNo7CSy
+    STRIPE_PUBLISHABLE_KEY =pk_test_51QOfrZP3C1ta6TKcd53VEcNm89cLxgcOaunbE5hVEIsHyBkHl7G36Gh3SnPErTfMgpUsT4RhmSf8mvpPDxjFgeuz00LJSztbXr
+
+    EMAIL2_USER=saifahmedsalah11
+    EMAIL2_PASS=lsssmezaheetgmld
+
+
+    # Frontend .env
+    URL=http://localhost:3000
+    AMADEUS_CLIENT_ID4= 6odeGdyTrngv1iK4MTGLV1ZA3e5DGpaQ
+    AMADEUS_CLIENT_SECRET4=5C6yUMriUDBvwtdK
+    ```
+
+3. Save the `.env` files.
 
 ## API Reference
 
