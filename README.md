@@ -183,13 +183,13 @@ If you want to contribute to our project you can clone our repository and create
 
 ### Node.js resources
 
-1. [Node.js resources](https://www.youtube.com/playlist?list=PLZlA0Gpn_vH_uZs4vJMIhcinABSTUH2bY)
-2. [Node.js resources](https://youtu.be/3OOHC_UzrKA?si=6S-I2KhhBGqCn1vn)
+1. [Node.js resource 1](https://www.youtube.com/playlist?list=PLZlA0Gpn_vH_uZs4vJMIhcinABSTUH2bY)
+2. [Node.js resource 2](https://youtu.be/3OOHC_UzrKA?si=6S-I2KhhBGqCn1vn)
 
 ### React.js resources
 
-1.[React.js resources](https://www.youtube.com/playlist?list=PLZlA0Gpn_vH_NT5zPVp18nGe_W9LqBDQK)
-2.[React.js resources](https://codedamn.com/news/reactjs/usestate-and-useeffect-hooks)
+1. [React.js resource 1](https://www.youtube.com/playlist?list=PLZlA0Gpn_vH_NT5zPVp18nGe_W9LqBDQK)
+2. [React.js resource 2](https://codedamn.com/news/reactjs/usestate-and-useeffect-hooks)
 
 ## License
 
