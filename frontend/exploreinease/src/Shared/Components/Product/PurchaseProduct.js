@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Alert } from '@mui/material'; 
-
+import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const ProductPurchased = () => {
   const location = useLocation();
@@ -129,6 +129,9 @@ const handleSaveReview =async(review)=>{
 // const 
 
   return (
+    <div>
+      <TouristNavbar/>
+   
     <Box display="flex" flexDirection="row" py={3} px={2} justifyContent="center">
     
 
@@ -256,6 +259,7 @@ onClose={handleClose}>
         </Alert>
       )}
     </Box>
+    </div>
   );
 };
 export default ProductPurchased;

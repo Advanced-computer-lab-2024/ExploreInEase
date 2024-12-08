@@ -24,6 +24,7 @@ import React, { useState, useEffect } from "react";
 import { differenceInHours } from 'date-fns'; // Use date-fns or a similar library
 import { Alert } from '@mui/material'; 
 import NetworkService from "../NetworkService";
+import TouristNavbar from "./TouristNavbar";
 const Booked = () => {
   const location = useLocation();
   const { events ,userId} = location.state || {};
@@ -505,6 +506,9 @@ const Booked = () => {
   console.log("Filtered Data",filteredData);
 
   return (
+    <div>
+      <TouristNavbar/>
+
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
         <Tabs value={role} onChange={handleRoleChange}>
@@ -898,6 +902,8 @@ const Booked = () => {
     )}
               </div>
             </div>
+            </div>
+
           );
         };
 export default Booked;

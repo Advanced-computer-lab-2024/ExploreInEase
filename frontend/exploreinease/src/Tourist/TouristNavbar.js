@@ -206,7 +206,7 @@ const  handleRegisterClick=async(title)=> {
                   }
                 }
             }
-            else if(title ==="View Booked items") {
+            else if(title ==="Booked items") {
               try {
                 const touristId=Userr._id;
                 const options = { 
@@ -219,10 +219,7 @@ const  handleRegisterClick=async(title)=> {
                 console.log('Error:', error);
               }
             }
-            else if(title ==="View/Rate Purchased Product") {
-              console.log("hereeeee");
-              console.log("heree");
-
+            else if(title ==="Purchased Product") {
               try {
                 const options = {
                   apiPath: `/getOrders/${Userr._id}`,
@@ -508,7 +505,7 @@ return (
      </div>
     </nav>
     <nav className="navbarSecondary">
-    {['Events',"Complaints","Book Hotels","Book Flights","Itinerary","View Itinerary","Products","Transportation","Order History","Rating"].map((tab) => (
+    {['Events',"Complaints","Book Hotels","Book Flights","Itinerary","Products","Purchased Product","Transportation","Booked items","Rating"].map((tab) => (
           <div
             key={tab}
             className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}
