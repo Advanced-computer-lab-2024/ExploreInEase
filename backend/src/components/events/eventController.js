@@ -401,7 +401,12 @@ const getAllActivities = async (req, res) => {
 
 const addActivity = async (req, res) => {
   const { name, date, time, location, price, category, tags, specialDiscounts, isOpen, created_by } = req.body;
-  console.log(tags);
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
   // Validate required fields
   if (!name || !date || !time || !location || !price || !category || !tags || typeof isOpen === 'undefined' || !created_by) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -427,6 +432,10 @@ const addActivity = async (req, res) => {
       created_by
     });
 
+    const activityImage = await checkoutService.uploadEventImage(activity._id, file, "Activity");
+    if(activityImage.message != 'Image uploaded successfully') {
+      return res.status(400).json({ message: 'Error uploading image' });
+    }
     return res.status(200).json({message: 'Activity created successfully', activity: activity });
   } catch (error) {
     console.error('Error creating activity:', error.message);
@@ -573,12 +582,16 @@ const getItineraryById = async (req, res) => {
   }
 };
 
-
 const createItinerary = async (req, res) => {
   try {
     const {name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial} = req.body;
-    console.log("");
+    console.log("      ");
     console.log(req.body);
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).send('No file uploaded.');
+    }
     if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !pickupLocation || !dropoffLocation) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -632,7 +645,11 @@ const createItinerary = async (req, res) => {
     
     // Call the service to create the itinerary
     const newItinerary = await eventService.createItinerary(itineraryData);
-    
+
+    const itineraryImage = await checkoutService.uploadEventImage(newItinerary._id, file, "Itinerary");
+    if(itineraryImage.message != 'Image uploaded successfully') {
+      return res.status(400).json({ message: 'Error uploading image' });
+    } 
     return res.status(200).json({message: "Itinerary created successfully", Itinerary: newItinerary});
   } catch (error) {
     console.error('Error creating itinerary:', error.message);
@@ -721,6 +738,12 @@ const createHistoricalPlace = async (req, res) => {
     tags
   } = req.body;
 
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
   // Validate required fields
   if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by || !tags) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -750,6 +773,12 @@ const createHistoricalPlace = async (req, res) => {
 
     // Call the service to create the historical place
     const historicalPlace = await eventService.createHistoricalPlace(historicalPlaceData);
+
+    const historicalPlaceImage = await checkoutService.uploadEventImage(historicalPlace._id, file, "HistoricalPlace");
+    if(historicalPlaceImage.message != 'Image uploaded successfully') {
+      return res.status(400).json({ message: 'Error uploading image' });
+    } 
+
     return res.status(historicalPlace.status).json(historicalPlace.response);
   } catch (error) {
     console.error('Error creating historical place:', error.message);

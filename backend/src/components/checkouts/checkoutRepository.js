@@ -2,10 +2,13 @@ const Product = require('../../models/product');
 const Users = require('../../models/user');
 const Tourist = require('../../models/tourist');
 const Notification = require('../../models/notification');
-require('dotenv').config();
+const PromoCode = require('../../models/promoCode');
 const Order = require('../../models/order');
+const Cart = require('../../models/cart');
 const path = require('path');
 const fs = require('fs');
+const HistoricalPlace = require('../../models/historicalPlace');
+dotenv = require('dotenv');
 
 const addProduct = async (productData) => {
     try {
@@ -167,19 +170,19 @@ const updateProductReviews = async (productId, updatedFields) => {
     }
 };
 
-// const getOrderById = async (orderId) => {
-//     try {
-//         // Use Mongoose to find the order by its ID
-//         const order = await Order.findById(orderId)
-//             .populate('touristId', 'name email') // Populate touristId with specific fields if needed
-//             .populate('productIds', 'name price') // Populate productIds with specific fields if needed
-//             .exec(); // Execute the query
+const getOrderById = async (orderId) => {
+    try {
+        // Use Mongoose to find the order by its ID
+        const order = await Order.findById(orderId)
+            .populate('touristId', 'name email') // Populate touristId with specific fields if needed
+            .populate('productIds', 'name price') // Populate productIds with specific fields if needed
+            .exec(); // Execute the query
 
-//         return order; // Return the found order, or null if not found
-//     } catch (error) {
-//         throw new Error(`Error retrieving order: ${error.message}`); // Throw an error if something goes wrong
-//     }
-// };
+        return order; // Return the found order, or null if not found
+    } catch (error) {
+        throw new Error(`Error retrieving order: ${error.message}`); // Throw an error if something goes wrong
+    }
+};
 
 
 const addOrder = async (orderData) => {
@@ -297,6 +300,30 @@ const updateProductImage = async (productId, fileName) => {
     }
 };
 
+const updateEventImage = async (eventId, fileName, type) => {
+    try {
+        let event;
+        if(type == "Activity"){
+            event = await Activity.findById(eventId);
+        }else if(type == "Itinerary"){
+            event = await Itinerary.findById(eventId);
+        }else if(type == "HistoricalPlace"){
+            event = await HistoricalPlace.findById(eventId);
+        }
+        else{
+            throw new Error('Invalid Type');
+        }
+        if (!eventId) {
+            throw new Error('eventId not found');
+        }
+        
+        eventId.picture = fileName;
+        await eventId.save();
+    } catch (error) {
+        throw new Error(`Error updating profile picture: ${error.message}`);
+    }
+};
+
 
 
 const uploadImage = async (productId, fileName, fileBuffer) => {
@@ -328,94 +355,6 @@ const archiveProduct = async (product) => {
     await product.save();
 };
 
-
-const findOrdersByStatusAndTouristId = async (touristId, currency) => {
-    // Fetch orders for the given touristId
-    const orders = await Order.find({ touristId }).exec();
-    console.log(orders);
-  
-    // Fetch tourist information for the given touristId
-    const tourist = await Tourist.findById(touristId).exec();
-    if (!tourist) {
-        throw new Error("Tourist not found");
-    }
-    const customerName = tourist.username;
-  
-    // Create a map of product IDs to their names for efficient lookup
-    const productIds = [
-        ...new Set(
-            orders.flatMap(order => order.productsIdsQuantity.map(product => product.id))
-        )
-    ];
-    const products = await Product.find({ _id: { $in: productIds } }).exec();
-    const productMap = Object.fromEntries(
-        products.map(product => [product._id.toString(), product.name])
-    );
-  
-    // Map orders to the desired structure
-    const convertedOrders = orders.map((order, index) => {
-        // Convert price based on the specified currency
-        let convertedPrice = order.price;
-        switch (currency) {
-            case "euro":
-                convertedPrice = parseFloat((order.price / 55).toFixed(2));
-                break;
-            case "dollar":
-                convertedPrice = parseFloat((order.price / 50).toFixed(2));
-                break;
-            case "EGP":
-                // No conversion needed for EGP
-                break;
-            default:
-                throw new Error("Invalid currency specified");
-        }
-  
-        return {
-            id: index + 1, // Generate a unique ID starting from 1
-            orderDate: new Date(order.createdAt).toISOString().split("T")[0], // Format date as YYYY-MM-DD
-            status: order.status,
-            products: order.productsIdsQuantity.map((product, idx) => ({
-                id: idx + 1, // Product index in sequence
-                name: productMap[product.id] || "Unknown Product", // Fetch name from productMap
-                quantity: product.quantity,
-                price: convertedPrice, // Total price of the order
-            })),
-            customerName, // Fetched from the Tourist table
-            shippingAddress: `${order.addressToBeDelivered.street}, ${order.addressToBeDelivered.city}, ${order.addressToBeDelivered.country}`,
-            paymentType: order.paymentType,
-        };
-    });
-  
-    return convertedOrders;
-  };
-  
-  
-  
-  
-  // Fetch order by ID
-  const getOrderById = async (orderId) => {
-      return await Order.findById(orderId).exec();
-  };
-  
-  // Fetch tourist by ID
-  const getTouristById = async (touristId) => {
-      return await Tourist.findById(touristId).exec();
-  };
-  
-  // Delete order by ID
-  const deleteOrderById = async (orderId) => {
-      return await Order.findByIdAndDelete(orderId).exec();
-  };
-
-
-
-  //Buildo+saif apis
-  
-const createOrder = async (orderData) => {
-    const order = new Order(orderData);
-    return await order.save();
-};
-
 const addNotification = async (notificationData) => {
     const notification = new Notification(notificationData);
     const newNotification = await notification.save();
@@ -425,10 +364,159 @@ const addNotification = async (notificationData) => {
 
 
 
+const getAllNotifications = async (id, type) => {
+
+    try {
+        const allnotifications = await Notification.find();
+        console.log(allnotifications);
+        const notifications = await Notification.find({ 'user.user_id': id, 'user.user_type': type });
+        return notifications;
+    } catch (error) {
+        throw new Error(`Error retrieving notifications: ${error.message}`);
+    }
+};
+
+const getPromoCode = async (promoCode) => {
+    try {
+        const promoCode = await PromoCode.findOne({ promoCodes: promoCode });
+        return promoCode.promoCodes;
+    } catch (error) {
+        throw new Error(`Error retrieving notifications: ${error.message}`);
+    }
+};
+
+const addWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.push(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const getWishlist = async (touristId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        const wishlistProducts = tourist.wishlists;
+        const products = await Product.find({ _id: { $in: wishlistProducts } });
+        return products;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const removeWishlist = async (touristId, productId) => {
+    try {
+        const tourist = await Tourist.findOne({ _id: touristId });
+        tourist.wishlists.pull(productId);
+        await tourist.save();
+        return tourist;
+    } catch (error) {
+        throw new Error(`Error adding to wishlist: ${error.message}`);
+    }
+}
+
+const addCart = async (touristId, productId, quantity) => {
+    try {
+        const cartTourists = await Cart.find({ touristId: touristId });
+        if(cartTourists.length != 0){
+            cartTourists[0].products.push({ productId: productId, quantity: quantity });
+            await cartTourists[0].save();
+            return cartTourists[0];
+        }
+        const cartItem = {
+            touristId: touristId,
+            products: {
+                productId:productId,
+                quantity:quantity
+            }
+        };
+        const cart = new Cart(cartItem);
+        await cart.save();
+        return cart;
+    } catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
+
+const getCart = async (touristId) => {
+    try {
+        const cart = await Cart.find({ touristId });
+
+        if (!cart || cart.length === 0) {
+            return { cart: [], products: [] };
+        }
+
+        const allProducts = [];
+
+        for (const cartItem of cart) {
+            const products = await Promise.all(
+                cartItem.products.map(async (product) => {
+                    const getProduct = await getProductById2(product.productId.toString());
+                    if (!getProduct) {
+                        throw new Error(`Product with ID ${product.productId} not found.`);
+                    }
+
+                    return {
+                        ...getProduct._doc, 
+                    };
+                })
+            );
+
+            allProducts.push(...products);
+        }
 
 
+        console.log(allProducts);
+
+        return { cart, products: allProducts };
+    } catch (error) {
+        console.error(`Error fetching cart: ${error.message}`);
+        throw new Error(`Error fetching cart: ${error.message}`);
+    }
+};
+
+
+
+const removeCart = async (touristId, cartItemId) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products.splice(cartItemId, 1); // Removes the item at the given index
+        if(cart.products.length == 0){
+            await Cart.deleteOne({ touristId: touristId });
+        }
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error removing from cart: ${error.message}`);
+    }
+}
+
+const editQuantityInCart = async (touristId, cartItemId, quantity) => {
+    try {
+        const cart = await Cart.findOne({ touristId: touristId });
+        cart.products[cartItemId].quantity = quantity;
+        await cart.save();
+        return cart;
+    }
+    catch (error) {
+        throw new Error(`Error adding to cart: ${error.message}`);
+    }
+}
 
 module.exports = {
+    editQuantityInCart,
+    removeCart,
+    getCart,
+    addCart,
+    removeWishlist,
+    getWishlist,
+    addWishlist,
+    getAllNotifications,
+    addNotification,
     getAvailableProductsSortedByRatings,
     addProduct,
     getAllAvailableProducts,
@@ -459,10 +547,5 @@ module.exports = {
     getOrdersByTouristId,
     getOrderById,
     getProductById2,
-    findOrdersByStatusAndTouristId,
-    getTouristById,
-    deleteOrderById,
-    createOrder,
-    addNotification
-
+    updateEventImage
 };

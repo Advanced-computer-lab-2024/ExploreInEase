@@ -120,6 +120,26 @@ const uploadImage = async (productId, file) => {
     return { message: 'Image uploaded successfully', imageUrl: imageUrl };
 };
 
+const uploadEventImage = async (eventId, file, type) => {
+    console.log('Service');
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+        throw new Error('Only image files are allowed (jpg, jpeg, png).');
+    }
+
+    const fileName = `${eventId}-${Date.now()}${fileExtension}`;
+    const fileBuffer = file.buffer;
+
+    await checkoutRepository.uploadImage(eventId, fileName, fileBuffer); 
+    const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+    await checkoutRepository.updateEventImage(eventId, fileName, type);
+
+    return { message: 'Image uploaded successfully', imageUrl: imageUrl };
+};
+
 const archiveProduct = async (product) => {
      await checkoutRepository.archiveProduct(product);
 };
@@ -374,7 +394,7 @@ module.exports = {
     getOrdersByStatusAndTouristId,
     cancelOrder,
     createOrderWalletOrCod,
-    createOrderWithCard
-
+    createOrderWithCard,
+    uploadEventImage
 
 };
