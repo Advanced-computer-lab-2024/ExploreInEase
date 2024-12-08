@@ -57,6 +57,7 @@ npm (comes with Node.js)
     ```bash
     npm install
     npm install stripe
+    npm install nodemailer
     npm install amadues
     npm install jsonwebtoken
     ```
@@ -147,12 +148,65 @@ As I have mentioned before, you never know who is going to read your readme. So 
 
 ## Contribute
 
-This is where you let them know that they can contribute and help you out. A guideline on how to contribute is also helpful.
+If you want to contribute to our project you can clone our repository and create your own branch to be able to contribute by following steps:
+
+### Cloning the Repository and Creating a Branch
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/Advanced-computer-lab-2024/ExploreInEase.git
+    ```
+
+2. Create a new branch:
+
+    ```bash
+    git checkout -b your-branch-name
+    ```
+
+3. Make your changes and commit them:
+
+    ```bash
+    git add .
+    git commit -m "Description of your changes"
+    ```
+
+4. Push your branch to the repository:
+
+    ```bash
+    git push origin your-branch-name
+    ```
+
+5. Create a pull request on GitHub to merge your changes into the main branch.
 
 ## Credits
 
-Giving proper credit is most important. Mention any links/repos which helped you or inspired you to build this project. It can be a blog, another open source project, or just people who have contributed to building this project.
+### Node.js resources
+
+1. [Node.js resources](https://www.youtube.com/playlist?list=PLZlA0Gpn_vH_uZs4vJMIhcinABSTUH2bY)
+2. [Node.js resources](https://youtu.be/3OOHC_UzrKA?si=6S-I2KhhBGqCn1vn)
+
+### React.js resources
+
+1.[React.js resources](https://www.youtube.com/playlist?list=PLZlA0Gpn_vH_NT5zPVp18nGe_W9LqBDQK)
+2.[React.js resources](https://codedamn.com/news/reactjs/usestate-and-useeffect-hooks)
 
 ## License
 
-A short description of the license. (MIT, Apache, etc.)
+### Nodemailer
+
+- **License:** MIT
+- **Source:** [Nodemailer GitHub Repository](https://github.com/nodemailer/nodemailer)
+- **Details:** Nodemailer is licensed under the MIT License, which permits unrestricted use, modification, and distribution as long as the original copyright notice is included.
+
+### Amadeus Node.js SDK
+
+- **License:** MIT
+- **Source:** [Amadeus Node.js SDK GitHub Repository](https://github.com/amadeus4dev/amadeus-node)
+- **Details:** The Amadeus Node.js SDK is also licensed under the MIT License, allowing for unrestricted use, modification, and distribution with attribution.
+
+### Stripe Node.js SDK
+
+- **License:** Apache 2.0
+- **Source:** [Stripe GitHub Repository](https://github.com/stripe/stripe-node)
+- **Details:** Stripe Node.js SDK is licensed under the Apache License 2.0, which permits usage, modification, and distribution with attribution, provided you comply with the terms of the license, including providing a copy of the license in any distribution.
