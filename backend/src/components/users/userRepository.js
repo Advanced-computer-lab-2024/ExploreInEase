@@ -50,7 +50,17 @@ const getUserStatistics = async () => {
   };
   
 
-
+  const getType = async (id) => {
+    const user = await Users.findOne({ _id: id });
+    const tourist = await Tourist.findOne({ _id: id });
+    if (user) {
+      return user.type;
+    } else if (tourist) {
+      return "tourist";
+    } else {
+      throw new Error("User not found");
+    }
+  };
 
 
 const updateUserStatus = async (userId, status) => {
@@ -1117,5 +1127,6 @@ module.exports = {
     checkSellerProductStatus,
     checkAdvertiserActivityStatus,
     getTouristByUsername,
-    getUserStatistics
+    getUserStatistics,
+    getType
 };

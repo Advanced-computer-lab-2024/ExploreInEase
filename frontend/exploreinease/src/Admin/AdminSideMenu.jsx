@@ -34,6 +34,8 @@ import EventsAndItineraries from './EventsAndItenararies';
 import AdminHomePage from './AdminHomePage';
 import AdminSalesReport from './AdminSalesReport';
 
+import AdminSalesReport2 from './AdminSalesReport2';
+
 import ActivityCategory from './activityCategories';//done
 import AddUser from './AddUser';//done
 import Preferencetags from './preferenceTags';//done
