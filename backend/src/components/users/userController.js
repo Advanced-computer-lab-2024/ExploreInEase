@@ -578,10 +578,6 @@ const acceptTerms = async (req, res) => {
 
 const requestDeletion = async (req, res) => {
     const { userId, type } = req.params;
-    
-
-
-    
     if (!userId || !type) {
         return res.status(400).json({ message: "ID and type are required." });
     }

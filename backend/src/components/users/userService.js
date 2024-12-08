@@ -578,7 +578,6 @@ const requestDeletion = async (userId, type) => {
         // Check conditions for tourist
         canDelete = await userRepository.checkTouristDeletionCriteria(userId);
     } else if (type === 'tourGuide') {
-        console.log('a7a');
         // Check conditions for tour guide in itinerary
         canDelete = await userRepository.checkTourGuideItineraryDates(userId);
     } else if (type === 'seller') {

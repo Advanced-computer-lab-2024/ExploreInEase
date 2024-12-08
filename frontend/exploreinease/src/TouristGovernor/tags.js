@@ -15,6 +15,7 @@ import TagIcon from "@mui/icons-material/Tag";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 import "./changePassword.css";
+import NodataFound from '../No data Found.avif';  
 
 function Tags() {
   const location = useLocation();
@@ -57,33 +58,7 @@ function Tags() {
     setOpen(true);
   };
 
-  // const handleClose = () => {
-  //   setOpen(false);
-  //   setTagType("");
-  //   setName("");
-  // };
-
-  // const handleSaveTag = async () => {
-  //   if (tagType && period.trim()) {
-  //     const body = {
-  //       type: tagType,
-  //       period: period,
-  //     };
-  //     const apiPath = `http://localhost:3030/createHistoricalTag/${governorId}`;
-
-  //     try {
-  //       const response = await axios.post(apiPath, body);
-  //       getAllTags();
-  //       setSuccessMessage(response.data.message || "Successfully!");
-  //       setShowSuccessMessage(true);
-  //       handleClose();
-  //     } catch (error) {
-  //       setErrorMessage("An error occurred");
-  //       setShowErrorMessage(true);
-  //       console.error("Error while saving the tag:", error);
-  //     }
-  //   }
-  // };
+ 
 
   return (
     <div>
@@ -138,20 +113,38 @@ function Tags() {
                     </ListSubheader>
                   }
                 >
-                  {tags.map((tag, index) => (
-                    <React.Fragment key={index}>
-                      <ListItem sx={{ display: "flex", alignItems: "center" }}>
-                        <ListItemIcon>
-                          <TagIcon sx={{ color: "primary.main" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={`Type: ${tag.tagType}`}
-                          secondary={`Period: ${tag.period}`}
-                        />
-                      </ListItem>
-                      {index < tags.length - 1 && <Divider />}
-                    </React.Fragment>
-                  ))}
+                  {tags.length>0?(
+                      tags.map((tag, index) => (
+                        <React.Fragment key={index}>
+                          <ListItem sx={{ display: "flex", alignItems: "center" }}>
+                            <ListItemIcon>
+                              <TagIcon sx={{ color: "primary.main" }} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={`Type: ${tag.tagType}`}
+                              secondary={`Period: ${tag.period}`}
+                            />
+                          </ListItem>
+                          {index < tags.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))
+                  ):(
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              height: "100vh", // Full viewport height, adjust as needed
+                            }}
+                          >
+                            <img
+                              src={NodataFound}
+                              alt="Centered Image"
+                              style={{ maxWidth: "100%", maxHeight: "100%" }}
+                            />
+                          </div>           
+                       )}
+        
                 </List>
 
                 <Tooltip title="Create a Tag" arrow>

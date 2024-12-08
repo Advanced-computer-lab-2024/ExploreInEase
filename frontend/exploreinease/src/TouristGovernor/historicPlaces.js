@@ -22,6 +22,8 @@ import Tooltip from "@mui/material/Tooltip";
 import InfoIcon from '@mui/icons-material/Info';
 import axios from 'axios';
 import GovernorNavbar from './GovernorNavbar';
+import NodataFound from '../No data Found.avif';  
+
 const containerStyle = {
   width: '100%',
   height: '400px',
@@ -39,8 +41,8 @@ function HistoricalPlaces() {
   const [open, setOpen] = useState(false);
   const [mapCenter, setMapCenter] = useState({lat:defaultCenter.lat, lng: defaultCenter.lng});
   const [markerPosition, setMarkerPosition] = useState(null);
-  const [ setMap] = useState(null);
-  const [ setPlacesService] = useState(null);
+  const [map,setMap] = useState(null);
+  const [placeService, setPlacesService] = useState(null);
   const [currentPlace, setCurrentPlace] = useState(null);
   const [tags, setTags] = React.useState([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -653,52 +655,70 @@ const getAllTags=async ()=>{
                 </Button>
               </DialogActions>
             </Dialog>
-            <Grid container >
-              {Array.isArray(historicPlaces) && historicPlaces.map((place, index) => (
-                <Card key={place.id || index} sx={{ 
-                      margin: 2, 
-                      boxShadow: 3, 
-                      borderRadius: 2, 
-                      '&:hover': { 
-                        boxShadow: 6, 
-                        transform: 'scale(1.02)', 
-                        transition: 'transform 0.3s ease, box-shadow 0.3s ease' 
-                      },
-                }}>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={place.pictures ? place.pictures[0] : '/default-placeholder.png'}
-                    alt={place.name}
-                  />
-                  <CardContent>
-                    <Box sx={{  justifyContent: 'center', marginLeft: 40 }}>
-                    <Tooltip title="Create a Tag" arrow>
-                      <IconButton onClick={() => handleToggleInfo(place)}>
-                        <InfoIcon fontSize="large" sx={{ color: '#00008B' }} />
-                      </IconButton>
-                      </Tooltip>
-                    </Box>
-                    <Typography variant="h5">
-                      <strong>{place.name}</strong>
-                    </Typography>
-                    <Typography variant="body1">
-                      <strong>Description:</strong> {place.description}
-                    </Typography>
-                  </CardContent>
-                  <CardActions sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
-                    gap: 2, 
-                    paddingBottom: 2 
-                  }}>
-                    <Button size="small" variant="contained" onClick={() => handleEditPlace(place)}>Edit</Button>
-                    <Button size="small" variant="contained" color="error" onClick={() => handleDeletePlace(place)}>Delete</Button>
-                  </CardActions>
-                </Card>
-              ))}
-            </Grid>
+            {historicPlaces.length>0?(
+     <Grid container >
+     {Array.isArray(historicPlaces) && historicPlaces.map((place, index) => (
+       <Card key={place.id || index} sx={{ 
+             margin: 2, 
+             boxShadow: 3, 
+             borderRadius: 2, 
+             '&:hover': { 
+               boxShadow: 6, 
+               transform: 'scale(1.02)', 
+               transition: 'transform 0.3s ease, box-shadow 0.3s ease' 
+             },
+       }}>
+         <CardMedia
+           component="img"
+           height="200"
+           image={place.pictures ? place.pictures[0] : '/default-placeholder.png'}
+           alt={place.name}
+         />
+         <CardContent>
+           <Box sx={{  justifyContent: 'center', marginLeft: 40 }}>
+           <Tooltip title="Create a Tag" arrow>
+             <IconButton onClick={() => handleToggleInfo(place)}>
+               <InfoIcon fontSize="large" sx={{ color: '#00008B' }} />
+             </IconButton>
+             </Tooltip>
+           </Box>
+           <Typography variant="h5">
+             <strong>{place.name}</strong>
+           </Typography>
+           <Typography variant="body1">
+             <strong>Description:</strong> {place.description}
+           </Typography>
+         </CardContent>
+         <CardActions sx={{ 
+           display: 'flex', 
+           justifyContent: 'center', 
+           alignItems: 'center', 
+           gap: 2, 
+           paddingBottom: 2 
+         }}>
+           <Button size="small" variant="contained" onClick={() => handleEditPlace(place)}>Edit</Button>
+           <Button size="small" variant="contained" color="error" onClick={() => handleDeletePlace(place)}>Delete</Button>
+         </CardActions>
+       </Card>
+     ))}
+   </Grid>
+            ):(
+              <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "50vh", // Full viewport height, adjust as needed
+              }}
+            >
+              <img
+                src={NodataFound}
+                alt="Centered Image"
+                style={{ maxWidth: "100%", maxHeight: "100%" }}
+              />
+            </div> 
+            )}
+       
             <Dialog open={selectedPlace !== null} onClose={() => setSelectedPlace(null)}>
               <DialogTitle><strong>{selectedPlace ? selectedPlace.name +' Details' : ''}</strong></DialogTitle>
               <DialogContent>

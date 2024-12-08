@@ -8,7 +8,7 @@ import NetworkService from "../NetworkService";
 import TourGuideHP from '../TourGuide/TourGuideNavbar';
 import AHomePage from '../Advertier/AdvertiserNavbar';
 import SHomePage from '../Seller/SellerNavbar';
-
+import GHomePage from '../TouristGovernor/GovernorNavbar';
 const ChangePassword = () => {
    const User = JSON.parse(localStorage.getItem('User'));
    const adminIdd=localStorage.getItem('UserId');
@@ -67,6 +67,10 @@ const ChangePassword = () => {
       {User?.type==='tourGuide' &&(
         <TourGuideHP/>
       )}
+          {User?.type==='tourismGovernor' &&(
+        <GHomePage/>
+      )}
+      
    </div>
       <Box className="change-password-background">
        

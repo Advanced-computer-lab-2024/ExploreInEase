@@ -5,14 +5,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import LockIcon from '@mui/icons-material/Lock';
-import LogoutIcon from '@mui/icons-material/Logout';
 import axios from 'axios';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import { Alert } from '@mui/material'; 
 import '../Guest/GuestHP.css'; 
@@ -29,10 +22,11 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import Tooltip from '@mui/material/Tooltip';
+import NodataFound from '../No data Found.avif';  
+
 const TourGuideHP = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
   console.log("User",Userr);
-  
   const imageUrl=localStorage.getItem('imageUrl');
  const navigate = useNavigate();
     const location = useLocation();
@@ -53,7 +47,6 @@ const TourGuideHP = () => {
     const [setError]=useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
-    const [drawerOpen, setDrawerOpen] = useState(false);
     const open = Boolean(anchorEl);
     const openNotfication = Boolean(anchorEl1);
     const initialUsername = User?.User?.username || User?.username;
@@ -74,7 +67,6 @@ const TourGuideHP = () => {
         setSelectedTab(savedTab); // Restore the selected tab
       }
     }, []);
-    
     useEffect(() => {
       // Update the avatar URL when the component mounts if a new image URL exists
       if (savedAvatarUrl || imageUrl) {
@@ -103,21 +95,6 @@ const TourGuideHP = () => {
 
   const handleOpenMenu = (event) => {
     setAnchorProfileEl(event.currentTarget);
-  };
-
-   const handleMenuClose = () => {
-      setAnchorEl(null);
-   };
-
-   const handleMenuClick = (action) => {
-      if (action === 'changePassword') {
-         navigate('/change-password', { state: { userId: userId } });;
-      } else if (action === 'logout') {
-         navigate('/');
-      }
-   };
-   const handleClick = (event) => {
-    setAnchorEl1(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl1(null);
@@ -173,7 +150,7 @@ const handleClickNotification = async(event) => {
   setAnchorEl1(event.currentTarget);
 };
 
-    async function handleRegisterClick(title) {
+ async function handleRegisterClick(title) {
         if (title === "profile"){
           console.log("here");
           console.log("userId",userId);
@@ -182,7 +159,7 @@ const handleClickNotification = async(event) => {
           } catch (err) {
             if (err.response) {
                 // console.log(err.message);
-              setError(err.response.data.message); // Set error message from server response if exists
+              console.log(err.response.data.message); // Set error message from server response if exists
             } else {
               console.log('An unexpected error occurred.'); // Generic error message
             }
