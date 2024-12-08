@@ -19,7 +19,7 @@ This project uses 2-space indentation for all JavaScript and JSON files. Formatt
 ```markdown
 Here are some screenshots of the application:
 
-![addGovernorOrAdmin](https://github.com/Advanced-computer-lab-2024/ExploreInEase/raw/Mohamed's/screenshots/addGovernorOrAdmin.png)
+![stripe](https://github.com/user-attachments/assets/e17eaec8-3b1c-496c-a24f-da22a0db8ab5)
 ![Screenshot 2](../screenshots/screenshot2.png)
 ![Screenshot 3](../screenshots/screenshot3.png)
 ![Screenshot 4](../screenshots/screenshot4.png)
@@ -28,10 +28,10 @@ Here are some screenshots of the application:
 
 ## Tech/Framework Used
 
-Frontend: React.js
-Backend: Node.js, Express.js
-Database: MongoDB
-Other Tools: Postman
+1. Frontend: React.js
+2. Backend: Node.js, Express.js
+3. Database: MongoDB
+4. Other Tools: Postman
 
 ## Features
 
