@@ -58,7 +58,7 @@ const TouristSchema = new Schema({
         id: { type: mongoose.Schema.Types.ObjectId, ref: 'Transportation' }, // Reference to Transportation schema
         pricePaid: { type: Number,min: 0 }
     }],
-    bookmark: [
+    bookmark: [ 
         {
             id: {type: mongoose.Schema.Types.ObjectId},
             type: {type: String}

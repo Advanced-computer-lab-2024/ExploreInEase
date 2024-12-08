@@ -152,25 +152,18 @@ const  handleRegisterClick=async(title)=> {
           console.log(response);
           
            const transportationData=response;
+           setSelectedTab(title);
+           localStorage.setItem('selectedTab', title);
           navigate(`/BookTransportation`,{state:{userId:userId,transportationData:transportationData}});          
           } catch (error) {
           console.log('Error:', error);
         }
             }
             else if(title==='Book Hotels'){
-
+              navigate(`/BookHotel`,{state:{userId}});          
             }
             else if (title==='Book Flights'){
-
-            }
-            else if(title==='Itinerary'){
-
-            }
-            else if(title==='view Itinerary'){
-
-            }
-            else if(title==='Rating'){
-
+              navigate(`/BookFlight`,{state:{userId}});          
             }
            else if (title==="Products") {
             try {
@@ -317,6 +310,25 @@ const  handleRegisterClick=async(title)=> {
                 setShowErrorMessage(true);
                 console.log(errorMessage);
               }
+            }
+            else if(title==='BookMarks'){
+              try { 
+                const options = {
+                  apiPath: `/fetchbookmark/${Userr._id}`,
+                };
+                const response = await NetworkService.get(options);
+                console.log(response); // Set success message
+                const events=response.data;
+                navigate('/MyBookmarks',{state:{events:events,userId}});  
+              }
+               catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                  console.log(err.response.data.message); // Set error message from server response if exists
+                } else {
+                  console.log('An unexpected error occurred.'); // Generic error message
+                }
+              }  
             }
             else if(title==='Log Out'){
               console.log('yes here');
@@ -505,7 +517,7 @@ return (
      </div>
     </nav>
     <nav className="navbarSecondary">
-    {['Events',"Complaints","Book Hotels","Book Flights","Itinerary","Products","Purchased Product","Transportation","Booked items","Rating"].map((tab) => (
+    {['Events',,"Products","Transportation","Complaints","Book Hotels","Book Flights","Purchased Product",,"Booked items","BookMarks"].map((tab) => (
           <div
             key={tab}
             className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Typography, Divider, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { Alert } from '@mui/material';
-
+import TouristNavbar from '../Tourist/TouristNavbar';
 const MyBookmarks = () => {
     const { state } = useLocation();
     const { events } = state || {}; // Get events and userId from navigation state
@@ -19,6 +19,8 @@ const MyBookmarks = () => {
         if (events) {
             const filtered = events.filter(event => event.category === activeCategory);
             setFilteredEvents(filtered);
+            console.log('filteredEvents',filteredEvents);
+            
         }
     }, [activeCategory, events]);
 
@@ -27,13 +29,26 @@ const MyBookmarks = () => {
     };
 
     return (
+        <div>
+            <TouristNavbar/>
         <div style={{ padding: '20px' }}>
-            <Typography variant="h4" gutterBottom>
-                My Saved Events
-            </Typography>
+        <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                    flexDirection: "column",
+                }}
+                >
+                <Typography variant="h4" gutterBottom>
+                    My Saved Events
+                </Typography>
+                </div>
+
 
             {/* Buttons for filtering categories */}
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '20px',alignContent:'center',alignItems:'center',display: "flex" }}>
                 <Button
                     variant={activeCategory === 'activities' ? 'contained' : 'outlined'}
                     color="primary"
@@ -73,11 +88,11 @@ const MyBookmarks = () => {
 
             {/* Events List */}
             <Grid container spacing={3}>
-                {filteredEvents.length > 0 ? (
-                    filteredEvents.map((event, index) => (
+                {events.length > 0 ? (
+                    events.map((event, index) => (
                         <Grid item xs={12} sm={6} md={4} key={index}>
                             <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px' }}>
-                                <Typography variant="h6">{event.title}</Typography>
+                                <Typography variant="h6">{event.name}</Typography>
                                 <Typography variant="body2">{event.description}</Typography>
                                 <Typography variant="body2" color="textSecondary">
                                     Category: {event.category}
@@ -97,6 +112,7 @@ const MyBookmarks = () => {
 
             {/* Divider */}
             <Divider style={{ margin: '20px 0' }} />
+        </div>
         </div>
     );
 };

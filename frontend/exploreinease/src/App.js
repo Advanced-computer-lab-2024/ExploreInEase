@@ -28,10 +28,6 @@ const ActivityList = React.lazy(() => import('./Advertier/ActivityList'));
 const ItineraryList = React.lazy(() => import('./TourGuide/ItineraryList'));
 const CreateItinerary = React.lazy(() => import('./TourGuide/CreateItinerary'));
 const GuestNavbar = React.lazy(() => import("./Guest/GuestNavbar"));
-
-
-
-
 const AdvertiserNavbar = React.lazy(() => import("./Advertier/AdvertiserNavbar"));
 const TouristNavbar = React.lazy(() => import('./Tourist/TouristNavbar'));
 const SellerNavbar = React.lazy(() => import('./Seller/SellerNavbar'));
@@ -60,7 +56,6 @@ const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesRe
 const OrderHistory = React.lazy(() => import('./Tourist/OrderHistory'));
 const MyBookmarks = React.lazy(() => import('./Shared/MyBookmarks'));
 const Events= React.lazy(() => import('./Guest/Events'));
-
 const App = () => {
   useEffect(() => {
     document.title = 'ExploreInEase';
