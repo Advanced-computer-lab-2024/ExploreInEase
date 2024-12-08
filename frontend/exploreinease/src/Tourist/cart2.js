@@ -16,6 +16,8 @@ import {
     Container,
     FormControl,
     FormLabel,
+    Select,
+  MenuItem,
     useTheme
   } from '@mui/material';
   import {
@@ -25,10 +27,17 @@ import {
     Remove as RemoveIcon
   } from '@mui/icons-material';
 import { Remove, Add, Close } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
+
 import StepperNavigation from "./StepperNavigtion";
+import NetworkService from "../NetworkService";
+
 // import CheckoutPage from "./CheckoutPage";
 import './Payment.css'; // Add your styles here
 const CartPage = () => {
+  const location = useLocation();
+  const { userId } = location.state || {};
+  console.log(userId);
     const [promoCode, setPromoCode] = useState("");
     const [activeStep,setActiveStep] = useState(0); 
     const [isFlipped, setIsFlipped] = useState(false);
@@ -38,15 +47,64 @@ const CartPage = () => {
     const [selectedDates, setSelectedDates] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [isBackVisible, setIsBackVisible] = useState(false);
-    const [deliveryInfo, setDeliveryInfo] = useState({
-      name: '',
-      mobile: '',
-      email: '',
-      city: '',
-      state: '',
-      zip: '',
-      address: ''
-    });
+    
+    
+
+  const [selectedAddressId, setSelectedAddressId] = useState('new');
+  
+  // Sample saved addresses - in a real app, this would come from an API/database
+  const savedAddresses = [
+    {
+      id: '1',
+      name: 'John Doe',
+      mobile: '123-456-7890',
+      email: 'john@example.com',
+      address: '123 Main St',
+      city: 'New York',
+      state: 'NY',
+      zip: '10001'
+    },
+    {
+      id: '2',
+      name: 'John Doe',
+      mobile: '123-456-7890',
+      email: 'john@example.com',
+      address: '456 Park Ave',
+      city: 'Boston',
+      state: 'MA',
+      zip: '02108'
+    }
+  ];
+
+  const [deliveryInfo, setDeliveryInfo] = useState({
+    name: '',
+    mobile: '',
+    email: '',
+    city: '',
+    state: '',
+    zip: '',
+    address: 'trial'
+  });
+
+  const handleAddressSelect = (event) => {
+    const selectedId = event.target.value;
+    setSelectedAddressId(selectedId);
+    
+    if (selectedId === 'new') {
+      setDeliveryInfo({
+        name: '',
+        mobile: '',
+        email: '',
+        city: '',
+        state: '',
+        zip: '',
+        address: ''
+      });
+    } else {
+      const selectedAddress = savedAddresses.find(addr => addr.id === selectedId);
+      setDeliveryInfo(selectedAddress);
+    }
+  };
     const [cartItems, setCartItems] = useState([
         {
             id: 1,
@@ -109,12 +167,37 @@ const CartPage = () => {
         setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)));
       };
     
-      const handleOnClickButton=(title)=>{
+      const handleOnClickButton= async (title,deliveryInfo)=>{
+        console.log(deliveryInfo);
+       
+
          if (title=='Continue to Checkout'){
+          try {
+            const options = {
+              apiPath: `/getAddresses/${userId}` ,// POST request to the correct endpoint
+            };
+            
+            const response = await NetworkService.get(options);  // Use POST instead of PUT
+            console.log(response);
+          } catch (error) {
+            console.error('Error bookmarking event:', error);
+            alert('Failed to bookmark event. Please try again.');
+          }
             setIsPaymentProceed(false);
             setActiveStep(1);
             setIsCheckoutView(true);
         } else if (title =='Proceed to Payment'){
+          try {
+            const options = {
+              apiPath: `/addAddresses/${userId}/${deliveryInfo.address}` ,// POST request to the correct endpoint
+            };
+            
+            const response = await NetworkService.post(options);  // Use POST instead of PUT
+            console.log(response);
+          } catch (error) {
+            console.error('Error bookmarking event:', error);
+            alert('Failed to bookmark event. Please try again.');
+          }
             setIsCheckoutView(false);
             setActiveStep(2);
             setIsPaymentProceed(true);
@@ -181,6 +264,28 @@ const CartPage = () => {
                         borderRadius: 2
                       }}
                     >
+                      {/* Address Selection */}
+                      <Box sx={{ mb: 3 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+                          Select Delivery Address
+                        </Typography>
+                        <Select
+                          fullWidth
+                          value={selectedAddressId}
+                          onChange={handleAddressSelect}
+                          size="small"
+                        >
+                          <MenuItem value="new">Enter New Address</MenuItem>
+                          <Divider />
+                          {savedAddresses.map((address) => (
+                            <MenuItem key={address.id} value={address.id}>
+                              {address.address}, {address.city}, {address.state} {address.zip}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Box>
+          
+                      {/* Address Form */}
                       <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                           <TextField
@@ -190,6 +295,7 @@ const CartPage = () => {
                             onChange={(e) => setDeliveryInfo({...deliveryInfo, name: e.target.value})}
                             variant="outlined"
                             size="small"
+                            disabled={selectedAddressId !== 'new'}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -200,6 +306,7 @@ const CartPage = () => {
                             onChange={(e) => setDeliveryInfo({...deliveryInfo, mobile: e.target.value})}
                             variant="outlined"
                             size="small"
+                            disabled={selectedAddressId !== 'new'}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -211,6 +318,7 @@ const CartPage = () => {
                             onChange={(e) => setDeliveryInfo({...deliveryInfo, email: e.target.value})}
                             variant="outlined"
                             size="small"
+                            disabled={selectedAddressId !== 'new'}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -221,6 +329,7 @@ const CartPage = () => {
                             onChange={(e) => setDeliveryInfo({...deliveryInfo, city: e.target.value})}
                             variant="outlined"
                             size="small"
+                            disabled={selectedAddressId !== 'new'}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -231,6 +340,7 @@ const CartPage = () => {
                             onChange={(e) => setDeliveryInfo({...deliveryInfo, state: e.target.value})}
                             variant="outlined"
                             size="small"
+                            disabled={selectedAddressId !== 'new'}
                           />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -241,6 +351,7 @@ const CartPage = () => {
                             onChange={(e) => setDeliveryInfo({...deliveryInfo, zip: e.target.value})}
                             variant="outlined"
                             size="small"
+                            disabled={selectedAddressId !== 'new'}
                           />
                         </Grid>
                         <Grid item xs={12}>
@@ -253,6 +364,7 @@ const CartPage = () => {
                             size="small"
                             multiline
                             rows={2}
+                            disabled={selectedAddressId !== 'new'}
                           />
                         </Grid>
                       </Grid>
@@ -592,7 +704,7 @@ const CartPage = () => {
                                     <Button
                                         variant="contained"
                                         fullWidth
-                                        onClick={() => handleOnClickButton("Continue to Checkout")}
+                                        onClick={() => handleOnClickButton("Continue to Checkout",deliveryInfo)}
                                         sx={{
                                             marginTop: "20px",
                                             backgroundColor: "#1261A0",

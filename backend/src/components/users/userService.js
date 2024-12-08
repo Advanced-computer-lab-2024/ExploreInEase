@@ -728,6 +728,28 @@ const addBookmark = async (touristId, bookmarks) => {
       throw new Error(error.message);
     }
   };
+
+  const addAddresses = async (userId, address) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const updatedUser = await userRepository.addAddresses(user, address);
+    return updatedUser;
+}
+
+const getAddresses = async (userId) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const addresses = await userRepository.getAddresses(user);
+    return addresses;
+}
+
+
     
 
 
@@ -774,7 +796,10 @@ module.exports = {
   userReport,
   getTouristHistory,
   addBookmark,
-  getBookmarks
+  getBookmarks,
+  addAddresses,
+  getAddresses
+  
 
 };
     

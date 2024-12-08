@@ -768,6 +768,34 @@ const getTouristHistory = async (req, res) => {
     }
   };
 
+  const addAddresses = async (req, res) => {
+    const { userId,address } = req.params;
+    if(!userId || !address){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.addAddresses(userId, address);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const getAddresses = async (req, res) => {
+    const { userId } = req.params;
+    console.log(userId);
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.getAddresses(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+
 
 module.exports = {
     changePassword,
@@ -808,5 +836,7 @@ module.exports = {
   userReport,
   getTouristHistory,
   addBookmark,
-  getBookmarks
+  getBookmarks,
+  addAddresses,
+  getAddresses
 };

@@ -927,6 +927,27 @@ const addBookmark = async (touristId, bookmark) => {
     return tourist.bookmark;
   };
 
+  const addAddresses = async (user, address) => {
+    try {
+        user.addresses.push(address);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding address: ${error.message}`);
+    }
+}
+
+const getAddresses = async (user) => {
+    try {
+        return user.addresses;
+    } catch (error) {
+        throw new Error(`Error fetching user addresses: ${error.message}`);
+    }
+}
+
+
+
+
 module.exports = {
     getLoyalityLevel,
     pointsAfterPayment,
@@ -977,6 +998,8 @@ module.exports = {
     userReport,
     getTouristHistoryFromDb,
     addBookmark,
-    getBookmarks
+    getBookmarks,
+    addAddresses,
+    getAddresses
 
 };

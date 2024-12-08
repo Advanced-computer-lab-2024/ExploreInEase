@@ -16,6 +16,8 @@ import {
   Container,
   FormControl,
   FormLabel,
+  Select,
+  MenuItem,
   useTheme
 } from '@mui/material';
 import {
@@ -30,6 +32,32 @@ const CheckoutPage = ({ cartItems = [] }) => {
   const [selectedDates, setSelectedDates] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isPaymentProceed, setIsPaymentProceed] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState('new');
+  
+  // Sample saved addresses - in a real app, this would come from an API/database
+  const savedAddresses = [
+    {
+      id: '1',
+      name: 'John Doe',
+      mobile: '123-456-7890',
+      email: 'john@example.com',
+      address: '123 Main St',
+      city: 'New York',
+      state: 'NY',
+      zip: '10001'
+    },
+    {
+      id: '2',
+      name: 'John Doe',
+      mobile: '123-456-7890',
+      email: 'john@example.com',
+      address: '456 Park Ave',
+      city: 'Boston',
+      state: 'MA',
+      zip: '02108'
+    }
+  ];
+
   const [deliveryInfo, setDeliveryInfo] = useState({
     name: '',
     mobile: '',
@@ -40,6 +68,27 @@ const CheckoutPage = ({ cartItems = [] }) => {
     address: ''
   });
 
+  const handleAddressSelect = (event) => {
+    const selectedId = event.target.value;
+    setSelectedAddressId(selectedId);
+    
+    if (selectedId === 'new') {
+      setDeliveryInfo({
+        name: '',
+        mobile: '',
+        email: '',
+        city: '',
+        state: '',
+        zip: '',
+        address: ''
+      });
+    } else {
+      const selectedAddress = savedAddresses.find(addr => addr.id === selectedId);
+      setDeliveryInfo(selectedAddress);
+    }
+  };
+
+  // ... (keep existing calendar and payment related functions)
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -65,21 +114,13 @@ const CheckoutPage = ({ cartItems = [] }) => {
     return cartItems.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
   };
 
-  const handleDateSelect = (date) => {
-    if (selectedDates.includes(date)) {
-      setSelectedDates(selectedDates.filter(d => d !== date));
-    } else {
-      setSelectedDates([...selectedDates, date]);
-    }
-  };
-
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Grid container spacing={4}>
         {/* Left Section - Delivery Information */}
         <Grid item xs={12} lg={8}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-            Delivery Information
+            Delivery Informatin
           </Typography>
 
           <Paper 
@@ -90,6 +131,28 @@ const CheckoutPage = ({ cartItems = [] }) => {
               borderRadius: 2
             }}
           >
+            {/* Address Selection */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+                Select Delivery Address
+              </Typography>
+              <Select
+                fullWidth
+                value={selectedAddressId}
+                onChange={handleAddressSelect}
+                size="small"
+              >
+                <MenuItem value="new">Enter New Address</MenuItem>
+                <Divider />
+                {savedAddresses.map((address) => (
+                  <MenuItem key={address.id} value={address.id}>
+                    {address.address}, {address.city}, {address.state} {address.zip}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+
+            {/* Address Form */}
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -99,6 +162,7 @@ const CheckoutPage = ({ cartItems = [] }) => {
                   onChange={(e) => setDeliveryInfo({...deliveryInfo, name: e.target.value})}
                   variant="outlined"
                   size="small"
+                  disabled={selectedAddressId !== 'new'}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -109,6 +173,7 @@ const CheckoutPage = ({ cartItems = [] }) => {
                   onChange={(e) => setDeliveryInfo({...deliveryInfo, mobile: e.target.value})}
                   variant="outlined"
                   size="small"
+                  disabled={selectedAddressId !== 'new'}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -120,6 +185,7 @@ const CheckoutPage = ({ cartItems = [] }) => {
                   onChange={(e) => setDeliveryInfo({...deliveryInfo, email: e.target.value})}
                   variant="outlined"
                   size="small"
+                  disabled={selectedAddressId !== 'new'}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -130,6 +196,7 @@ const CheckoutPage = ({ cartItems = [] }) => {
                   onChange={(e) => setDeliveryInfo({...deliveryInfo, city: e.target.value})}
                   variant="outlined"
                   size="small"
+                  disabled={selectedAddressId !== 'new'}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -140,6 +207,7 @@ const CheckoutPage = ({ cartItems = [] }) => {
                   onChange={(e) => setDeliveryInfo({...deliveryInfo, state: e.target.value})}
                   variant="outlined"
                   size="small"
+                  disabled={selectedAddressId !== 'new'}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -150,6 +218,7 @@ const CheckoutPage = ({ cartItems = [] }) => {
                   onChange={(e) => setDeliveryInfo({...deliveryInfo, zip: e.target.value})}
                   variant="outlined"
                   size="small"
+                  disabled={selectedAddressId !== 'new'}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -162,6 +231,7 @@ const CheckoutPage = ({ cartItems = [] }) => {
                   size="small"
                   multiline
                   rows={2}
+                  disabled={selectedAddressId !== 'new'}
                 />
               </Grid>
             </Grid>
