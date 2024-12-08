@@ -730,10 +730,13 @@ const addBookmark = async (touristId, bookmarks) => {
   };
 
   const addAddresses = async (userId, address) => {
+    //console.log(userId);
     const user = await userRepository.findTouristById(userId);
     if (!user) {
         throw new Error('User not found');
     }
+    //console.log(user);
+    //console.log(address);
 
     const updatedUser = await userRepository.addAddresses(user, address);
     return updatedUser;

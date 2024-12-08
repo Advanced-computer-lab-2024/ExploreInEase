@@ -929,6 +929,9 @@ const addBookmark = async (touristId, bookmark) => {
 
   const addAddresses = async (user, address) => {
     try {
+        console.log(user);
+        console.log(address);
+
         user.addresses.push(address);
         const updatedUser = await user.save();
         return updatedUser;

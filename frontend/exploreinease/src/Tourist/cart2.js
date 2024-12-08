@@ -37,7 +37,6 @@ import './Payment.css'; // Add your styles here
 const CartPage = () => {
   const location = useLocation();
   const { userId } = location.state || {};
-  console.log(userId);
     const [promoCode, setPromoCode] = useState("");
     const [activeStep,setActiveStep] = useState(0); 
     const [isFlipped, setIsFlipped] = useState(false);
@@ -56,12 +55,12 @@ const CartPage = () => {
   const savedAddresses = [
     {
       id: '1',
-      name: 'John Doe',
-      mobile: '123-456-7890',
-      email: 'john@example.com',
-      address: '123 Main St',
-      city: 'New York',
-      state: 'NY',
+      name: 'alitourist',
+      mobile: '01083711672',
+      email: 'alitourist@gmail.com',
+      address: 'Tgamo3',
+      city: 'Cairo',
+      state: 'CAI',
       zip: '10001'
     },
     {
@@ -70,7 +69,7 @@ const CartPage = () => {
       mobile: '123-456-7890',
       email: 'john@example.com',
       address: '456 Park Ave',
-      city: 'Boston',
+      city: 'CAI',
       state: 'MA',
       zip: '02108'
     }
@@ -167,7 +166,7 @@ const CartPage = () => {
         setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)));
       };
     
-      const handleOnClickButton= async (title,deliveryInfo)=>{
+      const handleOnClickButton= async (title)=>{
         console.log(deliveryInfo);
        
 
@@ -704,7 +703,7 @@ const CartPage = () => {
                                     <Button
                                         variant="contained"
                                         fullWidth
-                                        onClick={() => handleOnClickButton("Continue to Checkout",deliveryInfo)}
+                                        onClick={() => handleOnClickButton("Continue to Checkout")}
                                         sx={{
                                             marginTop: "20px",
                                             backgroundColor: "#1261A0",

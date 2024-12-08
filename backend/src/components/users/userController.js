@@ -770,6 +770,10 @@ const getTouristHistory = async (req, res) => {
 
   const addAddresses = async (req, res) => {
     const { userId,address } = req.params;
+
+    //console.log(address);
+    //console.log(userId);
+
     if(!userId || !address){
         return res.status(400).json({ message: "Missing parameters" });
     }
@@ -783,7 +787,7 @@ const getTouristHistory = async (req, res) => {
 
 const getAddresses = async (req, res) => {
     const { userId } = req.params;
-    console.log(userId);
+    //console.log(userId);
     if(!userId){
         return res.status(400).json({ message: "Missing parameters" });
     }
