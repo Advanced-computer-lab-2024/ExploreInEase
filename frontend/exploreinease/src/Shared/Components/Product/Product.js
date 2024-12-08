@@ -21,12 +21,11 @@ import ShoppingBasket from '@mui/icons-material/ShoppingBasket';
 import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
 import Avatar from '@mui/material/Avatar';
 import HomePage from '../../../Seller/SellerNavbar';
-
+import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const ProductCard = () => {
    const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
-
   const location = useLocation();
   const { User } = location.state || {};
   const userId = User ? User._id : adminIdd;
@@ -55,7 +54,6 @@ const ProductCard = () => {
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
   const [productInterval]=useState([]);
   const  Product = location.state?.Product || productInterval||[];
-  console.log("Product",Product);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -177,18 +175,13 @@ const handleClickPurchase = async (product, selectedQuantity) => {
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
   const handleRatingMinChange = (event) => setRatingFilter([Number(event.target.value), ratingFilter[1]]);
   const handleRatingMaxChange = (event) => setRatingFilter([ratingFilter[0], Number(event.target.value)]);
-  
   const handleOpenFilterDialog = () => setFilterDialogOpen(true);
   const handleCloseFilterDialog = () => setFilterDialogOpen(false);
-
   const handleOpenCreateDialog = () => setCreateDialogOpen(true);
-
   const handleOpenArchiveDialog = () => setArchiveDialogOpen(true);
   const handleCloseArchiveDialog = () => setArchiveDialogOpen(false);
-
   const handleOpenSalesDialog = () => setSalesDialogOpen(true);
   const handleCloseSalesDialog = () => setSalesDialogOpen(false);
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [openDialog, setOpenDialog] = useState(false);
@@ -448,9 +441,13 @@ const handleClickPurchase = async (product, selectedQuantity) => {
     );
 
   return (
+
     <div>
       <div>
-    <HomePage/>
+        {User.type==='seller'&&(
+            <HomePage/>
+        )}
+       <TouristNavbar/>
       </div>
     
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>

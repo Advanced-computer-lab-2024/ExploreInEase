@@ -89,7 +89,7 @@ const App = () => {
           <Route path="/viewPreferencatags" element={<Preferencetags />} />
           <Route path="/viewAddedUsers" element={<AddUser />} />
           <Route path="/viewAllUserProfiles" element={<AdminUserProfiles />} />
-          <Route path="/TouristHomePage" element={<TouristHomePage />} />
+          <Route path="/TouristHomePage" element={<Filter />} />
           <Route path="/SellerHomePage" element={<SalesReport />} />
           <Route path="/TourGuideHomePage" element={<SalesReport />} />
           <Route path="/AdminHomePage" element={<AdminSideMenu/>} />
@@ -117,7 +117,7 @@ const App = () => {
           <Route path="/OrderHistory" element={<OrderHistory />} />
           <Route path="/myBookmarks" element={<MyBookmarks/>}/>
           <Route path="/Events" element={<Events/>}/>
-          <Route path="/SellerNavbar" element={<TouristNavbar/>}/>
+          <Route path="/touristNavbar" element={<TouristNavbar/>}/>
         </Routes>
       </Suspense>
     </Router>

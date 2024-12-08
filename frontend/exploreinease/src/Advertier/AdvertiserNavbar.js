@@ -275,7 +275,7 @@ const HomePage = () => {
         alt="ExploreInEase Logo"
         className="logo"
       />
-      <span className="website-name">ExploreInEase</span>
+      <span className="website-name">ExploreInEase/Advertiser</span>
     </div>
       </div>
     <div className="navbar-right">

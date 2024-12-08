@@ -77,7 +77,7 @@ const Login = () => {
       if (response.message === 'Logged in Successfully') {
         console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-         navigateToHomePage(response.user, response.imageUrl);
+         navigateToHomePage(response,response.user, response.imageUrl);
       }
     } catch (error)  {
       setError(
@@ -87,44 +87,8 @@ const Login = () => {
       );
     }
   };
-
-  // onSubmit() {
-  //   if (this.loginForm.valid) {
-  //     const emailValue = this.loginForm.controls.email.value;
-  //     const updatedEmail = `${emailValue}@khazna.app`;
-  //     const body = { ...this.loginForm.value, email: updatedEmail };
-  //     this.networkService.post({ apiPath: '/login', body }).subscribe({
-  //       next: (res: any) => {
-  //         const token = res.accessToken;
-  //         localStorage.setItem('tokenKey', token);
-  //         const decodedToken: any = this.decodeToken(token);
-  //         const role = decodedToken.role.role;
-  //         if (role === 'employee') {
-  //           this.router.navigate(['/user'], {
-  //             queryParams: { id: decodedToken.employeeId, name: decodedToken.name ,team:decodedToken.team.type},
-  //           });
-  //         } else {
-  //           this.router.navigate(['/admin'], {
-  //             queryParams: { id: decodedToken.employeeId, name: decodedToken.name,team:decodedToken.team.type },
-  //           });
-  //         }  
-  //         this.messageService.add({
-  //           severity: 'success',
-  //           summary: 'Login Successed',
-  //           detail:'Login successfully',
-  //         });     
-  //       },
-  //       error: (err) => {
-  //         this.messageService.add({
-  //           severity: 'error',
-  //           summary: 'Login Failed',
-  //           detail: err.error.message || 'Login failed. Please try again.',
-  //         });
-  //       },
-  //     });
-  //   }
-
-  const navigateToHomePage = (user, imageUrl) => {
+  const navigateToHomePage = (response,user, imageUrl) => {
+    localStorage.removeItem('userType');
     localStorage.setItem('User',JSON.stringify(user));
     localStorage.setItem('imageUrl',imageUrl);    
     localStorage.setItem('UserId',user._id);
@@ -146,7 +110,9 @@ const Login = () => {
         navigate('/AdvertiserHomePage', { state: { User: user, imageUrl: imageUrl } });
         break;
       default:
-        navigate('/TouristHomePage', { state: { tourist: user,imageUrl: imageUrl } });
+        console.log('here');
+        localStorage.setItem('userType',response.userType);
+        navigate('/TouristHomePage', { state: { tourist: user,imageUrl: imageUrl,userType:response.userType } });
     }
   };
 

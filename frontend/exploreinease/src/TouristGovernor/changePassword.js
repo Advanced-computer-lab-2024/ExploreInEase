@@ -9,6 +9,7 @@ import TourGuideHP from '../TourGuide/TourGuideNavbar';
 import AHomePage from '../Advertier/AdvertiserNavbar';
 import SHomePage from '../Seller/SellerNavbar';
 import GHomePage from '../TouristGovernor/GovernorNavbar';
+import TouristNavbar from '../Tourist/TouristNavbar';
 const ChangePassword = () => {
    const User = JSON.parse(localStorage.getItem('User'));
    const adminIdd=localStorage.getItem('UserId');
@@ -21,6 +22,7 @@ const ChangePassword = () => {
    const [error, setError] = useState('');
    const [success, setSuccess] = useState('');
    const location = useLocation();
+   const {userType}=location.state ||{};
    const navigate=useNavigate();
    const userId  = adminIdd || location.state;
    console.log(userId);
@@ -69,6 +71,9 @@ const ChangePassword = () => {
       )}
           {User?.type==='tourismGovernor' &&(
         <GHomePage/>
+      )}
+      {userType==='tourist'&&(
+         <TouristNavbar/>
       )}
       
    </div>

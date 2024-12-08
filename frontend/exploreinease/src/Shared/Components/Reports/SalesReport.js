@@ -7,11 +7,10 @@ import { useLocation } from 'react-router-dom';
 import TourGuideHP from '../../../TourGuide/TourGuideNavbar';
 import AHomePage from '../../../Advertier/AdvertiserNavbar';
 import SHomePage from '../../../Seller/SellerNavbar';
-
 const SalesReport = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
   const location = useLocation();
-  const {Response: initialData, User} = location.state || {};
+  const {Response: initialData, User} = location.state || {};  
   const [data] = useState(initialData || []); // Initialize with empty array if no data
   const [selectedActivity, setSelectedActivity] = useState('all');
   const [selectedItinerary, setSelectedItinerary] = useState('all');
@@ -69,17 +68,14 @@ const SalesReport = () => {
     <div> 
       {Userr?.type==='seller' &&(
         <>
-        
         <SHomePage/>
         </>
       )}
       {Userr?.type==='advertiser'&&(
-                <AHomePage/>
+       <AHomePage/>
       )}
-      {Userr?.type==='tourGuide' &&(
-        <TourGuideHP/>
-      )}
-      
+      {Userr?.type==='tourGuide'&&
+      (<TourGuideHP/>)}
     <div>
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>

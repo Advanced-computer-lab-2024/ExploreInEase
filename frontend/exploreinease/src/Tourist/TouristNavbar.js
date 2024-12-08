@@ -8,22 +8,28 @@ import IconButton from '@mui/material/IconButton';
 import NetworkService from '../NetworkService';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import Divider from '@mui/material/Divider';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { AddShoppingCart } from "@mui/icons-material";
 import "../TouristGovernor/GovernorHomePage.css"; 
+import Tooltip from '@mui/material/Tooltip';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import UploadIcon from '@mui/icons-material/Upload';
+import axios from 'axios';
+import Delete from '@mui/icons-material/Delete';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 const TouristNavbar = () => {
    const Userr = JSON.parse(localStorage.getItem('User'));
-   const imageUrll = JSON.parse(localStorage.getItem('imageUrl'));
+   const imageUrll = localStorage.getItem('imageUrl');
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
     const imageUrl = state?.imageUrl || imageUrll;
-    const  tourist  = state?.tourist ||Userr.User|| {};
-    const [setSuccess]=useState();
-    const [setError]=useState();
-    const [ setDrawerOpen] = useState(false);
+    const  tourist  = Userr;
     const [currency] = useState("EGP"); // default currency
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
@@ -38,7 +44,6 @@ const TouristNavbar = () => {
      const [showSuccessMessage, setShowSuccessMessage] = useState(false);
      const [showErrorMessage, setShowErrorMessage] = useState(false);
      const [ setErrorMessage] = useState('');
-     const [ setSuccessMessage] = useState('');
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
@@ -50,34 +55,71 @@ const TouristNavbar = () => {
       { title: 'Project Deadline', body: 'Project submission is due next week.' },
       { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
       { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
-     useEffect(() => {
+
+useEffect(() => {
          // Update the avatar URL when the component mounts if a new image URL exists
          if (savedAvatarUrl || imageUrl) {
              setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
          } else {
              setAvatarImage(defaultAvatarUrl);
          }
-     }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
-
+}, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
      
-     useEffect(() => {
+ useEffect(() => {
       if (showSuccessMessage) {
         const timer = setTimeout(() => {
           setShowSuccessMessage(false);
         }, 5000);
         return () => clearTimeout(timer);
       }
-    }, [showSuccessMessage]);
+}, [showSuccessMessage]);
     
-    useEffect(() => {
+useEffect(() => {
       if (showErrorMessage) {
         const timer = setTimeout(() => {
           setShowErrorMessage(false);
         }, 5000);
         return () => clearTimeout(timer);
       }
-    }, [showErrorMessage]);
+ }, [showErrorMessage]);
 
+useEffect(() => {
+  const savedTab = localStorage.getItem('selectedTab');
+  if (savedTab) {
+    setSelectedTab(savedTab); // Restore the selected tab
+  }
+}, []);
+
+
+ const handleAvatarUpload = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        console.log(null);
+          const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+              },
+          });
+          console.log('Image uploaded successfully:', response);
+          const uploadedImageUrl = response.data.imageUrl;
+          
+          // Update avatarImage and save the URL in localStorage
+          setAvatarImage(uploadedImageUrl);
+          localStorage.setItem(`${userId}`, uploadedImageUrl);
+          console.log('Image uploaded successfully!');
+      } catch (err) {
+          console.error('Error uploading image:', err);
+          console.log(err.response ? err.response.data.error : 'Failed to upload image. Please try again.');
+      }
+  }else {
+    console.log('No file selected.');
+    return; 
+  }
+};
 const handleClick = (event) => {
   setAnchorEl1(event.currentTarget);
 };
@@ -98,18 +140,10 @@ const handleOpenMenu = (event) => {
 };
    const handleTabClick = (tabName) => {
     setSelectedTab(tabName);
-};
-   const handleMenuClick = (action) => {
-      handleMenuClose();
-      if (action === 'changePassword') {
-         navigate('/change-password', { state: { userId: userId } });;
-      } else if (action === 'logout') {
-         navigate('/');
-      }
-};
+}; 
+const  handleRegisterClick=async(title)=> {
 
-    const  handleRegisterClick=async(title)=> {
-       if(title ==="Book a Transportation") {
+           if(title ==="Transportation") {
         try {
           const options = { 
             apiPath: `/getTransportations/EGP`
@@ -122,15 +156,30 @@ const handleOpenMenu = (event) => {
           } catch (error) {
           console.log('Error:', error);
         }
-      }
-       else if (title === "View Products") {
+            }
+            else if(title==='Book Hotels'){
+
+            }
+            else if (title==='Book Flights'){
+
+            }
+            else if(title==='Itinerary'){
+
+            }
+            else if(title==='view Itinerary'){
+
+            }
+            else if(title==='Rating'){
+
+            }
+           else if (title==="Products") {
             try {
                 const options = {
                   apiPath: `/getAvailableProducts/${userId}`,
                 };
                 
                 const response = await NetworkService.get(options);
-                setSuccess(response.message); // Set success message
+                console.log(response.message); // Set success message
                 console.log(response);
                 const Product=response.Products;
                 const Type='tourist';
@@ -138,174 +187,174 @@ const handleOpenMenu = (event) => {
               } catch (err) {
                 if (err.response) {
                     console.log(err.message);
-                  setError(err.response.data.message); // Set error message from server response if exists
+
+                  console.log(err.response.data.message); // Set error message from server response if exists
                 } else {
-                  setError('An unexpected error occurred.'); // Generic error message
+                  console.log('An unexpected error occurred.'); // Generic error message
                 }
               }
-        }
-      else if (title==="My Profile"){
-        try {
-            const options = {
-              apiPath: `/getTourist/${userId}`,
+             }
+            else if (title==='profile'){
+              try {
+                  navigate(`/viewTouristProfile`,{state:{Tourist:Userr}});
+                } catch (err) {
+                  if (err.response) {
+                      console.log(err.message);
+                      console.log(err.response.data.message); // Set error message from server response if exists
+                  } else {
+                    console.log('An unexpected error occurred.'); // Generic error message
+                  }
+                }
+            }
+            else if(title ==="View Booked items") {
+              try {
+                const touristId=Userr._id;
+                const options = { 
+                  apiPath: `/bookedEvents/${touristId}`
+                };
+                const response = await NetworkService.get(options);
+                navigate(`/ViewListofBooked`,{state:{events:response,userId:Userr._id}});          
+        
+              } catch (error) {
+                console.log('Error:', error);
+              }
+            }
+            else if(title ==="View/Rate Purchased Product") {
+              console.log("hereeeee");
+              console.log("heree");
+
+              try {
+                const options = {
+                  apiPath: `/getOrders/${Userr._id}`,
+                };
+                const response = await NetworkService.get(options);
+                console.log(response.message); // Set success message
+                console.log("get Purchased Product",response);
+                const Product=response.orders;
+                console.log("get Purchased Product",Product);
+
+                const Type='tourist';
+                navigate(`/ViewPurchasedProduct`,{ state: { Product:Product, Type:Type ,userId:Userr._id} });          
+              } catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                    console.log(err.response.data.message); // Set error message from server response if exists
+                } else {
+                  console.log('An unexpected error occurred.'); // Generic error message
+                }
+              }
+            }
+            else if(title ==="Book Hotels") {
+            navigate(`/BookHotel`,{state:{userId:Userr._id}});          
+            }
+            else if(title ==="Book Flights") {
+              navigate(`/BookFlight`,{state:{userId:Userr._id}});          
+            }
+            else if (title ==="Complaints"){
+              try { 
+                const options = {
+                  apiPath: `/myComplaints/${Userr._id}`,
+                  urlParam:userId
+                };
+                const response = await NetworkService.get(options);
+                console.log(response.message); // Set success message
+                console.log(response);
+                const events=response.data;
+                console.log(events)
+                navigate(`/Complaints`,{state:{events,userId:Userr._id}});          
+              } catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                    console.log(err.response.data.message); // Set error message from server response if exists
+                } else {
+                  console.log('An unexpected error occurred.'); // Generic error message
+                }
+              }
+            }
+            else if(title ==="Order History"){
+              try {
+                const options = {
+                  apiPath: `/myOrders/${Userr._id}/${currency}`,
+                };
+                
+                const response = await NetworkService.get(options);
+                console.log(response);
+                console.log(response.message); // Set success message
+                const Type='tourist';
+                const Orders = response.data;
+                navigate(`/OrderHistory`,{ state: { Orders, Type ,User:tourist} });          
+              } catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                    console.log(err.response.data.message); // Set error message from server response if exists
+                } else {
+                  console.log('An unexpected error occurred.'); // Generic error message
+                }
+              } 
+            }
+            else if(title==='Change Password'){
+              console.log('hereee');
               
-            };
-            
-            const response = await NetworkService.get(options);
-            setSuccess(response.message); // Set success message
-            console.log(response);
-            navigate(`/viewTouristProfile`,{state:{Tourist:response}});
-          } catch (err) {
-            if (err.response) {
-                console.log(err.message);
-              setError(err.response.data.message); // Set error message from server response if exists
-            } else {
-              setError('An unexpected error occurred.'); // Generic error message
+              navigate('/change-password', { state: { userId: Userr._id ,userType:userType} });;
             }
-          }
-      }      else if(title ==="View Booked items") {
-        try {
-          const touristId=userId;
-          const options = { 
-            apiPath: `/bookedEvents/${touristId}`
-           };
-          const response = await NetworkService.get(options);
-          navigate(`/ViewListofBooked`,{state:{events:response,userId:userId}});          
-  
-        } catch (error) {
-          console.log('Error:', error);
-        }
-      }
-      else if(title ==="View/Rate Purchased Product") {
-        console.log("hereeeee");
-        console.log("heree");
-
-        try {
-          const options = {
-            apiPath: `/getOrders/${userId}`,
-          };
-          const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          console.log("get Purchased Product",response);
-          const Product=response.orders;
-          console.log("get Purchased Product",Product);
-
-          const Type='tourist';
-          navigate(`/ViewPurchasedProduct`,{ state: { Product:Product, Type:Type ,userId:userId} });          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
-        }
-      }
-      else if(title ==="Book Hotels") {
-       navigate(`/BookHotel`,{state:{userId}});          
-      }
-      else if(title ==="Book Flights") {
-        navigate(`/BookFlight`,{state:{userId}});          
-      }
-      else if (title ==="Complaints"){
-        try { 
-          const options = {
-            apiPath: `/myComplaints/${userId}`,
-            urlParam:userId
-          };
-          const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
-          console.log(response);
-          const events=response.data;
-          console.log(events)
-          navigate(`/Complaints`,{state:{events,userId:userId}});          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
-        }
-      }
-      else if(title ==="Order History"){
-        try {
-          const options = {
-            apiPath: `/myOrders/${userId}/${currency}`,
-          };
-          
-          const response = await NetworkService.get(options);
-          console.log(response);
-
-          setSuccess(response.message); // Set success message
-          const Type='tourist';
-          const Orders = response.data;
-          navigate(`/OrderHistory`,{ state: { Orders, Type ,User:tourist} });          
-        } catch (err) {
-          if (err.response) {
-              console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
-          } else {
-            setError('An unexpected error occurred.'); // Generic error message
-          }
-        } 
-      }
-      else{
-        try {
-            const options = {
-              apiPath: `/upcomingEvents/${currency}`,
-              urlParam: {currency: currency},
-            };
-            console.log(options);
-            const response = await NetworkService.get(options);
-            setSuccess(response.message); // Set success message
-            console.log("response",response);
-            const events=response;
-            console.log(userId);
+            else if(title==='Delete Account'){
+              try {
+                const options = {
+                  apiPath: `/requestDeletion/${Userr._id}/${userType}`,
+                  useParams: Userr._id,
+                  userType,
+                };
+                const response = await NetworkService.put(options);
+                console.log(response);
             
-            navigate(`/explore`,{state:{events:events,userId:userId,typee:"tourist"}});          
-          } catch (err) {
-            if (err.response) {
-                console.log(err.message);
-              setError(err.response.data.message); // Set error message from server response if exists
-            } else {
-              setError('An unexpected error occurred.'); // Generic error message
+                console.log(response.message || "Delete Successfully!");            
+                if (response.success) {
+                  console.log("Account deletion requested successfully.");
+                } else {
+                  console.log(response.message || "Account deletion request failed.");
+                }
+              } catch (err) {
+                // Access the error message from the response data
+                const errorMessage = err.response?.data?.message || "An error occurred";
+                setErrorMessage(errorMessage);
+                setShowErrorMessage(true);
+                console.log(errorMessage);
+              }
             }
-          }
-      }
-      }
+            else if(title==='Log Out'){
+              console.log('yes here');
+              localStorage.removeItem('User');
+              localStorage.removeItem('imageUrl');
+              localStorage.removeItem('UserId');
+              localStorage.removeItem('UserType');
+              navigate('/');
+            }
+            else if(title==='Events'){              
+              try {
+                  const options = {
+                    apiPath: `/upcomingEvents/${currency}`,
+                    urlParam: {currency: currency},
+                  };
+                  console.log(options);
+                  const response = await NetworkService.get(options);
+                  console.log(response.message); // Set success message
+                  console.log("response",response);
+                  const events=response;
+                  console.log(Userr._id);
+                  
+                  navigate(`/explore`,{state:{events:events,userId:Userr._id,userType:"tourist"}});          
+                } catch (err) {
+                  if (err.response) {
+                      console.log(err.message);
+                      console.log(err.response.data.message); // Set error message from server response if exists
+                  } else {
+                    console.log('An unexpected error occurred.'); // Generic error message
+                  }
+                }
+            }
 
-      const handleDeleteAccount = async () => {
-        try {
-          console.log(userId, userType);
-      
-          const options = {
-            apiPath: `/requestDeletion/${userId}/${userType}`,
-            useParams: userId,
-            userType,
-          };
-          const response = await NetworkService.put(options);
-          console.log(response);
-      
-          setSuccessMessage(response.message || "Delete Successfully!");
-          setShowSuccessMessage(true);
-      
-          if (response.success) {
-            setSuccess("Account deletion requested successfully.");
-          } else {
-            setError(response.message || "Account deletion request failed.");
-          }
-        } catch (err) {
-          // Access the error message from the response data
-          const errorMessage = err.response?.data?.message || "An error occurred";
-          setErrorMessage(errorMessage);
-          setShowErrorMessage(true);
-          setError(errorMessage);
-        }
-      };
-  const toggleDrawer = (open) => () => {
-    setDrawerOpen(open);
 };
+
 return (
   <>
       <nav className="navbarMain">
@@ -316,23 +365,25 @@ return (
         alt="ExploreInEase Logo"
         className="logo"
       />
-      <span className="website-name">ExploreInEase</span>
+      <span className="website-name">ExploreInEase/Tourist</span>
     </div>
       </div>
     <div className="navbar-right">
        {/* Cart Button */}
-  <IconButton
-    style={{
-      color: 'blue',
-      backgroundColor: '#e0f7fa',
-    }}
-    onClick={() => {
-      navigate('/cart');
-    }}
-  >
-    <AddShoppingCart />
-  </IconButton>   
-   
+        <IconButton
+          style={{
+            color: 'blue',
+            backgroundColor: '#e0f7fa',
+          }}
+          onClick={() => {
+            navigate('/cart');
+          }}
+        >
+          <Tooltip title="Cart">
+          <AddShoppingCart />
+          </Tooltip>
+
+        </IconButton>   
 
   {/* Notification Button */}
   <IconButton
@@ -345,9 +396,11 @@ return (
       backgroundColor: '#e0f7fa',
     }}
   >
+    <Tooltip title='Notification'>
     <Badge badgeContent={4} color="success">
       <NotificationsNoneOutlinedIcon sx={{ fontSize: 23 }} />
     </Badge>
+    </Tooltip>
   </IconButton>
 
   <Menu
@@ -388,6 +441,7 @@ return (
       <MenuItem disabled>No notifications available</MenuItem>
     )}
   </Menu>
+  <Tooltip title="Options">
   <Avatar
     sx={{
       bgcolor: 'darkblue',
@@ -399,7 +453,7 @@ return (
   >
     {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
   </Avatar>
-
+</Tooltip>
   <Menu
     anchorEl={anchorProfileEl}
     open={Boolean(anchorProfileEl)}
@@ -413,192 +467,58 @@ return (
       horizontal: 'center',
     }}
   >
-    <MenuItem onClick={handleCloseMenu}>View Profile</MenuItem>
-    <MenuItem onClick={handleCloseMenu}>Change Password</MenuItem>
-    <MenuItem onClick={handleCloseMenu}>Delete Account</MenuItem>
-    <MenuItem onClick={handleCloseMenu}>Log Out</MenuItem>
-  </Menu>
-                
+                      <MenuItem onClick={()=>handleRegisterClick('profile')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                              <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                  <PersonOutlineIcon />
+                              </ListItemIcon>
+                              profile
+                       </MenuItem> 
+                          <Divider/>
+                          <MenuItem onClick={()=>handleRegisterClick('Change Password')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                                                    <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                                        <PasswordOutlinedIcon />
+                                                    </ListItemIcon>
+                                                    Change Password
+                                            </MenuItem>    <Divider/>
+                          <MenuItem onClick={()=>handleRegisterClick('Delete Account')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                                                    <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                                        <Delete />
+                                                    </ListItemIcon>
+                                                    Delete Account  
+                                                  </MenuItem>    <Divider/>
+                          <MenuItem component="label" sx={{cursor:'pointer', alignItems: 'center',padding: 0 , marginLeft: '8px'}} >
+                                                    <ListItemIcon sx={{cursor:'pointer', marginRight: '5px' }}>
+                                                        <UploadIcon />
+                                                    </ListItemIcon>
+                                                      Upload Profile Picture
+                                                      <input
+                                                          type="file"
+                                                          accept="image/*"
+                                                          style={{ display: 'none' }}
+                                                          onChange={handleAvatarUpload}
+                          /> </MenuItem>
+                        <Divider/>
+                          <MenuItem onClick={()=>handleRegisterClick('Log Out')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                                                    <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
+                                                        <LogoutOutlinedIcon />
+                                                    </ListItemIcon>
+                                                    Log Out
+                          </MenuItem> 
+     </Menu>           
      </div>
     </nav>
     <nav className="navbarSecondary">
-    {["Sales","Tourists","Complaints","Book Hotels","Book Flights","Itinerary","View Itinerary","Products","Transportation","Order History","Rating"].map((tab) => (
+    {['Events',"Complaints","Book Hotels","Book Flights","Itinerary","View Itinerary","Products","Transportation","Order History","Rating"].map((tab) => (
           <div
             key={tab}
             className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}
-            onClick={() => handleTabClick(tab)}
+            onClick={() => handleRegisterClick(tab)}
           >
             {tab}
           </div>
         ))}
     </nav>
   </>
-//   <div>
-//       <nav className="navbar">
-//           <div className="logo-container">
-//               <img src={HomePageLogo} alt="ExploreInEase Logo" className="logo" />
-//               <span className="website-name">ExploreInEase</span>
-//           </div>
-//           <div style={{ display: 'flex',flexDirection: 'row',marginLeft:'1450px',alignContent:'center',alignItems:'center' }}>
-//           <IconButton 
-//            className="menu-button"
-//            style={{ 
-//             position:'absolute',
-//             color: 'blue',      // Change icon color to blue
-//             backgroundColor: '#e0f7fa', // Light blue background for contrast
-//             alignItems:'center'
-//         }}
-//           onClick={()=>{navigate('/cart')}} >
-//                     <AddShoppingCart />
-//             </IconButton>
-      
-//           <IconButton 
-//                         onClick={handleClick} 
-//                         aria-controls={open ? 'basic-menu' : undefined}
-//                         aria-haspopup="true"
-//                         aria-expanded={open ? 'true' : undefined}
-//                         className="menu-button" 
-//                         style={{ 
-//                             position:'absolute',
-//                             color: 'blue',      // Change icon color to blue
-//                             backgroundColor: '#e0f7fa', // Light blue background for contrast
-//                             right: '115px',
-//                             alignItems:'center'
-//                         }}>
-//                         <Badge badgeContent={4} color="success">
-//                         <NotificationsNoneOutlinedIcon sx={{ fontSize: 30 }} />
-//                         </Badge>
-//              </IconButton>
-             
-//     <Menu
-//     id="basic-menu"
-//     anchorEl={anchorEl1}
-//     open={openNotfication}
-//     onClose={handleClose}
-//     MenuListProps={{
-//         'aria-labelledby': 'basic-button',
-//     }}
-//     PaperProps={{
-//         style: {
-//             maxHeight: '300px', // Set the maximum height for the menu
-//             overflow: 'auto',   // Enable scrolling
-//         },
-//     }}
-// >
-//     {menuItems && menuItems.length > 0 ? (
-//         menuItems.map((item, index) => (
-//             <MenuItem key={index}>
-//                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-//                     <strong>{item.title}</strong>
-//                     <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
-//                 </div>
-//             </MenuItem>
-//         ))
-//     ) : (
-//         <MenuItem disabled>No notifications available</MenuItem>
-//     )}
-// </Menu>
-//                   <IconButton 
-//             onClick={toggleDrawer(true)} 
-//             className="menu-button" 
-//             style={{ 
-//               position: 'absolute', 
-//               right: '40px', 
-//               color: 'white',      // Icon color
-//               backgroundColor: '#3f51b5' // Background color
-//             }}
-//           >
-//               <MenuIcon />
-//             </IconButton>
-//                     </div>
-
-       
-//       </nav>
-//       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{width: drawerOpen ? '700px' : '300px'}}>
-//           <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
-//               <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
-//                   {avatarImage ? '' : firstInitial}
-//               </Avatar>
-//               <Typography variant="h6" style={{ marginLeft: '10px' }}>{tourist.username}</Typography>
-//           </div>
-//           <Divider />
-//           <List>
-//   <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
-//   <ListItem button onClick={() => handleMenuClick('changePassword')}>
-//     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-//       <LockIcon fontSize="small" />
-//     </ListItemIcon>
-//     <ListItemText primary="Change Password" />
-//   </ListItem>
-//   <ListItem button onClick={handleDeleteAccount}>
-//     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-//       <Delete fontSize="small" />
-//     </ListItemIcon>
-    
-//     <ListItemText primary="Delete Account" />
-//   </ListItem>
-//   <ListItem button onClick={() => handleMenuClick('logout')}>
-//     <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-//       <LogoutIcon fontSize="small" />
-//     </ListItemIcon>
-//     <ListItemText primary="Logout" />
-//   </ListItem>
-// </List>
-
-//           <Divider />
-//           <List>
-//               <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
-//               {[
-//                   "Explore Activities",
-//                   "View Products",
-//                   "Book a Transportation",
-//                   "View Booked items",
-//                   "View/Rate Purchased Product",
-//                   "Book Hotels",
-//                   "Book Flights",
-//                   "Complaints",
-//                   "Order History",
-//                   "My Profile"
-//               ].map((text) => (
-//                   <ListItem key={text} disablePadding>
-//                       <ListItemButton onClick={() => handleRegisterClick(text)}>
-//                           <ListItemText primary={text} />
-//                       </ListItemButton>
-//                   </ListItem>
-//               ))}
-//           </List>
-//       </Drawer>
-//       <div>
-//       {showSuccessMessage && (
-//         <Alert severity="success" 
-//         sx={{
-//           position: 'fixed',
-//           top: 80, // You can adjust this value to provide space between success and error alerts
-//           right: 20,
-//           width: 'auto',
-//           fontSize: '1.2rem', // Adjust the size
-//           padding: '16px',
-//           zIndex: 9999, // Ensure it's visible above other content
-//         }}>
-//           {successMessage}
-//         </Alert>
-//       )}
-//       {showErrorMessage && (
-//         <Alert severity="error" 
-//         sx={{
-//           position: 'fixed',
-//           top: 60, // You can adjust this value to provide space between success and error alerts
-//           right: 20,
-//           width: 'auto',
-//           fontSize: '1.2rem', // Adjust the size
-//           padding: '16px',
-//           zIndex: 9999, // Ensure it's visible above other content
-//         }}>
-//           {errorMessage}
-//         </Alert>
-//       )}
-//       </div>
-//   </div>
 );
 };
 export default TouristNavbar;

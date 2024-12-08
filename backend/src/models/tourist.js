@@ -60,8 +60,8 @@ const TouristSchema = new Schema({
     }],
     bookmark: [
         {
-            id: [{type: mongoose.Schema.Types.ObjectId}],
-            type: [{type: String}]
+            id: {type: mongoose.Schema.Types.ObjectId},
+            type: {type: String}
         }
     ],
     createdAt: {
@@ -111,18 +111,6 @@ const TouristSchema = new Schema({
         type: Boolean,
         default: false
     },
-    interestedIn: [{
-        id: { type: mongoose.Schema.Types.ObjectId},
-        type: { type: String }
-    }],
-    otp: {
-        type: Number,
-        default: 0
-    },
-    currency: {
-        type: String,
-        default: "EGP"
-    }
 }, {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     versionKey: false // Disable the version key field "__v"

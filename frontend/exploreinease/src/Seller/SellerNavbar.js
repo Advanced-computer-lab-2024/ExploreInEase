@@ -271,7 +271,7 @@ const SHomePage = () => {
         alt="ExploreInEase Logo"
         className="logo"
       />
-      <span className="website-name">ExploreInEase</span>
+      <span className="website-name">ExploreInEase/Seller</span>
     </div>
       </div>
     <div className="navbar-right">

@@ -781,7 +781,6 @@ const getAddresses = async (userId) => {
     return addresses;
 }
 
-
 const userReport = async (userId) => {
     const user = await userRepository.findUserById(userId);
     if (!user) {
@@ -805,13 +804,67 @@ const getAllNotifications = async (userId) => {
     if(tourist){
         notifications = await userRepository.getAllNotifications(tourist);
     }
-    return notifications;
-}
+const sortedNotifications = notifications.sort((a, b) => {
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      });
+    
+    return sortedNotifications;}
 
+    const addBookmark = async (touristId, bookmarks) => {
+        try {
+          // Call the repository to update the tourist's bookmarks
+          return await userRepository.addBookmark(touristId, bookmarks);
+        } catch (error) {
+          throw new Error(error.message);
+        }
+      };      
+      const getBookmarks = async (touristId) => {
+        try {
+          const bookmarks = await userRepository.getBookmarks(touristId);
+      
+          // Enrich each bookmark with the corresponding model data
+          const enrichedBookmarks = await Promise.all(
+            bookmarks.map(async (bookmark) => {
+              let Model;
+              switch (bookmark.type) {
+                case "Itinerary":
+                  Model = Itinerary;
+                  break;
+                case "Activity":
+                  Model = Activity;
+                  break;
+                case "HistoricalPlace":
+                  Model = HistoricalPlace;
+                  break;
+                default:
+                  // If type doesn't match known models, return null data
+                  return { ...bookmark, type: bookmark.type, data: null };
+              }
+      
+              // Fetch the detailed document
+              const doc = await Model.findById(bookmark.id).lean();
+              return { ...bookmark, type: bookmark.type, data: doc };
+            })
+          );
+      
+          // Return objects with type and data fields
+          return enrichedBookmarks.map((bookmark) => ({
+            type: bookmark.type,
+            data: bookmark.data,
+          }));
+        } catch (error) {
+          throw new Error(error.message);
+        }
+      };
+    
+
+    
 module.exports = {
     getAllNotifications,
     verifyOtP,
     addAddresses,
+    addBookmark,
+    getBookmarks,
     getAddresses,
     addInterestedIn,
     creatingPromoCode,

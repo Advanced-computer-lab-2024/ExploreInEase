@@ -160,7 +160,7 @@ const GovernorNavbar = () => {
         alt="ExploreInEase Logo"
         className="logo"
       />
-      <span className="website-name">ExploreInEase</span>
+      <span className="website-name">ExploreInEase/GovernorHomePage</span>
     </div>
       </div>
     <div className="navbar-right">
@@ -228,102 +228,6 @@ const GovernorNavbar = () => {
         ))}
             </nav>
   </>
-//    <div>
-//      <nav className="navbar">
-//        <div className="logo-container">
-//          <img
-//            src={HomePageLogo} // Use the imported logo
-//            alt="ExploreInEase Logo"
-//            className="logo"
-//          />
-//          <span className="website-name">ExploreInEase</span>
-//        </div>
-    
-
-
-//                <IconButton 
-//               onClick={toggleDrawer(true)} 
-//               className="menu-button" 
-//               style={{ 
-//                 position: 'absolute', 
-//                 right: '40px', 
-//                 color: 'white',      // Icon color
-//                 backgroundColor: '#3f51b5' // Background color
-//               }}
-//                 >
-//  <MenuIcon />
-// </IconButton>
-// </nav>
-// <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)} style={{width: drawerOpen ? '700px' : '300px'}}>
-//          <div style={{ padding: '16px', display: 'flex', alignItems: 'center' }}>
-//              <Avatar sx={{ bgcolor: 'darkblue', color: 'white' }} src={avatarImage || undefined}>
-//                  {avatarImage ? '' : firstInitial}
-//              </Avatar>
-//              <Typography variant="h6" style={{ marginLeft: '10px' }}>{tourist.username}</Typography>
-//          </div>
-//          <Divider />
-//          <List>
-//  <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Account</strong></Typography>
-//  <ListItem button onClick={() => handleRegisterClick('changePassword')}>
-//    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-//      <LockIcon fontSize="small" />
-//    </ListItemIcon>
-//    <ListItemText primary="Change Password" />
-//  </ListItem>
-//  <ListItem button onClick={() => handleRegisterClick('logout')}>
-//    <ListItemIcon style={{ minWidth: '0px', marginRight: '8px' }}>
-//      <LogoutIcon fontSize="small" />
-//    </ListItemIcon>
-//    <ListItemText primary="Logout" />
-//  </ListItem>
-// </List>
-
-//          <Divider />
-//          <List>
-//              <Typography variant="h6" style={{ padding: '8px 16px' }}><strong>Pages</strong></Typography>
-//              {[
-//                  "Create Historical Locations Tags",
-//                  "CRUD Historical Places",
-//              ].map((text) => (
-//                  <ListItem key={text} disablePadding>
-//                      <ListItemButton onClick={() => handleRegisterClick(text)}>
-//                          <ListItemText primary={text} />
-//                      </ListItemButton>
-//                  </ListItem>
-//              ))}
-//          </List>
-//              </Drawer>
-//              <div>
-//              {showSuccessMessage && (
-//                <Alert severity="success" 
-//                sx={{
-//                  position: 'fixed',
-//                  top: 80, // You can adjust this value to provide space between success and error alerts
-//                  right: 20,
-//                  width: 'auto',
-//                  fontSize: '1.2rem', // Adjust the size
-//                  padding: '16px',
-//                  zIndex: 9999, // Ensure it's visible above other content
-//                }}>
-//                  {successMessage}
-//                </Alert>
-//              )}
-//              {showErrorMessage && (
-//                <Alert severity="error" 
-//                sx={{
-//                  position: 'fixed',
-//                  top: 60, // You can adjust this value to provide space between success and error alerts
-//                  right: 20,
-//                  width: 'auto',
-//                  fontSize: '1.2rem', // Adjust the size
-//                  padding: '16px',
-//                  zIndex: 9999, // Ensure it's visible above other content
-//                }}>
-//                  {errorMessage}
-//                </Alert>
-//              )}
-//         </div>
-//    </div>
  );
 };
 

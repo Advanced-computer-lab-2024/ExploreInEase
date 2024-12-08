@@ -94,6 +94,9 @@ const getTouristComplaints = async (touristId) => {
   const complaints = await complaintRepository.findComplaintsByTourist(
     touristId
   );
+  if(!complaints){
+    return [];
+  }
   return complaints.map((complaint) => ({
     _id: complaint._id,
     title:complaint.title,

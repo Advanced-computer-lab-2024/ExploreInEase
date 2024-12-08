@@ -590,7 +590,7 @@ const requestDeletion = async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
         
-        res.status(200).json({ message: "Request to be deleted accepted.", user: result });
+        res.status(200).json({ message: "Request is Made.", user: result });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -658,16 +658,13 @@ const login = async (req, res) => {
 
     try {
         // Fetch user or tourist from the service
-        const { user, userType } = await userService.login(username, password);
-        
+        const { user, userType } = await userService.login(username, password);   
         if (!user || !userType) {
             return res.status(404).json({ error: 'Invalid username or password' });
         }
-
         let imageUrl = null;
         if (userType !== 'tourist') {
             imageUrl = await userRepository.getUserProfilePicture(user._id);
-
             // If terms and conditions are not accepted, return the formatted response
             if (!user.termsAndConditions) {
                 return res.status(200).json({
@@ -863,9 +860,13 @@ const verifyOtP = async (req, res) => {
     }
 }
 
+
 const addAddresses = async (req, res) => {
-    const { userId } = req.params;
-    const { address } = req.body;
+    const { userId,address } = req.params;
+
+    //console.log(address);
+    //console.log(userId);
+
     if(!userId || !address){
         return res.status(400).json({ message: "Missing parameters" });
     }
@@ -879,6 +880,7 @@ const addAddresses = async (req, res) => {
 
 const getAddresses = async (req, res) => {
     const { userId } = req.params;
+    //console.log(userId);
     if(!userId){
         return res.status(400).json({ message: "Missing parameters" });
     }
@@ -889,7 +891,6 @@ const getAddresses = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 }
-
 
 const userReport = async (req, res) => {
     const { userId } = req.params;
@@ -916,6 +917,57 @@ const getAllNotifications = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 }
+const addBookmark = async (req, res) => {
+    const { touristId,id,type } = req.params;
+    console.log(touristId);
+    console.log(type);
+    console.log(id);
+
+    
+  
+    if (!id || !type) {
+      return res.status(400).json({
+        success: false,
+        message: "Both id and type are required",
+      });
+    }
+  
+    try {
+      const bookmark = { id, type };
+      console.log(bookmark);
+      const updatedBookmarks = await userService.addBookmark(touristId, bookmark);
+      res.status(201).json({
+        success: true,
+        data: updatedBookmarks,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+  
+  // Controller method to handle retrieving all bookmarks
+  const getBookmarks = async (req, res) => {
+    const { touristId } = req.params;
+  
+    try {
+      const bookmarks = await userService.getBookmarks(touristId);
+  
+      res.status(200).json({
+        success: true,
+        data: bookmarks,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+
 
 module.exports = {
     getAllNotifications,
@@ -923,6 +975,8 @@ module.exports = {
     changePasswordAfterOTP,
     verifyOtP,
     addAddresses,
+    addBookmark,
+    getBookmarks,
     getAddresses,
     forgetPassword,
     creatingPromoCode,

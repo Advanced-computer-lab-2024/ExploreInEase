@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../NetworkService';
-
+import TouristNavbar from './TouristNavbar';
 const Complaints = () => {
     const location = useLocation();
     const { userId } = location.state || {};
@@ -108,6 +108,8 @@ const Complaints = () => {
     
 
     return (
+        <div>
+            <TouristNavbar/>    
         <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>My Complaints</h1>
@@ -200,6 +202,7 @@ const Complaints = () => {
                     {errorMessage}
                 </Alert>
             )}
+        </div>
         </div>
     );
 };

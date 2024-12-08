@@ -37,12 +37,15 @@ const roleFields = {
   Activities: ['budget', 'date', 'category', 'rating'],
   Itineraries: ['budget', 'date', 'preferences', 'language'],
 };
-
 const Filter = ({eventsG=[],typeeG=''}) => {
+  const Userr = JSON.parse(localStorage.getItem('User'));
+  let typeTourist= localStorage.getItem('userType')|| '';
+  localStorage.removeItem('userType');
   const location = useLocation();
+  const{userType:userTypee}=location.state||'';
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState(null);
-  const { events,userId=null,typee } = location.state || {};  
+  const { events,userId=null,typee} = location.state || {};  
   const itemList = events?.flat() ||eventsG?.flat()|| []; // Flatten the array and ensure it's initialized
   const [filters, setFilters] = useState({
     budget: '',
@@ -62,7 +65,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   // const [historicalTags, setHistoricalTags] = useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [ setShareDialogOpen] = useState(false);
+  const [ shareDialogOpen,setShareDialogOpen] = useState(false);
   const [type, setType] = useState(''); 
   const [budget, setBudget] = useState('');
   const [currency, setCurrency] = useState('');
@@ -90,6 +93,24 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     }
   }, [showErrorMessage]);
 
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(false); // Hide the alert after 3 seconds
+      }, 7000);
+  
+      return () => clearTimeout(timer); // Clean up the timer on component unmount
+    }
+  }, [success]);
+
+  useEffect(() => {
+    const initialData = itemList.filter(item =>
+      (role === 'Activities' && item.type === 'Activity') ||
+      (role === 'Itineraries' && item.type === 'Itinerary') ||
+      (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
+    );
+    setFilteredData(initialData);
+  }, []);
   const handleShareClick = (item) => {
     setSelectedItem(item);
     setShareDialogOpen(true);
@@ -97,50 +118,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const handleShareDialogClose = () => {
     setShareDialogOpen(false);
   };
-  // const getAddressFromCoordinates = async (coordinates) => {
-  //   if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
-  //     return 'Location not available';
-  //   }
-  //   const [longitude, latitude] = coordinates;
 
-  //   // Check cache first
-  //   const cacheKey = `${latitude},${longitude}`;
-  //   if (addressCache[cacheKey]) {
-  //     return addressCache[cacheKey];
-  //   }
-  //   try {
-  //     const response = await fetch(
-  //       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-  //       {
-  //         headers: {
-  //           'Accept-Language': 'en-US,en;q=0.9',
-  //         },
-  //       }
-  //     );
-      
-  //     if (!response.ok) {
-  //       throw new Error('Geocoding failed');
-  //     }
-
-  //     const data = await response.json();
-      
-  //     // Create a readable address from the response
-  //     const address = data.display_name.split(',').slice(0, 3).join(',');
-  //     addressCache[cacheKey] = address;
-
-  //     // Cache the result
-  //     setAddressCache(prev => ({
-  //       ...prev,
-  //       [cacheKey]: address
-  //     }));
-
-  //     return address;
-  //   } catch (error) {
-  //     console.error('Error fetching address:', error);
-  //     // Fallback to coordinate display if geocoding fails
-  //     return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
-  //   }
-  // };
   const fetchAddressFromAPI = async (latitude, longitude) => {
     try {
       const response = await fetch(
@@ -200,16 +178,6 @@ const Filter = ({eventsG=[],typeeG=''}) => {
       </span>
     );
   };
-
-  useEffect(() => {
-    const initialData = itemList.filter(item =>
-      (role === 'Activities' && item.type === 'Activity') ||
-      (role === 'Itineraries' && item.type === 'Itinerary') ||
-      (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
-    );
-    setFilteredData(initialData);
-  }, []);
-
   // Handle Input Change
   const handleFilterChange = (e) => {
     setFilters({
@@ -295,14 +263,17 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   };
 
   const handleBookmarkClick = async (item) => {
-    const touristId = userId;
+    const touristId = Userr._id;
     const id = item.id;  // 'Activity', 'Itinerary', 'HistoricalPlace'
     const type = item.type;
+    console.log(item);
+    console.log(id);
+    console.log(type);
+
   
     try {
       const options = {
-        apiPath: `/bookmark/${touristId}`,  // POST request to the correct endpoint
-        useParams: { id, type },  // Pass id and type as parameters
+        apiPath: `/bookmark/${touristId}/${id}/${type}` ,// POST request to the correct endpoint
       };
       
       const response = await NetworkService.post(options);  // Use POST instead of PUT
@@ -540,24 +511,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     }
     handleClose();
   }
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        setSuccess(false); // Hide the alert after 3 seconds
-      }, 7000);
-  
-      return () => clearTimeout(timer); // Clean up the timer on component unmount
-    }
-  }, [success]);
-  // useEffect(() => {
-  //   filteredData.forEach((item) => {
-  //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
-  //       getHistoricalTags(item.tags);
-  //     }
-  //   });
-  // }, [filteredData, historicalTags]);
-// getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
-// console.log("filteredData",filteredData);
+
 const handleOpenDialog = (data) => {
   setDialogData(data);
   setDialogOpen(true);
@@ -567,11 +521,14 @@ const handleCloseDialog = () => {
   setDialogOpen(false);
   setDialogData(null);
 };
+
   return (
 <div>
-    {typee==='tourist' &&(
-      <TouristNavbar/>
-    )}
+      {
+        userTypee==='tourist' &&(
+          <TouristNavbar/>
+        )
+      }
 
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
      <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>
@@ -726,7 +683,7 @@ const handleCloseDialog = () => {
             <Grid item xs={12} sm={6} md={4} key={item.id}>
               <Card    
                 style={{
-                  width: item.type === 'Activity' ? '380px' : item.type === 'Itinerary' ? '360px' : '380px',
+                  width: 'auto',
                   height: 'auto',
                   margin: '16px',
                   padding: '16px',
@@ -751,18 +708,19 @@ const handleCloseDialog = () => {
                         style={{ borderRadius: '8px 8px 0 0' }}
                 />
                 <CardContent>
-                <div style={{ display: 'flex', alignItems: 'center', marginLeft: '120px' }}>  
+                <div style={{ display: 'flex', alignItems: 'center'}}>  
                  <Typography variant="h5" component="div">
                    {item.name}
                  </Typography>
                  <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '8px' }}>
                     <InfoIcon color="primary" />
-                  </IconButton></div>
+                  </IconButton>
+                  </div>
                   {item.type === 'Activity' && (
                     <>
-                      <Typography ><strong>Budget:</strong>{item.budget}</Typography>
+                      {/* <Typography ><strong>Budget:</strong>{item.budget}</Typography>
                       <Typography ><strong>Date:</strong> {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
-                      <Typography><strong>Category:</strong> {item.category}</Typography>
+                      <Typography><strong>Category:</strong> {item.category}</Typography> */}
                       <Typography><strong>Locations:</strong>
                            { 
                               <LocationDisplay coordinates={item.location} />
@@ -777,12 +735,12 @@ const handleCloseDialog = () => {
                     <>
                       <Typography ><strong>Activities:</strong> {item.activities.join(', ')}</Typography>
                       <Typography ><strong>Locations:</strong> {item.locations.join(', ')}</Typography>   
-                      <Typography><strong>Price: </strong>{item.price}</Typography>
+                      {/* <Typography><strong>Price: </strong>{item.price}</Typography>
                       <Typography><strong>Rating:</strong> {item.rating.length ===0 ?0:item.rating}</Typography>
                       <Typography><strong>Language:</strong> {item.language}</Typography>
                       <Typography><strong>Dropoff location:</strong> {item.dropoffLocation}</Typography>
                       <Typography><strong>Pickup location:</strong>{item.pickupLocation}</Typography>
-                      <Typography><strong>Directions:</strong> {item.directions}</Typography>
+                      <Typography><strong>Directions:</strong> {item.directions}</Typography> */}
                     </>
                   )}
                   {item.type === 'HistoricalPlace' && (
@@ -793,16 +751,16 @@ const handleCloseDialog = () => {
                               <LocationDisplay coordinates={item.location} />
                          }
                       </Typography>
-                      <Typography><strong>Opening Hours:</strong> {item.openingHours}</Typography>
+                      {/* <Typography><strong>Opening Hours:</strong> {item.openingHours}</Typography>
                       <Typography><strong>Students ticket price: </strong> {item.ticketPrice[0]}</Typography>
                       <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
-                      <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography>
+                      <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography> */}
                       {/* <Typography><strong> Tags:</strong>
                           {item.tags ? renderTags(item.tags) : 'No tags available'}
                       </Typography>           */}
                     </>
                   )}
-                      {typee==="tourist" && (<>
+                      {userTypee==="tourist" && (<>
                       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
                        <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
                          Book a ticket 
@@ -817,20 +775,18 @@ const handleCloseDialog = () => {
                     </Button>
                         
                     <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleBookmarkClick(item)}
-              style={{ marginLeft: '10px' }}
-            >
-              Bookmark
-            </Button>
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleBookmarkClick(item)}
+                      style={{ marginLeft: '10px' }}
+                    >
+                      Bookmark
+                    </Button>
                    </div>
                 </>)}
                   </CardContent>
-
-                  </Card> 
                   <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>More Details</DialogTitle>
+        <DialogTitle>More Details  </DialogTitle>
         <DialogContent>
           {dialogData && (
             <div>
@@ -864,7 +820,9 @@ const handleCloseDialog = () => {
             </div>
           )}
         </DialogContent>
-      </Dialog>   
+      </Dialog> 
+                  </Card> 
+             
                 </Grid>
                   ))}
 

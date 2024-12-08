@@ -1035,12 +1035,15 @@ router.put('/updatePromoCode', userController.updatePromoCode);
 router.put('/addInterestedIn/:_id/:eventId/:eventType', userController.addInterestedIn);
 router.get('/getAllNotifications/:userId', userController.getAllNotifications);
 
-router.post('/addAddresses/:userId', userController.addAddresses);
-router.get('/getAddresses/:userId', userController.getAddresses);
-
 router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
-
 router.get('/userReport/:userId', userController.userReport);
+
+
+router.post("/bookmark/:touristId/:id/:type", userController.addBookmark);
+router.get("/fetchbookmark/:touristId", userController.getBookmarks);
+
+router.post('/addAddresses/:userId/:address', userController.addAddresses);
+router.get('/getAddresses/:userId', userController.getAddresses);
 
 module.exports = {
     router,

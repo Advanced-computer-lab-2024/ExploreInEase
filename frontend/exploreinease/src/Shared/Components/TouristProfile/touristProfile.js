@@ -14,7 +14,7 @@ import bronze from './bronze.png';
 import gold from './gold.png';
 import Tooltip from '@mui/material/Tooltip';
 import Sky from '../Sky2.jpeg';
-
+import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const TouristProfile = (props) => {
   const location = useLocation();
@@ -152,6 +152,9 @@ const TouristProfile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
+    <div>
+
+    <TouristNavbar/>
     <Box
     sx={{
       backgroundImage: `url(${Sky})`,
@@ -163,6 +166,7 @@ const TouristProfile = (props) => {
       justifyContent: 'center',
     }}
   >
+  
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       {/* Flex container to center the card */}
       <Box
@@ -369,6 +373,8 @@ const TouristProfile = (props) => {
       </Box>
     </LocalizationProvider>
     </Box>
+    </div>
+
   );
 };
 

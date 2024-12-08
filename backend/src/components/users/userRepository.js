@@ -1031,6 +1031,7 @@ const getAddresses = async (user) => {
     }
 }
 
+
 const getAllNotifications = async (user) => {
     try {
         const notifications = await Notification.find({ 'user.user_id': user._id });
@@ -1039,11 +1040,42 @@ const getAllNotifications = async (user) => {
         throw new Error(`Error fetching notifications: ${error.message}`);
     }
 }
+const addBookmark = async (touristId, bookmark) => {
+    try {
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        throw new Error("Tourist not found");
+      }
+  
+      tourist.bookmark.push(bookmark);
+      await tourist.save();
+  
+      return {
+        message: "Bookmark added successfully",
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+  
+  const getBookmarks = async (touristId) => {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      throw new Error("Tourist not found");
+    }
+  
+    // tourist.bookmark is an array of objects: { id: ObjectId, type: String }
+    return tourist.bookmark;
+  };
+
+
 
 module.exports = {
     getAllNotifications,
     addAddresses,
     getAddresses,
+    addBookmark,
+    getBookmarks,
     addInterestedIn,
     fetchAllPromoCodes,
     updatePromoCode,

@@ -155,6 +155,18 @@ const getFilteredUpcomingActivities = async (filters) => {
   }
 };
 
+function handleBudget(activityPrice, rate) {
+  // Split the price by "-"
+  const [minPrice, maxPrice] = activityPrice.split('-');
+
+  // Convert to numbers and divide by the rate
+  const minBudget = (parseFloat(minPrice) / rate).toFixed(2);
+  const maxBudget = (parseFloat(maxPrice) / rate).toFixed(2);
+
+  // Return the result as a string
+  return { budget:`${minBudget}-${maxBudget}` };
+}
+
 const getAllUpcomingEvents = async (currency) => {
   try {
 
@@ -190,8 +202,7 @@ const getAllUpcomingEvents = async (currency) => {
         date: activity.date,
         time: activity.time,
         location: loc, // Include location details (latitude, longitude)
-        budget: activity.price/rate, // Handle budget or price depending on schema
-        category: category, // Assuming category is populated and has a 'name' field
+        budget: handleBudget(activity.price, rate).budget, // Handle budget or price depending on schemaactivity.price, // Handle budget or price depending on schema        category: category, // Assuming category is populated and has a 'name' field
         tags: activity.tags, // Include tags if applicable
         specialDiscounts: activity.specialDiscounts,
         created_by: activity.created_by,
@@ -929,6 +940,7 @@ const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ti
     cvc,promoCode
   );
 };
+
 
 
 
