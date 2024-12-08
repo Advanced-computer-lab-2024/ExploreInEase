@@ -131,11 +131,20 @@ const handleSaveReview =async(review)=>{
   return (
     <div>
       <TouristNavbar/>
-   
+      <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                    flexDirection: "column",
+                }}
+                >
+                <Typography variant="h4" gutterBottom>  Purchased Products </Typography>
+                </div>
     <Box display="flex" flexDirection="row" py={3} px={2} justifyContent="center">
-    
-
-      <Box width="70%" px={2}>
+   
+      <Box width="80%" px={2}>
         <Grid container spacing={3}>
           {initialProductList.map((product,index) => (
             <Grid item xs={12} sm={6} md={4} >

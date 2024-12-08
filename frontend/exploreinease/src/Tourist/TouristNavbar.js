@@ -25,18 +25,18 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 const TouristNavbar = () => {
    const Userr = JSON.parse(localStorage.getItem('User'));
    const imageUrll = localStorage.getItem('imageUrl');
+   const [selectedTab, setSelectedTab] = useState('Events');  
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
     const imageUrl = state?.imageUrl || imageUrll;
     const  tourist  = Userr;
-    const [currency] = useState("EGP"); // default currency
+    const [currency] = useState(Userr.currency); // default currency
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
     const openNotfication = Boolean(anchorEl1);
     const open = Boolean(anchorEl);
     const initialUsername = tourist?.username;
-    const [selectedTab, setSelectedTab] = useState("Sales");  
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const userId=Userr.User?._id ||tourist._id||{};
      const userType = tourist.tourist?.type || Userr?.type||tourist.type||'tourist';
@@ -138,9 +138,6 @@ const handleOpenMenu = (event) => {
    const handleMenuClose = () => {
       setAnchorEl(null);
 };
-   const handleTabClick = (tabName) => {
-    setSelectedTab(tabName);
-}; 
 const  handleRegisterClick=async(title)=> {
 
            if(title ==="Transportation") {
@@ -160,12 +157,17 @@ const  handleRegisterClick=async(title)=> {
         }
             }
             else if(title==='Book Hotels'){
+              setSelectedTab(title);
+              localStorage.setItem('selectedTab', title);
               navigate(`/BookHotel`,{state:{userId}});          
             }
             else if (title==='Book Flights'){
+              setSelectedTab(title);
+              localStorage.setItem('selectedTab', title);
               navigate(`/BookFlight`,{state:{userId}});          
             }
            else if (title==="Products") {
+
             try {
                 const options = {
                   apiPath: `/getAvailableProducts/${userId}`,
@@ -176,6 +178,8 @@ const  handleRegisterClick=async(title)=> {
                 console.log(response);
                 const Product=response.Products;
                 const Type='tourist';
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
                 navigate(`/viewProduct`,{ state: { Product, Type ,User:tourist} });          
               } catch (err) {
                 if (err.response) {
@@ -206,6 +210,8 @@ const  handleRegisterClick=async(title)=> {
                   apiPath: `/bookedEvents/${touristId}`
                 };
                 const response = await NetworkService.get(options);
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
                 navigate(`/ViewListofBooked`,{state:{events:response,userId:Userr._id}});          
         
               } catch (error) {
@@ -224,6 +230,8 @@ const  handleRegisterClick=async(title)=> {
                 console.log("get Purchased Product",Product);
 
                 const Type='tourist';
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
                 navigate(`/ViewPurchasedProduct`,{ state: { Product:Product, Type:Type ,userId:Userr._id} });          
               } catch (err) {
                 if (err.response) {
@@ -235,9 +243,13 @@ const  handleRegisterClick=async(title)=> {
               }
             }
             else if(title ==="Book Hotels") {
+              setSelectedTab(title);
+              localStorage.setItem('selectedTab', title);
             navigate(`/BookHotel`,{state:{userId:Userr._id}});          
             }
             else if(title ==="Book Flights") {
+              setSelectedTab(title);
+              localStorage.setItem('selectedTab', title);
               navigate(`/BookFlight`,{state:{userId:Userr._id}});          
             }
             else if (title ==="Complaints"){
@@ -250,7 +262,9 @@ const  handleRegisterClick=async(title)=> {
                 console.log(response.message); // Set success message
                 console.log(response);
                 const events=response.data;
-                console.log(events)
+                console.log(events);
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
                 navigate(`/Complaints`,{state:{events,userId:Userr._id}});          
               } catch (err) {
                 if (err.response) {
@@ -272,6 +286,8 @@ const  handleRegisterClick=async(title)=> {
                 console.log(response.message); // Set success message
                 const Type='tourist';
                 const Orders = response.data;
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
                 navigate(`/OrderHistory`,{ state: { Orders, Type ,User:tourist} });          
               } catch (err) {
                 if (err.response) {
@@ -319,6 +335,8 @@ const  handleRegisterClick=async(title)=> {
                 const response = await NetworkService.get(options);
                 console.log(response); // Set success message
                 const events=response.data;
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
                 navigate('/MyBookmarks',{state:{events:events,userId}});  
               }
                catch (err) {
@@ -350,7 +368,8 @@ const  handleRegisterClick=async(title)=> {
                   console.log("response",response);
                   const events=response;
                   console.log(Userr._id);
-                  
+                  setSelectedTab(title);
+                  localStorage.setItem('selectedTab', title);
                   navigate(`/explore`,{state:{events:events,userId:Userr._id,userType:"tourist"}});          
                 } catch (err) {
                   if (err.response) {
