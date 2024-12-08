@@ -1027,7 +1027,9 @@ router.post('/login', userController.login);
 
 router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
 
+//sarah api35
 
+router.get('/fetchUserStats/:adminid', userController.getUserStatistics);
 
 router.post('/forgetPassword', userController.forgetPassword);
 router.get('/verifyOTP/:userId/:otp', userController.verifyOtP);

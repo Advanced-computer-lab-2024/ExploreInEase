@@ -6,6 +6,17 @@ const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const Order = require('../../models/order');
+
+
+//api 35
+const fetchUserStatistics = async () => {
+    try {
+      return await userRepository.getUserStatistics();
+    } catch (error) {
+      throw new Error("Error fetching user statistics");
+    }
+  };
 
 
 const getUserById = async (id) => {
@@ -793,6 +804,93 @@ const userReport = async (userId) => {
     return report;
 }
 
+// const adminReport = async (userId) => { 
+//     const user = await userRepository.findUserById(userId);
+//     if (!user) {
+//         throw new Error('User not found');
+//     }
+
+//     let totalRevenue = 0;
+//     let ActivityRevenue = 0; 
+//     let ItineraryRevenue = 0;
+//     let HistoricalPlaceRevenue = 0;
+//     let OrdersRevenue = 0;
+
+//     // Prepare a map for product revenue grouped by month
+//     const productRevenueByMonth = {};
+
+//     const tourists = await userRepository.fetchAllTourists();
+
+//     for (const tourist of tourists) {
+//         const allActivities = tourist.activityId || [];
+//         const allItineraries = tourist.itineraryId || [];
+//         const allHistoricalPlaces = tourist.historicalplaceId || [];
+
+//         // Calculate activity revenue
+//         for (const activity of allActivities) {
+//             const revenue = activity.pricePaid * 0.1;
+//             totalRevenue += revenue;
+//             ActivityRevenue += revenue;
+//         }
+
+//         // Calculate itinerary revenue
+//         for (const itinerary of allItineraries) {
+//             const revenue = itinerary.pricePaid * 0.1;
+//             totalRevenue += revenue;
+//             ItineraryRevenue += revenue;
+//         }
+
+//         // Calculate historical place revenue
+//         for (const historicalPlace of allHistoricalPlaces) {
+//             const revenue = historicalPlace.pricePaid * 0.1;
+//             totalRevenue += revenue;
+//             HistoricalPlaceRevenue += revenue;
+//         }
+
+//         // Fetch all orders for this tourist
+//         const allOrders = await Order.find({ touristId: tourist._id, status: 'delivered' });
+
+//         for (const order of allOrders) {
+//             // Extract the month of the order and convert it to a full month name
+//             const month = order.createdAt
+//                 ? new Date(order.createdAt).toLocaleString('en-US', { month: 'long' }) // e.g., "November"
+//                 : 'Unknown';
+
+//             for (const productId of order.productIds) {
+//                 const product = await Products.findById(productId);
+
+//                 if (product) {
+//                     // Initialize revenue structure for this product and month
+//                     if (!productRevenueByMonth[product.name]) {
+//                         productRevenueByMonth[product.name] = {};
+//                     }
+
+//                     if (!productRevenueByMonth[product.name][month]) {
+//                         productRevenueByMonth[product.name][month] = 0;
+//                     }
+
+//                     // Calculate revenue for this product and add to the month
+//                     const revenue = (order.price / order.productIds.length) * 0.1; // Assuming revenue split across products
+//                     productRevenueByMonth[product.name][month] += revenue;
+//                 }
+//             }
+
+//             // Calculate total revenue for orders
+//             OrdersRevenue += order.price * 0.1;
+//             totalRevenue += order.price * 0.1;
+//         }
+//     }
+
+//     return { 
+//         ActivityRevenue, 
+//         ItineraryRevenue, 
+//         HistoricalPlaceRevenue, 
+//         OrdersRevenue, 
+//         totalRevenue,
+//         productRevenueByMonth
+//     };
+// };
+
 const adminReport = async (userId) => { 
     const user = await userRepository.findUserById(userId);
     if (!user) {
@@ -928,7 +1026,8 @@ module.exports = {
   redeemPoints,
   fetchUsersForDeletion,
   getNotAcceptedUsers,
-  updatingStatusUser
+  updatingStatusUser,
+  fetchUserStatistics
 
 };
 

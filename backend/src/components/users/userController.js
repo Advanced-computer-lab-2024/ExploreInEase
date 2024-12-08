@@ -3,7 +3,41 @@ const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const generateToken = require('../../middlewares/generateToken');
 const Tourist = require('../../models/tourist');
+const Order = require('../../models/order');
 
+
+//api 35
+const getUserStatistics = async (req, res) => {
+    console.log("ia am here");
+    const { adminid } = req.params;
+    if (!adminid) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin ID is required",
+      });
+    }
+    const type = await userRepository.getType(adminid);
+    if (type !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access. Only admins access.",
+      });
+    }
+    try {
+      // Fetch user statistics
+      const stats = await userService.fetchUserStatistics();
+      res.status(200).json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Error fetching user statistics:", error);
+      res.status(500).json({
+        success: false,
+        error: error.message || "Internal Server Error",
+      });
+    }
+  };
 
 // Controller to handle request for users with requestDeletion set to true
 const getUsersForDeletion = async (req, res) => {
@@ -934,5 +968,6 @@ module.exports = {
   redeemPoints,
   getUsersForDeletion,
   getNotAcceptedUsers,
-  updatingStatusUser
+  updatingStatusUser,
+  getUserStatistics
 };

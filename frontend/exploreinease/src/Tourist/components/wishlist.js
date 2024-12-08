@@ -22,6 +22,8 @@ const WishList = () => {
           image: item.picture, // Update this to match your image storage logic
         }));
         setWishlistItems(wishlistData);
+
+        console.log(wishlistData);
       } catch (err) {
         console.error("Error fetching wishlist:", err);
       }
@@ -55,7 +57,6 @@ const WishList = () => {
         variant="h4"
         sx={{
           fontWeight: "bold",
-          marginBottom: "20px",
           textAlign: "center",
         }}
       >
@@ -77,6 +78,7 @@ const WishList = () => {
             <Grid item xs={12} key={item.id}>
               <Box
                 sx={{
+                  minHeight: "150px",
                   display: "flex",
                   alignItems: "center",
                   padding: "10px",
@@ -111,7 +113,7 @@ const WishList = () => {
                 >
                   ${item.price.toFixed(2)}
                 </Typography>
-                <AddToWishListButton productId={item.id} />
+                {/* <AddToWishListButton productId={item.id} /> */}
                 <IconButton onClick={() => handleRemove(item.id)}>
                   <Close />
                 </IconButton>

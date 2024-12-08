@@ -10,6 +10,49 @@ const Order = require('../../models/order');
 const fs = require('fs');
 const path = require('path');
 
+
+// Fetch total users and count of new users per month
+const getUserStatistics = async () => {
+    const totalUsers = await Users.countDocuments({ type: { $ne: "admin" } }); // haysheel el admin  users
+    const toatlTourist = await Tourist.countDocuments();
+  
+    const total = totalUsers + toatlTourist;
+  
+    // Count new users grouped by month
+    const pipeline = [
+      {
+        $match: { type: { $ne: "admin" } }, // Exclude admin users
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ];
+  
+    const userStats = await Users.aggregate(pipeline);
+    const touristStats = await Tourist.aggregate(pipeline);
+  
+    //... da merge opertator fa negma3 both user and tourists
+    const combinedStats = [...userStats, ...touristStats].reduce((acc, cur) => {
+      const existing = acc.find((entry) => entry._id === cur._id);
+      if (existing) {
+        existing.count += cur.count;
+      } else {
+        acc.push(cur);
+      }
+      return acc;
+    }, []);
+  
+    return { total, newUsersPerMonth: combinedStats };
+  };
+  
+
+
+
+
 const updateUserStatus = async (userId, status) => {
     try {
         const user = await findUserById(userId);
@@ -1073,5 +1116,6 @@ module.exports = {
     checkTourGuideItineraryDates,
     checkSellerProductStatus,
     checkAdvertiserActivityStatus,
-    getTouristByUsername
+    getTouristByUsername,
+    getUserStatistics
 };

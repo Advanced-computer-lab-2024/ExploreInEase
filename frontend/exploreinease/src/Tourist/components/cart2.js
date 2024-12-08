@@ -11,46 +11,47 @@ import {
 import { Remove, Add, Close } from "@mui/icons-material";
 import StepperNavigation from "./StepperNavigation";
 import axios from "axios";
+import AddToWishListButton from "./AddToWishListButton";
+import AddToCartButton from "./AddToCartButton";
 
 const CartPage = () => {
 
     const [activeStep] = useState(1); // Active step for stepper navigation
     const [cartItems, setCartItems] = useState([
-      {
-        id: 1,
-        product_id: '674f4e9b8006151a00273857',
-        name: "Apple AirPods Pro",
-        color: "White",
-        price: 249.99,
-        count: 1,
-        image: "https://via.placeholder.com/80", // Replace with real image
-      },
-      {
-        id: 2,
-        product_id: '672dd6c967508f11dffd2cb0',
-        name: "Apple AirPods Max",
-        color: "Silver",
-        price: 549.99,
-        count: 1,
-        image: "https://via.placeholder.com/80", // Replace with real image
-      },
-      {
-        id: 3,
-        product_id: '672dd732b51b7f8d0b3ef36c',
-        name: "Apple HomePod Mini",
-        color: "Silver",
-        price: 99.99,
-        count: 1,
-        image: "https://via.placeholder.com/80", // Replace with real image
-      },
+      // {
+      //   id: 1,
+      //   product_id: '672a3f5b09ecb52acb373c37',
+      //   name: "Apple AirPods Pro",
+      //   color: "White",
+      //   price: 249.99,
+      //   count: 1,
+      //   image: "https://via.placeholder.com/80", // Replace with real image
+      // },
+      // {
+      //   id: 2,
+      //   product_id: '672a4032287be6cf170d66a6',
+      //   name: "Apple AirPods Max",
+      //   color: "Silver",
+      //   price: 549.99,
+      //   count: 1,
+      //   image: "https://via.placeholder.com/80", // Replace with real image
+      // },
+      // {
+      //   id: 3,
+      //   product_id: '672a4061287be6cf170d66a8',
+      //   name: "Apple HomePod Mini",
+      //   color: "Silver",
+      //   price: 99.99,
+      //   count: 1,
+      //   image: "https://via.placeholder.com/80", // Replace with real image
+      // },
     ]);
+
+    localStorage.setItem("UserId", "6752e7c65f08a3b694655e6b");
 
   const UserId= localStorage.getItem("UserId");
 
   
-
-
-
 
   useEffect(()=>{
     
@@ -58,35 +59,85 @@ const CartPage = () => {
 
   
   
-      const fetchCart = async ()=>{
-        await axios.get(`http://localhost:3030/getCart/${UserId}`).then((res) => {
-        console.log(res.data);
-      }).catch((err) => {
-        console.log(err);
-      });}
+      const fetchCart = async () => {
+        try {
+          const res = await axios.get(`http://localhost:3030/getCart/${UserId}`);
+          const fetchedProducts = res.data.products || [];
+    
+          const formattedItems = fetchedProducts.map((product) => ({
+            id: product._id,
+            product_id: product._id,
+            name: product.name,
+            color: product.color || "N/A", // If no color provided
+            price: product.price,
+            count: product.quantity,
+            image: `http://localhost:3030/uploads/${product.picture}` // Adjust base URL as needed
+          }));
 
+          console.log(formattedItems);
+    
+          setCartItems(formattedItems);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+    
       fetchCart();
     
   }, []);
 
   const [promoCode, setPromoCode] = useState("");
 
-  const handleIncrease = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, count: item.count + 1 } : item
-      )
-    );
+  const handleIncrease = async (id) => {
+    const itemIndex = cartItems.findIndex((item) => item.id === id);
+    let newCount; // to store the updated quantity
+
+  setCartItems((prev) =>
+    prev.map((item) => {
+      if (item.id === id) {
+        newCount = item.count + 1;
+        return { ...item, count: newCount };
+      }
+      return item;
+    })
+  );
+
+  // Use newCount in the request URL
+  await axios
+    .put(`http://localhost:3030/editQuantityInCart/${UserId}/${itemIndex}/${newCount}`)
+    .then((res) => {
+      console.log(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+
   };
 
-  const handleDecrease = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id && item.count > 1
-          ? { ...item, count: item.count - 1 }
-          : item
-      )
-    );
+  const handleDecrease = async (id) => {
+    const itemIndex = cartItems.findIndex((item) => item.id === id);
+    let newCount; // to store the updated quantity
+
+  setCartItems((prev) =>
+    prev.map((item) => {
+      if (item.id === id) {
+        newCount = item.count - 1;
+        return { ...item, count: newCount };
+      }
+      return item;
+    })
+  );
+
+  // Use newCount in the request URL
+  await axios
+    .put(`http://localhost:3030/editQuantityInCart/${UserId}/${itemIndex}/${newCount}`)
+    .then((res) => {
+      console.log(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   };
 
   const handleRemove = async (id) => {
@@ -173,6 +224,7 @@ const CartPage = () => {
                     </Typography>
                   </Grid>
                   <Grid item xs={1}>
+                    <AddToWishListButton productId={item.product_id} />  
                     <IconButton onClick={() => handleRemove(item.id)}>
                       <Close />
                     </IconButton>
@@ -240,6 +292,12 @@ const CartPage = () => {
                 backgroundColor: "#1261A0",
                 color: "#fff",
               }}
+
+              onClick={() => {
+                console.log("final cart items",cartItems);
+              }
+              }
+
             >
               Continue to Checkout
             </Button>

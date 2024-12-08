@@ -1,4 +1,6 @@
 import { Grid, Card, CardContent, Typography } from '@mui/material';
+import {useState,useEffect} from 'react';
+import axios from 'axios';
 
 const OverviewCards = () => {
   const stats = [
@@ -7,6 +9,25 @@ const OverviewCards = () => {
     { label: "Total Events", value: 50 },
     { label: "Archived Products", value: 15 },
   ];
+
+  useEffect(() => {
+
+    const getStats = async () => {
+      try {
+         let UserId = localStorage.getItem("UserId");
+
+        const response = await axios.get(`http://localhost:3030/fetchUserStats/${UserId}`);
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getStats();
+
+  }, []);
+
+
 
   return (
     <Grid container spacing={3}>

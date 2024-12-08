@@ -20,6 +20,11 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { tableCellClasses } from "@mui/material/TableCell";
+import axios from "axios";
+
+
+
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -66,8 +71,21 @@ const SalesReport = () => {
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        // Simulate loading data
-        setTimeout(() => setLoaded(true), 1000);
+
+        let UserId = localStorage.getItem("UserId");
+        
+        const getSalesReport = async () => {
+            await axios.get(`http://localhost:3030/adminReport/${UserId}`).then((response) => {
+                console.log(response.data);
+                setLoaded(true);
+            }
+            ).catch((error) => {
+                console.log(error);
+            }
+            );
+        };
+        getSalesReport();
+
     }, []);
 
     useEffect(() => {

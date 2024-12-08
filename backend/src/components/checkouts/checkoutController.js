@@ -552,6 +552,9 @@ const removeCart = async (req, res) => {
 const editQuantityInCart = async (req, res) => {
     const {userId, cartItemId, quantity} = req.params;
 
+    console.log(req.params);
+    console.log(quantity);
+
     try {
         const result = await checkoutService.editQuantityInCart(userId, cartItemId, quantity);
         return res.status(200).json(result);
