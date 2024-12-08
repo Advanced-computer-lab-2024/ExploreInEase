@@ -14,6 +14,7 @@ import {
   Edit as EditIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
+import { AddShoppingCart } from "@mui/icons-material";
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
 import ArchiveIcon from '@mui/icons-material/Archive';
 import InfoIcon from '@mui/icons-material/Info';
@@ -657,6 +658,11 @@ const handleClickPurchase = async (product, selectedQuantity) => {
     </>
   ) : ( 
     <>
+       <Tooltip title="add to Cart" placement="top" arrow>
+        <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
+          <AddShoppingCart />
+        </IconButton>
+      </Tooltip>
       <Tooltip title="Reviews" placement="top" arrow>
         <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
           <RateReviewIcon />
@@ -844,14 +850,20 @@ const handleClickPurchase = async (product, selectedQuantity) => {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Select Quantity</DialogTitle>
         <DialogContent>
+          <div>
           <TextField
+          sx={{
+              margin:'9px'
+          }}
             label="Quantity"
+            variant="outlined"
             type="number"
-            inputProps={{ min: 1, max: selectedProduct?.originalQuantity }}
             value={quantity}
             onChange={(e) => setQuantity(Math.min(Math.max(1, e.target.value), selectedProduct?.originalQuantity))}
-            fullWidth
+            
           />
+          </div>
+  
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
