@@ -30,8 +30,8 @@ import HomePage from './GuestNavbar';
 import debounce from 'lodash.debounce';
 
 const Events = () => {
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogData, setDialogData] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogData, setDialogData] = useState(null);
   const [events, setEvents] = useState([]); // State to store fetched events
   const itemList = events?.flat()||[]; // Flatten the array and ensure it's initialized
   const [role, setRole] = useState('Activities'); // Default to Main to show all
@@ -51,7 +51,6 @@ const Events = () => {
     search: '',
     sortBy: '',
   });
-
   const fetchAddressFromAPI = async (latitude, longitude) => {
     try {
       const response = await fetch(
@@ -79,7 +78,6 @@ const Events = () => {
     Activities: ['budget', 'date', 'category', 'rating'],
     Itineraries: ['budget', 'date', 'preferences', 'language'],
   };
-
   const handleRatingChange = (event, newRating) => {
     setFilters({
       ...filters,
@@ -165,7 +163,6 @@ const Events = () => {
     setDialogOpen(false);
     setDialogData(null);
   };
-  // Fetch events from the server when component mounts
   useEffect(() => {
     fetchEvents();
   },[currency]);
@@ -264,9 +261,7 @@ const Events = () => {
   const handleRoleChange = (event, newValue) => {
     setRole(newValue);
     applyFilters(newValue); // Apply filters immediately when changing tabs
-  };
-  console.log("filteredData",filteredData);
-  
+  };  
   return (
     <div className="homepage">
       <HomePage /> {/* Render the Navbar (HomePage) */}
@@ -443,12 +438,12 @@ const Events = () => {
                         />
 
                <CardContent>
-                <div style={{ display: 'flex', alignItems: 'center',gap:"25px"}}>  
+                <div style={{ display: 'flex', alignItems: 'center',gap:"10px"}}>  
                  <Typography variant="h5" component="div">
                    {item.name}
                  </Typography>
                  <Tooltip title="More Info">
-                 <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '8px' }}>
+                 <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '2px' }}>
                     <InfoIcon color="primary" />
                   </IconButton>
                   </Tooltip></div>

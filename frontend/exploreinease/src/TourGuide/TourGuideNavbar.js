@@ -28,6 +28,7 @@ import Delete from '@mui/icons-material/Delete';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import Tooltip from '@mui/material/Tooltip';
 const TourGuideHP = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
   console.log("User",Userr);
@@ -214,13 +215,9 @@ const handleClickNotification = async(event) => {
           const options = {
             apiPath: `/userReport/${userId}`,
           };
-  
           const response = await NetworkService.get(options);
           const data = response.eventObject;
           console.log(data);
-  
-  
-  
           console.log(response.message); // Set success message
           setSelectedTab(title);
           localStorage.setItem('selectedTab', title); // Save selected tab
@@ -296,7 +293,7 @@ const handleClickNotification = async(event) => {
           const errorMessage = err.response?.data?.message || "An error occurred";
           setErrorMessage(errorMessage);
           setShowErrorMessage(true);
-          setError(errorMessage);
+          console.log(errorMessage);
         }
        }
        else{
@@ -317,9 +314,11 @@ const handleClickNotification = async(event) => {
     </div>
       </div>
     <div className="navbar-right">
+             <Tooltip title="Options">
                     <Avatar sx={{ bgcolor: 'darkblue', color: 'white',cursor:'pointer' ,marginRight:'25px'}} src={avatarImage || undefined} onClick={handleOpenMenu} >
                         {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
                     </Avatar>
+                    </Tooltip>
                     <Menu
                             anchorEl={anchorProfileEl}
                             open={Boolean(anchorProfileEl)}
@@ -367,8 +366,6 @@ const handleClickNotification = async(event) => {
                                     onChange={handleAvatarUpload}
                                 />
                             </MenuItem>
-
-                            
                             <Divider/>
                             <MenuItem onClick={()=>handleRegisterClick('Log Out')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
                               <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
@@ -389,11 +386,12 @@ const handleClickNotification = async(event) => {
                                 right: '100px',       // Distance from the right of the parent
                                 alignItems: 'center',
                                 margin:'3px'
-                            }}
-                        >
+                            }}>
+                          <Tooltip title="Notification">
                             <Badge badgeContent={4} color="success">
                                 <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
                             </Badge>
+                          </Tooltip>
                         </IconButton>
                         <Menu
                             id="basic-menu"

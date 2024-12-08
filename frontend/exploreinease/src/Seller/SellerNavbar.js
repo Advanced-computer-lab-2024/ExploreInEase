@@ -19,6 +19,7 @@ import Delete from '@mui/icons-material/Delete';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import Tooltip from '@mui/material/Tooltip';
 const SHomePage = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
   const imageUrll = localStorage.getItem('imageUrl');
@@ -38,6 +39,7 @@ const SHomePage = () => {
   const [ setSuccess] = useState();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [ setError] = useState();
+  const [selectedTab, setSelectedTab] = useState("Sales Report");  
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [setErrorMessage] = useState('');
@@ -47,7 +49,6 @@ const SHomePage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [anchorEl1, setAnchorEl1] = React.useState(null);
-  const [selectedTab, setSelectedTab] = useState("Sales Report");
   const openNotfication = Boolean(anchorEl1);
   const initialUsername = User.User?.username || User.username;
   const userId = User.User?._id || User._id;
@@ -57,7 +58,12 @@ const SHomePage = () => {
   // Retrieve avatar URL from localStorage or fallback to the default avatar
   const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
   const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
-
+  useEffect(() => {
+    const savedTab = localStorage.getItem('selectedTab');
+    if (savedTab) {
+      setSelectedTab(savedTab); // Restore the selected tab
+    }
+  }, []);
   useEffect(() => {
     // Update the avatar URL when the component mounts if a new image URL exists
     if (savedAvatarUrl || imageUrl) {
@@ -100,7 +106,6 @@ const SHomePage = () => {
       navigate('/');
     }
   };
-
   const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -122,7 +127,7 @@ const SHomePage = () => {
         setSuccess('Image uploaded successfully!');
       } catch (err) {
         console.error('Error uploading image:', err);
-        setError(err.response ? err.response.data.error : 'Failed to upload image. Please try again.');
+        // setError(err.response ? err.response.data.error : 'Failed to upload image. Please try again.');
       }
     }
   };
@@ -132,14 +137,14 @@ const SHomePage = () => {
   async function handleClick(title) {
     if (title === "Profile") {
       try {
-        const options = {
-          apiPath: `/getSeller/${userId}`,
-        };
+        // const options = {
+        //   apiPath: `/getSeller/${userId}`,
+        // };
 
-        const response = await NetworkService.get(options);
-        setSuccess(response.message); // Set success message
-        console.log(response.seller);
-        navigate(`/viewSellerProfile`, { state: { tourist: response.seller } });
+        // const response = await NetworkService.get(options);
+        // setSuccess(response.message); // Set success message
+        // console.log(response.seller);
+        navigate(`/viewSellerProfile`, { state: { tourist: Userr } });
 
       } catch (err) {
         if (err.response) {
@@ -150,24 +155,25 @@ const SHomePage = () => {
         }
       }
     }
-    else {
-      if (title === "Products") {
+      else if (title === "Products") {
         try {
           const options = {
-            apiPath: `/getAvailableProducts/${userId}`,
+            apiPath: `/getAvailableProducts/${Userr._id}`,
           };
           const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
+          // setSuccess(response.message); // Set success message
           console.log(response);
           const Product = response.Products;
           const Type = 'Seller';
-          navigate(`/viewProduct`, { state: { Product, Type, User: User } });
+          setSelectedTab(title);
+          localStorage.setItem('selectedTab', title); // Save selected tab
+          navigate(`/viewProduct`, { state: { Product, Type, User: Userr } });
         } catch (err) {
           if (err.response) {
             console.log(err.message);
-            setError(err.response.data.message); // Set error message from server response if exists
+            // setError(err.response.data.message); // Set error message from server response if exists
           } else {
-            setError('An unexpected error occurred.'); // Generic error message
+            console.log('An unexpected error occurred.',err); // Generic error message
           }
         }
       } else if (title === 'Sales Report') {
@@ -175,14 +181,12 @@ const SHomePage = () => {
           const options = {
             apiPath: `/userReport/${userId}`,
           };
-  
           const response = await NetworkService.get(options);
           const data = response.eventObject;
           console.log(data);
-  
-  
-  
-          setSuccess(response.message); // Set success message
+          console.log(response.message); // Set success message
+          setSelectedTab(title);
+          localStorage.setItem('selectedTab', title); // Save selected tab
           navigate('/SalesReport', { state: { Response: data,User: Userr } });
         } catch (err) {
           if (err.response) {
@@ -199,7 +203,6 @@ const SHomePage = () => {
       else if(title==='Delete Account'){
         try {
           console.log(userId, userType);
-    
           const options = {
             apiPath: `/requestDeletion/${userId}/${userType}`,
             useParams: userId,
@@ -207,10 +210,10 @@ const SHomePage = () => {
           };
           const response = await NetworkService.put(options);
           console.log(response);
-    
+      
           setSuccessMessage(response.message || "Delete Successfully!");
           setShowSuccessMessage(true);
-    
+      
           if (response.success) {
             setSuccess("Account deletion requested successfully.");
           } else {
@@ -219,73 +222,44 @@ const SHomePage = () => {
         } catch (err) {
           // Access the error message from the response data
           const errorMessage = err.response?.data?.message || "An error occurred";
-          setErrorMessage(errorMessage);
+          console.log(errorMessage);
           setShowErrorMessage(true);
           console.log(errorMessage);
         }
       }
       else if(title==='Log Out'){
+        console.log('yes here');
+        localStorage.removeItem('Userr');
+        localStorage.removeItem('imageUrll');
+        localStorage.removeItem('UserId');
+        localStorage.removeItem('UserType');
         navigate('/');
-      }
+        }
       else {
         try {
           const options = {
             apiPath: `/getArchivedProducts/${userId}`,
           };
           const response = await NetworkService.get(options);
-          setSuccess(response.message); // Set success message
+          // setSuccess(response.message); // Set success message
           console.log(response);
           const Product = response.Products;
           const Type = 'Seller';
+          setSelectedTab(title);
+          localStorage.setItem('selectedTab', title); // Save selected tab
           navigate(`/unArchiveProduct`, { state: { Product, Type, User: User } });
         } catch (err) {
           if (err.response) {
             console.log(err.message);
             console.log(err.response.data.message); // Set error message from server response if exists
           } else {
-            console.log('An unexpected error occurred.'); // Generic error message
+            console.log('An unexpected error occurred.',err); // Generic error message
           }
         }
       }
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    try {
-      console.log(userId, userType);
-
-      const options = {
-        apiPath: `/requestDeletion/${userId}/${userType}`,
-        useParams: userId,
-        userType,
-      };
-      const response = await NetworkService.put(options);
-      console.log(response);
-
-      setSuccessMessage(response.message || "Delete Successfully!");
-      setShowSuccessMessage(true);
-
-      if (response.success) {
-        setSuccess("Account deletion requested successfully.");
-      } else {
-        setError(response.message || "Account deletion request failed.");
-      }
-    } catch (err) {
-      // Access the error message from the response data
-      const errorMessage = err.response?.data?.message || "An error occurred";
-      setErrorMessage(errorMessage);
-      setShowErrorMessage(true);
-      setError(errorMessage);
-    }
   };
   const handleClose = () => {
     setAnchorEl1(null);
-  };
-  const toggleDrawer = (open) => () => {
-    setDrawerOpen(open);
-  };
-  const handleTabClick = (tabName) => {
-    setSelectedTab(tabName);
   };
   return (
     <>
@@ -345,7 +319,7 @@ const SHomePage = () => {
                                   <Delete />
                               </ListItemIcon>Delete Account</MenuItem>
                             <Divider/>
-                            <MenuItem onClick={()=>handleClick('Log Out m')}>
+                            <MenuItem onClick={()=>handleClick('Log Out')}>
                             <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
                                   <LogoutOutlinedIcon />
                               </ListItemIcon>Log Out</MenuItem>

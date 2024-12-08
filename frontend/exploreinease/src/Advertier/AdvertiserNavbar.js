@@ -18,6 +18,8 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import Divider from '@mui/material/Divider';
+import Tooltip from '@mui/material/Tooltip';
+
 const HomePage = () => {
     const Userr = JSON.parse(localStorage.getItem('User'));
     const imageUrll = localStorage.getItem('imageUrl');
@@ -81,6 +83,14 @@ const HomePage = () => {
         }
     }, [showErrorMessage]);
 
+    useEffect(() => {
+        const savedTab = localStorage.getItem('selectedTab');
+        if (savedTab) {
+          setSelectedTab(savedTab); // Restore the selected tab
+        }
+      }, []);
+
+
     const handleOpenMenu = (event) => {
         setAnchorProfileEl(event.currentTarget);
       };
@@ -137,6 +147,8 @@ const HomePage = () => {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title); // Save selected tab
                 navigate(`/transportion`, { state: { allActivity: response.data, advertiserId: userId } });
             } catch (err) {
                 console.log(err.response ? err.response.data.message : 'An unexpected error occurred.');
@@ -147,6 +159,8 @@ const HomePage = () => {
             try {
                 const apiPath = `http://localhost:3030/activity/user/${userId}/allActivities`;
                 const response = await axios.get(apiPath);
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title); // Save selected tab
                 navigate(`/Activities`, { state: { allActivity: response.data, id: userId } });
             } catch (err) {
                 console.log(err.response ? err.response.data.message : 'An unexpected error occurred.');
@@ -201,10 +215,10 @@ const HomePage = () => {
            }
         else if(title==='profile'){
             try {
-                const options = { apiPath: `/getAdvertiser/${userId}` };
-                const response = await NetworkService.get(options);
-                setSuccess(response.message);
-                navigate(`/viewAdvertiserProfile`, { state: { advertiser: response } });
+                // const options = { apiPath: `/getAdvertiser/${userId}` };
+                // const response = await NetworkService.get(options);
+                // setSuccess(response.message);
+                navigate(`/viewAdvertiserProfile`, { state: { advertiser: Userr } });
             } catch (err) {
                 console.log(err.response ? err.response.data.message : 'An unexpected error occurred.');
             }
@@ -217,13 +231,12 @@ const HomePage = () => {
             localStorage.removeItem('UserType');
             navigate('/');
            }
-           else if(title==='password'){
+       else if(title==='password'){
             navigate('/change-password', { state: { userId: Userr._id } });
 
            }
   else if(title==='Delete Account'){
             console.log('hereee');
-            
             try {
               console.log(userId, userType);
               const options = {
@@ -250,8 +263,6 @@ const HomePage = () => {
               console.log(err);
             }
            }
-           
-    
     };
 
     return (
@@ -268,9 +279,11 @@ const HomePage = () => {
     </div>
       </div>
     <div className="navbar-right">
-                    <Avatar sx={{ bgcolor: 'darkblue', color: 'white',cursor:'pointer' ,marginRight:'20px'}} src={avatarImage || undefined} onClick={handleOpenMenu} >
+                <Tooltip title="Options">
+                    <Avatar sx={{ bgcolor: 'darkblue', color: 'white',cursor:'pointer' ,marginRight:'20px',cursor:'pointer'}} src={avatarImage || undefined} onClick={handleOpenMenu} >
                         {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
                     </Avatar>
+                    </Tooltip>
                     <Menu
                             anchorEl={anchorProfileEl}
                             open={Boolean(anchorProfileEl)}
@@ -340,9 +353,11 @@ const HomePage = () => {
                                 margin:'2px'
                             }}
                         >
+                            <Tooltip title="Notification">
                             <Badge badgeContent={4} color="success">
                                 <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
                             </Badge>
+                            </Tooltip>
                         </IconButton>
                         <Menu
                             id="basic-menu"
