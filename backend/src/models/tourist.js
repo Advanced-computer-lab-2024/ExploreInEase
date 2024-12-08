@@ -60,8 +60,8 @@ const TouristSchema = new Schema({
     }],
     bookmark: [
         {
-            id: [{type: mongoose.Schema.Types.ObjectId}],
-            type: [{type: String}]
+            id: {type: mongoose.Schema.Types.ObjectId},
+            type: {type: String}
         }
     ],
     createdAt: {
