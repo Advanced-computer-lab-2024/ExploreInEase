@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const Order = require('../../models/order');
+const Products = require('../../models/product');
 
 
 //api 35

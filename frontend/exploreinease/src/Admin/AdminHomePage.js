@@ -9,6 +9,8 @@ const AdminHomePage = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       {/* Overview Cards */}
+      {/* <OverviewCards /> */}
+
       {/* Graph Section centered */}
       {/* <Grid container spacing={3} sx={{ mt: 4, justifyContent:'center' }}>
         <Grid item xs={12} md={8}>
@@ -39,6 +41,7 @@ const AdminHomePage = () => {
         </Grid> */}
       </Grid>
       <OverviewCards />
+
 
     </Container>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions,
     Typography, TextField, CircularProgress, Box, Grid, Card, CardContent
 } from "@mui/material";
@@ -19,7 +19,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
         fontSize: 14,
     },
 }));
-
+//
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Colors for different revenue categories
 
 const SalesReport = () => {
@@ -50,16 +50,16 @@ const SalesReport = () => {
 
                 // Prepare pie chart data
                 const tempPieData = [
-                  { name: "Activity", value: data.ActivityRevenue || 0 },
-                  { name: "Historical Place", value: data.HistoricalPlaceRevenue || 0 },
-                  { name: "Itinerary", value: data.ItineraryRevenue || 0 },
-                  { name: "Orders", value: data.OrdersRevenue || 0 }
+                    { name: "Activity", value: data.ActivityRevenue || 0 },
+                    { name: "Historical Place", value: data.HistoricalPlaceRevenue || 0 },
+                    { name: "Itinerary", value: data.ItineraryRevenue || 0 },
+                    { name: "Orders", value: data.OrdersRevenue || 0 }
                 ];
                 setPieData(tempPieData);
 
                 // Transform productRevenueByMonth into an array of sales entries
                 const productRevenueByMonth = data.productRevenueByMonth || {};
-                
+
                 let transformedSales = [];
                 let idCounter = 1;
 
@@ -82,7 +82,7 @@ const SalesReport = () => {
                     const monthlyData = productRevenueByMonth[productName];
                     for (const monthName in monthlyData) {
                         const year = "2024";
-                        const monthNumber = monthMap[monthName] || "01"; 
+                        const monthNumber = monthMap[monthName] || "01";
                         const dateStr = `${year}-${monthNumber}-01`;
 
                         transformedSales.push({
@@ -150,11 +150,11 @@ const SalesReport = () => {
                     {/* Filter Inputs */}
                     <Box mb={3}>
                         {/* Add the total revenue label here, just after you check that data is loaded */}
-    <Box mb={2}>
-      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-        Total Revenue: ${totalRev}
-      </Typography>
-    </Box>
+                        <Box mb={2}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Total Revenue: ${totalRev}
+                            </Typography>
+                        </Box>
                         <Grid container spacing={2} alignItems="center">
                             <Grid item xs={12} sm={6} md={3}>
                                 <TextField
@@ -180,17 +180,15 @@ const SalesReport = () => {
                             </Grid>
                             <Grid item xs={12} sm={6} md={3}>
                                 <TextField
-                                    label="Date (YYYY-MM-DD)"
                                     variant="outlined"
                                     size="small"
                                     type="date"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
                                     fullWidth
+                                    placeholder="YYYY-MM-DD"
                                     value={filterCriteria.date}
                                     onChange={(e) => handleFilterChange("date", e.target.value)}
                                 />
+
                             </Grid>
                             <Grid item xs={12} sm={6} md={3}>
                                 <Button
@@ -216,7 +214,7 @@ const SalesReport = () => {
                                             <StyledTableCell align="center">Product</StyledTableCell>
                                             <StyledTableCell align="center">Date</StyledTableCell>
                                             <StyledTableCell align="center">Revenue</StyledTableCell>
-                                            <StyledTableCell align="center"></StyledTableCell>
+                                            {/* <StyledTableCell align="center"></StyledTableCell> */}
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -225,14 +223,14 @@ const SalesReport = () => {
                                                 <TableCell align="center">{sale.product}</TableCell>
                                                 <TableCell align="center">{sale.date}</TableCell>
                                                 <TableCell align="center">${sale.revenue}</TableCell>
-                                                <TableCell align="center">
+                                                {/* <TableCell align="center">
                                                     <Button
                                                         variant="outlined"
                                                         onClick={() => handleViewDetails(sale)}
                                                     >
                                                         View Details
                                                     </Button>
-                                                </TableCell>
+                                                </TableCell> */}
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -290,7 +288,7 @@ const SalesReport = () => {
                                     <Typography variant="body1">
                                         <strong>Product:</strong> {viewDetails.product}
                                     </Typography>
-                                    
+
                                     <Typography variant="body1">
                                         <strong>Date:</strong> {viewDetails.date}
                                     </Typography>

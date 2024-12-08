@@ -88,40 +88,40 @@ const ResponsiveDrawer = (props) => {
         case "AdminHomePage":
           setTab(<AdminHomePage />);
           return <AdminHomePage />;
-        case "ComplaintsTable":
+        case "Complaints":
           setTab(<ComplaintsTable />);
           return <ComplaintsTable />;
         case "AdminSalesReport": // Add this case
           setTab(<AdminSalesReport />);
           return <AdminSalesReport />;
-        case "DeletionRequests":
+        case "Deletion Requests":
           setTab(<DeletionRequests />);
           return <DeletionRequests />;
-        case "EventsAndItineraries":
+        case "Events And Itineraries":
           setTab(<EventsAndItineraries />);
           return <EventsAndItineraries />;
-        case "RegistringUsers":
+        case "Registring Users":
           setTab(<RegistringUsers />);
           return <RegistringUsers />;
-        case "ViewProduct":
+        case "View Product":
           setTab(<ViewProduct />);
           return <ViewProduct />;
-        case "AdminUserProfiles":
+        case "AdminUser Profiles":
           setTab(<AdminUserProfiles />);
           return <AdminUserProfiles />;
-        case "Preferencetags":
+        case "Preference tags":
           setTab(<Preferencetags />);
           return <Preferencetags />;
-        case "AddUser":
+        case "Add User":
           setTab(<AddUser />);
           return <AddUser />;
-        case "ActivityCategory":
+        case "Activity Category":
           setTab(<ActivityCategory />);
           return <ActivityCategory />;
-        case "ArchiveProduct":
+        case "Archive Product":
           setTab(<ArchiveProduct />);
           return <ArchiveProduct />;
-        case "ChangePassword":
+        case "Change Password":
           setTab(<ChangePassword />);
           return <ChangePassword />;
         default:
@@ -151,13 +151,7 @@ const ResponsiveDrawer = (props) => {
           <ListItemText primary="Home" />
         </ListItemButton>
         <Divider />
-        <ListItemButton onClick={() => handleTabChange("AllNotifications")}>
-          <ListItemIcon>
-            <MailIcon />
-          </ListItemIcon>
-          <ListItemText primary="All Notifications" />
-        </ListItemButton>
-        <Divider />
+        
         
         <ListItemButton onClick={() => handleTabChange("AdminSalesReport")}>
           <ListItemIcon>
@@ -173,12 +167,12 @@ const ResponsiveDrawer = (props) => {
         <Collapse in={UsercollapseOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding sx={{ backgroundColor: "#156fb7", color: "fff" }}>
             {[
-              "ComplaintsTable",
-              "DeletionRequests",
-              "EventsAndItineraries",
-              "RegistringUsers",
-              "AddUser",
-              "ChangePassword",
+              "Complaints",
+              "Deletion Requests",
+              "Events And Itineraries",
+              "Registring Users",
+              "Add User",
+              "Change Password",
             ].map((text) => (
               <ListItemButton
                 key={text}
@@ -197,13 +191,11 @@ const ResponsiveDrawer = (props) => {
         <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding sx={{ backgroundColor: "#156fb7", color: "fff" }}>
             {[
-              "ComplaintsTable",
-              "DeletionRequests",
-              "EventsAndItineraries",
-              "ViewProduct",
-              "Preferencetags",
-              "ActivityCategory",
-              "ArchiveProduct",
+              
+              "View Product",
+              "Preference tags",
+              "Activity Category",
+              "Archive Product",
             ].map((text) => (
               <ListItemButton
                 key={text}

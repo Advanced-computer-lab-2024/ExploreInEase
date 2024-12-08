@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const generateToken = require('../../middlewares/generateToken');
 const Tourist = require('../../models/tourist');
 const Order = require('../../models/order');
+const Products = require('../../models/product');
 
 
 //api 35
