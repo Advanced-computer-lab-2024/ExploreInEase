@@ -404,6 +404,13 @@ const getAllNotifications = async (id, type) => {
 }
 
 module.exports = {
+    addWishlist,
+    getWishlist,
+    removeWishlist,
+    addCart,
+    getCart,
+    removeCart,
+    editQuantityInCart,
     getAllNotifications,
     uploadImage,
     archiveProduct,

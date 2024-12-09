@@ -61,6 +61,9 @@ const ProductCard = () => {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isAddedToWishlist, setIsAddedToWishlist] = useState(false);
+  const [wishlistStatus, setWishlistStatus] = useState({}); // Track wishlist status for each product
+
   const [productData, setProductData] = useState({
     _id: null,
     name: '',
@@ -98,6 +101,31 @@ const ProductCard = () => {
     console.log("Fetching products...");
     handleGetAllProduct();
   }, []);
+  useEffect(() => {
+    console.log("Fetching products...");
+    handleGetAllInWishlist();
+  }, []);
+
+
+  const handleGetAllInWishlist = async () => {
+    try {
+      const options = { apiPath: `/getWishlist/${userId}`, urlParam: userId };
+      const response = await NetworkService.get(options);
+      console.log(response);
+
+      if (response && response.wishlist) {
+        const wishlistStatus = response.wishlist.reduce((acc, product) => {
+          acc[product._id] = true;
+          return acc;
+        }, {});
+        setWishlistStatus(wishlistStatus);
+      } else {
+        console.warn('Wishlist data is not available in the response');
+      }
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    }
+      }
 // Replace setProductData with setProducts in handleGetAllProduct
 const handleGetAllProduct = async () => {
   try {
@@ -139,7 +167,6 @@ const handleGetAllProduct = async () => {
     await axios.post(`http://localhost:3030/addCart/${userId}`,reqbody).then((res) => {
         console.log(res.data);
         console.log("Added to cart", productId);
-
         }).catch((err) => {
         console.log(err);
         }
@@ -155,7 +182,14 @@ const handleAddToWishList = async (productId) => {
 
   await axios.post(`http://localhost:3030/addWishlist/${userId}`,reqbody).then((res) => {
       console.log(res.data);
-      console.log("Added to cart", productId);
+      console.log("Added to Wishlist", productId);
+      setIsAddedToWishlist(true);
+
+            // Update state for this specific product
+      setWishlistStatus((prevState) => ({
+        ...prevState,
+        [productId]: true, // Mark this product as added
+      }));
 
       }).catch((err) => {
       console.log(err);
@@ -695,21 +729,27 @@ gap: 2, // Space between icons
 ) : ( 
 <>
    <Tooltip title="add to Cart" placement="top" arrow>
-    <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
+    <IconButton onClick={() => handleAddToCart(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
       <AddShoppingCart />
     </IconButton>
   </Tooltip>
-  <Tooltip title="WishList">
-  <IconButton
+  <Tooltip
+      title="WishList"
+      placement="top"
+      sx={{
+        "& .MuiTooltip-tooltip": {
+          backgroundColor: wishlistStatus[product._id] ? "red" : undefined, // Change color only for this card
+        },
+      }}
+    >
+      <IconButton
         onClick={() => {
-            // Add to cart
-            // console.log("Added to cart", product);
-            handleAddToWishList(product._id);
+          handleAddToWishList(product._id);
         }}
-        >
-        <FavoriteIcon />
-        </IconButton>
-        </Tooltip>
+      >
+        <FavoriteIcon color={wishlistStatus[product._id] ? "error" : "inherit"} />
+      </IconButton>
+    </Tooltip>
   <Tooltip title="Reviews" placement="top" arrow>
     <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
       <RateReviewIcon />

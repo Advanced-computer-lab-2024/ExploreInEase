@@ -280,7 +280,10 @@ const updateProductRating = async (productId, updatedFields) => {
         throw error;
     }
 }
-
+const createOrder = async (orderData) => {
+    const order = new Order(orderData);
+    return await order.save();
+};
 const updateProductReviews = async (productId, updatedFields) => {
     try {
         // Use Mongoose's `findByIdAndUpdate` to update the tour guide's comments
@@ -567,5 +570,6 @@ module.exports = {
     getOrdersByTouristId,
     getOrderById,
     getProductById2,
-    updateEventImage
+    updateEventImage,
+    createOrder
 };

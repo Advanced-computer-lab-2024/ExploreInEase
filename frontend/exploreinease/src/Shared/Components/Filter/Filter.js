@@ -75,7 +75,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
   const [success,setSuccess]=useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [ErrorMessage, setErrorMessage] = useState('');
+  const [ errorMessage, setErrorMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [payment, setPayment] = useState('');
   const [cardNumber, setcardNumber] = useState('');
@@ -111,6 +111,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
       return () => clearTimeout(timer); // Clean up the timer on component unmount
     }
   }, [success]);
+
   useEffect(() => {
     const initialData = itemList.filter(item =>
       (role === 'Activities' && item.type === 'Activity') ||
@@ -119,11 +120,22 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
     );
     console.log("itemList",itemList);
     console.log("initalData",initialData);
-    
+    let event;
+    if(role === 'Activities'){
+      event = 'activity';
+    }
+    else{
+      if(role === 'Itineraries'){
+        event = 'itinerary';
+      }
+      else{
+        event = 'historical';
+      }
+    }
         
     const adjustedFilteredData = initialData.map((item) => ({
       ...item,
-      picture: localStorage.getItem(`itinerary-image-${item.id}`) || null,
+      picture: localStorage.getItem(`${event}-image-${item.id}`) || nodata,
     }));
     console.log(adjustedFilteredData);
 
@@ -452,15 +464,15 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
   const handleSaveBook=async(selectedItem,budget,type,currency)=>{
     console.log(selectedItem);
     console.log("type:",type);
-
+    console.log(payment);
     if (selectedItem.type === 'Activity') {
-      if (payment == 'wallet') {
+      if (payment == 'Wallet') {
         try {
           const options = {
             apiPath: `/bookEvent`,
             body: {
               userType: 'tourist',
-              touristId: userId,
+              touristId: Userr._id,
               eventType: 'activity',
               eventID: selectedItem.id,
               ticketType: '',
@@ -486,7 +498,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
             apiPath: "/bookEventWithCard",
             body: {
               userType: 'tourist',
-              touristId: userId,
+              touristId: Userr._id,
               eventType: 'activity',
               eventID: selectedItem.id,
               ticketType: '',
@@ -952,12 +964,12 @@ const handleCloseDialog = () => {
         }}
         >
        <CardMedia
-                        component="img"
-                        height="150"
-                        image={item.picture || nodata} // Default placeholder if no image URL is provided
-                        alt={item.name}
-                        style={{ borderRadius: '8px 8px 0 0' }}
-                        />
+          component="img"
+          height="150"
+          image={item.picture || nodata} // Default placeholder if no image URL is provided
+          alt={item.name}
+          style={{ borderRadius: '8px 8px 0 0' }}
+          />
         <CardContent>
         <div style={{ display: 'flex', alignItems: 'center'}}>  
          <Typography variant="h5" component="div">

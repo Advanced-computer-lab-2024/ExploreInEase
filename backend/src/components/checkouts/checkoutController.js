@@ -337,6 +337,10 @@ const addCart = async (req, res) => {
     const {userId} = req.params;
     const { productId, quantity } = req.body;
 
+    console.log("carts");
+    console.log(req.body);
+    console.log(userId);
+
     try {
         const result = await checkoutService.addCart(userId, productId, quantity);
         return res.status(200).json(result);
@@ -521,6 +525,7 @@ const createOrderWithCard = async (req, res) => {
         currency 
     } = req.body;
 
+    console.log("BODY: ",req.body);
     if (
         !touristId || 
         !Array.isArray(productsIdsQuantity) || 
@@ -804,11 +809,12 @@ const createOrderWalletOrCod = async (req, res) => {
         });
     }
 
-    const validPaymentTypes = ['wallet', 'COD'];
+    const validPaymentTypes = ['wallet', 'cash'];
+    console.log("PAYMENT TYPE: ",paymentType);
     if (!validPaymentTypes.includes(paymentType)) {
         return res.status(400).json({
             success: false,
-            message: 'Invalid payment type. Must be "wallet" or "COD".',
+            message: 'Invalid payment type. Must be "wallet" or "cash".',
         });
     }
 

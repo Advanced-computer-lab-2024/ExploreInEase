@@ -197,8 +197,10 @@ const CartPage = () => {
 
     if (title === 'Continue to Checkout') {
       try {
+        console.log(UserId);
         const options = {
-          apiPath: `/getAddresses/${userId}`,
+          apiPath: `/getAddresses/${UserId}`,
+          urlParam: `/${UserId}`,
         };
         const response = await NetworkService.get(options);
         console.log(response);
@@ -214,10 +216,13 @@ const CartPage = () => {
       // Only add address if it's a new one
       if (selectedAddressId === 'new' && !savedAddresses.includes(deliveryInfo.address)) {
         try {
+          console.log(UserId);
+          console.log(deliveryInfo.address);
           const options = {
-            apiPath: `/addAddresses/${userId}/${deliveryInfo.address}`,
+            apiPath: `/addAddresses/${UserId}/${deliveryInfo.address}`,
+            urlParam: `${UserId}/${deliveryInfo.address}`
           };
-          await NetworkService.wallett(options);
+          await NetworkService.post(options);
         } catch (error) {
           console.error('Error adding address:', error);
           alert('Failed to add address. Please try again.');
@@ -241,7 +246,7 @@ const CartPage = () => {
         const response = await NetworkService.post({
           apiPath: `/createOrderWalletOrCod`,
           body: {
-            touristId: userId,
+            touristId: UserId,
             productsIdsQuantity: cartItems,
             addressToBeDelivered: deliveryInfo,
             paymentType: selectedPaymentMethod,
@@ -270,12 +275,12 @@ const CartPage = () => {
         const response = await NetworkService.post({
           apiPath: `/createOrderCard`,
           body: {
-            touristId: userId,
+            touristId: UserId,
             productsIdsQuantity: cartItems,
             addressToBeDelivered: deliveryInfo,
             paymentType: selectedPaymentMethod,
             price: calculateTotal(),
-            currency: currency,
+            currency: "EGP",
             cardNumber: cardDetails.number,
             expMonth: cardDetails.expMonth,
             expYear: cardDetails.expYear,

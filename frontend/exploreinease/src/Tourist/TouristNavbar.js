@@ -16,6 +16,7 @@ import "../TouristGovernor/GovernorHomePage.css";
 import Tooltip from '@mui/material/Tooltip';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import UploadIcon from '@mui/icons-material/Upload';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import axios from 'axios';
 import Delete from '@mui/icons-material/Delete';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -134,7 +135,8 @@ const handleCloseMenu = () => {
 const handleClickNotification = async(event) => {
   setAnchorEl1(event.currentTarget);
   const options = { 
-    apiPath: `/getAllNotifications/${Userr._id}`
+    apiPath: `/getAllNotifications/${Userr._id}`,
+    urlParam: Userr._id
    };
   const response =await NetworkService.get(options);
   setMenuItem(response);
@@ -424,61 +426,61 @@ return (
         </IconButton>   
 
   {/* Notification Button */}
-  <IconButton
-    onClick={handleClickNotification}
-    aria-controls={open ? 'basic-menu' : undefined}
-    aria-haspopup="true"
-    aria-expanded={open ? 'true' : undefined}
-    style={{
-      color: 'blue',
-      backgroundColor: '#e0f7fa',
-    }}
-  >
-    <Tooltip title='Notification'>
-    <Badge badgeContent={4} color="success">
-      <NotificationsNoneOutlinedIcon sx={{ fontSize: 23 }} />
-    </Badge>
-    </Tooltip>
-  </IconButton>
+{/* Notification Icon Button */}
+<IconButton
+        aria-controls={openNotfication ? "basic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={openNotfication ? "true" : undefined}
+        onClick={handleClickNotification} // Attach the function here
+        style={{
+          color: "blue",
+          backgroundColor: "#e0f7fa",
+        }}
+      >
+        <Badge badgeContent={menuItems?.length || 0} color="error">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
 
-  <Menu
-    id="basic-menu"
-    anchorEl={anchorEl1}
-    open={openNotfication}
-    onClose={handleClose}
-    MenuListProps={{
-      'aria-labelledby': 'basic-button',
-    }}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'right',
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: 'right',
-    }}
-    PaperProps={{
-      style: {
-        maxHeight: '300px',
-        overflow: 'auto',
-      },
-    }}
-  >
-    {menuItems && menuItems.length > 0 ? (
-      menuItems.map((item, index) => (
-        <MenuItem key={index}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <strong>{item.title}</strong>
-            <span style={{ fontSize: '0.875rem', color: 'gray' }}>
-              {item.body}
-            </span>
-          </div>
-        </MenuItem>
-      ))
-    ) : (
-      <MenuItem disabled>No notifications available</MenuItem>
-    )}
-  </Menu>
+      {/* Notification Menu */}
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl1}
+        open={openNotfication}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        PaperProps={{
+          style: {
+            maxHeight: "300px",
+            overflow: "auto",
+          },
+        }}
+      >
+        {menuItems && menuItems.length > 0 ? (
+          menuItems.map((item, index) => (
+            <MenuItem key={index}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <strong>{item.title}</strong>
+                <span style={{ fontSize: "0.875rem", color: "gray" }}>
+                  {item.body}
+                </span>
+              </div>
+            </MenuItem>
+          ))
+        ) : (
+          <MenuItem disabled>No notifications available</MenuItem>
+        )}
+      </Menu>
   <Tooltip title="Options">
   <Avatar
     sx={{
