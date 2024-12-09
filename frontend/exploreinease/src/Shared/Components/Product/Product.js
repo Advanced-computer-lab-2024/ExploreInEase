@@ -27,10 +27,11 @@ import NodataFound from '../../../No data Found.avif';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const ProductCard = () => {
-  const Userr=localStorage.getItem('User');
-   const adminIdd = localStorage.getItem('UserId');
+  const Userr = JSON.parse(localStorage.getItem('User'));
+  const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
    console.log("User Type", userType);
+   console.log(Userr.type);
   const location = useLocation();
   const { User } = location.state || Userr||{};
   const userId = User ? User._id : adminIdd;
@@ -626,7 +627,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
             image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
             alt={product.name}
           />
-          {userType==='seller' || userType==='admin' &&(
+          {Userr.type==='seller' || userType==='admin' &&(
                 <Box
                 sx={{
                   position: 'absolute',

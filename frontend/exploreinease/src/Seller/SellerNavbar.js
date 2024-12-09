@@ -14,6 +14,7 @@ import Badge from '@mui/material/Badge';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import UploadIcon from '@mui/icons-material/Upload';
 import Divider from '@mui/material/Divider';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import Delete from '@mui/icons-material/Delete';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -287,6 +288,60 @@ const SHomePage = () => {
     </div>
       </div>
     <div className="navbar-right">
+    <IconButton
+        aria-controls={openNotfication ? "basic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={openNotfication ? "true" : undefined}
+        onClick={handleClickNotification} // Attach the function here
+        style={{
+          color: "blue",
+          backgroundColor: "#e0f7fa",
+        }}
+      >
+        <Badge badgeContent={menuItems?.length || 0} color="error">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
+
+      {/* Notification Menu */}
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl1}
+        open={openNotfication}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        PaperProps={{
+          style: {
+            maxHeight: "300px",
+            overflow: "auto",
+          },
+        }}
+      >
+        {menuItems && menuItems.length > 0 ? (
+          menuItems.map((item, index) => (
+            <MenuItem key={index}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <strong>{item.title}</strong>
+                <span style={{ fontSize: "0.875rem", color: "gray" }}>
+                  {item.body}
+                </span>
+              </div>
+            </MenuItem>
+          ))
+        ) : (
+          <MenuItem disabled>No notifications available</MenuItem>
+        )}
+      </Menu>
                     <Avatar sx={{ bgcolor: 'darkblue', color: 'white',cursor:'pointer' ,marginRight:'25px'}} src={avatarImage || undefined} onClick={handleOpenMenu} >
                         {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
                     </Avatar>
@@ -335,60 +390,6 @@ const SHomePage = () => {
                             <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
                                   <LogoutOutlinedIcon />
                               </ListItemIcon>Log Out</MenuItem>
-                        </Menu>
-                        <IconButton
-                            onClick={handleClickNotification}
-                            aria-controls={open ? 'basic-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={open ? 'true' : undefined}
-                            style={{
-                                position: 'absolute', // Keeps the button positioned relative to its parent
-                                color: 'blue',        // Icon color
-                                backgroundColor: '#e0f7fa', // Light blue background
-                                right: '100px',       // Distance from the right of the parent
-                                alignItems: 'center',
-                                margin:'3px'
-                            }}
-                        >
-<Badge badgeContent={value} color="success">
-                                <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
-                            </Badge>
-                        </IconButton>
-                        <Menu
-                            id="basic-menu"
-                            anchorEl={anchorEl1}
-                            open={openNotfication}
-                            onClose={handleClose}
-                            MenuListProps={{
-                                'aria-labelledby': 'basic-button',
-                            }}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            PaperProps={{
-                                style: {
-                                    maxHeight: '300px', // Set the maximum height for the menu
-                                    overflow: 'auto',   // Enable scrolling
-                                },
-                            }}
-                        >
-                            {menuItems && menuItems.length > 0 ? (
-                                        menuItems.map((item, index) => (
-                                            <MenuItem key={index}>
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <strong>{item.title}</strong>
-                                                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
-                                                </div>
-                                            </MenuItem>
-                                        ))
-                                    ) : (
-                                        <MenuItem disabled>No notifications available</MenuItem>
-                                    )}
                         </Menu>
      </div>
     </nav>

@@ -14,6 +14,7 @@ import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import Badge from '@mui/material/Badge';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import "../TouristGovernor/GovernorHomePage.css"; 
 import UploadIcon from '@mui/icons-material/Upload';
@@ -287,6 +288,20 @@ const handleClickNotification = async(event) => {
     </div>
       </div>
     <div className="navbar-right">
+    <IconButton
+        aria-controls={openNotfication ? "basic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={openNotfication ? "true" : undefined}
+        onClick={handleClickNotification} // Attach the function here
+        style={{
+          color: "blue",
+          backgroundColor: "#e0f7fa",
+        }}
+      >
+        <Badge badgeContent={menuItems?.length || 0} color="error">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
              <Tooltip title="Options">
                     <Avatar sx={{ bgcolor: 'darkblue', color: 'white',cursor:'pointer' ,marginRight:'25px'}} src={avatarImage || undefined} onClick={handleOpenMenu} >
                         {avatarImage ? '' : initialUsername.charAt(0).toUpperCase()}
@@ -347,61 +362,46 @@ const handleClickNotification = async(event) => {
                               Log Out
                             </MenuItem>
                         </Menu>
-                        <IconButton
-                            onClick={handleClickNotification}
-                            aria-controls={open ? 'basic-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={open ? 'true' : undefined}
-                            style={{
-                                position: 'absolute', // Keeps the button positioned relative to its parent
-                                color: 'blue',        // Icon color
-                                backgroundColor: '#e0f7fa', // Light blue background
-                                right: '100px',       // Distance from the right of the parent
-                                alignItems: 'center',
-                                margin:'3px'
-                            }}>
-                          <Tooltip title="Notification">
-                          <Badge badgeContent={menuItems.length || 0} color="success">
-                                <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
-                            </Badge>
-                          </Tooltip>
-                        </IconButton>
-                        <Menu
-                            id="basic-menu"
-                            anchorEl={anchorEl1}
-                            open={openNotfication}
-                            onClose={handleClose}
-                            MenuListProps={{
-                                'aria-labelledby': 'basic-button',
-                            }}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            PaperProps={{
-                                style: {
-                                    maxHeight: '300px', // Set the maximum height for the menu
-                                    overflow: 'auto',   // Enable scrolling
-                                },
-                            }}
-                        >
-                            {menuItems && menuItems.length > 0 ? (
-                                        menuItems.map((item, index) => (
-                                            <MenuItem key={index}>
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <strong>{item.title}</strong>
-                                                    <span style={{ fontSize: '0.875rem', color: 'gray' }}>{item.body}</span>
-                                                </div>
-                                            </MenuItem>
-                                        ))
-                                    ) : (
-                                        <MenuItem disabled>No notifications available</MenuItem>
-                                    )}
-                        </Menu>
+
+      {/* Notification Menu */}
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl1}
+        open={openNotfication}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        PaperProps={{
+          style: {
+            maxHeight: "300px",
+            overflow: "auto",
+          },
+        }}
+      >
+        {menuItems && menuItems.length > 0 ? (
+          menuItems.map((item, index) => (
+            <MenuItem key={index}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <strong>{item.title}</strong>
+                <span style={{ fontSize: "0.875rem", color: "gray" }}>
+                  {item.body}
+                </span>
+              </div>
+            </MenuItem>
+          ))
+        ) : (
+          <MenuItem disabled>No notifications available</MenuItem>
+        )}
+      </Menu>
      </div>
     </nav>
     <nav className="navbarSecondary">
