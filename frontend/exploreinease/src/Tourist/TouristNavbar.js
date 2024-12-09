@@ -105,8 +105,7 @@ useEffect(() => {
               },
           });
           console.log('Image uploaded successfully:', response);
-          const uploadedImageUrl = response.data.imageUrl;
-          
+          const uploadedImageUrl = response.data.imageUrl; 
           // Update avatarImage and save the URL in localStorage
           setAvatarImage(uploadedImageUrl);
           localStorage.setItem(`${userId}`, uploadedImageUrl);
@@ -129,8 +128,15 @@ const handleClose = () => {
 const handleCloseMenu = () => {
   setAnchorProfileEl(null);
 };
-const handleClickNotification = (event) => {
-  setAnchorEl1(event.currentTarget);
+const handleClickNotification = async(event) => {
+  const options = { 
+    apiPath: `/getAllNotifications/${Userr._id}`
+   };
+  const response =await NetworkService.get(options);
+    setAnchorEl1(event.currentTarget);
+
+  console.log(response);
+  
 };
 const handleOpenMenu = (event) => {
   setAnchorProfileEl(event.currentTarget);

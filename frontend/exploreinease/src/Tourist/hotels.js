@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, TextField, Select, MenuItem, Grid, InputLabel, FormControl, Box, Typography, CardActions, Card, CardContent, CardMedia } from '@mui/material';
+import { Button, TextField, Select,MenuItem, Grid, InputLabel, FormControl, Box, Typography, CardActions, Card, CardContent, CardMedia } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -24,7 +24,7 @@ import Hotel14 from '../Hotels Images/Hotel 14.jpeg';
 import Hotel15 from '../Hotels Images/Hotel 15.jpeg';
 import Hotel16 from '../Hotels Images/Hotel 16.jpeg';
 import TouristNavbar from './TouristNavbar';
-
+import NodataFound from '../No data Found.avif';
 const hotelImages =
  [
   Hotel1, Hotel2, Hotel3, Hotel4, Hotel5, Hotel6, Hotel7, Hotel8,
@@ -32,10 +32,12 @@ const hotelImages =
 ];
 
 const Hotels = () => {
+  const User=localStorage.getItem('User')
   const location = useLocation();
   const { userId } = location.state || {};
   const [iatCode,setIatCode]=useState([]);
   const [hotelDataa,sethotelDataa]=useState([]);
+  const [selectedCity, setSelectedCity] = useState(''); // Selected city value
   const [searchParams, setSearchParams] = useState({
     country:"",
     startDate: null,
@@ -43,7 +45,15 @@ const Hotels = () => {
     peopleCount: null,
     currency: "",
   });
-
+  const resetSearchParams = () => {
+    setSearchParams({
+      country: "",
+      startDate: null,
+      endDate: null,
+      peopleCount: null,
+      currency: "",
+    });
+  };
 const handlegetCities=async()=>{
   console.log("Country",searchParams.country);
   
@@ -64,32 +74,16 @@ const handleGetHotels = async () => {
   try {
     const startDate = new Date(searchParams.startDate).toISOString().slice(0, 10);
     const endDate = new Date(searchParams.endDate).toISOString().slice(0, 10);
-    const allHotelData = await Promise.allSettled(
-      iatCode.map(async (code) => {
-        console.log("seatchParam",searchParams,startDate,endDate);
-        
-        const options = { 
-          apiPath: `/hotels/${code}/${startDate}/${endDate}/${searchParams.currency}/${searchParams.peopleCount}`,
-        };
-        console.log("options send",options);
-
-        // Fetch data for each iataCode
-        const response = await NetworkService.get(options);
-        console.log("Hotel data for", code, ":", response);
-        
-        return response; // Return each response to be collected
-      })
-    );
-
-    // Filter out any rejected promises and keep only successful responses
-    const combinedHotelData = allHotelData
-      .filter(result => result.status === 'fulfilled')  // Only keep successful responses
-      .map(result => result.value)                      // Extract value from successful responses
-      .flat();                                          // Flatten if responses are arrays
-    
+      const options = { 
+      apiPath: `/hotels/${selectedCity}/${startDate}/${endDate}/${User.currency}/${searchParams.peopleCount}`,
+    };
+    const response = await NetworkService.get(options);
+    console.log("Hotel data for", response);    
+    const combinedHotelData = response;
+   
     console.log("Combined hotel data:", combinedHotelData);
     sethotelDataa(combinedHotelData);
-
+    // setSearchParams()
   } catch (error) {
     console.log('Unexpected error fetching hotel data:', error);
   }
@@ -104,13 +98,13 @@ const handleBookHotels=async(selected)=>{
       body:{
         bookedBy:userId,
         price:selected.price,
-        iataCode:selected.iataCode,
+        iataCode:selectedCity,
         hotelName:selected.name,
         hotelId:selected.hotelId,
         startDate:selected.startDate,
         endDate:selected.endDate,
         personCount:searchParams.peopleCount,
-        currency:searchParams.currency,
+        currency:User.currency,
       }
      };
      console.log(options);
@@ -126,7 +120,14 @@ const handleBookHotels=async(selected)=>{
   const handleDateChange = (field) => (date) => {
     setSearchParams((prev) => ({ ...prev, [field]: date }));
   };
-
+  const handleCityChange = (event) => {
+    const newCity = event.target.value;
+    setSelectedCity(newCity);
+    console.log("Selected City:", newCity); // Logs immediately
+    
+  };
+  console.log(selectedCity);
+  
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     
@@ -134,11 +135,18 @@ const handleBookHotels=async(selected)=>{
       ...prevParams,
       [name]: name === "peopleCount" ? parseInt(value, 10) || 1 : value // Parse as integer or default to 1
     }));
+    console.log(searchParams);
+    
   };
 
   const handleSearch = () => {
-    handlegetCities();
-    handleGetHotels();
+    if(iatCode.length==0){
+      handlegetCities();
+    }
+    else{
+      handleGetHotels();
+    }
+    // 
     // setSearchParams({
     //   country:'',
     //   startDate: null,
@@ -171,7 +179,21 @@ const handleBookHotels=async(selected)=>{
                   onChange={handleInputChange}
                   fullWidth
                 />
-                <FormControl fullWidth>
+                                {iatCode.length > 0 && (
+                            <>
+                                <InputLabel id="city-select-label">Select City</InputLabel>
+                                <Select
+                                    value={selectedCity}
+                                    onChange={handleCityChange}
+                                    fullWidth
+                                >
+                                    {iatCode.map((city) => (
+                                        <MenuItem key={city} value={city}>
+                                            {city}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                                <FormControl fullWidth>
                   <DatePicker
                     label="Start Date"
                     value={searchParams.startDate}
@@ -200,20 +222,11 @@ const handleBookHotels=async(selected)=>{
                     startAdornment: <PeopleIcon sx={{ color: 'action.active', mr: 1 }} />,
                   }}
                 />
-                <FormControl fullWidth>
-                  <InputLabel>Currency</InputLabel>
-                  <Select
-                    name="currency"
-                    label="Currency"
-                    value={searchParams.currency}
-                    onChange={handleInputChange}
-                    startAdornment={<AttachMoneyIcon sx={{ color: 'action.active', mr: 1 }} />}
-                  >
-                    <MenuItem value="dollar">USD</MenuItem>
-                    <MenuItem value="euro">EUR</MenuItem>
-                    <MenuItem value="EGP">EGP</MenuItem>
-                  </Select>
-                </FormControl>
+                            </>
+                        )}
+
+        
+             
                 <Button
                   variant="contained"
                   color="primary"
@@ -229,39 +242,61 @@ const handleBookHotels=async(selected)=>{
         </Grid>
         
         {/* Right Column - Hotel Cards */}
-        <Grid item xs={12} md={8}>
+        <Grid container spacing={2} item xs={12} md={8}>
+          {hotelDataa.length>0?(
+  hotelDataa.map((hotel) => (
+    <Grid item xs={12} sm={6} md={4} key={hotel.id}>
+      <Card sx={{ width: '100%', boxShadow: 3, height: 400, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <CardMedia
+          component="img"
+          height="180"
+          image={getRandomImage()}
+          alt={`${hotel.name} image`}
+        />
+        <CardContent>
+          <Typography variant="h6">{hotel.name}</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Price: {hotel.price} {searchParams.currency.toUpperCase()}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Start Date: {hotel.startDate}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            End Date: {hotel.endDate}
+          </Typography>
+        </CardContent>
+        <CardActions sx={{ paddingBottom: 2 }}> {/* Adjusting paddingBottom here */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Button onClick={() =>handleBookHotels(hotel)} variant="contained" color="primary">
+              Book Now
+            </Button>
+          </Box>
+        </CardActions>
+      </Card>
+    </Grid>
+  ))
+          ):(
+            <div
+            style={{
+              width: "400px", // Set a fixed width for the GIF
+              height: "400px", // Set a fixed height to match the width
+              position: "relative",
+              marginLeft:'200px',
+              marginTop:'100px',
+              alignContent:'center',
+              alignItems:'center'
+            }}
+          >
+            <img
+              src={NodataFound}
+              width="100%"
+              height="100%"
+    
+            ></img>
+          </div>
+          )}
   <Grid container spacing={2}>
-    {hotelDataa.map((hotel) => (
-      <Grid item xs={12} sm={6} md={4} key={hotel.id}>
-        <Card sx={{ width: '100%', boxShadow: 3, height: 400, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <CardMedia
-            component="img"
-            height="180"
-            image={getRandomImage()}
-            alt={`${hotel.name} image`}
-          />
-          <CardContent>
-            <Typography variant="h6">{hotel.name}</Typography>
-            <Typography variant="body1" color="text.secondary">
-              Price: {hotel.price} {searchParams.currency.toUpperCase()}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Start Date: {hotel.startDate}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              End Date: {hotel.endDate}
-            </Typography>
-          </CardContent>
-          <CardActions sx={{ paddingBottom: 2 }}> {/* Adjusting paddingBottom here */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <Button onClick={() =>handleBookHotels(hotel)} variant="contained" color="primary">
-                Book Now
-              </Button>
-            </Box>
-          </CardActions>
-        </Card>
-      </Grid>
-    ))}
+  
   </Grid>
 </Grid>
       </Grid>

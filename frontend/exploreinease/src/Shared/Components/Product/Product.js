@@ -27,10 +27,11 @@ import NodataFound from '../../../No data Found.avif';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const ProductCard = () => {
+  const Userr=localStorage.getItem('User');
    const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
   const location = useLocation();
-  const { User } = location.state || {};
+  const { User } = location.state || Userr||{};
   const userId = User ? User._id : adminIdd;
   const [products, setProducts] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -222,7 +223,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
       
       const options = {
         apiPath: '/availableQuantityAndSales/{userType}/{productId}/{currency}',
-        urlParam: { userType: userType , productId: productId, currency: "EGP"},
+        urlParam: { userType: userType , productId: productId, currency: User.currency},
       }
       const response = await NetworkService.get(options);
       console.log(response);
