@@ -35,8 +35,9 @@ const updateEventFlagController = async (req, res) => {
       const publisher = await eventRepository.getPublisher(updatedEvent.created_by);
 
 
-      const body = `${eventType} with ID ${eventID} has been flagged Inappropriate.`;
+      const body =` ${eventType} with ID ${eventID} has been flagged Inappropriate.`;
         const notificationData = {
+            title: 'Inappropriate Event Flagged',
             body,
             user: {
                 user_id: publisher._id,     // Match the schema key
@@ -60,8 +61,8 @@ const updateEventFlagController = async (req, res) => {
         const mailOptions = {
             from: process.env.EMAIL2_USER,
             to: publisher.email,
-            subject: 'Product out of stock',
-            text: `Hello ${publisher.username},\n\n${body}\n\nBest regards,\n${process.env.EMAIL2_USER}`
+            subject: 'Inappropriate Event Flagged',
+            text:` Hello ${publisher.username},\n\n${body}\n\nBest regards,\n${process.env.EMAIL2_USER}`
         };
     
         await transporter.sendMail(mailOptions);
@@ -72,6 +73,114 @@ const updateEventFlagController = async (req, res) => {
       return res.status(400).json({ message: error.message });
   }
 };
+
+const bookEventWithCard = async (req, res) => {
+  const {
+    userType,
+    touristId,
+    eventType,
+    eventID,
+    ticketType,
+    currency,
+    activityPrice,
+    cardNumber,
+    expMonth,
+    expYear,
+    cvc,
+    promoCode
+  } = req.body;
+
+  try {
+    if (userType !== "tourist") {
+      throw new Error("User type must be tourist");
+    }
+    if (
+      !touristId ||
+      !userType ||
+      !eventType ||
+      !eventID ||
+      !cardNumber ||
+      !expMonth ||
+      !expYear ||
+      !cvc
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All attributes are required in the request body",
+      });
+    }
+
+    const result = await eventService.addEventToTouristWithCard(
+      userType,touristId,eventType,eventID,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode
+    );
+
+
+    const allTourists = await eventRepository.findTourists();
+    
+    allTourists.forEach(async tourist => {
+      const isInterested = Array.isArray(tourist.interestedIn) && 
+        tourist.interestedIn.some(interested => 
+          interested.id.toString() === eventID && 
+          interested.type === eventType
+        );
+    
+      if (isInterested) {
+          const event = await eventRepository.findEventById(eventID, eventType);
+          console.log("Event: ",event);
+          const eventName = event.name;
+          console.log("Event Name: ",eventName);
+          if (event) {
+              if(!event.isBooked) {
+                const body = `${eventType} with Name ${eventName} started its first booking`;
+                const notificationData = {
+                    title: "Event Booking",
+                    body,
+                    user: {
+                        user_id: tourist._id,
+                        user_type: "tourist"
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+                
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                console.log("Tourist email: ",tourist.email);
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: tourist.email,
+                    subject: 'Event Booking',
+                    text: `${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions); 
+              }
+            }
+        }
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Event booked successfully, Payment successful and Email sent",
+      data: result.tourist,
+      paymentStatus: result.paymentStatus,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 
 // Get all user events by _id and userType
 const getUserEvents = async (req, res) => {
@@ -746,56 +855,78 @@ const createHistoricalPlace = async (req, res) => {
   const {
     name,
     description,
-    pictures,
-    location,
+    latitude,
+    longitude,
+    address,
     openingHours,
-    ticketPrice,
+    ticketPrice_student,
+    ticketPrice_native,
+    ticketPrice_foreign,
     created_by,
     tags
   } = req.body;
 
+  console.log(req.body);
+
+  const location = {
+    latitude,
+    longitude,
+    address
+  };
+
+  const ticketPrice = {
+    student: ticketPrice_student,
+    native: ticketPrice_native,
+    foreign: ticketPrice_foreign
+  };
+
+const cleanOpeningHours = JSON.parse(openingHours);
+
+  console.log(location);
+  console.log(ticketPrice);
+
   const file = req.file;
 
   if (!file) {
+    console.log("fff");
     return res.status(400).send('No file uploaded.');
   }
-
+  console.log("3ada");
   // Validate required fields
-  if (!name || !description || !pictures || !location || !openingHours || !ticketPrice  || !created_by || !tags) {
+  if (!name || !description || !location || !cleanOpeningHours || !ticketPrice  || !created_by || !tags) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
-
-  // Check if the user has the right type
-  const typeData = await eventRepository.getType(created_by);
-  if (typeData !== 'tourismGovernor') {
-    return res.status(403).json({ message: 'You are not authorized to create a Historical Place' });
-  }
+  console.log("3ada2");
 
   try {
-    const tag = await eventRepository.findTagByTypeAndPeriod(tags);
+    const tagString = JSON.parse(tags)[0];
+    console.log("TagString:",tagString);
+    const tag = await eventRepository.findTagByTypeAndPeriod(tagString);
       if (!tag) {
+        console.log("Tag Error 1");
         return res.status(400).json({ message: 'Invalid tag type' });
       }
+      console.log("Tag:",tag);
     const historicalPlaceData = {
       name,
       description,
-      pictures,
       location,
-      openingHours,
+      openingHours: cleanOpeningHours,
       ticketPrice,
       created_by,
-      tags
+      tagString
     };
 
     // Call the service to create the historical place
     const historicalPlace = await eventService.createHistoricalPlace(historicalPlaceData);
+    console.log("Historical Place:",historicalPlace.response);
 
-    const historicalPlaceImage = await checkoutService.uploadEventImage(historicalPlace._id, file, "HistoricalPlace");
+    const historicalPlaceImage = await checkoutService.uploadEventImage(historicalPlace.response.savedPlace._id, file, "HistoricalPlace");
     if(historicalPlaceImage.message != 'Image uploaded successfully') {
       return res.status(400).json({ message: 'Error uploading image' });
     } 
 
-    return res.status(historicalPlace.status).json(historicalPlace.response);
+    return res.status(historicalPlace.status).json({historicalPlace: historicalPlace.response, imageUrl: historicalPlaceImage.imageUrl});
   } catch (error) {
     console.error('Error creating historical place:', error.message);
     return res.status(500).json({ message: 'Error creating historical place', error: error.message });
@@ -1196,6 +1327,23 @@ const updateItineraryActivation = async (req, res) => {
 
 //Buildo + saif apis 
 
+
+
+const notifyUpcomingEvents = async (req, res) => {
+  try {
+    const { touristId } = req.params;
+    if (!touristId) {
+      return res.status(400).json({ error: "touristId is required" });
+    }
+    const result = await eventService.notifyUpcomingEvents(touristId);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
+
 const bookEvent = async (req, res) => {
   const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice,promoCode } = req.body;
   try {
@@ -1228,6 +1376,7 @@ const bookEvent = async (req, res) => {
               if(!event.isBooked) {
                 const body = `${eventType} with Name ${eventName} started its first booking`;
                 const notificationData = {
+                    title: "Event Booking",
                     body,
                     user: {
                         user_id: tourist._id,
@@ -1252,7 +1401,7 @@ const bookEvent = async (req, res) => {
                     from: process.env.EMAIL2_USER,
                     to: tourist.email,
                     subject: 'Event Booking',
-                    text: `${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                    text:` ${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
                 };
             
                 await transporter.sendMail(mailOptions); 
@@ -1280,128 +1429,6 @@ const bookEvent = async (req, res) => {
     });
   }
 };
-
-
-const bookEventWithCard = async (req, res) => {
-  const {
-    userType,
-    touristId,
-    eventType,
-    eventID,
-    ticketType,
-    currency,
-    activityPrice,
-    cardNumber,
-    expMonth,
-    expYear,
-    cvc,
-    promoCode
-  } = req.body;
-
-  try {
-    if (userType !== "tourist") {
-      throw new Error("User type must be tourist");
-    }
-    if (
-      !touristId ||
-      !userType ||
-      !eventType ||
-      !eventID ||
-      !cardNumber ||
-      !expMonth ||
-      !expYear ||
-      !cvc
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "All attributes are required in the request body",
-      });
-    }
-
-    const result = await eventService.addEventToTouristWithCard(
-      userType,touristId,eventType,eventID,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode
-    );
-
-
-    const allTourists = await eventRepository.findTourists();
-    
-    allTourists.forEach(async tourist => {
-      const isInterested = Array.isArray(tourist.interestedIn) && 
-        tourist.interestedIn.some(interested => 
-          interested.id.toString() === eventID && 
-          interested.type === eventType
-        );
-    
-      if (isInterested) {
-          const event = await eventRepository.findEventById(eventID, eventType);
-          console.log("Event: ",event);
-          const eventName = event.name;
-          console.log("Event Name: ",eventName);
-          if (event) {
-              if(!event.isBooked) {
-                const body = `${eventType} with Name ${eventName} started its first booking`;
-                const notificationData = {
-                    body,
-                    user: {
-                        user_id: tourist._id,
-                        user_type: "tourist"
-                    }
-                };
-                const notification = await checkoutRepository.addNotification(notificationData);
-                console.log("NOTIFICATION: ",notification);
-                
-                const transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: {
-                        user: process.env.EMAIL2_USER,
-                        pass: process.env.EMAIL2_PASS
-                    }
-                });
-            
-                console.log("Transporter created");
-                console.log("Tourist email: ",tourist.email);
-                
-                const mailOptions = {
-                    from: process.env.EMAIL2_USER,
-                    to: tourist.email,
-                    subject: 'Event Booking',
-                    text: `${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
-                };
-            
-                await transporter.sendMail(mailOptions); 
-              }
-            }
-        }
-      });
-
-    return res.status(200).json({
-      success: true,
-      message: "Event booked successfully, Payment successful and Email sent",
-      data: result.tourist,
-      paymentStatus: result.paymentStatus,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-
-const notifyUpcomingEvents = async (req, res) => {
-  try {
-    const { touristId } = req.params;
-    if (!touristId) {
-      return res.status(400).json({ error: "touristId is required" });
-    }
-    const result = await eventService.notifyUpcomingEvents(touristId);
-    return res.status(200).json(result);
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-};
-
 
 
 module.exports = {

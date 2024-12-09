@@ -1068,8 +1068,16 @@ const addBookmark = async (touristId, bookmark) => {
         throw new Error(`Error fetching tourists: ${error.message}`);
     }
 };
+const fetchUserStatistics = async () => {
+    try {
+      return await userRepository.getUserStatistics();
+    } catch (error) {
+      throw new Error("Error fetching user statistics");
+    }
+  };
 
 module.exports = {
+    fetchUserStatistics,
     getAllNotifications,
     addAddresses,
     getAddresses,

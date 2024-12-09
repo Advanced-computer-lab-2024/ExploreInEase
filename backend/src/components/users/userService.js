@@ -942,10 +942,17 @@ const sortedNotifications = notifications.sort((a, b) => {
             productRevenueByMonth
         };
     };
-    
+    const fetchUserStatistics = async () => {
+        try {
+          return await userRepository.getUserStatistics();
+        } catch (error) {
+          throw new Error("Error fetching user statistics");
+        }
+      };
 
     
 module.exports = {
+    fetchUserStatistics,
     adminReport,
     getAllNotifications,
     verifyOtP,

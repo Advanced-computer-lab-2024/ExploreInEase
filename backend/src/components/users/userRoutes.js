@@ -1045,6 +1045,7 @@ router.get("/fetchbookmark/:touristId", userController.getBookmarks);
 router.post('/addAddresses/:userId/:address', userController.addAddresses);
 router.get('/getAddresses/:userId', userController.getAddresses);
 router.get('/adminReport/:userId', userController.adminReport);
+router.get('/fetchUserStats/:adminid', userController.getUserStatistics);
 module.exports = {
     router,
     setDBConnection,

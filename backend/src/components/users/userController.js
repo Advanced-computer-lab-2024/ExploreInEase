@@ -978,10 +978,42 @@ const addBookmark = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 }
+const getUserStatistics = async (req, res) => {
+    console.log("ia am here");
+    const { adminid } = req.params;
+    if (!adminid) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin ID is required",
+      });
+    }
+    const type = await userRepository.getType(adminid);
+    if (type !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access. Only admins access.",
+      });
+    }
+    try {
+      // Fetch user statistics
+      const stats = await userService.fetchUserStatistics();
+      res.status(200).json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Error fetching user statistics:", error);
+      res.status(500).json({
+        success: false,
+        error: error.message || "Internal Server Error",
+      });
+    }
+  };
 
 
 module.exports = {
     getAllNotifications,
+    getUserStatistics,
     addInterestedIn,
     adminReport,
     changePasswordAfterOTP,

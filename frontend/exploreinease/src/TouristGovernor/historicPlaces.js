@@ -34,10 +34,11 @@ const defaultCenter = {
 };
 function HistoricalPlaces() {
   const location = useLocation();
-  const governorId = location.state?.governorId || '';
+  const governorId = localStorage.getItem('UserId') || '';
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
-  const [historicPlaces, setHistoricPlaces] = useState([]);
+  const [historicPlaces, setHistoricPlaces] = useState([{}]);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [open, setOpen] = useState(false);
   const [mapCenter, setMapCenter] = useState({lat:defaultCenter.lat, lng: defaultCenter.lng});
   const [markerPosition, setMarkerPosition] = useState(null);
@@ -48,7 +49,7 @@ function HistoricalPlaces() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [ setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state
   const [newHistoricPlace, setNewHistoricPlace] = useState({
@@ -92,8 +93,13 @@ function HistoricalPlaces() {
       // console.log(response);
       const tempArray= response.filter(item=>item.created_by.toString()===governorId);
       console.log("temp Array",tempArray);
+
+      const adjustedHistorical = tempArray.map((place) => ({
+        ...place,
+        picture: localStorage.getItem(`historical-image-${place._id}`) || null,
+      }));
       
-      setHistoricPlaces(tempArray ||[]);
+      setHistoricPlaces(adjustedHistorical ||[]);
       console.log("Historical Places:",historicPlaces);
       
     } catch (error) {
@@ -185,36 +191,51 @@ function HistoricalPlaces() {
       ? `${newHistoricPlace.openingHours[0].format("hh:mm a")} - ${newHistoricPlace.openingHours[1].format("hh:mm a")}` 
       : '';
 
-      // images.forEach((file) => {
-      //   historicPlaces.append('images', file);
-      // });
-
       console.log("Hours in normal",newHistoricPlace.openingHours );
       
-      const body = {
-        name: newHistoricPlace.name,
-        description: newHistoricPlace.description,
-        pictures: images.map((file) => URL.createObjectURL(file)),
-        location: {
-          latitude: newHistoricPlace.location.latitude,
-          longitude: newHistoricPlace.location.longitude,
-          address: newHistoricPlace.location.address,
-        },
-        openingHours: formattedOpeningHours ,
-        ticketPrice: {
-          student: newHistoricPlace.studentTicketPrice,
-          native: newHistoricPlace.nativeTicketPrice,
-          foreign: newHistoricPlace.foreignerTicketPrice,
-        },
-        created_by: governorId,
-        tags:newHistoricPlace.tagId
-      };
-        console.log("create Body:",body);
+      const formData = new FormData();
+
+      formData.append('name', newHistoricPlace.name);
+      formData.append('description', newHistoricPlace.description);
+      
+      // Add location fields
+      formData.append('latitude', newHistoricPlace.location.latitude);
+      formData.append('longitude', newHistoricPlace.location.longitude);
+      formData.append('address', newHistoricPlace.location.address);
+      
+      // Add openingHours (formattedOpeningHours is assumed to be a string or JSON string)
+      formData.append('openingHours', JSON.stringify(formattedOpeningHours));
+      
+      // Add ticketPrice fields
+      formData.append('ticketPrice_student', newHistoricPlace.studentTicketPrice);
+      formData.append('ticketPrice_native', newHistoricPlace.nativeTicketPrice);
+      formData.append('ticketPrice_foreign', newHistoricPlace.foreignerTicketPrice);
+      
+      // Add created_by field
+      formData.append('created_by', governorId);
+      
+      // Add tags (assuming it's an array, convert it to JSON string)
+      formData.append('tags', JSON.stringify(newHistoricPlace.tagId));
+
+      formData.append('file', selectedImage);
+      
+        console.log("create Body:",formData);
 
       try {
-        const response = await axios.post(`http://localhost:3030/historical-places`, body);
-        console.log(response);
-        setSuccessMessage(response.data.message||"Edit Successfully!");
+        const response = await axios.post(`http://localhost:3030/historical-places`, formData, 
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data', // Important for file uploads
+            },
+          }
+        );
+        console.log(response.data.historicalPlace);
+        const uploadedImageUrl = response.data.imageUrl;
+        localStorage.setItem(`historical-image-${response.data.historicalPlace.savedPlace._id}`, uploadedImageUrl);
+        console.log(`historical-image-${response.data.historicalPlace.savedPlace._id}`);
+        console.log('Image uploaded successfully:', uploadedImageUrl);
+
+        setSuccessMessage(response.data.historicalPlace.message||"Edit Successfully!");
         setShowSuccessMessage(true);
 
         handleClose();
@@ -403,9 +424,7 @@ const getAllTags=async ()=>{
     }));
   };
   const handleImageChange = (event) => {
-    const files = Array.from(event.target.files);
-    setImages(files);
-    setImagePreviews(files.map((file) => URL.createObjectURL(file)));
+    setSelectedImage(event.target.files[0]); // Save the selected file to state
   };
   const handleTagChange = (event) => {
     const selectedTagId = event.target.value;
@@ -671,7 +690,7 @@ const getAllTags=async ()=>{
          <CardMedia
            component="img"
            height="200"
-           image={place.pictures ? place.pictures[0] : '/default-placeholder.png'}
+           image={place.picture ? place.picture : '/default-placeholder.png'}
            alt={place.name}
          />
          <CardContent>

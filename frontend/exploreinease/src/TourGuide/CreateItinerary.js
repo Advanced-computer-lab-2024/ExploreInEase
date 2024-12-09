@@ -50,6 +50,7 @@ const CreateItinerary = () => {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
   const location = useLocation();
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -76,31 +77,9 @@ const CreateItinerary = () => {
     fetchActivities();
   }, []);
   const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if(file){
-    const formData = new FormData();
-    formData.append('image', file);
-    // try {
-    //   setError(null);
-    //     const response = await axios.post(`http://localhost:3030/uploadImage/${userId}`, formData, {
-    //         headers: {
-    //             'Content-Type': 'multipart/form-data',
-    //         },
-    //     });
-    //     console.log('Image uploaded successfully:', response);
-    //     const uploadedImageUrl = response.data.imageUrl;
-        
-    //     // Update avatarImage and save the URL in localStorage
-    //     setImageUrl(uploadedImageUrl);
-    //     setSuccess('Image uploaded successfully!');
-    // }   
-   }else{
-    console.log('no file uploaded');
-    
-   }
-     
-  
+    setSelectedImage(event.target.files[0]); // Save the selected file to state
   };
+  
   console.log("setImage",Image);
   console.log("imagePreviews",imagePreviews);
 
@@ -181,31 +160,48 @@ const CreateItinerary = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const itineraryData = {
-      name: itineraryName,
-      activities: selectedActivityIds, // Send the activity IDs instead of names
-      locations,
-      durations,
-      language,
-      price,
-      dateTimeAvailable: availableDates,
-      accessibility,
-      pickupLocation,
-      dropoffLocation,
-      timeline,
-      directions,
-      isActivated: activate ? 1 : 0,
-      isSpecial: special ? true : false,
-      created_by: userId,
-      flag: 1,
-    };
+    const formData = new FormData();
+
+    formData.append("name", itineraryName);
+    formData.append("activities", selectedActivityIds); // Array as a single index
+    formData.append("locations", locations); // Array as a single index
+    formData.append("timeline", timeline); // Array as a single index
+    formData.append("directions", directions); // Array as a single index
+    formData.append("language", language);
+    formData.append("price", price);
+    formData.append("dateTimeAvailable", availableDates); // Array as a single index
+    formData.append("accessibility", accessibility);
+    formData.append("pickupLocation", pickupLocation);
+    formData.append("dropoffLocation", dropoffLocation);
+    formData.append("isActivated", activate ? 1 : 0);
+    formData.append("isSpecial", special ? true : false);
+    formData.append("created_by", userId);
+    formData.append("flag", 1);
+    
+    if (selectedImage) {
+      formData.append("file", selectedImage); // File upload
+    }
+    
 
     // Make an API call to create the itinerary
     try{
 
-      const response = await NetworkService.post({ apiPath: '/itinerary', body: itineraryData });
+      const response = await NetworkService.post({
+        apiPath: '/itinerary',
+        body: formData, // Correct key for sending data
+        headers: {
+          'Content-Type': 'multipart/form-data', // Ensures proper encoding for file uploads
+        },
+      });
+      
       console.log(response);
       console.log("weslt henaa");
+
+      const uploadedImageUrl = response.imageUrl;
+      console.log("Image:  ",uploadedImageUrl);
+      localStorage.setItem(`itinerary-image-${response.Itinerary._id}`, uploadedImageUrl);
+      console.log(`itinerary-image-${response.Itinerary._id}`);
+      console.log('Image uploaded successfully:', uploadedImageUrl);
 
       setSuccessMessage(response.message||"save Successfully!");
       console.log("weslt henaa");
@@ -219,7 +215,7 @@ const CreateItinerary = () => {
       setShowErrorMessage(true);
     }
   };
-
+  
   return (
     <div >
       <div>

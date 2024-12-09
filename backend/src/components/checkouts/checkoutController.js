@@ -142,111 +142,6 @@ const reviewProduct = async (req, res) => {
     }
 }
 
-const addOrder = async (req, res) => {
-    const { touristId, productIds, quantities, totalPrice, promoCode } = req.body;
-    console.log("BODY: ",req.body);
-
-    // Ensure all required fields are provided
-    if (!touristId || !productIds || !quantities || productIds.length === 0 || quantities.length === 0) {
-        console.log("touristId",touristId);
-        console.log("productIds",productIds);
-        console.log("quantities",quantities);
-
-        
-        return res.status(400).json({ message: "touristId, productIds, and quantities are required." });
-    }
-
-    // Check if the number of products matches the number of quantities
-    if (productIds.length !== quantities.length) {
-        return res.status(400).json({ message: "Each product must have a corresponding quantity." });
-    }
-
-    // Prepare order data
-    const orderData = {
-        touristId,
-        productIds,
-        quantities,
-        price: totalPrice,
-        status: 'pending', // Default status
-        dateDelivered: null // Initially null, can be updated later
-    };
-
-    const product = await checkoutRepository.getProductById(productIds[0]);
-    if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-    }
-    console.log("PRODUCT: ",product);
-    try {
-        // Call the service function to add the order
-        const newOrder = await checkoutService.addOrder(orderData);
-        const tourist = await userRepository.findTouristById(touristId);
-        if(promoCode){
-            const promo = await checkoutRepository.getPromoCode(promoCode);
-            console.log("PROMO: ",promo);
-            if(promo){
-                if(tourist.promoCodes.includes(promo)){
-                    tourist.wallet = tourist.wallet - (totalPrice * (30 / 100));
-                    tourist.save();
-                }
-                else{
-                    throw new Error("Invalid Promo Code");
-                }
-            }
-        }
-        else{
-            tourist.wallet = tourist.wallet - totalPrice;
-            tourist.save();
-        }
-
-        product.takenQuantity = product.takenQuantity + quantities[0];
-        console.log("Quantity: ",product.takenQuantity);
-        product.save();
-        console.log("SAVED PRODUCT: ",product);
-    
-        if(product.takenQuantity === product.originalQuantity){
-            const publisherId = product.sellerId.toString();
-            const publisher = await userRepository.findSellerById(publisherId);
-            console.log("PUBLISHER: ",publisher);
-    
-    
-            const body = `Product ${product.name} is out of stock`;
-            const notificationData = {
-                body,
-                user: {
-                    user_id: publisher._id,     // Match the schema key
-                    user_type: publisher.type   // Match the schema key
-                }
-            };
-            const notification = await checkoutRepository.addNotification(notificationData);
-            console.log("NOTIFICATION: ",notification);
-    
-    
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: process.env.EMAIL2_USER,
-                    pass: process.env.EMAIL2_PASS
-                }
-            });
-        
-            console.log("Transporter created");
-            
-            const mailOptions = {
-                from: process.env.EMAIL2_USER,
-                to: publisher.email,
-                subject: 'Product out of stock',
-                text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
-            };
-        
-            await transporter.sendMail(mailOptions);
-    
-        }
-        res.status(201).json({ message: "Order added successfully", order: newOrder });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
 const getOrders = async (req, res) => {
     const { userId } = req.params;
     const user = await checkoutRepository.findUserById(userId);
@@ -609,96 +504,6 @@ const cancelOrder = async (req, res) => {
 //Buildo+saif apis
 
 
-const createOrderWalletOrCod = async (req, res) => {
-    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType,promoCode,currency } = req.body;
-
-    if (
-        !touristId ||
-        !Array.isArray(productsIdsQuantity) ||
-        productsIdsQuantity.length === 0 ||
-        price === undefined ||
-        !paymentType
-    ) {
-        return res.status(400).json({
-            success: false,
-            message: 'Tourist ID, products, price, and payment type are required.',
-        });
-    }
-
-    const validPaymentTypes = ['wallet', 'COD'];
-    if (!validPaymentTypes.includes(paymentType)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid payment type. Must be "wallet" or "COD".',
-        });
-    }
-
-    try {
-        const order = await checkoutService.createOrderWalletOrCod({
-            touristId,
-            productsIdsQuantity,
-            price,
-            addressToBeDelivered,
-            paymentType,
-            promoCode,
-            currency
-        });
-        
-        for(let i = 0; i < productsIdsQuantity.length; i++){
-            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
-            console.log("PRODUCT: ",product);           
-            if(product.takenQuantity === product.originalQuantity){
-                const publisherId = product.sellerId.toString();
-                const publisher = await userRepository.findSellerById(publisherId);
-                console.log("PUBLISHER: ",publisher);
-        
-        
-                const body = `Product ${product.name} is out of stock`;
-                const notificationData = {
-                    body,
-                    user: {
-                        user_id: publisher._id,     // Match the schema key
-                        user_type: publisher.type   // Match the schema key
-                    }
-                };
-                const notification = await checkoutRepository.addNotification(notificationData);
-                console.log("NOTIFICATION: ",notification);
-        
-        
-                const transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: {
-                        user: process.env.EMAIL2_USER,
-                        pass: process.env.EMAIL2_PASS
-                    }
-                });
-            
-                console.log("Transporter created");
-                
-                const mailOptions = {
-                    from: process.env.EMAIL2_USER,
-                    to: publisher.email,
-                    subject: 'Product out of stock',
-                    text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
-                };
-            
-                await transporter.sendMail(mailOptions);
-        
-            }
-        }
-
-        return res.status(201).json({
-            success: true,
-            data: order,
-        });
-    } catch (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.message,
-        });
-    }
-};
-
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const nodemailer = require("nodemailer");
@@ -876,10 +681,204 @@ const createOrderWithCard = async (req, res) => {
 
 
 
+const addOrder = async (req, res) => {
+    const { touristId, productIds, quantities, totalPrice, promoCode } = req.body;
+    console.log("BODY: ",req.body);
+
+    // Ensure all required fields are provided
+    if (!touristId || !productIds || !quantities || productIds.length === 0 || quantities.length === 0) {
+        console.log("touristId",touristId);
+        console.log("productIds",productIds);
+        console.log("quantities",quantities);
+
+        
+        return res.status(400).json({ message: "touristId, productIds, and quantities are required." });
+    }
+
+    // Check if the number of products matches the number of quantities
+    if (productIds.length !== quantities.length) {
+        return res.status(400).json({ message: "Each product must have a corresponding quantity." });
+    }
+
+    // Prepare order data
+    const orderData = {
+        touristId,
+        productIds,
+        quantities,
+        price: totalPrice,
+        status: 'pending', // Default status
+        dateDelivered: null // Initially null, can be updated later
+    };
+
+    const product = await checkoutRepository.getProductById(productIds[0]);
+    if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+    }
+    console.log("PRODUCT: ",product);
+    try {
+        // Call the service function to add the order
+        const newOrder = await checkoutService.addOrder(orderData);
+        const tourist = await userRepository.findTouristById(touristId);
+        if(promoCode){
+            const promo = await checkoutRepository.getPromoCode(promoCode);
+            console.log("PROMO: ",promo);
+            if(promo){
+                if(tourist.promoCodes.includes(promo)){
+                    tourist.wallet = tourist.wallet - (totalPrice * (30 / 100));
+                    tourist.save();
+                }
+                else{
+                    throw new Error("Invalid Promo Code");
+                }
+            }
+        }
+        else{
+            tourist.wallet = tourist.wallet - totalPrice;
+            tourist.save();
+        }
+
+        product.takenQuantity = product.takenQuantity + quantities[0];
+        console.log("Quantity: ",product.takenQuantity);
+        product.save();
+        console.log("SAVED PRODUCT: ",product);
+    
+        if(product.takenQuantity === product.originalQuantity){
+            const publisherId = product.sellerId.toString();
+            const publisher = await userRepository.findSellerById(publisherId);
+            console.log("PUBLISHER: ",publisher);
+    
+    
+            const body = `Product ${product.name} is out of stock`;
+            const notificationData = {
+                title: "Product out of stock",
+                body,
+                user: {
+                    user_id: publisher._id,     // Match the schema key
+                    user_type: publisher.type   // Match the schema key
+                }
+            };
+            const notification = await checkoutRepository.addNotification(notificationData);
+            console.log("NOTIFICATION: ",notification);
+    
+    
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL2_USER,
+                    pass: process.env.EMAIL2_PASS
+                }
+            });
+        
+            console.log("Transporter created");
+            
+            const mailOptions = {
+                from: process.env.EMAIL2_USER,
+                to: publisher.email,
+                subject: 'Product out of stock',
+                text: Hello `${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+            };
+        
+            await transporter.sendMail(mailOptions);
+    
+        }
+        res.status(201).json({ message: "Order added successfully", order: newOrder });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 
 
+const createOrderWalletOrCod = async (req, res) => {
+    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType,promoCode,currency } = req.body;
 
+    if (
+        !touristId ||
+        !Array.isArray(productsIdsQuantity) ||
+        productsIdsQuantity.length === 0 ||
+        price === undefined ||
+        !paymentType
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: 'Tourist ID, products, price, and payment type are required.',
+        });
+    }
+
+    const validPaymentTypes = ['wallet', 'COD'];
+    if (!validPaymentTypes.includes(paymentType)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid payment type. Must be "wallet" or "COD".',
+        });
+    }
+
+    try {
+        const order = await checkoutService.createOrderWalletOrCod({
+            touristId,
+            productsIdsQuantity,
+            price,
+            addressToBeDelivered,
+            paymentType,
+            promoCode,
+            currency
+        });
+        
+        for(let i = 0; i < productsIdsQuantity.length; i++){
+            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
+            console.log("PRODUCT: ",product);           
+            if(product.takenQuantity === product.originalQuantity){
+                const publisherId = product.sellerId.toString();
+                const publisher = await userRepository.findSellerById(publisherId);
+                console.log("PUBLISHER: ",publisher);
+        
+        
+                const body = `Product ${product.name} is out of stock`;
+                const notificationData = {
+                    title: "Product out of stock",
+                    body,
+                    user: {
+                        user_id: publisher._id,     // Match the schema key
+                        user_type: publisher.type   // Match the schema key
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+        
+        
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: publisher.email,
+                    subject: 'Product out of stock',
+                    text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions);
+        
+            }
+        }
+
+        return res.status(201).json({
+            success: true,
+            data: order,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
 
 
 
@@ -915,5 +914,12 @@ module.exports = {
     viewMyOrders,
     cancelOrder,
     createOrderWalletOrCod,
-    createOrderWithCard
+    createOrderWithCard,
+    addWishlist,
+    getWishlist,
+    removeWishlist,
+    addCart,
+    getCart,
+    removeCart,
+    editQuantityInCart
 };

@@ -114,9 +114,18 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     console.log("itemList",itemList);
     console.log("initalData",initialData);
     
-    
-    setFilteredData(initialData);
+        
+    const adjustedFilteredData = initialData.map((item) => ({
+      ...item,
+      picture: localStorage.getItem(`itinerary-image-${item.id}`) || null,
+    }));
+    console.log(adjustedFilteredData);
+
+    setFilteredData(adjustedFilteredData);
+
   },[itemList]);
+  console.log(localStorage.getItem(`itinerary-image-${filteredData[6].id}`));
+  console.log("filteredData",filteredData[6]);
 
   useEffect(() => {
     fetchEvents();
@@ -732,7 +741,7 @@ const handleCloseDialog = () => {
        <CardMedia
                         component="img"
                         height="150"
-                        image={item.imageUrl || nodata} // Default placeholder if no image URL is provided
+                        image={item.picture || nodata} // Default placeholder if no image URL is provided
                         alt={item.name}
                         style={{ borderRadius: '8px 8px 0 0' }}
                         />

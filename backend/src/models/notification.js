@@ -3,6 +3,9 @@ const { Schema } = mongoose;
 
 // Define the Notification Schema
 const notificationSchema = new Schema({
+    title: {
+        type: String,
+    },
     body: {
         type: String,
     },

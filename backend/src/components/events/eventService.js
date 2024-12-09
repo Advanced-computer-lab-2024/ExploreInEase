@@ -942,8 +942,6 @@ const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ti
 };
 
 
-
-
 const notifyUpcomingEvents = async (touristId) => {
   const tourist = await userRepository.getTouristById(touristId);
   if (!tourist) {
