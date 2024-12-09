@@ -558,6 +558,7 @@ router.get('/availableQuantityAndSales/:userType/:productId/:currency', checkout
 // Route for viewing delivered orders
 router.get('/myOrders/:touristId/:currency', checkoutController.viewMyOrders);
 
+router.get('/allNotifications/:userId/:type', checkoutController.getAllNotifications);
 
 
 

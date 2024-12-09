@@ -399,9 +399,12 @@ const createOrderWithCard = async ({ touristId, productsIdsQuantity, price, addr
     return order;
 };
 
-
+const getAllNotifications = async (id, type) => {
+    return await checkoutRepository.getAllNotifications(id, type);
+}
 
 module.exports = {
+    getAllNotifications,
     uploadImage,
     archiveProduct,
     calculateSalesAndAvailability,
