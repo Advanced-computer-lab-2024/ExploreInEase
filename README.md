@@ -4,7 +4,9 @@ ExploreInEase
 
 ## Motivation
 
-This section is for letting the reader know why you created this project, the reason behind pursuing such a project, and why you have decided to do it.
+Traveling is an enriching experience, but planning a trip can often feel overwhelming. The inspiration behind ExploreInEase was to simplify and enhance the travel experience for tourists and other stakeholders in the travel industry. Our goal was to create a platform that not only allows tourists to book hotels, flights, transportation, and activities with ease but also provides a comprehensive solution for tour guides, advertisers, sellers, and tourism governors to manage their services effectively.
+
+By offering a user-friendly interface, robust features, and seamless payment options, we aim to bridge the gap between tourists and service providers. Whether you're a tourist looking for the perfect vacation itinerary, a tour guide managing your offerings, or an advertiser showcasing local activities, ExploreInEase is designed to cater to your needs and make every journey a memorable one.
 
 ## Build Status
 
@@ -15,80 +17,6 @@ This basically explains the current build status of the project. If there is a b
 This project uses 2-space indentation for all JavaScript and JSON files. Formatting is enforced with Prettier to maintain consistency and uses the routes-controller-service-repository architecture to ensure separation of concerns
 
 ## Screenshots
-
-Here are some screenshots of the application:
-
-### Add Governor or Admin
-
-![Add Governor or Admin](screenshots/addGovernorOrAdmin.png)
-
-### Add Product
-
-![Add Product](screenshots/AddProduct.png)
-
-### Book Event With Card
-
-![Book Event Card](screenshots/bookEventCard.png)
-
-### Book Event By Wallet
-
-![Book Event Wallet](screenshots/bookEventWallet.png)
-
-### Create Transportation
-
-![Create Transportation](screenshots/createtransportation.png)
-
-### Create Order (Wallet or COD)
-
-![Create Order Wallet or COD](screenshots/createOrderWalletOrCod.png)
-
-### Delete User
-
-![Delete User](screenshots/deleteuser.png)
-
-### Deletion Requests
-
-![Deletion Requests](screenshots/deletionrequestsfortheadmin.png)
-
-### Email Sent for verifying Booking
-
-![Email Sent for Booking](screenshots/emailsentforbooking.png)
-
-### Flight Offers
-
-![Flight Offers](screenshots/flightOffers.png)
-
-### Get All Events Part 1
-
-![Get All Events Part 1](screenshots/getAllEventspart1.png)
-
-### Get All Events Part 2
-
-![Get All Events Part 2](screenshots/getAllEventspart2.png)
-
-### Get All Events Part 3
-
-![Get All Events Part 3](screenshots/getAllEventspart3.png)
-
-### Hotel Offers
-
-![Hotel Offers](screenshots/hotelOffers.png)
-
-### Login Page
-
-![Login Page](screenshots/login.png)
-
-### My Orders
-
-![My Orders](screenshots/myOrders.png)
-
-### Request Deletion
-
-![Request Deletion](screenshots/requestDeletion.png)
-
-### Stripe Payment
-
-![Stripe Payment](screenshots/stripe.png)
 
 ## Tech/Framework Used
 
@@ -144,9 +72,1838 @@ This is where you write what all extra features have been done in your project. 
 4. Add User
 5. Delete an Account
 
-## Code Examples
+### Code Examples
 
-This is where you try to compress your project and make the reader understand what it does as simple as possible. This should help the reader understand if your code solves their issue.
+#### Uploading Image for Products
+
+**checkoutRoutes:**
+
+```javascript
+router.post('/product/uploadImage/:productId/:userId', upload.single('image'), checkoutController.uploadImage);
+```
+
+**checkoutController:**
+
+```javascript
+const uploadImage = async (req, res) => {
+    const { productId, userId } = req.params;
+    const file = req.file;
+
+    if (!productId) {
+        return res.status(400).json({ message: 'Missing productId' });
+    }
+
+    const product = await checkoutRepository.getProductById(productId);
+    if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+    }
+
+    try {
+        if (!file) {
+            return res.status(400).send('No file uploaded.');
+        }
+
+        const result = await checkoutService.uploadImage(productId, file);
+        return res.status(200).send(result);
+
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return res.status(500).send({ error: 'Error uploading image.' });
+    }
+};
+```
+
+**checkoutService:**
+
+```javascript
+const uploadImage = async (productId, file) => {
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+        throw new Error('Only image files are allowed (jpg, jpeg, png).');
+    }
+
+    const fileName = `${productId}-${Date.now()}${fileExtension}`;
+    const fileBuffer = file.buffer;
+
+    await checkoutRepository.uploadImage(productId, fileName, fileBuffer); 
+    const imageUrl = `http://localhost:3030/images/${fileName}`;
+
+    await checkoutRepository.updateProductImage(productId, fileName);
+
+    return { message: 'Image uploaded successfully', imageUrl: imageUrl };
+};
+```
+
+**checkoutRepository:**
+
+```javascript
+const getProductById = async (productId) => {
+    try {
+        const product = await Product.findOne({ _id: productId });
+        return product;
+    } catch (error) {
+        throw new Error(`Error fetching product by ID: ${error.message}`);
+    }
+};
+
+const uploadImage = async (productId, fileName, fileBuffer) => {
+    try {
+        const imagesDir = path.join(__dirname, '../images');
+        
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
+        const filePath = path.join(imagesDir, fileName);
+        await fs.promises.writeFile(filePath, fileBuffer);
+
+        return { message: 'Image uploaded successfully', fileName: fileName };
+    } catch (error) {
+        throw new Error(`Error uploading image: ${error.message}`);
+    }
+};
+
+const updateProductImage = async (productId, fileName) => {
+    try {
+        const product = await Product.findById(productId);
+        if (!product) {
+            throw new Error('Product not found');
+        }
+        product.picture = fileName;
+        await product.save();
+    } catch (error) {
+        throw new Error(`Error updating profile picture: ${error.message}`);
+    }
+};
+```
+
+#### Create Order by Card
+
+**checkoutRoutes:**
+
+```javascript
+router.post('/createOrderCard', checkoutController.createOrderWithCard);
+```
+
+**checkoutController:**
+
+```javascript
+require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const nodemailer = require("nodemailer");
+
+const createOrderWithCard = async (req, res) => {
+    const { 
+        touristId, 
+        productsIdsQuantity, 
+        price, 
+        addressToBeDelivered, 
+        cardNumber, 
+        expMonth, 
+        expYear, 
+        cvc,
+        promoCode,
+        currency 
+    } = req.body;
+
+    if (
+        !touristId || 
+        !Array.isArray(productsIdsQuantity) || 
+        productsIdsQuantity.length === 0 || 
+        !price || 
+        !cardNumber || 
+        !expMonth || 
+        !expYear || 
+        !cvc ||
+        !addressToBeDelivered ||
+        !currency
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: 'Missing required fields.',
+        });
+    }
+
+    let updatedCurrency;
+    let price2 = price;
+    switch (currency) {
+        case 'euro':
+            updatedCurrency = "EUR";
+            price2 = (price * 55).toFixed(2);
+            break;
+        case 'dollar':
+            updatedCurrency = "USD";
+            price2 = (price * 50).toFixed(2);
+            break;
+        case 'EGP':
+            updatedCurrency = "EGP";
+            price2 = price.toFixed(2);
+            break;
+        default:
+            throw new Error('Invalid currency');
+    }
+
+    try {
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tourist not found.',
+            });
+        }
+        if (promoCode) {
+            const validPromo = tourist.promoCodes.includes(promoCode);
+            if (validPromo) {
+                tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+                await tourist.save();
+            } else {
+                throw new Error("Invalid promo code");
+            }
+        }
+        if (promoCode) {
+            price2 *= 0.7;
+        }
+
+        const paymentMethod = await stripe.paymentMethods.create({
+            type: 'card',
+            card: {
+                number: cardNumber,
+                exp_month: expMonth,
+                exp_year: expYear,
+                cvc: cvc,
+            },
+        });
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(price2 * 100),
+            currency: updatedCurrency,
+            payment_method: paymentMethod.id,
+            confirm: true,
+            description: `Payment for order by Tourist with username: ${tourist.username}`,
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: 'never',
+            },
+        });
+
+        const order = await checkoutService.createOrderWithCard({
+            touristId,
+            productsIdsQuantity,
+            price: price2,
+            addressToBeDelivered,
+            paymentType: 'card',
+        });
+
+        for (let i = 0; i < productsIdsQuantity.length; i++) {
+            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
+            if (product.takenQuantity === product.originalQuantity) {
+                const publisherId = product.sellerId.toString();
+                const publisher = await userRepository.findSellerById(publisherId);
+
+                const body = `Product ${product.name} is out of stock`;
+                const notificationData = {
+                    body,
+                    user: {
+                        user_id: publisher._id,
+                        user_type: publisher.type
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: publisher.email,
+                    subject: 'Product out of stock',
+                    text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+
+                await transporter.sendMail(mailOptions);
+            }
+        }
+
+        return res.status(201).json({
+            success: true,
+            data: order,
+            paymentStatus: paymentIntent.status,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: `Stripe Payment Failed: ${error.message}`,
+        });
+    }
+};
+```
+
+**checkoutService:**
+
+```javascript
+const createOrderWithCard = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType }) => {
+    const order = await checkoutRepository.createOrder({
+        touristId,
+        productIds: productsIdsQuantity.map(product => product.id),
+        productsIdsQuantity,
+        price,
+        addressToBeDelivered,
+        paymentType,
+    });
+
+    return order;
+};
+```
+
+**checkoutRepository:**
+
+```javascript
+const createOrder = async (orderData) => {
+    const order = new Order(orderData);
+    return await order.save();
+};
+
+const addNotification = async (notificationData) => {
+    const notification = new Notification(notificationData);
+    const newNotification = await notification.save();
+    return newNotification;
+};
+```
+
+**userRepository:**
+
+```javascript
+const findSellerById = async (id) => {
+    try {
+        const seller = await Users.findById({ _id: id });
+        return seller;
+    } catch (error) {
+        console.error('Error fetching seller by ID:', error);
+        throw error;
+    }
+};
+```
+
+#### Create Order by Wallet or COD
+
+**checkoutRoutes:**
+
+```javascript
+router.post('/createOrderWalletOrCod', checkoutController.createOrderWalletOrCod);
+```
+
+**checkoutController:**
+
+```javascript
+const createOrderWalletOrCod = async (req, res) => {
+    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType, promoCode, currency } = req.body;
+
+    if (
+        !touristId ||
+        !Array.isArray(productsIdsQuantity) ||
+        productsIdsQuantity.length === 0 ||
+        price === undefined ||
+        !paymentType
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: 'Tourist ID, products, price, and payment type are required.',
+        });
+    }
+
+    const validPaymentTypes = ['wallet', 'COD'];
+    if (!validPaymentTypes.includes(paymentType)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid payment type. Must be "wallet" or "COD".',
+        });
+    }
+
+    try {
+        const order = await checkoutService.createOrderWalletOrCod({
+            touristId,
+            productsIdsQuantity,
+            price,
+            addressToBeDelivered,
+            paymentType,
+            promoCode,
+            currency
+        });
+
+        for (let i = 0; i < productsIdsQuantity.length; i++) {
+            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
+            if (product.takenQuantity === product.originalQuantity) {
+                const publisherId = product.sellerId.toString();
+                const publisher = await userRepository.findSellerById(publisherId);
+
+                const body = `Product ${product.name} is out of stock`;
+                const notificationData = {
+                    body,
+                    user: {
+                        user_id: publisher._id,
+                        user_type: publisher.type
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: publisher.email,
+                    subject: 'Product out of stock',
+                    text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+
+                await transporter.sendMail(mailOptions);
+            }
+        }
+
+        return res.status(201).json({
+            success: true,
+            data: order,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+```
+
+**checkoutService:**
+
+```javascript
+const createOrderWalletOrCod = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType, promoCode, currency }) => {
+    if (paymentType === 'wallet') {
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            throw new Error('Tourist not found.');
+        }
+        switch (currency) {
+            case 'euro':
+                price = (price * 55).toFixed(2);
+                break;
+            case 'dollar':
+                price = (price * 50).toFixed(2);
+                break;
+            case 'EGP':
+                price = price.toFixed(2);
+                break;
+            default:
+                throw new Error('Invalid currency');
+        }
+
+        if (promoCode) {
+            const validPromo = tourist.promoCodes.includes(promoCode);
+            if (validPromo) {
+                tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+                await tourist.save();
+            } else {
+                throw new Error("Invalid promo code");
+            }
+        }
+        if (promoCode) {
+            price *= 0.7;
+        }
+
+        if (tourist.wallet < price) {
+            throw new Error('Insufficient wallet balance.');
+        }
+
+        tourist.wallet -= price;
+        await tourist.save();
+    }
+
+    const order = await checkoutRepository.createOrder({
+        touristId,
+        productIds: productsIdsQuantity.map(product => product.id),
+        productsIdsQuantity,
+        price,
+        addressToBeDelivered,
+        paymentType,
+    });
+
+    return order;
+};
+```
+
+#### Getting Tourists Orders
+
+**checkoutRoutes:**
+
+```javascript
+router.get('/myOrders/:touristId/:currency', checkoutController.viewMyOrders);
+```
+
+**checkoutController:**
+
+```javascript
+const viewMyOrders = async (req, res) => {
+    const { touristId, currency } = req.params;
+
+    if (!touristId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Tourist ID is required.',
+        });
+    }
+
+    try {
+        const orders = await checkoutService.getOrdersByStatusAndTouristId(touristId, currency);
+        return res.status(200).json({
+            success: true,
+            data: orders,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+```
+
+**checkoutService:**
+
+```javascript
+const getOrdersByStatusAndTouristId = async (touristId, currency) => {
+    const orders = await checkoutRepository.findOrdersByStatusAndTouristId(touristId, currency);
+    return orders;
+};
+```
+
+**checkoutRepository:**
+
+```javascript
+const findOrdersByStatusAndTouristId = async (touristId, currency) => {
+    const orders = await Order.find({ touristId }).exec();
+    const tourist = await Tourist.findById(touristId).exec();
+    if (!tourist) {
+        throw new Error("Tourist not found");
+    }
+    const customerName = tourist.username;
+
+    const productIds = [
+        ...new Set(
+            orders.flatMap(order => order.productsIdsQuantity.map(product => product.id))
+        )
+    ];
+    const products = await Product.find({ _id: { $in: productIds } }).exec();
+    const productMap = Object.fromEntries(
+        products.map(product => [product._id.toString(), product.name])
+    );
+
+    const convertedOrders = orders.map((order, index) => {
+        let convertedPrice = order.price;
+        switch (currency) {
+            case "euro":
+                convertedPrice = parseFloat((order.price / 55).toFixed(2));
+                break;
+            case "dollar":
+                convertedPrice = parseFloat((order.price / 50).toFixed(2));
+                break;
+            case "EGP":
+                break;
+            default:
+                throw new Error("Invalid currency specified");
+        }
+
+        return {
+            id: index + 1,
+            OrderId: order._id,
+            orderDate: new Date(order.createdAt).toISOString().split("T")[0],
+            status: order.status,
+            products: order.productsIdsQuantity.map((product, idx) => ({
+                id: idx + 1,
+                name: productMap[product.id] || "Unknown Product",
+                quantity: product.quantity,
+                price: convertedPrice,
+            })),
+            customerName,
+            shippingAddress: `${order.addressToBeDelivered.street}, ${order.addressToBeDelivered.city}, ${order.addressToBeDelivered.country}`,
+            paymentType: order.paymentType,
+        };
+    });
+
+    return convertedOrders;
+};
+```
+
+#### Rating Products
+
+**checkoutRoutes:**
+
+```javascript
+router.post('/rateProduct/:touristId', checkoutController.rateProduct);
+```
+
+**checkoutController:**
+
+```javascript
+const rateProduct = async (req, res) => {
+    const { touristId } = req.params;
+    const { productId, rating } = req.body;
+
+    try {
+        const result = await checkoutService.rateProduct(touristId, productId, rating);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+```
+
+**checkoutService:**
+
+```javascript
+const rateProduct = async (touristId, productId, rating) => {
+    try {
+        const purchased = await checkoutRepository.isPurchased(touristId, productId);
+
+        if (!purchased) {
+            throw new Error("You cannot rate this product because you didn't purchase it yet.");
+        }
+
+        const product = await Product.findOne({ _id: productId });
+        if (!product) {
+            throw new Error("Product not found.");
+        }
+
+        if (rating < 1 || rating > 5) {
+            throw new Error("Rating must be between 1 and 5 inclusive.");
+        }
+
+        product.ratingSum += rating;
+        product.ratingCount += 1;
+        product.ratings = product.ratingSum / product.ratingCount;
+
+        await checkoutRepository.updateProductRating(productId, {
+            ratings: product.ratings,
+            ratingSum: product.ratingSum,
+            ratingCount: product.ratingCount
+        });
+
+        return { message: "Rating added successfully", updatedProduct: product };
+    } catch (error) {
+        throw error;
+    }
+};
+```
+
+**checkoutRepository:**
+
+```javascript
+const updateProductRating = async (productId, updatedFields) => {
+    try {
+        const updatedProduct = await Product.findByIdAndUpdate(
+            productId,
+            { $set: updatedFields },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedProduct) {
+            throw new Error("Product not found or could not be updated.");
+        }
+
+        return updatedProduct;
+    } catch (error) {
+        throw error;
+    }
+};
+```
+
+#### Reviewing Products
+
+**checkoutRoutes:**
+
+```javascript
+router.post('/reviewProduct/:touristId', checkoutController.reviewProduct);
+```
+
+**checkoutController:**
+
+```javascript
+const reviewProduct = async (req, res) => {
+    const { touristId } = req.params;
+    const { productId, reviewText } = req.body;
+
+    try {
+        const result = await checkoutService.reviewProduct(touristId, productId, reviewText);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+```
+
+**checkoutService:**
+
+```javascript
+const reviewProduct = async (touristId, productId, reviewText) => {
+    try {
+        const purchased = await checkoutRepository.isPurchased(touristId, productId);
+
+        if (!purchased) {
+            throw new Error("You cannot review this product because you didn't purchase it yet.");
+        }
+
+        const product = await Product.findOne({ _id: productId });
+        if (!product) {
+            throw new Error("Product not found.");
+        }
+
+        const newReview = {
+            userId: touristId,
+            comment: reviewText,
+            createdAt: new Date(),
+        };
+
+        const updatedProduct = await checkoutRepository.updateProductReviews(productId, { $push: { reviews: newReview } });
+
+        return { message: "Review added successfully", updatedProduct };
+    } catch (error) {
+        throw error;
+    }
+};
+```
+
+**checkoutRepository:**
+
+```javascript
+const updateProductReviews = async (productId, updatedFields) => {
+    try {
+        const updatedProduct = await Product.findByIdAndUpdate(
+            productId,
+            updatedFields,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedProduct) {
+            throw new Error("Product not found or could not be updated.");
+        }
+
+        return updatedProduct;
+    } catch (error) {
+        throw error;
+    }
+};
+```
+
+#### Book Event By Card and Sending Confirmation by Mail and Notification on the System
+
+**eventRoutes:**
+
+```javascript
+router.put('/bookEvent', eventController.bookEventWithCard);
+```
+
+**eventController:**
+
+```javascript
+const bookEventWithCard = async (req, res) => {
+    const {
+        userType,
+        touristId,
+        eventType,
+        eventID,
+        ticketType,
+        currency,
+        activityPrice,
+        cardNumber,
+        expMonth,
+        expYear,
+        cvc,
+        promoCode
+    } = req.body;
+
+    try {
+        if (userType !== "tourist") {
+            throw new Error("User type must be tourist");
+        }
+        if (!touristId || !userType || !eventType || !eventID || !cardNumber || !expMonth || !expYear || !cvc) {
+            return res.status(400).json({
+                success: false,
+                message: "All attributes are required in the request body",
+            });
+        }
+
+        const result = await eventService.addEventToTouristWithCard(
+            userType, touristId, eventType, eventID, ticketType, currency, activityPrice, cardNumber, expMonth, expYear, cvc, promoCode
+        );
+
+        const allTourists = await eventRepository.findTourists();
+
+        allTourists.forEach(async tourist => {
+            const isInterested = Array.isArray(tourist.interestedIn) &&
+                tourist.interestedIn.some(interested =>
+                    interested.id.toString() === eventID &&
+                    interested.type === eventType
+                );
+
+            if (isInterested) {
+                const event = await eventRepository.findEventById(eventID, eventType);
+                const eventName = event.name;
+                if (event && !event.isBooked) {
+                    const body = `${eventType} with Name ${eventName} started its first booking`;
+                    const notificationData = {
+                        body,
+                        user: {
+                            user_id: tourist._id,
+                            user_type: "tourist"
+                        }
+                    };
+                    await checkoutRepository.addNotification(notificationData);
+
+                    const transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: process.env.EMAIL2_USER,
+                            pass: process.env.EMAIL2_PASS
+                        }
+                    });
+
+                    const mailOptions = {
+                        from: process.env.EMAIL2_USER,
+                        to: tourist.email,
+                        subject: 'Event Booking',
+                        text: `${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                    };
+
+                    await transporter.sendMail(mailOptions);
+                }
+            }
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Event booked successfully, Payment successful and Email sent",
+            data: result.tourist,
+            paymentStatus: result.paymentStatus,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+```
+
+**eventService:**
+
+```javascript
+const addEventToTouristWithCard = async (userType, touristId, eventType, eventID, ticketType, currency, activityPrice, cardNumber, expMonth, expYear, cvc, promoCode) => {
+    return await eventRepository.bookEventWithCard(touristId, eventType, eventID, ticketType, currency, activityPrice, cardNumber, expMonth, expYear, cvc, promoCode);
+};
+```
+
+**eventRepository:**
+
+```javascript
+const bookEventWithCard = async (touristId, eventType, eventID, ticketType, currency, activityPrice, cardNumber, expMonth, expYear, cvc, promoCode) => {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+        throw new Error("Tourist not found");
+    }
+
+    let eventPrice = 0;
+    let eventName = "";
+
+    if (promoCode) {
+        const validPromo = tourist.promoCodes.includes(promoCode);
+        if (validPromo) {
+            tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+            await tourist.save();
+        } else {
+            throw new Error("Invalid promo code");
+        }
+    }
+
+    switch (eventType) {
+        case "itinerary":
+            const itinerary = await Itinerary.findById(eventID);
+            if (!itinerary) {
+                throw new Error("Itinerary not found");
+            }
+            if (tourist.itineraryId.some((event) => event.id.toString() === eventID)) {
+                throw new Error("This itinerary has already been booked.");
+            }
+            eventPrice = itinerary.price;
+            eventName = itinerary.name;
+
+            if (promoCode) {
+                eventPrice *= 0.7;
+            }
+            break;
+
+        case "activity":
+            if (tourist.activityId.some((event) => event.id.toString() === eventID)) {
+                throw new Error("This activity has already been booked.");
+            }
+            const activity = await Activity.findById(eventID);
+            if (!activity) {
+                throw new Error("Activity not found");
+            }
+            eventName = activity.name;
+
+            switch (currency) {
+                case "euro":
+                    eventPrice = (activityPrice * 55).toFixed(2);
+                    break;
+                case "dollar":
+                    eventPrice = (activityPrice * 50).toFixed(2);
+                    break;
+                case "EGP":
+                    eventPrice = (activityPrice * 1).toFixed(2);
+                    break;
+                default:
+                    throw new Error("Invalid currency");
+            }
+
+            if (promoCode) {
+                eventPrice *= 0.7;
+            }
+            break;
+
+        case "historicalPlace":
+            const historicalPlace = await HistoricalPlace.findById(eventID);
+            if (!historicalPlace) {
+                throw new Error("Historical place not found");
+            }
+            if (tourist.historicalplaceId.some((event) => event.id.toString() === eventID)) {
+                throw new Error("This historical place has already been booked.");
+            }
+            eventPrice = ticketType === "student" ? historicalPlace.ticketPrice.student : ticketType === "native" ? historicalPlace.ticketPrice.native : historicalPlace.ticketPrice.foreign;
+            eventName = historicalPlace.name;
+
+            if (promoCode) {
+                eventPrice *= 0.7;
+            }
+            break;
+
+        default:
+            throw new Error("Invalid event type");
+    }
+
+    try {
+        const paymentMethod = await stripe.paymentMethods.create({
+            type: "card",
+            card: {
+                number: cardNumber,
+                exp_month: expMonth,
+                exp_year: expYear,
+                cvc: cvc,
+            },
+        });
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(eventPrice * 100),
+            currency: "EGP",
+            payment_method: paymentMethod.id,
+            confirm: true,
+            description: `Payment for order by Tourist with username: ${tourist.username}`,
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: "never",
+            },
+        });
+
+        const eventData = { id: eventID, pricePaid: eventPrice };
+        switch (eventType) {
+            case "itinerary":
+                tourist.itineraryId.push(eventData);
+                break;
+            case "activity":
+                tourist.activityId.push(eventData);
+                break;
+            case "historicalPlace":
+                tourist.historicalplaceId.push(eventData);
+                break;
+        }
+
+        await tourist.save();
+
+        const lastFourDigits = paymentMethod.card.last4;
+        await sendPaymentReceiptEmail(tourist.email, tourist.username, eventName, eventPrice, lastFourDigits);
+
+        return {
+            success: true,
+            tourist,
+            paymentStatus: paymentIntent.status,
+        };
+    } catch (error) {
+        throw new Error(`Stripe Payment Failed: ${error.message}`);
+    }
+};
+
+const sendPaymentReceiptEmail = async (touristEmail, username, eventName, pricePaid, lastFourDigits) => {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL2_USER,
+            pass: process.env.EMAIL2_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL2_USER,
+        to: touristEmail,
+        subject: "Payment Receipt for Your Booking",
+        text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid: ${pricePaid} EGP\nPayment Method: Card ending in ****${lastFourDigits}\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+```
+
+**checkoutRepository:**
+
+```javascript
+const addNotification = async (notificationData) => {
+    const notification = new Notification(notificationData);
+    const newNotification = await notification.save();
+    return newNotification;
+};
+```
+
+#### Book Event By Wallet and Sending Confirmation by Mail and Notification on the System
+
+**eventRoutes:**
+
+```javascript
+router.post('/bookEventWithCard', eventController.bookEventWithCard);
+```
+
+**eventController:**
+
+```javascript
+const bookEvent = async (req, res) => {
+    const { userType, touristId, eventType, eventID, ticketType, currency, activityPrice, promoCode } = req.body;
+    try {
+        if (userType !== 'tourist') {
+            throw new Error('User type must be tourist');
+        }
+        if (!touristId || !userType || !eventType || !eventID) {
+            return res.status(400).json({ error: "All attributes are required in the request body" });
+        }
+
+        const updatedTourist = await eventService.addEventToTourist(userType, touristId, eventType, eventID, ticketType, currency, activityPrice, promoCode);
+
+        const allTourists = await eventRepository.findTourists();
+        
+        allTourists.forEach(async tourist => {
+            const isInterested = tourist.interestedIn.some(interested => 
+                    interested.id.toString() === eventID && 
+                    interested.type === eventType
+            );
+        
+            if (isInterested) {
+                    const event = await eventRepository.findEventById(eventID, eventType);
+                    const eventName = event.name;
+                    if (event && !event.isBooked) {
+                            const body = `${eventType} with Name ${eventName} started its first booking`;
+                            const notificationData = {
+                                    body,
+                                    user: {
+                                            user_id: tourist._id,
+                                            user_type: "tourist"
+                                    }
+                            };
+                            await checkoutRepository.addNotification(notificationData);
+                            
+                            const transporter = nodemailer.createTransport({
+                                    service: 'gmail',
+                                    auth: {
+                                            user: process.env.EMAIL2_USER,
+                                            pass: process.env.EMAIL2_PASS
+                                    }
+                            });
+                            
+                            const mailOptions = {
+                                    from: process.env.EMAIL2_USER,
+                                    to: tourist.email,
+                                    subject: 'Event Booking',
+                                    text: `${eventType} with Name ${eventName} started its first booking.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                            };
+                            
+                            await transporter.sendMail(mailOptions); 
+                    }
+            }
+        });
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Event booked successfully',
+            data: updatedTourist,
+        });
+    } catch (error) {
+        if (error.message.includes('already been booked')) {
+            return res.status(409).json({
+                success: false,
+                message: error.message,
+            });
+        }
+
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+```
+
+**eventService:**
+
+```javascript
+const addEventToTouristWithCard = async (userType, touristId, eventType, eventId, ticketType, currency, activityPrice, cardNumber, expMonth, expYear, cvc, promoCode) => {
+    return await eventRepository.bookEventWithCard(
+        touristId,
+        eventType,
+        eventId,
+        ticketType,
+        currency,
+        activityPrice,
+        cardNumber,
+        expMonth,
+        expYear,
+        cvc, promoCode
+    );
+};
+```
+
+**checkoutRepository:**
+
+```javascript
+const addNotification = async (notificationData) => {
+        const notification = new Notification(notificationData);
+        const newNotification = await notification.save();
+        return newNotification;
+};
+```
+
+**eventRepository:**
+
+```javascript
+const bookEvent = async (
+    touristId,
+    eventType,
+    eventId,
+    ticketType,
+    currency,
+    activityPrice,
+    promoCode
+) => {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+        throw new Error("Tourist not found");
+    }
+
+    let eventPrice = 0;
+    let eventName = ""; // Add this for email purposes
+
+    if (promoCode) {
+        const validPromo = tourist.promoCodes.includes(promoCode);
+        if (validPromo) {
+            tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+            await tourist.save();
+        } else {
+            throw new Error("Invalid promo code");
+        }
+    }
+
+    switch (eventType) {
+        case "itinerary":
+            const itinerary = await Itinerary.findById(eventId);
+            if (!itinerary) {
+                throw new Error("Itinerary not found");
+            }
+            if (
+                tourist.itineraryId.some((event) => event.id.toString() === eventId)
+            ) {
+                throw new Error("This itinerary has already been booked.");
+            }
+            eventPrice = itinerary.price;
+            eventName = itinerary.name; // For email
+
+            if (promoCode) {
+                eventPrice *= 0.7; // Apply 30% discount
+            }
+            break;
+
+        case "activity":
+            if (tourist.activityId.some((event) => event.id.toString() === eventId)) {
+                throw new Error("This activity has already been booked.");
+            }
+            const activity = await Activity.findById(eventId);
+            if (!activity) {
+                throw new Error("Activity not found");
+            }
+            eventName = activity.name; // For email
+
+            switch (currency) {
+                case "euro":
+                    eventPrice = (activityPrice * 55).toFixed(2);
+                    break;
+                case "dollar":
+                    eventPrice = (activityPrice * 50).toFixed(2);
+                    break;
+                case "EGP":
+                    eventPrice = (activityPrice * 1).toFixed(2);
+                    break;
+                default:
+                    throw new Error("Invalid currency");
+            }
+
+            if (promoCode) {
+                eventPrice *= 0.7; // Apply 30% discount
+            }
+            break;
+
+        case "historicalPlace":
+            const historicalPlace = await HistoricalPlace.findById(eventId);
+            if (!historicalPlace) {
+                throw new Error("Historical place not found");
+            }
+            if (
+                tourist.historicalplaceId.some(
+                    (event) => event.id.toString() === eventId
+                )
+            ) {
+                throw new Error("This historical place has already been booked.");
+            }
+            eventPrice =
+                ticketType === "student"
+                    ? historicalPlace.ticketPrice.student
+                    : ticketType === "native"
+                    ? historicalPlace.ticketPrice.native
+                    : historicalPlace.ticketPrice.foreign;
+            eventName = historicalPlace.name; // For email
+
+            if (promoCode) {
+                eventPrice *= 0.7; // Apply 30% discount
+            }
+            break;
+
+        default:
+            throw new Error("Invalid event type");
+    }
+
+    if (tourist.wallet < eventPrice) {
+        throw new Error("Insufficient funds to book this event");
+    }
+
+    tourist.wallet -= eventPrice;
+
+    const eventData = { id: eventId, pricePaid: eventPrice };
+    switch (eventType) {
+        case "itinerary":
+            tourist.itineraryId.push(eventData);
+            break;
+        case "activity":
+            tourist.activityId.push(eventData);
+            break;
+        case "historicalPlace":
+            tourist.historicalplaceId.push(eventData);
+            break;
+    }
+
+    await tourist.save();
+
+    // Send a booking confirmation email
+    await sendBookingConfirmationEmail(
+        tourist.email,
+        tourist.username,
+        eventName,
+        eventPrice
+    );
+
+    return tourist;
+};
+
+const sendBookingConfirmationEmail = async (
+    touristEmail,
+    username,
+    eventName,
+    pricePaid
+) => {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "aclproject7@gmail.com",
+            pass: "qodo imkr adxs jred", // Store securely in environment variables
+        },
+    });
+
+    const mailOptions = {
+        from: "aclproject7@gmail.com",
+        to: touristEmail,
+        subject: "Booking Confirmation for Your Event",
+        text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid by wallet: ${pricePaid} EGP\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+```
+
+#### Changing the User's Password
+
+**userRoutes:**
+
+```javascript
+router.put('/changePassword/:userId', userController.changePassword);
+```
+
+**userController:**
+
+```javascript
+const changePassword = async (req, res) => {
+        const { userId } = req.params;
+        const { oldPassword, newPassword } = req.body;
+
+        if (!userId) {
+                return res.status(400).json({ message: "Missing userId" });
+        }
+        if (!oldPassword || !newPassword) {
+                return res.status(400).json({ message: "Missing Input" });
+        }
+
+        try {
+                const result = await userService.changePassword(userId, oldPassword, newPassword);
+                res.status(result.status).json(result.response);
+        } catch (error) {
+                res.status(500).json({ message: error.message });
+        }
+};
+```
+
+**userService:**
+
+```javascript
+const changePassword = async (userId, oldPassword, newPassword) => {
+        const user = await userRepository.findUserById(userId);
+        const tourist = await userRepository.findTouristById(userId);
+
+        if (user) {
+                if(user.password !== oldPassword) {
+                        return { status: 400, response: { message: "Incorrect password" } };
+                }
+                const newUser = await userRepository.updateUserPassword(user, newPassword);
+                return { status: 200, response: { message: "Password updated successfully", user: newUser } };
+        } else if (tourist) {
+                if(tourist.password !== oldPassword) {
+                        return { status: 400, response: { message: "Incorrect password" } };
+                }
+                const newUser = await userRepository.updateUserPassword(tourist, newPassword);
+                return { status: 200, response: { message: "Password updated successfully", user: tourist } };
+        } else {
+                return { status: 400, response: { message: "User not found" } };
+        }
+};
+```
+
+**userRepository:**
+
+```javascript
+const updateUserPassword = async (user, password) => {
+        try {
+                user.password = password;
+                const updatedUser = await user.save();
+                return updatedUser;
+        } catch (error) {
+                throw new Error(`Error updating user password: ${error.message}`);
+        }
+};
+```
+
+#### Users Registering
+
+**userRoutes:**
+
+```javascript
+router.post('/register/:type', userController.registerUser);
+```
+
+**userController:**
+
+```javascript
+const registerUser = async (req, res) => {
+    const { type } = req.params;
+    const { email, username, password, mobileNum, nation, dob, profession, currency } = req.body;
+    if (!type) {
+        return res.status(400).json({ message: "User type is required" });
+    }
+    if (!checkUsername(username)) {
+        return res.status(400).json({ message: "Username can only contain letters and numbers" });
+    }
+
+    const usernameExists = await userRepository.checkUserExists(username);
+    if (usernameExists) {
+        return res.status(409).json({ message: "Username already exists" });
+    }
+
+    if (type == 'tourist') {
+        if (!email || !username || !password || !mobileNum || !nation || !dob || !profession || !currency) {
+            return res.status(400).json({ message: "Missing Input" });
+        }
+        try {
+            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob, profession, currency);
+            res.status(result.status).json(result.response);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    } else {
+        if (type == 'tourGuide' || type == 'advertiser' || type == 'seller') {
+            if (!email || !username || !password || !currency) {
+                return res.status(400).json({ message: "Missing Input" });
+            }
+            try {
+                const result = await userService.registerUser(type, email, username, password, currency);
+                res.status(result.status).json(result.response);
+            } catch (error) {
+                res.status(500).json({ message: error.message });
+            }
+        } else {
+            res.status(400).json({ message: "Invalid usertype" });
+        }
+    }
+};
+```
+
+**userService:**
+
+```javascript
+const registerTourist = async (email, username, password, mobileNum, nation, dob, profession, currency) => {
+    const touristExists = await userRepository.checkTouristExists(username);
+    if (touristExists) {
+        return { status: 409, response: { message: "Tourist already exists" } };
+    }
+
+    const newTourist = {
+        email: email,
+        username: username,
+        password: password,
+        mobileNum: mobileNum,
+        nation: nation,
+        dob: dob,
+        profession: profession,
+        wallet: 1000000,
+        currency
+    };
+    const tourist = await userRepository.saveTourist(newTourist);
+    return { status: tourist.status, response: { message: "Tourist registered successfully", tourist: tourist.tourist, type: 'tourist' } };
+};
+
+const registerUser = async (type, email, username, password, currency) => {
+    try {
+        const existingUser = await userRepository.findUserByUsername(username);
+        if (existingUser) {
+            return { status: 400, response: { message: "User already exists" } };
+        }
+
+        const userData = {
+            email,
+            username,
+            password: password,
+            type,
+            docStatus: 'pending',
+            currency
+        };
+
+        const savedUser = await userRepository.saveUser(userData);
+        return { status: 200, response: { message: "User registered successfully", User: savedUser } };
+    } catch (error) {
+        return { status: 500, response: { message: error.message } };
+    }
+};
+```
+
+**userRepository:**
+
+```javascript
+const checkUserExists = async (username) => {
+    try {
+        const existsUser = await Users.findOne({ username });
+        const existsTourist = await Tourist.findOne({ username });
+        if (existsUser || existsTourist) {
+            return true;
+        }
+    } catch (error) {
+        console.error(`Error checking if user exists: ${error.message}`);
+        return false;
+    }
+};
+
+const saveUser = async (userData) => {
+    const newUser = new Users(userData);
+    const savedUser = await newUser.save();
+    return savedUser;
+};
+
+const saveTourist = async (tourist) => {
+    try {
+        const newTourist = new Tourist(tourist);
+        const savedTourist = await newTourist.save();
+        return { status: 201, tourist: savedTourist };
+    } catch (error) {
+        throw new Error(`Error saving tourist: ${error.message}`);
+    }
+};
+```
+
+#### Adding Delivery Addresses for Tourist
+
+**userRoutes:**
+
+```javascript
+router.post('/addAddresses/:userId/:address', userController.addAddresses);
+```
+
+**userController:**
+
+```javascript
+const addAddresses = async (req, res) => {
+    const { userId, address } = req.params;
+
+    if (!userId || !address) {
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.addAddresses(userId, address);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+```
+
+**userService:**
+
+```javascript
+const addAddresses = async (userId, address) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const updatedUser = await userRepository.addAddresses(user, address);
+    return updatedUser;
+};
+```
+
+**userRepository:**
+
+```javascript
+const addAddresses = async (user, address) => {
+    try {
+        user.addresses.push(address);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding address: ${error.message}`);
+    }
+};
+```
+
+#### Getting Delivery Addresses of Tourist
+
+**userRoutes:**
+
+```javascript
+router.get('/getAddresses/:userId', userController.getAddresses);
+```
+
+**userController:**
+
+```javascript
+const getAddresses = async (req, res) => {
+    const { userId } = req.params;
+    if (!userId) {
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.getAddresses(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+```
+
+**userService:**
+
+```javascript
+const getAddresses = async (userId) => {
+    const user = await userRepository.findTouristById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const addresses = await userRepository.getAddresses(user);
+    return addresses;
+};
+```
+
+**userRepository:**
+
+```javascript
+const getAddresses = async (user) => {
+    try {
+        return user.addresses;
+    } catch (error) {
+        throw new Error(`Error fetching user addresses: ${error.message}`);
+    }
+};
+```
+
+#### Admin Viewing Complaints
+
+**complaintRoutes:**
+
+```javascript
+router.get("/ViewComplaints", complaintController.AdminViewComplain);
+```
+
+**complaintController:**
+
+```javascript
+const AdminViewComplain = async (req, res) => {
+    try {
+        const { adminId } = req.query;
+        if (!adminId) {
+            return res.status(400).json({
+                success: false,
+                message: "Admin id needed",
+            });
+        }
+
+        const complaints = await complaintService.ViewComplain(adminId);
+
+        if (complaints.length === 0) {
+            return res.status(404).json({ message: "No complaints found." });
+        }
+        return res.status(201).json({
+            success: true,
+            total: complaints.length,
+            complaints,
+        });
+    } catch (error) {
+        console.error(`Controller Error: ${error.message}`);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while fetching the complaint.",
+            details: error.message,
+        });
+    }
+};
+```
+
+**complaintService:**
+
+```javascript
+const ViewComplain = async (adminId) => {
+    const admin = await User.findById(adminId);
+    if (!admin || admin.type !== "admin") {
+        throw new Error("Access denied. Admins only.");
+    }
+
+    try {
+        const complaints = await complaintRepository.getAllComplaints();
+
+        return complaints.map((complaint) => ({
+            _id: complaint._id,
+            title: complaint.title,
+            touristId: complaint.touristId ? complaint.touristId._id : null,
+            touristName: complaint.touristId ? complaint.touristId.username : "Unknown",
+            touristEmail: complaint.touristId ? complaint.touristId.email : "Unknown",
+            problem: complaint.problem,
+            dateOfComplaint: complaint.dateOfComplaint,
+            status: complaint.status,
+            reply: complaint.reply,
+        }));
+    } catch (error) {
+        console.error("Error in ViewComplain:", error);
+        throw new Error("Failed to retrieve complaints.");
+    }
+};
+```
+
+**complaintRepository:**
+
+```javascript
+const getAllComplaints = async () => {
+    try {
+        const complaints = await Complaint.find()
+            .populate("touristId", "username email")
+            .sort({ dateOfComplaint: -1 });
+
+        return complaints;
+    } catch (error) {
+        console.error("Error fetching complaints:", error);
+        throw new Error("Could not retrieve complaints");
+    }
+};
+```
+
+#### Tourist Viewing His Complaints
+
+**complaintRoutes:**
+
+```javascript
+router.get("/myComplaints/:touristId", complaintController.getMyComplaints);
+```
+
+**complaintController:**
+
+```javascript
+const getMyComplaints = async (req, res) => {
+    try {
+        const { touristId } = req.params;
+        if (!touristId) {
+            return res.status(400).json({
+                success: false,
+                message: "tourist Id and problem description is required.",
+            });
+        }
+
+        const complaints = await complaintService.getTouristComplaints(touristId);
+
+        if (complaints.length === 0) {
+            return res.status(200).json({
+                success: true,
+                data: complaints.length,
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: complaints,
+        });
+    } catch (error) {
+        console.error(`Controller Error: ${error.message}`);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while fetching the complaints.",
+            details: error.message,
+        });
+    }
+};
+```
+
+**complaintService:**
+
+```javascript
+const getTouristComplaints = async (touristId) => {
+    const touristExists = await Tourist.findById(touristId);
+    if (!touristExists) {
+        throw new Error("Invalid Tourist Id: No such tourist found.");
+    }
+    const complaints = await complaintRepository.findComplaintsByTourist(touristId);
+    if (!complaints) {
+        return [];
+    }
+    return complaints.map((complaint) => ({
+        _id: complaint._id,
+        title: complaint.title,
+        problem: complaint.problem,
+        dateOfComplaint: complaint.dateOfComplaint,
+        status: complaint.status,
+        reply: complaint.reply,
+    }));
+};
+```
+
+**complaintRepository:**
+
+```javascript
+const findComplaintsByTourist = async (touristId) => {
+    const complaints = await Complaint.find({ touristId }).populate(
+        "touristId",
+        "username email"
+    );
+    return complaints;
+};
+```
+
+#### Deleting Complaints by Admin
+
+**complaintRoutes:**
+
+```javascript
+router.delete("/deleteAllComplaints", complaintController.deleteAllComplaints);
+```
+
+**complaintController:**
+
+```javascript
+const deleteAllComplaints = async (req, res) => {
+    try {
+        const { adminId } = req.query;
+        if (!adminId) {
+            return res.status(400).json({
+                success: false,
+                message: "Admin ID is required",
+            });
+        }
+
+        const result = await complaintService.deleteAllComplaints(adminId);
+
+        res.status(200).json({
+            success: true,
+            message: result.message,
+        });
+    } catch (error) {
+        console.error(`Controller Error: ${error.message}`);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while deleting complaints.",
+            details: error.message,
+        });
+    }
+};
+```
+
+**complaintService:**
+
+```javascript
+const deleteAllComplaints = async (adminId) => {
+    const admin = await User.findById(adminId);
+    if (!admin || admin.type !== "admin") {
+        throw new Error("Access denied. Admins only.");
+    }
+
+    await complaintRepository.deleteAllComplaints();
+    return { message: "All complaints have been deleted." };
+};
+```
+
+**complaintRepository:**
+
+```javascript
+const deleteAllComplaints = async () => {
+    try {
+        await Complaint.deleteMany();
+    } catch (error) {
+        console.error("Repository Error deleting complaints:", error);
+        throw new Error("Could not delete complaints");
+    }
+};
+```
 
 ## Installation
 
@@ -255,11 +2012,125 @@ If your project is small, then we can add the reference docs in the readme. For 
 
 ## Tests
 
-This is the section where you mention all the different tests that can be performed with code examples.
+Here are some tests of the application apis from postman:
+
+### Add Governor or Admin
+
+![Add Governor or Admin](screenshots/addGovernorOrAdmin.png)
+
+### Add Product
+
+![Add Product](screenshots/AddProduct.png)
+
+### Book Event With Card
+
+![Book Event Card](screenshots/bookEventCard.png)
+
+### Book Event By Wallet
+
+![Book Event Wallet](screenshots/bookEventWallet.png)
+
+### Create Transportation
+
+![Create Transportation](screenshots/createtransportation.png)
+
+### Create Order (Wallet or COD)
+
+![Create Order Wallet or COD](screenshots/createOrderWalletOrCod.png)
+
+### Delete User
+
+![Delete User](screenshots/deleteuser.png)
+
+### Deletion Requests
+
+![Deletion Requests](screenshots/deletionrequestsfortheadmin.png)
+
+### Email Sent for verifying Booking
+
+![Email Sent for Booking](screenshots/emailsentforbooking.png)
+
+### Flight Offers
+
+![Flight Offers](screenshots/flightOffers.png)
+
+### Get All Events Part 1
+
+![Get All Events Part 1](screenshots/getAllEventspart1.png)
+
+### Get All Events Part 2
+
+![Get All Events Part 2](screenshots/getAllEventspart2.png)
+
+### Get All Events Part 3
+
+![Get All Events Part 3](screenshots/getAllEventspart3.png)
+
+### Hotel Offers
+
+![Hotel Offers](screenshots/hotelOffers.png)
+
+### Login Page
+
+![Login Page](screenshots/login.png)
+
+### My Orders
+
+![My Orders](screenshots/myOrders.png)
+
+### Request Deletion
+
+![Request Deletion](screenshots/requestDeletion.png)
+
+### Stripe Payment
+
+![Stripe Payment](screenshots/stripe.png)
 
 ## How to Use?
 
-As I have mentioned before, you never know who is going to read your readme. So it is better to provide information on how to use your project. A step-by-step guide is best suited for this purpose. It is better to explain the steps as detailed as possible because it might be a beginner who is reading it.
+ExploreInEase is designed to provide a seamless travel planning experience for users of all roles, including tourists, tour guides, advertisers, sellers, and tourism governors. Here's a step-by-step guide on how to use the website:
+
+### For Tourists
+
+1. **Sign Up/Login**: Create an account or log in to your existing account.
+2. **Browse Services**: Explore various travel services such as hotels, flights, events, and transportation from the homepage.
+3. **Book Services**: Select a service, provide necessary details, and confirm your booking.
+    - *Example*: Book a flight, choose your destination, select dates, and confirm your payment method (wallet, Visa, or COD).
+4. **Manage Bookings**: View your order history and track your bookings from the "My Orders" section.
+5. **Submit Complaints**: If you face any issues, use the complaint submission feature to report them.
+
+### For Tour Guides
+
+1. **Itinerary Management**: Log in as a tour guide and create, update, or delete itineraries for tourists.
+2. **View Reports**: Check the number of tourists and sales reports to manage your services effectively.
+
+### For Advertisers
+
+1. **Manage Activities & Transportation**: Add, update, or delete activities and transportation options.
+2. **View Reports**: Access reports to understand tourist engagement and sales.
+
+### For Sellers
+
+1. **Product Management**: Add new products or archive/unarchive existing ones.
+2. **View Sales Data**: Monitor your sales reports to optimize inventory and pricing.
+
+### For Tourism Governors
+
+1. **Manage Historical Places**: Add or update historical places and location tags to promote tourism.
+2. **View Reports**: Analyze the performance of tourism spots in your region.
+
+### For Admins
+
+1. **Manage Categories and Preferences**: Create or update activity categories and preference tags to keep the website updated.
+2. **User Management**: Add new users or delete inactive accounts.
+
+### General Notes
+
+- All users can access their respective dashboards to view and manage their activities.
+- Ensure that your profile information is up to date for a smooth experience.
+- Use the provided payment options for a secure transaction process.
+
+By following these steps, you can utilize all the features offered by ExploreInEase and make the most of your travel or business opportunities.
 
 ## Contribute
 
