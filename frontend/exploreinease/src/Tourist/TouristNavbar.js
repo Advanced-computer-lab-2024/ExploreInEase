@@ -51,15 +51,16 @@ const TouristNavbar = () => {
      const [menuItems,setMenuItem]=useState( []);
 
 
-//      useEffect(()=>{
-//   checkPromoCode();
-// },[]);
-// const checkPromoCode=async()=>{
-//   const options = {
-//     apiPath: '/updatePromoCode',
-//   };
-//   await NetworkService.put(options);
-// }
+     useEffect(()=>{
+  checkPromoCode();
+},[]);
+const checkPromoCode=async()=>{
+  const options = {
+    apiPath: '/updatePromoCode',
+  };
+  const response = await NetworkService.put(options);
+  console.log(response);
+}
 useEffect(() => {
          // Update the avatar URL when the component mounts if a new image URL exists
          if (savedAvatarUrl || imageUrl) {

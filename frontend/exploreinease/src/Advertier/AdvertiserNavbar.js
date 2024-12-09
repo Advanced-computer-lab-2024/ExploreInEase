@@ -84,14 +84,14 @@ const HomePage = () => {
       }, []);
 
       // useEffect(()=>{
-        //   checkPromoCode();
-        // },[]);
-        // const checkPromoCode=async()=>{
-        //   const options = {
-        //     apiPath: '/updatePromoCode',
-        //   };
-        //   await NetworkService.put(options);
-        // }
+      //     checkPromoCode();
+      //   },[]);
+      //   const checkPromoCode=async()=>{
+      //     const options = {
+      //       apiPath: '/updatePromoCode',
+      //     };
+      //     await NetworkService.put(options);
+      //   }
     const handleOpenMenu = (event) => {
         setAnchorProfileEl(event.currentTarget);
       };

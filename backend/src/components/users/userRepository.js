@@ -9,6 +9,8 @@ const PromoCode = require('../../models/promoCode');
 const Notification = require('../../models/notification');
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 const updateUserStatus = async (userId, status) => {
     try {

@@ -8,6 +8,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const Products = require('../../models/product');
 const Order = require('../../models/order');
+const mongoose = require('mongoose');
 
 
 const getUserById = async (id) => {

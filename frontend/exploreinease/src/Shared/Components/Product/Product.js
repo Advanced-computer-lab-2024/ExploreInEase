@@ -507,7 +507,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
 
     <div>
       <div>
-        {User.type==='seller' ?(
+        {userType==='seller' ?(
             <HomePage/>
         ):(
           <TouristNavbar/>
@@ -620,7 +620,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
             image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
             alt={product.name}
           />
-          {User.type==='Seller' &&(
+          {userType==='Seller' &&(
                 <Box
                 sx={{
                   position: 'absolute',

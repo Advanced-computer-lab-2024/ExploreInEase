@@ -2,6 +2,8 @@ const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const Order = require('../../models/order');
+const Tourist = require('../../models/tourist');
+const mongoose = require('mongoose');
 
 
 // Controller to handle request for users with requestDeletion set to true
@@ -765,6 +767,7 @@ const creatingPromoCode = async (req, res) => {
 
 const updatePromoCode = async (req, res) => {
     try {
+        console.log("update");
         // Fetch all tourists
         const tourists = await Tourist.find();
 
@@ -777,7 +780,7 @@ const updatePromoCode = async (req, res) => {
         const birthdayTourists = await Promise.all(tourists.map(async (tourist) => {
             const birthDate = new Date(tourist.dob);
             const isBirthdayToday = birthDate.getMonth() + 1 === todayMonth && birthDate.getDate() === todayDay;
-
+            console.log("Birthday: ", isBirthdayToday); // Log the result for debugging
             // If it's their birthday, set the flag to true, otherwise false
             if (isBirthdayToday && !tourist.promoCodeFlag) {
                 // Update the tourist's flag and save
@@ -801,7 +804,7 @@ const updatePromoCode = async (req, res) => {
         console.log("Birthday Tourists: ", birthdayTouristIds); // Log the IDs for debugging
 
         if (birthdayTouristIds.length === 0) {
-            return res.status(404).json({
+            return res.status(200).json({
                 message: "No tourists with birthdays today or all have already received a promo code",
             });
         }
