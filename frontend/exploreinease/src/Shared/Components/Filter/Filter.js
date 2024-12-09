@@ -37,16 +37,16 @@ const roleFields = {
   Activities: ['budget', 'date', 'category', 'rating'],
   Itineraries: ['budget', 'date', 'preferences', 'language'],
 };
-const Filter = ({eventsG=[],typeeG=''}) => {
+const Filter = ({ eventsG = [], typeeG = '' }) => {
   const Userr = JSON.parse(localStorage.getItem('User'));
-  let typeTourist= localStorage.getItem('userType')|| '';
+  let typeTourist = localStorage.getItem('userType') || '';
   localStorage.removeItem('userType');
   const location = useLocation();
-  const{userType:userTypee}=location.state||'';
+  const { userType: userTypee } = location.state || '';
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState(null);
-  const { events,userId=null,typee} = location.state || {};  
-  const [itemList,setItemList] = useState(events?.flat() ||eventsG?.flat()|| []); // Flatten the array and ensure it's initialized
+  const { events, userId = null, typee } = location.state || {};
+  const [itemList, setItemList] = useState(events?.flat() || eventsG?.flat() || []); // Flatten the array and ensure it's initialized
   const [filters, setFilters] = useState({
     budget: '',
     price: '',
@@ -75,8 +75,14 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const [success,setSuccess]=useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [ setErrorMessage] = useState('');
+  const [ErrorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [payment, setPayment] = useState('');
+  const [cardNumber, setcardNumber] = useState('');
+  const [expYear, setexpYear] = useState('');
+  const [expMonth, setexpMonth] = useState('');
+  const [cvc, setcvc] = useState('');
+  const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
     if (showSuccessMessage) {
@@ -124,8 +130,6 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     setFilteredData(adjustedFilteredData);
 
   },[itemList]);
-  console.log(localStorage.getItem(`itinerary-image-${filteredData[6].id}`));
-  console.log("filteredData",filteredData[6]);
 
   useEffect(() => {
     fetchEvents();
@@ -155,6 +159,26 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   const handleShareDialogClose = () => {
     setShareDialogOpen(false);
   };
+
+  const handlePayment = (event) => {
+
+    const value = event.target.value; // Get the selected value
+    console.log(value);
+    setPayment(value); // Update the state
+  };
+
+  const handlePromoCode = (event) => {
+    setPromoCode(event.target.value);
+  };
+  const handlecardNumber = (event) => {
+    setcardNumber(event.target.value);
+  }; const handleexpYear = (event) => {
+    setexpYear(event.target.value);
+  }; const handleexpMonth = (event) => {
+    setexpMonth(event.target.value);
+  }; const handlecvc = (event) => {
+    setcvc(event.target.value);
+  }
 
   const fetchAddressFromAPI = async (latitude, longitude) => {
     try {
@@ -429,122 +453,311 @@ const Filter = ({eventsG=[],typeeG=''}) => {
     console.log(selectedItem);
     console.log("type:",type);
 
-    if (selectedItem.type === 'Activity'){
-      try {
-        const options = { apiPath: `/bookEvent`,
-        body:{
-          userType:'tourist',
-           touristId:userId,
-           eventType:'activity',
-           eventID:selectedItem.id,
-           ticketType:'',
-           currency:currency,
-           activityPrice:budget
-        }
-        };
-        const response = await NetworkService.put(options);
+    if (selectedItem.type === 'Activity') {
+      if (payment == 'wallet') {
+        try {
+          const options = {
+            apiPath: `/bookEvent`,
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'activity',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: budget
+            }
+          };
+          const response = await NetworkService.put(options);
           console.log(response);
           setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
           setSuccess(true);
-          setSuccessMessage(response.data.message||"Save Successfully!");
+          setSuccessMessage(response.data.message || "Save Successfully!");
           setShowSuccessMessage(true);
-          
-      } catch (error) {
-        setErrorMessage(error.response?.data?.message || 'An error occurred');
-        setShowErrorMessage(true);
-        console.log('Error fetching historical places:', error);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
+      } else {
+        try {
+          const options = {
+            apiPath: "/bookEventWithCard",
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'activity',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: budget,
+              paymentType: 'card',
+              cardNumber: cardNumber,
+              expMonth: expMonth,
+              expYear: expYear,
+              cvc: cvc
+            }
+          };
+          const response = await NetworkService.post(options);
+          console.log(response);
+          setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+          setSuccess(true);
+          setSuccessMessage(response.data.message || "Save Successfully!");
+          setShowSuccessMessage(true);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
       }
     }
-    else if (selectedItem.type === 'Itinerary'){
-      try {
-        const options = { apiPath: `/bookEvent`,
-        body:{
-          userType:'tourist',
-           touristId:userId,
-           eventType:'itinerary',
-           eventID:selectedItem.id,
-           ticketType:'',
-           currency:'',
-           activityPrice:selectedItem.price
-        }
-        };
-        const response = await NetworkService.put(options);
-        console.log(response);
-        setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
-          setSuccess(true);
 
-      } catch (error) {
-        console.log('Error fetching historical places:', error);
+    else if (selectedItem.type === 'Itinerary') {
+      console.log(selectedItem);
+      if (payment == 'Wallet') {
+        try {
+          const options = {
+            apiPath: `/bookEvent`,
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'itinerary',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: ''
+            }
+          };
+          const response = await NetworkService.put(options);
+          console.log(response);
+          setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+          setSuccess(true);
+          setSuccessMessage(response.data.message || "Save Successfully!");
+          setShowSuccessMessage(true);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
+      } else {
+        try {
+          const options = {
+            apiPath: `/bookEventWithCard`,
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'itinerary',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: '',
+              paymentType: 'card',
+              cardNumber: cardNumber,
+              expMonth: expMonth,
+              expYear: expYear,
+              cvc: cvc
+            }
+          };
+          const response = await NetworkService.post(options);
+          console.log(response);
+          setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+          setSuccess(true);
+          setSuccessMessage(response.data.message || "Save Successfully!");
+          setShowSuccessMessage(true);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
       }
     }
     else {
-      if (type === 'student'){
-        try {
-          const options = { apiPath: `/bookEvent`,
-          body:{
-            userType:'tourist',
-             touristId:userId,
-             eventType:'historicalPlace',
-             eventID:selectedItem.id,
-             ticketType:type,
-             currency:'',
-             activityPrice:selectedItem.ticketPrice[0]
-          }
-          };
-          const response = await NetworkService.put(options);
+      if (type === 'student') {
+        if (payment == 'Wallet') {
+          try {
+            const options = {
+              apiPath: `/bookEvent`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0]
+              }
+            };
+            const response = await NetworkService.put(options);
             console.log(response);
-            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
             setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
 
-        } catch (error) {
-          console.log('Error fetching historical places:', error);
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
+        } else {
+          try {
+            const options = {
+              apiPath: `/bookEventWithCard`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0],
+                paymentType: 'card',
+                cardNumber: cardNumber,
+                expMonth: expMonth,
+                expYear: expYear,
+                cvc: cvc
+
+              }
+            };
+            const response = await NetworkService.post(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+            setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
+
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
         }
       }
-      else if (type ==='native'){
-        try {
-          const options = { apiPath: `/bookEvent`,
-          body:{
-            userType:'tourist',
-             touristId:userId,
-             eventType:'historicalPlace',
-             eventID:selectedItem.id,
-             ticketType:type,
-             currency:'',
-             activityPrice:selectedItem.ticketPrice[1]
-          }
-          };
-          const response = await NetworkService.put(options);
+      else if (type === 'native') {
+        if (payment == 'Wallet') {
+          try {
+            const options = {
+              apiPath: `/bookEvent`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0]
+              }
+            };
+            const response = await NetworkService.put(options);
             console.log(response);
-            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
             setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
 
-        } catch (error) {
-          console.log('Error fetching historical places:', error);
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
+        } else {
+          try {
+            const options = {
+              apiPath: `/bookEventWithCard`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0],
+                paymentType: 'card',
+                cardNumber: cardNumber,
+                expMonth: expMonth,
+                expYear: expYear,
+                cvc: cvc
+              }
+            };
+            const response = await NetworkService.post(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+            setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
+
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
         }
       }
-      else{
-        try {
-          const options = { apiPath: `/bookEvent`,
-          body:{
-            userType:'tourist',
-             touristId:userId,
-             eventType:'historicalPlace',
-             eventID:selectedItem.id,
-             ticketType:type,
-             currency:'',
-             activityPrice:selectedItem.ticketPrice[2]
-          }
-          };
-          const response = await NetworkService.put(options);
+      else {
+        if (payment == 'Wallet') {
+          try {
+            const options = {
+              apiPath: `/bookEvent`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0]
+              }
+            };
+            const response = await NetworkService.put(options);
             console.log(response);
-            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
             setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
 
-        } catch (error) {
-          console.log('Error fetching historical places:', error);
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
+        } else {
+          try {
+            const options = {
+              apiPath: `/bookEventWithCard`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0],
+                paymentType: 'card',
+                cardNumber: cardNumber,
+                expMonth: expMonth,
+                expYear: expYear,
+                cvc: cvc
+              }
+            };
+            const response = await NetworkService.post(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+            setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
+
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
         }
       }
-     
+
     }
     handleClose();
   }
@@ -892,97 +1105,378 @@ const handleCloseDialog = () => {
         <>
           {selectedItem.type === 'Activity' && (
             <>
-              <Typography>Budget for Activity: {selectedItem.budget}</Typography>
-              <div style={{ display: 'flex', alignItems: 'center',  }}>
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your currency:</span>
-                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
-                   <InputLabel id="demo-simple-select-label">currency</InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          value={currency}
-                          label="currency"
-                          onChange={handleChangeCurrency}
+<Typography>Budget for Activity: {selectedItem.budget}</Typography>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your payment type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">payment</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={payment}
+                            label="payment"
+                            onChange={handlePayment}
+                            required
+                          >
+                            <MenuItem value={'Wallet'}>Wallet</MenuItem>
+                            <MenuItem value={'Card'}>Card</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your currency:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">currency</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={currency}
+                            label="currency"
+                            onChange={handleChangeCurrency}
+                            required
+                          >
+                            <MenuItem value={'EGP'}>EGP</MenuItem>
+                            <MenuItem value={'euro'}>euro</MenuItem>
+                            <MenuItem value={'dollar'}>USD</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Write your Budget for the Activity:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="budget"
+                          type="number"
+                          variant="standard"
+                          style={{ width: '150px' }}
                           required
-                        >
-                          <MenuItem value={'EGP'}>EGP</MenuItem>
-                          <MenuItem value={'euro'}>euro</MenuItem>
-                          <MenuItem value={'dollar'}>USD</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </div>
-              <div  style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-                  
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Write your Budget for the Activity:</span>
-                     <TextField id="standard-basic" label="budget" type="number" variant="standard" style={{ width: '150px' }}
-                       required value={budget} onChange={handleBudgetChange}  />  
-                    </div>
-            </>
-          )}
-          {selectedItem.type === 'Itinerary' && (
-            <>
-              <Typography>Activities: {selectedItem.activities.join(', ')}</Typography>
-              {/* Add more Itinerary-specific fields here */}
-            </>
-          )}
-          {selectedItem.type === 'HistoricalPlace' && (
-            <>
-                     <div style={{ display: 'flex', alignItems: 'center',  }}>
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
-                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
-                   <InputLabel id="demo-simple-select-label">Type</InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          value={type}
-                          label="Type"
-                          onChange={handleChange}
+                          value={budget}
+                          onChange={handleBudgetChange}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>PromoCode:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="PromoCode"
+                          type="string"
+                          variant="standard"
+                          style={{ width: '150px' }}
                           required
-                        >
-                          <MenuItem value={'native'}>Native</MenuItem>
-                          <MenuItem value={'student'}>Student</MenuItem>
-                          <MenuItem value={'foreigner'}>Foreigner</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </div>
+                          value={promoCode}
+                          onChange={handlePromoCode}
+                        />
+                      </div>
 
-                            </>
-                          )}
-                        </>
+                      {payment === 'Card' && (
+                        <div style={{ marginTop: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Card Number:</span>
+                            <TextField
+                              id="card-number"
+                              label="Card Number"
+                              variant="standard"
+                              style={{ width: '200px' }}
+                              required
+                              value={cardNumber}
+                              onChange={handlecardNumber}
+                              inputProps={{ maxLength: 16 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>CVV:</span>
+                            <TextField
+                              id="cvv"
+                              label="CVV"
+                              variant="standard"
+                              type="password"
+                              style={{ width: '100px' }}
+                              required
+                              value={cvc}
+                              onChange={handlecvc}
+                              inputProps={{ maxLength: 3 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Expiration Date:</span>
+                            <TextField
+                              id="expiry-month"
+                              label="MM"
+                              variant="standard"
+                              style={{ width: '60px', marginRight: '8px' }}
+                              required
+                              value={expMonth}
+                              onChange={handleexpMonth}
+                              inputProps={{ maxLength: 2 }}
+                            />
+                            <span style={{ marginRight: '8px' }}>/</span>
+                            <TextField
+                              id="expiry-year"
+                              label="YY"
+                              variant="standard"
+                              style={{ width: '60px' }}
+                              required
+                              value={expYear}
+                              onChange={handleexpYear}
+                              inputProps={{ maxLength: 4 }}
+                            />
+                          </div>
+                        </div>
                       )}
-                    <div>
-                    <strong>Important Note:</strong>
-                    <p>*Please note that you must bring a Student ID/Passport/National ID to the location*</p>
-                    </div>
+                    </>
+                  )}
+                  {selectedItem.type === 'Itinerary' && (
+                    <>
+                      <Typography>Activities: {selectedItem.activities.join(', ')}</Typography>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your payment type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">payment</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={payment}
+                            label="payment"
+                            onChange={handlePayment}
+                            required
+                          >
+                            <MenuItem value={'Wallet'}>Wallet</MenuItem>
+                            <MenuItem value={'Card'}>Card</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your currency:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">currency</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={currency}
+                            label="currency"
+                            onChange={handleChangeCurrency}
+                            required
+                          >
+                            <MenuItem value={'EGP'}>EGP</MenuItem>
+                            <MenuItem value={'euro'}>euro</MenuItem>
+                            <MenuItem value={'dollar'}>USD</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
 
-                </DialogContent>
-                <DialogActions>
-                <Button onClick={()=>handleSaveBook(selectedItem,budget,type,currency)} autoFocus>
-                    Book
-                  </Button>
-                  <Button onClick={handleClose}>Close</Button>
-                </DialogActions>
-              </Dialog>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>PromoCode:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="PromoCode"
+                          type="string"
+                          variant="standard"
+                          style={{ width: '150px' }}
+                          required
+                          value={promoCode}
+                          onChange={handlePromoCode}
+                        />
+                      </div>
 
+                      {payment === 'Card' && (
+                        <div style={{ marginTop: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Card Number:</span>
+                            <TextField
+                              id="card-number"
+                              label="Card Number"
+                              variant="standard"
+                              style={{ width: '200px' }}
+                              required
+                              inputProps={{ maxLength: 16 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>CVV:</span>
+                            <TextField
+                              id="cvv"
+                              label="CVV"
+                              variant="standard"
+                              type="password"
+                              style={{ width: '100px' }}
+                              required
+                              inputProps={{ maxLength: 3 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Expiration Date:</span>
+                            <TextField
+                              id="expiry-month"
+                              label="MM"
+                              variant="standard"
+                              style={{ width: '60px', marginRight: '8px' }}
+                              required
+                              inputProps={{ maxLength: 2 }}
+                            />
+                            <span style={{ marginRight: '8px' }}>/</span>
+                            <TextField
+                              id="expiry-year"
+                              label="YY"
+                              variant="standard"
+                              style={{ width: '60px' }}
+                              required
+                              inputProps={{ maxLength: 4 }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {selectedItem.type === 'HistoricalPlace' && (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your Type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={type}
+                            label="Type"
+                            onChange={handleChange}
+                            required
+                          >
+                            <MenuItem value={'native'}>Native</MenuItem>
+                            <MenuItem value={'student'}>Student</MenuItem>
+                            <MenuItem value={'foreigner'}>Foreigner</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your payment type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">payment</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={payment}
+                            label="payment"
+                            onChange={handlePayment}
+                            required
+                          >
+                            <MenuItem value={'Wallet'}>Wallet</MenuItem>
+                            <MenuItem value={'Card'}>Card</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your currency:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">currency</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={currency}
+                            label="currency"
+                            onChange={handleChangeCurrency}
+                            required
+                          >
+                            <MenuItem value={'EGP'}>EGP</MenuItem>
+                            <MenuItem value={'euro'}>euro</MenuItem>
+                            <MenuItem value={'dollar'}>USD</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>PromoCode:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="PromoCode"
+                          type="string"
+                          variant="standard"
+                          style={{ width: '150px' }}
+                          required
+                          value={promoCode}
+                          onChange={handlePromoCode}
+                        />
+                      </div>
+
+                      {payment === 'Card' && (
+                        <div style={{ marginTop: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Card Number:</span>
+                            <TextField
+                              id="card-number"
+                              label="Card Number"
+                              variant="standard"
+                              style={{ width: '200px' }}
+                              required
+                              inputProps={{ maxLength: 16 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>CVV:</span>
+                            <TextField
+                              id="cvv"
+                              label="CVV"
+                              variant="standard"
+                              type="password"
+                              style={{ width: '100px' }}
+                              required
+                              inputProps={{ maxLength: 3 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Expiration Date:</span>
+                            <TextField
+                              id="expiry-month"
+                              label="MM"
+                              variant="standard"
+                              style={{ width: '60px', marginRight: '8px' }}
+                              required
+                              inputProps={{ maxLength: 2 }}
+                            />
+                            <span style={{ marginRight: '8px' }}>/</span>
+                            <TextField
+                              id="expiry-year"
+                              label="YY"
+                              variant="standard"
+                              style={{ width: '60px' }}
+                              required
+                              inputProps={{ maxLength: 4 }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+              <div>
+                <strong>Important Note:</strong>
+                <p>Please note that you must bring a Student ID/Passport/National ID to the location</p>
               </div>
-{showSuccessMessage && (
-        <Alert severity="success" 
-        sx={{
-          position: 'fixed',
-          top: 80, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-            </div>
-            </div>
-          );
-        };
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => handleSaveBook(selectedItem, budget, type, currency)} autoFocus>
+                Book
+              </Button>
+              <Button onClick={handleClose}>Close</Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+        {showSuccessMessage && (
+          <Alert severity="success"
+            sx={{
+              position: 'fixed',
+              top: 80, // You can adjust this value to provide space between success and error alerts
+              right: 20,
+              width: 'auto',
+              fontSize: '1.2rem', // Adjust the size
+              padding: '16px',
+              zIndex: 9999, // Ensure it's visible above other content
+            }}>
+            {successMessage}
+          </Alert>
+        )}
+      </div>
+    </div>
+  );
+};
 export default Filter;
-
-

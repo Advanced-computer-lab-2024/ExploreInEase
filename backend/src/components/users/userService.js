@@ -6,6 +6,8 @@ const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const Products = require('../../models/product');
+const Order = require('../../models/order');
 
 
 const getUserById = async (id) => {
@@ -943,6 +945,7 @@ const sortedNotifications = notifications.sort((a, b) => {
             productRevenueByMonth
         };
     };
+    
     const fetchUserStatistics = async () => {
         try {
           return await userRepository.getUserStatistics();

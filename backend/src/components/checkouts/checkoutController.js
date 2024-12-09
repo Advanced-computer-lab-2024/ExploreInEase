@@ -473,7 +473,6 @@ const viewMyOrders = async (req, res) => {
 
 
 
-
 // Controller to cancel an order
 const cancelOrder = async (req, res) => {
     const { orderId, touristId } = req.body;
@@ -888,6 +887,16 @@ const createOrderWalletOrCod = async (req, res) => {
 
 
 
+const getAllNotifications = async (req, res) => {
+    try {
+        const {userId, type} = req.params;
+
+        const notifications = await checkoutService.getAllNotifications(userId, type);
+        res.status(200).json(notifications);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 
 
@@ -896,6 +905,7 @@ const createOrderWalletOrCod = async (req, res) => {
 
 
 module.exports = {
+    getAllNotifications,
     uploadImage,
     availableQuantityAndSales,
     archiveProduct,

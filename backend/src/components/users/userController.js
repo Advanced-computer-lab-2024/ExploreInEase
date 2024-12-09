@@ -1,7 +1,7 @@
 const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
-
+const Order = require('../../models/order');
 
 
 // Controller to handle request for users with requestDeletion set to true
@@ -1011,7 +1011,19 @@ const getUserStatistics = async (req, res) => {
   };
 
 
+  const getPromoCodes = async (req, res) => {
+    try{
+        const promoCodes = await userRepository.fetchAllPromoCodes();
+        return res.status(200).json({message: "Promo codes fetched successfully", promoCodes
+        });
+        }catch(error){
+            return res.status(500).json({ error: 'An error occurred while logging in the user'});
+        }
+    }
+
+
 module.exports = {
+    getPromoCodes,
     getAllNotifications,
     getUserStatistics,
     addInterestedIn,
@@ -1060,5 +1072,6 @@ module.exports = {
   getUsersForDeletion,
   getNotAcceptedUsers,
   updatingStatusUser,
-  userReport
+  userReport,
+
 };

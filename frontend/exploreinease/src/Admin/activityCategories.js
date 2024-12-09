@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from "react-router-dom";
 import Box from '@mui/material/Box';
 import axios from 'axios'; // Ensure Axios is imported
@@ -12,21 +12,16 @@ import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import CircularProgress from "@mui/material/CircularProgress";
-import Tooltip from "@mui/material/Tooltip";
-import AddIcon from "@mui/icons-material/Add";
 import DialogTitle from '@mui/material/DialogTitle';
 import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import NetworkService from '../NetworkService';
-import './preferenceTags.css';
 
 function ActivityCategory() {
   const adminIdd=localStorage.getItem('UserId');
   const location = useLocation();
-  const [loading, setLoading] = useState(false); // Loading state
   const [categoryData, setCategoryData] = React.useState([]);
   const allcategories = location.state?.allcategories || categoryData;
   const { adminId } = location.state || adminIdd;  
@@ -55,9 +50,7 @@ function ActivityCategory() {
   };
 
   const getAllCategory = async () => {
-
     try {
-      setLoading(true);
       const apiPath = `http://localhost:3030/getAllCategories/admin`;  // Ensure this matches your API route
       const response = await axios.get(apiPath);
       console.log("response aho",response);
@@ -70,7 +63,6 @@ function ActivityCategory() {
           id: category._id,
           name: category.categoryName
         }));
-        setLoading(false);
         setCategory(categories.map(item => item.name));
         // console.log(categories);
       } else {
@@ -167,46 +159,28 @@ function ActivityCategory() {
   };
 
   return (
-<Box>
-  {loading ? (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-      }}
-    >
-      <CircularProgress color="error" size={100} />
-    </Box>
-  ) : (
-    <Box className="tags-background">
+    <div>
+      <Button variant="contained" onClick={handleClickOpen} sx={{ marginLeft: 2, marginTop: 2, height: 50, width: 300 }}>
+        Create Activity Category
+      </Button>
+      
       <Box
         sx={{
-          bgcolor: "white",
-          border: "1px solid #ccc",
-          marginTop: 4,
-          mx: "auto",
+          minWidth: 400,
+          bgcolor: 'white',
+          border: '1px solid #ccc',
+          marginTop: 4, 
+          marginRight: 8,
+          marginLeft: 8,
           borderRadius: 1,
-          p: 3,
-          maxWidth: 800,
-          height: "100%", // Take full available height
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
+          padding: 2
         }}
       >
-        {/* Dialog */}
-        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
-            {editingCategoryIndex !== null
-              ? "Edit Activity Category"
-              : "Create Activity Category"}
-          </DialogTitle>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{editingCategoryIndex !== null ? 'Edit Activity Category' : 'Create Activity Category'}</DialogTitle>
           <DialogContent>
             <TextField
               required
-              fullWidth
               margin="normal"
               id="name"
               name="name"
@@ -218,119 +192,53 @@ function ActivityCategory() {
             />
           </DialogContent>
           <DialogActions>
-            <Button
-              sx={{ gap: 2 }}
-              type="submit"
-              variant="contained"
-              onClick={handleSaveCategory}
-              color="primary"
-            >
-              {editingCategoryIndex !== null ? "Update" : "Add"}
+            <Button sx={{ gap: 2 }} type="submit" variant='outlined' onClick={handleSaveCategory}>
+              {editingCategoryIndex !== null ? 'Update' : 'Add'}
             </Button>
-            <Button variant="outlined" onClick={handleClose}>
-              Cancel
-            </Button>
+            <Button variant='outlined' onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Dialog>
 
-        {/* List */}
-        <nav aria-label="main tags folders">
+        <nav aria-label="main categories folders">
           <List
-            sx={{
-              width: "100%",
-              bgcolor: "background.paper",
-            }}
+            sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
             subheader={
               <ListSubheader
                 sx={{
-                  fontWeight: "bold",
-                  fontSize: "1.5rem",
-                  color: "red",
-                  textAlign: "center",
+                  fontWeight: 'bold',
+                  fontSize: '1.25rem',
+                  color: 'red'
                 }}
               >
-                Activity Categories
+               Activity Category
               </ListSubheader>
             }
           >
-            {category.length === 0 ? (
-              <Box
-                sx={{
-                  textAlign: "center",
-                  p: 4,
-                  fontStyle: "italic",
-                  color: "gray",
-                }}
-              >
-                No categories found. Please add one.
-              </Box>
-            ) : (
-              category.map((category, index) => (
-                <React.Fragment key={index}>
-                  <ListItem
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <ListItemButton>
-                      <ListItemText primary={category} />
-                    </ListItemButton>
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      <Tooltip title="Edit" arrow>
-                        <IconButton
-                          edge="end"
-                          aria-label="edit"
-                          onClick={() => handleEditCategory(index)}
-                          sx={{ color: "green" }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete" arrow>
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => handleDeleteCategory(category)}
-                          sx={{ color: "red" }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </ListItem>
-                  {index < category.length - 1 && <Divider />}
-                </React.Fragment>
-              ))
-            )}
+            {category.map((category, index) => (
+              <React.Fragment key={index}>
+                <ListItem
+                  sx={{ marginLeft: 6, display: 'flex', justifyContent: 'space-between' }}
+                >
+                  <ListItemButton>
+                    <ListItemText primary={category} />
+                  </ListItemButton>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton edge="end" aria-label="edit" onClick={() => handleEditCategory(index)} sx={{ color: 'green' }}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteCategory(category)} sx={{ color: 'red' }}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </ListItem>
+                {index < category.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
           </List>
-          <Tooltip title="Create Activity Category" arrow>
-            <IconButton
-              onClick={handleClickOpen}
-              sx={{
-                width: 50,
-                height: 50,
-                display: "block",
-                margin: "16px auto 0",
-                bgcolor: "primary.main",
-                color: "white",
-                "&:hover": {
-                  bgcolor: "primary.dark",
-                },
-              }}
-            >
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
         </nav>
       </Box>
-    </Box>
-  )}
-</Box>
-
-
-      );
+    </div>
+  );
 }
 
  export default ActivityCategory;
