@@ -361,7 +361,7 @@ const handleClickNotification = async(event) => {
                                 margin:'3px'
                             }}>
                           <Tooltip title="Notification">
-                            <Badge badgeContent={4} color="success">
+                          <Badge badgeContent={value} color="success">
                                 <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
                             </Badge>
                           </Tooltip>

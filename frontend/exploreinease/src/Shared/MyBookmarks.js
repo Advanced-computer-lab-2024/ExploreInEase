@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Typography, Card, CardContent, CardMedia, Button, Grid } from '@mui/material';
 import NetworkService from '../NetworkService';
 import TourGuideHP from '../TourGuide/TourGuideNavbar';
+import TouristNavbar from '../Tourist/TouristNavbar';
+
 const MyBookmarks = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -76,7 +78,7 @@ const MyBookmarks = () => {
   };
 
   return (
-    <><TourGuideHP/>
+    <><TouristNavbar/>
     <div style={{ padding: '20px' }}>
       <Typography variant="h4" gutterBottom>
         Bookmarked Events

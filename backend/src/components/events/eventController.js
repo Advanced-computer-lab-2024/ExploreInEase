@@ -3,6 +3,7 @@ const eventService = require('../events/eventService');
 const { validationResult } = require('express-validator');
 const eventRepository = require('../events/eventRepository');
 const checkoutRepository = require('../checkouts/checkoutRepository');
+const userRepository = require('../users/userRepository');
 const checkoutService = require('../checkouts/checkoutService');
 const nodemailer = require('nodemailer');
 
@@ -32,7 +33,8 @@ const updateEventFlagController = async (req, res) => {
       if (!updatedEvent) {
           return res.status(404).json({ message: 'Event not found.' });
       }
-      const publisher = await eventRepository.getPublisher(updatedEvent.created_by);
+      console.log("Updated Event: ",updatedEvent.created_by);
+      const publisher = await userRepository.findUserById(updatedEvent.created_by);
 
 
       const body =` ${eventType} with ID ${eventID} has been flagged Inappropriate.`;

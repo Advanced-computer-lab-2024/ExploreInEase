@@ -28,6 +28,7 @@ const SHomePage = () => {
   const [anchorProfileEl, setAnchorProfileEl] = useState(null);
   
   const navigate = useNavigate();
+  const [value,setValue]=useState(null);
   const [menuItems,setMenuItem] = useState([]);
   const [ setSuccess] = useState();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -66,6 +67,18 @@ const SHomePage = () => {
       setSelectedTab(savedTab); // Restore the selected tab
     }
   }, []);
+  const handleClickNotification = async(event) => {
+    setAnchorEl1(event.currentTarget);
+    const options = { 
+      apiPath: `/getAllNotifications/${Userr._id}`
+     };
+    const response =await NetworkService.get(options);
+
+    setMenuItem(response);
+    console.log(response);
+    console.log(response.length);
+    setValue(response.length);
+  };
   useEffect(() => {
     // Update the avatar URL when the component mounts if a new image URL exists
     if (savedAvatarUrl || imageUrl) {
@@ -132,16 +145,6 @@ const SHomePage = () => {
         // setError(err.response ? err.response.data.error : 'Failed to upload image. Please try again.');
       }
     }
-  };
-  const handleClickNotification = async(event) => {
-    setAnchorEl1(event.currentTarget);
-    const options = { 
-      apiPath: `/getAllNotifications/${Userr._id}`
-     };
-    const response =await NetworkService.get(options);
-    setMenuItem(response);
-    console.log(response);
-    console.log(menuItems);
   };
   async function handleClick(title) {
     if (title === "Profile") {
@@ -347,9 +350,9 @@ const SHomePage = () => {
                                 margin:'3px'
                             }}
                         >
-                            <Badge badgeContent={4} color="success">
+<Badge badgeContent={value} color="success">
                                 <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
-                            </Badge>
+                            </Badge>
                         </IconButton>
                         <Menu
                             id="basic-menu"

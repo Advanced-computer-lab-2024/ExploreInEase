@@ -30,6 +30,7 @@ const ProductCard = () => {
   const Userr=localStorage.getItem('User');
    const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
+   console.log("User Type", userType);
   const location = useLocation();
   const { User } = location.state || Userr||{};
   const userId = User ? User._id : adminIdd;
@@ -278,12 +279,13 @@ const handleClickPurchase = async (product, selectedQuantity) => {
     try {
       // Replace with your API endpoint
       const options = {
-        apiPath: '/archiveProduct/{userId}/{productId}',
+        apiPath: `/archiveProduct/${userId}/${productId}`,
         urlParam: {
           userId: userId,
           productId: productId,
         },
       }
+      console.log('options:', options);
       const response = await NetworkService.put(options);
       console.log(response);
       setSuccessMessage("Successfully!");
@@ -506,12 +508,16 @@ const handleClickPurchase = async (product, selectedQuantity) => {
   return (
 
     <div>
-      <div>
-        {userType==='seller' ?(
+<div>
+        {userType==='seller' &&(
             <HomePage/>
-        ):(
-          <TouristNavbar/>
         )}
+
+        {userType==='tourist'&&(
+          <TouristNavbar/>
+        )
+      }
+        
       </div>
     
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
@@ -620,7 +626,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
             image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
             alt={product.name}
           />
-          {userType==='Seller' &&(
+          {userType==='seller' || userType==='admin' &&(
                 <Box
                 sx={{
                   position: 'absolute',
