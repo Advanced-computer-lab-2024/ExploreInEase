@@ -5,6 +5,7 @@ const HistoricalPlace = require('../../models/historicalPlace');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 
 const getUserById = async (id) => {
