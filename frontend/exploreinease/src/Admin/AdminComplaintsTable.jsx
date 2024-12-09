@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper';
 import { Menu, MenuItem } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { Tooltip, IconButton } from '@mui/material';
-import { TextField, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { TextField, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@mui/material';
 
 import dayjs from 'dayjs';
 import SortIcon from '@mui/icons-material/Sort';
@@ -174,11 +174,29 @@ const ComplaintsTable = () => {
     setOptionsAnchorEl(null);
     setSelectedComplaintId(null);
   };
+
+  const handleAction = (id, action) => {
+    console.log(`Action: ${action} on Complaint ID: ${selectedComplaintId}`);
+    handleOptionsClose();
+  };
+
+
+
   const handleViewComplaint = (complaint) => {
     setComplaintDetails(complaint);
     setOpen(true);
     handleOptionsClose();
   };
+
+
+  const handleReply = (complaint) => {
+    setComplaintDetails(complaint);
+    setReplyOpen(true);
+    setOpen(false);
+    handleOptionsClose();
+  };
+
+
   const handleCloseDialog = () => {
     setOpen(false);
     setComplaintDetails({});

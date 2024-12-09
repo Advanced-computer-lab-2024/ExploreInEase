@@ -1,22 +1,40 @@
 import {
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Button,
+  Rating,
+  Card,
+  CardContent,
+  Typography,
   Grid,
   Box,
   Tabs,
   Tab,
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
+import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+
 import ActivityCard from './Cards/ActivityCard';
 import HistoricalPlaceCard from './Cards/HistoricalPlacesCard';
 import ItineraryCard from './Cards/ItenraryCard';
 import CircularProgress from '@mui/material/CircularProgress';
 // Sample data with 'type' field added
+
+
+
 const EventsAndItineraries = () => {
 
   const [activities, setActivities] = useState([]);
   const [itineraries, setItineraries] = useState([]);
   const [historicalPlaces, setHistoricalPlaces] = useState([]);
+
   const [currentTab , setCurrentTab] = useState('activities');
+
   const [loaded,setLoaded] = useState(false);
 
 

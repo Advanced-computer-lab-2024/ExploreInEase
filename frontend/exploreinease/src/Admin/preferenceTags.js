@@ -5,9 +5,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import axios from 'axios'; // Ensure Axios is imported
 import Button from '@mui/material/Button';
-import Tooltip from "@mui/material/Tooltip";
-import AddIcon from "@mui/icons-material/Add";
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -18,20 +17,17 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import NetworkService from '../NetworkService';
-import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 import { useLocation } from 'react-router-dom';
-import ListItemIcon from "@mui/material/ListItemIcon";
-import TagIcon from "@mui/icons-material/Tag";
-import './preferenceTags.css';
+
 function Preferencetags() {
     const adminIdd=localStorage.getItem('UserId');
   const [tags, setTags] = React.useState([]);
-  const [loading, setLoading] = useState(false); // Loading state
   const [prefenceTagg, setPreferenceTagg] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [newTag, setNewTag] = React.useState('');
   const [prevTag, setPrevTag] = React.useState('');
-  const [ setSuccess] = useState('');
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
   const [editingTagIndex, setEditingTagIndex] = React.useState(null);
   const location = useLocation();
  const {adminId}=location.state || adminIdd;
@@ -46,10 +42,8 @@ function Preferencetags() {
 
 
  const getAllPreferenceTags =async() => {
-  setLoading(true);
   const options = { apiPath: `/getAllPreferenceTags/${adminId}`, urlParam: adminId };
   const response = await NetworkService.get(options);
-  setLoading(false);
   setSuccess(response.message);
   console.log(response);
   const PreferenceTaggg = response.tags;
@@ -110,7 +104,7 @@ console.log("preference",PreferenceTag);
                   tags: newTag
                 }
               }
-               await NetworkService.post(options);
+              const response = await NetworkService.post(options);
               // Add new tag
               setTags((prevTags) => [...prevTags, newTag]);
               setCheckPreferenceTag(true);
@@ -150,108 +144,27 @@ console.log("preference",PreferenceTag);
   };
 
   return (
-
-  
-    <Box >
-    {loading ? (
+    <div>
+      {/* Button outside of the box */}
+      <Button variant="contained" onClick={handleClickOpen} sx={{ marginLeft: 2, marginTop: 2, height: 50, width: 300 }}>
+        Create Preference Tag
+      </Button>
+      
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh", // Adjust as needed
+          minWidth: 100,
+          bgcolor: 'white',
+          border: '1px solid #ccc', // Add border
+          marginRight: 8,
+          marginLeft: 8,
+          marginTop: 4, // Add top margin
+          borderRadius: 1, // Slight border radius for aesthetics
+          padding: 2 // Add padding inside the box
         }}
       >
-        <CircularProgress color="error" size={100} />
-      </Box>
-    ) : (
-      <>
-        <Box className="tags-background">
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              bgcolor: "background.paper",
-              borderRadius: "50px",
-              padding: 2,
-              boxShadow: 3,
-              maxWidth: 400,
-              margin: "0 auto",
-              position: "relative",
-            }}
-          >
-            <nav aria-label="main tags folders">
-              <List
-                sx={{
-                  width: "100%",
-                  maxWidth: 360,
-                  maxHeight: 700,
-                  overflowY: "auto", // Ensures vertical scrolling
-                  bgcolor: "background.paper",
-                }}
-                subheader={
-                  <ListSubheader
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "1.25rem",
-                      color: "red",
-                      textAlign: "center",
-                    }}
-                  >
-                    Preference Tags
-                  </ListSubheader>
-                }
-              >
-                {tags.map((tag, index) => (
-                  <React.Fragment key={index}>
-                    <ListItem sx={{ display: "flex", alignItems: "center" }}>
-                      <ListItemButton>
-                        <ListItemIcon>
-                          <TagIcon sx={{ color: "primary.main" }} />
-                        </ListItemIcon>
-                        <ListItemText primary={tag} />
-                      </ListItemButton>
-                      <Box sx={{ display: "flex" }}> {/* Add a gap between the icons */}
-                        <IconButton edge="end" aria-label="edit" onClick={() => handleEditTag(index)} sx={{ color: "green" }}>
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteTag(index)} sx={{ color: "red" }}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    </ListItem>
-                    {index < tags.length - 1 && <Divider />} {/* Add divider after each item except the last */}
-                  </React.Fragment>
-                ))}
-              </List>
-              <Tooltip title="Create Preference Tag" arrow>
-            <IconButton
-                    onClick={handleClickOpen}
-                    sx={{
-                      width: 50,
-                      height: 35,
-                      marginLeft: 35,
-                      marginTop: 2,
-                      bgcolor: "red",
-                      color: "white",
-                      "&:hover": {
-                        bgcolor: "primary.dark",
-                      },
-                    }}
-                  >
-                    <AddIcon />
-                  </IconButton>
-            </Tooltip>
-            </nav>
-            {/* Plus Button */}
-   
-          </Box>
-        </Box>
-
         {/* Dialog for creating or editing a tag */}
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{editingTagIndex !== null ? "Edit Preference Tag" : "Create a Usable Preference Tag"}</DialogTitle>
+          <DialogTitle>{editingTagIndex !== null ? 'Edit Preference Tag' : 'Create a usable Preference Tag'}</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
@@ -267,17 +180,55 @@ console.log("preference",PreferenceTag);
             />
           </DialogContent>
           <DialogActions>
-            <Button sx={{ gap: 2 }} type="submit" variant="standard" onClick={handleSaveTag}>
-              {editingTagIndex !== null ? "Update" : "Add"}
+            <Button sx={{ gap: 2 }} type="submit" variant='standard' onClick={handleSaveTag}>
+              {editingTagIndex !== null ? 'Update' : 'Add'}
             </Button>
-            <Button variant="standard" onClick={handleClose}>
-              Cancel
-            </Button>
+            
+            <Button variant='standard' onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Dialog>
-      </>
-    )}
-  </Box>
+
+        {/* Display the list of existing tags */}
+        <nav aria-label="main tags folders">
+          <List
+            sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+            subheader={
+              <ListSubheader
+                sx={{
+                  fontWeight: 'bold', // Make it bold
+                  fontSize: '1.25rem', // Increase the font size
+                  color: 'red'
+                }}
+              >
+                Preference Tags
+              </ListSubheader>
+            }
+          >
+            {tags.map((tag, index) => (
+              <React.Fragment key={index}>
+                <ListItem
+                  sx={{ marginLeft: 6, display: 'flex', justifyContent: 'space-between' }}
+                >
+                  <ListItemButton>
+                    <ListItemText primary={tag} />
+                  </ListItemButton>
+                  {/* Icons for editing and deleting with styles */}
+                  <Box sx={{ display: 'flex', gap: 1 }}> {/* Add a gap between the icons */}
+                    <IconButton edge="end" aria-label="edit" onClick={() => handleEditTag(index)} sx={{ color: 'green' }}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteTag(index)} sx={{ color: 'red' }}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </ListItem>
+                {index < tags.length - 1 && <Divider />} {/* Add divider after each item except the last */}
+              </React.Fragment>
+            ))}
+          </List>
+        </nav>
+      </Box>
+    </div>
   );
 }
 
