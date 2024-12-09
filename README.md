@@ -10,7 +10,13 @@ By offering a user-friendly interface, robust features, and seamless payment opt
 
 ## Build Status
 
-This basically explains the current build status of the project. If there is a bug/error which needs addressing, mention it here.
+(On going Project)
+major problems :
+
+1. Products deletion doesn't get deleted from a cart that it was put into earlier
+2. Book flights and hotels by amadues apis is slow as the amadues servers is slow a lot of times.
+3. The tourist is not able to view his transporatation tickets and it's a feature to be added
+4. There is no mail verification, that when sending an email to the tourist if the mail doesn't exist it doesn't give an error to the user
 
 ## Code Style
 
@@ -2243,15 +2249,15 @@ npm (comes with Node.js)
 
 #### Event Management
 
-    - **Flag Inappropriate Event**
-    
-        ```http
+#### Flag Inappropriate Event
+
+```http
         
         PUT /inappropriate
         ```
         Flags an event as inappropriate.
 
-    - **Get All Events**
+**Get All Events**
         ```http
         GET /getAllEvents
         ```
