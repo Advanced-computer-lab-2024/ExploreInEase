@@ -192,19 +192,19 @@ const GovernorNavbar = () => {
                             horizontal: 'center',
                             }}
                         >
-                           <Divider/>
+                           {/* <Divider/> */}
                             <MenuItem onClick={()=>handleRegisterClick('Change Password')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
                               <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
                                   <PasswordOutlinedIcon />
                               </ListItemIcon>
                               Change Password
                        </MenuItem>                            <Divider/>
-                            <MenuItem onClick={()=>handleRegisterClick('Delete Account')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
+                            {/* <MenuItem onClick={()=>handleRegisterClick('Delete Account')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
                               <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
                                   <Delete />
                               </ListItemIcon>
                               Delete Account  
-                            </MenuItem>                            <Divider/>
+                            </MenuItem>                            <Divider/> */}
                             <MenuItem component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
                               <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
                                   <UploadIcon />

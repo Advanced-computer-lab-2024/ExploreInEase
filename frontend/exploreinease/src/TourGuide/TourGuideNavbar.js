@@ -7,7 +7,6 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
 import axios from 'axios';
 import IconButton from '@mui/material/IconButton';
-import { Alert } from '@mui/material'; 
 import '../Guest/GuestHP.css'; 
 import NetworkService from '../NetworkService';
 import HomePageLogo from '../HomePageLogo.png';
@@ -15,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import Badge from '@mui/material/Badge';
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import Alert from '@mui/material/Alert';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import "../TouristGovernor/GovernorHomePage.css"; 
 import UploadIcon from '@mui/icons-material/Upload';
@@ -41,6 +41,7 @@ const TourGuideHP = () => {
     const [setError]=useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
+    const [message,setMessage]=useState('');
     const open = Boolean(anchorEl);
     const openNotfication = Boolean(anchorEl1);
     const initialUsername = User?.User?.username || User?.username;
@@ -86,6 +87,17 @@ const TourGuideHP = () => {
       return () => clearTimeout(timer);
     }
   }, [showErrorMessage]);
+
+  useEffect(() => {
+    if (message || errorMessage) {
+      const timer = setTimeout(() => {
+        setMessage('');
+        setErrorMessage('');
+      }, 3000); // Disappear after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup on component unmount
+    }
+  }, [message, errorMessage]);
 
   const handleOpenMenu = (event) => {
     setAnchorProfileEl(event.currentTarget);
@@ -245,7 +257,7 @@ const handleClickNotification = async(event) => {
        }
        else if(title==='Delete Account'){
         try {
-          console.log(userId, userType);
+          // console.log(userId, userType);
           const options = {
             apiPath: `/requestDeletion/${userId}/${userType}`,
             useParams: userId,
@@ -253,7 +265,7 @@ const handleClickNotification = async(event) => {
           };
           const response = await NetworkService.put(options);
           console.log(response);
-      
+          setMessage(response.message);
           setSuccessMessage(response.message || "Delete Successfully!");
           setShowSuccessMessage(true);
       
@@ -265,11 +277,12 @@ const handleClickNotification = async(event) => {
         } catch (err) {
           // Access the error message from the response data
           const errorMessage = err.response?.data?.message || "An error occurred";
+          console.log(errorMessage);
           setErrorMessage(errorMessage);
           setShowErrorMessage(true);
           console.log(errorMessage);
         }
-       }
+      }
        else{
         console.log('yes here');
        }
@@ -404,6 +417,38 @@ const handleClickNotification = async(event) => {
       </Menu>
      </div>
     </nav>
+    <div style={{ position: 'relative' }}>
+      {message !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px', // Adjust this for horizontal positioning
+            width: '300px', // Customize the width
+            zIndex: 1000, // Ensure it appears above other elements
+          }}
+        >
+          <Alert severity="success" style={{ width: '100%' }}>
+            {message}
+          </Alert>
+        </div>
+      )}
+      {errorMessage !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '60px', // Stack the alerts vertically
+            left: '20px',
+            width: '300px',
+            zIndex: 1000,
+          }}
+        >
+          <Alert severity="error" style={{ width: '100%' }}>
+            {errorMessage}
+          </Alert>
+        </div>
+      )}
+    </div>
     <nav className="navbarSecondary">
     {["Sales Report","Tourists Report","Itinerary","View Itinerary"].map((tab) => (
           <div

@@ -17,6 +17,7 @@ import Tooltip from '@mui/material/Tooltip';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import UploadIcon from '@mui/icons-material/Upload';
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import Alert from '@mui/material/Alert';
 import axios from 'axios';
 import Delete from '@mui/icons-material/Delete';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -44,16 +45,30 @@ const TouristNavbar = () => {
      const [anchorProfileEl, setAnchorProfileEl] = useState(null);
      const [showSuccessMessage, setShowSuccessMessage] = useState(false);
      const [showErrorMessage, setShowErrorMessage] = useState(false);
-     const [ setErrorMessage] = useState('');
+     const [setSuccess, setSuccessMessage] = useState('');
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
      const [menuItems,setMenuItem]=useState( []);
+     const [message,setMessage]=useState('');
+    const [errorMessage,setErrorMessage]=useState('');
 
 
      useEffect(()=>{
   checkPromoCode();
 },[]);
+
+useEffect(() => {
+  if (message || errorMessage) {
+    const timer = setTimeout(() => {
+      setMessage('');
+      setErrorMessage('');
+    }, 3000); // Disappear after 3 seconds
+
+    return () => clearTimeout(timer); // Cleanup on component unmount
+  }
+}, [message, errorMessage]);
+
 const checkPromoCode=async()=>{
   const options = {
     apiPath: '/updatePromoCode',
@@ -318,23 +333,27 @@ const  handleRegisterClick=async(title)=> {
             }
             else if(title==='Delete Account'){
               try {
+                // console.log(userId, userType);
                 const options = {
-                  apiPath: `/requestDeletion/${Userr._id}/${userType}`,
-                  useParams: Userr._id,
+                  apiPath: `/requestDeletion/${userId}/${userType}`,
+                  useParams: userId,
                   userType,
                 };
                 const response = await NetworkService.put(options);
                 console.log(response);
+                setMessage(response.message);
+                setSuccessMessage(response.message || "Delete Successfully!");
+                setShowSuccessMessage(true);
             
-                console.log(response.message || "Delete Successfully!");            
                 if (response.success) {
-                  console.log("Account deletion requested successfully.");
+                  setSuccess("Account deletion requested successfully.");
                 } else {
                   console.log(response.message || "Account deletion request failed.");
                 }
               } catch (err) {
                 // Access the error message from the response data
                 const errorMessage = err.response?.data?.message || "An error occurred";
+                console.log(errorMessage);
                 setErrorMessage(errorMessage);
                 setShowErrorMessage(true);
                 console.log(errorMessage);
@@ -548,6 +567,38 @@ return (
      </Menu>           
      </div>
     </nav>
+    <div style={{ position: 'relative' }}>
+      {message !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px', // Adjust this for horizontal positioning
+            width: '300px', // Customize the width
+            zIndex: 1000, // Ensure it appears above other elements
+          }}
+        >
+          <Alert severity="success" style={{ width: '100%' }}>
+            {message}
+          </Alert>
+        </div>
+      )}
+      {errorMessage !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '60px', // Stack the alerts vertically
+            left: '20px',
+            width: '300px',
+            zIndex: 1000,
+          }}
+        >
+          <Alert severity="error" style={{ width: '100%' }}>
+            {errorMessage}
+          </Alert>
+        </div>
+      )}
+    </div>
     <nav className="navbarSecondary">
     {['Events',,"Products","Transportation","Complaints","Book Hotels","Book Flights","Purchased Product",,"Booked items","BookMarks"].map((tab) => (
           <div

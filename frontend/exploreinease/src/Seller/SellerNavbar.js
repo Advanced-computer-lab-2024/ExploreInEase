@@ -17,6 +17,7 @@ import Divider from '@mui/material/Divider';
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import Delete from '@mui/icons-material/Delete';
+import Alert from '@mui/material/Alert';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
@@ -37,8 +38,9 @@ const SHomePage = () => {
   let [selectedTab, setSelectedTab] = useState("Sales Report");  
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [setErrorMessage] = useState('');
   const [setSuccessMessage] = useState('');
+  const [message,setMessage]=useState('');
+  const [errorMessage,setErrorMessage]=useState('');
   const User = state?.User || Userr|| '';
   const imageUrl = state?.imageUrl || imageUrll;
   const [anchorEl, setAnchorEl] = useState(null);
@@ -68,6 +70,16 @@ const SHomePage = () => {
       setSelectedTab(savedTab); // Restore the selected tab
     }
   }, []);
+  useEffect(() => {
+    if (message || errorMessage) {
+      const timer = setTimeout(() => {
+        setMessage('');
+        setErrorMessage('');
+      }, 3000); // Disappear after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup on component unmount
+    }
+  }, [message, errorMessage]);
   const handleClickNotification = async(event) => {
     setAnchorEl1(event.currentTarget);
     const options = { 
@@ -215,7 +227,7 @@ const SHomePage = () => {
       }
       else if(title==='Delete Account'){
         try {
-          console.log(userId, userType);
+          // console.log(userId, userType);
           const options = {
             apiPath: `/requestDeletion/${userId}/${userType}`,
             useParams: userId,
@@ -223,7 +235,7 @@ const SHomePage = () => {
           };
           const response = await NetworkService.put(options);
           console.log(response);
-      
+          setMessage(response.message);
           setSuccessMessage(response.message || "Delete Successfully!");
           setShowSuccessMessage(true);
       
@@ -236,6 +248,7 @@ const SHomePage = () => {
           // Access the error message from the response data
           const errorMessage = err.response?.data?.message || "An error occurred";
           console.log(errorMessage);
+          setErrorMessage(errorMessage);
           setShowErrorMessage(true);
           console.log(errorMessage);
         }
@@ -393,6 +406,38 @@ const SHomePage = () => {
                         </Menu>
      </div>
     </nav>
+    <div style={{ position: 'relative' }}>
+      {message !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px', // Adjust this for horizontal positioning
+            width: '300px', // Customize the width
+            zIndex: 1000, // Ensure it appears above other elements
+          }}
+        >
+          <Alert severity="success" style={{ width: '100%' }}>
+            {message}
+          </Alert>
+        </div>
+      )}
+      {errorMessage !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '60px', // Stack the alerts vertically
+            left: '20px',
+            width: '300px',
+            zIndex: 1000,
+          }}
+        >
+          <Alert severity="error" style={{ width: '100%' }}>
+            {errorMessage}
+          </Alert>
+        </div>
+      )}
+    </div>
     <nav className="navbarSecondary">
     {["Sales Report","Products","Archieved Products"].map((tab) => (
           <div
