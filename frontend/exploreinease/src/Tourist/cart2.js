@@ -124,7 +124,7 @@ const CartPage = () => {
     name: '',
     cvv: '',
     expMonth: '',
-    expYear:'',
+    expYear: '',
   });
 
   useEffect(() => {
@@ -217,7 +217,7 @@ const CartPage = () => {
           const options = {
             apiPath: `/addAddresses/${userId}/${deliveryInfo.address}`,
           };
-          await NetworkService.post(options);
+          await NetworkService.wallett(options);
         } catch (error) {
           console.error('Error adding address:', error);
           alert('Failed to add address. Please try again.');
@@ -231,7 +231,7 @@ const CartPage = () => {
       if (selectedPaymentMethod === 'cash') {
         // For cash on delivery, show the confirmation view
         setIsPaymentProceed(true);
-      } else if (selectedPaymentMethod === 'card') {
+      } else {
         // For card payment, proceed to payment gateway
         setIsPaymentProceed(true);
       }
@@ -263,7 +263,7 @@ const CartPage = () => {
         console.error('Error confirming order:', error);
         alert('Failed to confirm order. Please try again.');
       }
-    }else if (title === 'Confirm Details') {
+    } else if (title === 'Confirm Details') {
       try {
         console.log(selectedPaymentMethod);
         console.log(cardDetails);
@@ -400,7 +400,6 @@ const CartPage = () => {
   return (
     <Box sx={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
       <div>
-        {/* Order Confirmation Popup */}
         <Modal
           open={isOrderConfirmed}
           onClose={() => setIsOrderConfirmed(false)}
@@ -409,28 +408,56 @@ const CartPage = () => {
         >
           <Box
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              bgcolor: 'background.paper',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "background.paper",
               boxShadow: 24,
               p: 4,
-              borderRadius: 2,
-              textAlign: 'center',
+              borderRadius: 3,
+              textAlign: "center",
+              minWidth: 300,
+              maxWidth: 400,
             }}
           >
-            <h2 id="order-confirmed-title">Order Confirmed</h2>
-            <p id="order-confirmed-description">
+            <Typography
+              id="order-confirmed-title"
+              variant="h5"
+              component="h2"
+              sx={{
+                mb: 2,
+                fontWeight: "bold",
+              }}
+            >
+              Order Confirmed 🎉
+            </Typography>
+            <Typography
+              id="order-confirmed-description"
+              variant="body1"
+              sx={{
+                mb: 3,
+              }}
+            >
               Your order has been successfully placed!
-            </p>
-            <button onClick={() => setIsOrderConfirmed(false)}>Close</button>
+            </Typography>
+            <Button
+              onClick={() => setIsOrderConfirmed(false)}
+              variant="contained"
+              color="primary"
+              sx={{
+                px: 4,
+                py: 1,
+                textTransform: "none",
+                fontSize: "1rem",
+              }}
+            >
+              Close
+            </Button>
           </Box>
         </Modal>
-
-        
       </div>
-      
+
 
 
       {/* Add StepperNavigation */}
@@ -652,7 +679,7 @@ const CartPage = () => {
                         sx={{ mr: 4 }}
                       />
                       <FormControlLabel
-                        value="pos"
+                        value="wallet"
                         control={<Radio />}
                         label="Pay with Wallet"
                       />
@@ -852,7 +879,7 @@ const CartPage = () => {
       )}
 
       {/* Cash on Delivery Confirmation View */}
-      {isPaymentProceed && selectedPaymentMethod === 'pos' && (
+      {isPaymentProceed && selectedPaymentMethod === 'wallet' && (
         <Container maxWidth="xl" sx={{ py: 4 }}>
           <Grid container spacing={4} justifyContent="center">
             <Grid item xs={12} md={8}>
@@ -861,8 +888,7 @@ const CartPage = () => {
                   Wallet Selected
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 4 }}>
-                  Your order will be delivered to the specified address.
-                  Please keep the exact amount of ${calculateTotal().toFixed(2)} ready for payment.
+                  Your order will be processed using your wallet balance.
                 </Typography>
                 <Button
                   variant="contained"
@@ -1037,7 +1063,7 @@ const CartPage = () => {
                   sx={{
                     width: 300,
                     height: 180,
-                    position: "relative",
+                    walletition: "relative",
                     transformStyle: "preserve-3d",
                     transition: "transform 0.6s",
                   }}
@@ -1051,7 +1077,7 @@ const CartPage = () => {
                       height: "100%",
                       color: "white",
                       borderRadius: 2,
-                      position: "absolute",
+                      walletition: "absolute",
                       backfaceVisibility: "hidden",
                       display: "flex",
                       flexDirection: "column",
@@ -1102,7 +1128,7 @@ const CartPage = () => {
                       height: "100%",
                       color: "white",
                       borderRadius: 2,
-                      position: "absolute",
+                      walletition: "absolute",
                       backfaceVisibility: "hidden",
                       transform: "rotateY(180deg)",
                       background: "linear-gradient(145deg, #1976d2, #0d47a1)",
@@ -1148,13 +1174,13 @@ const CartPage = () => {
                       onChange={(e) => handleChange("expMonth", e.target.value)}
                       onFocus={() => setIsFlipped(false)} // Ensure card stays on front
                     /><TextField
-                    label="Expiry Year"
-                    type="text"
-                    placeholder="MM/YY"
-                    value={cardDetails.expYear}
-                    onChange={(e) => handleChange("expYear", e.target.value)}
-                    onFocus={() => setIsFlipped(false)} // Ensure card stays on front
-                  />
+                      label="Expiry Year"
+                      type="text"
+                      placeholder="MM/YY"
+                      value={cardDetails.expYear}
+                      onChange={(e) => handleChange("expYear", e.target.value)}
+                      onFocus={() => setIsFlipped(false)} // Ensure card stays on front
+                    />
                     <TextField
                       label="Cardholder Name"
                       type="text"
