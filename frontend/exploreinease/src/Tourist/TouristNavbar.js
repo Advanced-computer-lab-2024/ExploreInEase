@@ -38,7 +38,7 @@ const TouristNavbar = () => {
     const open = Boolean(anchorEl);
     const initialUsername = tourist?.username;
      const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-     const userId=Userr.User?._id ||tourist._id||{};
+     const userId=Userr.User?._id ||tourist?._id||{};
      const userType = tourist.tourist?.type || Userr?.type||tourist.type||'tourist';
      const [anchorProfileEl, setAnchorProfileEl] = useState(null);
      const [showSuccessMessage, setShowSuccessMessage] = useState(false);

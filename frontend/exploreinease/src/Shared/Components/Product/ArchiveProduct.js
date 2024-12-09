@@ -239,7 +239,10 @@ const ArchiveProduct = () => {
   return (
     <div>
     <div>
-      <HomePage/>
+      {User.type==='seller'&&
+      (
+        <HomePage/>
+      )}
     </div>
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
       <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}      

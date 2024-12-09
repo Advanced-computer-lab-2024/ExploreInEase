@@ -473,11 +473,14 @@ const handleClickPurchase = async (product, selectedQuantity) => {
 
     <div>
       <div>
-        {User.type==='seller' ?(
+        {User.type==='seller' &&(
             <HomePage/>
-        ):(
-          <TouristNavbar/>
         )}
+
+        {User.type==='tourist'&&(
+          <TouristNavbar/>
+        )
+      } 
       </div>
     
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
