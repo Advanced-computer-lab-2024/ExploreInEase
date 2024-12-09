@@ -10,8 +10,8 @@ import NetworkService from '../../../NetworkService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import Sky from '../Sky2.jpeg';
-import { styled } from '@mui/system';
-
+import '../TourGuideProfile/tourGuideProfile.css';
+import HomePage from '../../../Advertier/AdvertiserNavbar';
 const AdvertiserProfile = (props) => {
   const initialData = {
     username: '',
@@ -24,6 +24,7 @@ const AdvertiserProfile = (props) => {
     noEmployees: '',
     founded: null,
   };
+  const navigate=useNavigate();
   const location = useLocation();
   const { advertiser, imageUrl } = location.state || {};
   console.log(advertiser.advertiser);
@@ -136,6 +137,8 @@ const AdvertiserProfile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
+    <>
+       <HomePage/>
     <Box
     sx={{
       backgroundImage: `url(${Sky})`,
@@ -145,8 +148,10 @@ const AdvertiserProfile = (props) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      marginTop:'10px'
     }}
   >
+ 
     <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Box
         sx={{
@@ -352,10 +357,15 @@ const AdvertiserProfile = (props) => {
       </Box>
     </Grid>
 </Grid>
+<p className='signup-promptadvance'>
+          Back to 
+          <span className='signup-link' onClick={() => navigate('/AdvertiserHomePage')}>Home Page</span>
+        </p>
         </Card>
       </Box>
     </LocalizationProvider>
     </Box>
+    </>
   );
 };
 

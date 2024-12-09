@@ -1,6 +1,7 @@
 const checkoutService = require('../checkouts/checkoutService');
 const checkoutRepository = require('../checkouts/checkoutRepository');
 const userRepository = require('../users/userRepository');
+const Tourist = require('../../models/tourist');
 
 const addProduct = async (req, res) => {
     const { price, description, originalQuantity, name } = req.body;
@@ -140,55 +141,6 @@ const reviewProduct = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 }
-
-const addOrder = async (req, res) => {
-    const { touristId, productIds, quantities, totalPrice } = req.body;
-    console.log("BODY: ",req.body);
-
-    // Ensure all required fields are provided
-    if (!touristId || !productIds || !quantities || productIds.length === 0 || quantities.length === 0) {
-        console.log("touristId",touristId);
-        console.log("productIds",productIds);
-        console.log("quantities",quantities);
-
-        
-        return res.status(400).json({ message: "touristId, productIds, and quantities are required." });
-    }
-
-    // Check if the number of products matches the number of quantities
-    if (productIds.length !== quantities.length) {
-        return res.status(400).json({ message: "Each product must have a corresponding quantity." });
-    }
-
-    // Prepare order data
-    const orderData = {
-        touristId,
-        productIds,
-        quantities,
-        status: 'delivered', // Default status
-        dateDelivered: null // Initially null, can be updated later
-    };
-
-    const product = await checkoutRepository.getProductById(productIds[0]);
-    if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-    }
-    console.log("PRODUCT: ",product);
-    product.takenQuantity = product.takenQuantity + quantities[0];
-    console.log("Quantity: ",product.takenQuantity);
-    product.save();
-
-    try {
-        // Call the service function to add the order
-        const newOrder = await checkoutService.addOrder(orderData);
-        const tourist = await userRepository.findTouristById(touristId);
-        tourist.wallet = tourist.wallet - totalPrice;
-        tourist.save();
-        res.status(201).json({ message: "Order added successfully", order: newOrder });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
 
 const getOrders = async (req, res) => {
     const { userId } = req.params;
@@ -347,9 +299,90 @@ const availableQuantityAndSales = async (req, res) => {
         });
     }
 };
+const addWishlist = async (req, res) => {
+    const {userId} = req.params;
+    const { productId } = req.body;
 
+    try {
+        const result = await checkoutService.addWishlist(userId, productId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const getWishlist = async (req, res) => {
+    const {userId} = req.params;
+
+    try {
+        const result = await checkoutService.getWishlist(userId);
+        return res.status(200).json({message: "Fetched wishlist successfully!", wishlist: result});
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const removeWishlist = async (req, res) => {
+    const {userId, productId} = req.params;
+
+    try {
+        const result = await checkoutService.removeWishlist(userId, productId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const addCart = async (req, res) => {
+    const {userId} = req.params;
+    const { productId, quantity } = req.body;
+
+    try {
+        const result = await checkoutService.addCart(userId, productId, quantity);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }    
+}
+
+const getCart = async (req, res) => {
+    const {userId} = req.params;
+
+    try {
+        const result = await checkoutService.getCart(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const removeCart = async (req, res) => {
+    const {userId, cartItemId} = req.params;
+
+    try {
+        const result = await checkoutService.removeCart(userId, cartItemId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const editQuantityInCart = async (req, res) => {
+    const {userId, cartItemId, quantity} = req.params;
+
+    console.log(req.params);
+    console.log(quantity);
+
+    try {
+        const result = await checkoutService.editQuantityInCart(userId, cartItemId, quantity);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
 const getAvailableProducts = async (req, res) => {
     const {userId} = req.params;
+    console.log(userId);
     const type = await checkoutRepository.getType(userId);
     console.log(type);
     if (type !== 'admin' && type !== 'seller' && type !== 'tourist') 
@@ -407,7 +440,472 @@ const getAvailableProductsSortedByRatings = async (req, res) => {
     }
 };
 
+
+
+// Controller for viewing delivered orders associated with a tourist
+const viewMyOrders = async (req, res) => {
+    const { touristId,currency } = req.params;
+    console.log(currency);
+
+    if (!touristId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Tourist ID is required.',
+        });
+    }
+
+    try {
+        const orders = await checkoutService.getOrdersByStatusAndTouristId(touristId,currency);
+        console.log(orders);
+        return res.status(200).json({
+            success: true,
+            data: orders,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
+
+
+
+// Controller to cancel an order
+const cancelOrder = async (req, res) => {
+    const { orderId, touristId } = req.body;
+
+    if (!orderId || !touristId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Order ID and Tourist ID are required.',
+        });
+    }
+
+    try {
+        await checkoutService.cancelOrder(orderId, touristId);
+        return res.status(200).json({
+            success: true,
+            message: 'Order canceled successfully.',
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
+
+//Buildo+saif apis
+
+
+require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const nodemailer = require("nodemailer");
+
+const createOrderWithCard = async (req, res) => {
+    const { 
+        touristId, 
+        productsIdsQuantity, 
+        price, 
+        addressToBeDelivered, 
+        cardNumber, 
+        expMonth, 
+        expYear, 
+        cvc,
+        promoCode,
+        currency 
+    } = req.body;
+
+    if (
+        !touristId || 
+        !Array.isArray(productsIdsQuantity) || 
+        productsIdsQuantity.length === 0 || 
+        !price || 
+        !cardNumber || 
+        !expMonth || 
+        !expYear || 
+        !cvc    ||
+        !addressToBeDelivered ||
+        !currency
+
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: 'Missing required fields.',
+        });
+    }
+    
+
+
+    let updatedCurrency;
+    let price2 = price;
+    switch (currency) {
+        case 'euro':
+          updatedCurrency = "EUR";
+          price2 = (price * 55).toFixed(2);
+
+          break;
+        case 'dollar':
+            updatedCurrency = "USD";
+            price2 = (price * 50).toFixed(2);
+          break;
+        case 'EGP':
+            updatedCurrency = "EGP";
+            price2 = price.toFixed(2);
+          break;
+        default:
+          throw new Error('Invalid currency');
+      }
+
+
+
+    try {
+        // Find tourist information
+        const tourist = await Tourist.findById(touristId);
+        if (!tourist) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tourist not found.',
+            });
+        }
+        if (promoCode) {
+            const validPromo = tourist.promoCodes.includes(promoCode); // Correct validation
+            if (validPromo) {
+              // Remove the promo code from the array
+              tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+              await tourist.save(); // Save the updated promo codes
+            } else {
+              throw new Error("Invalid promo code");
+            }
+        }
+        // Apply discount if promo code was valid
+        if (promoCode) {
+            price2 *= 0.7; // Apply 30% discount
+        }
+
+        // Create a Payment Method
+        const paymentMethod = await stripe.paymentMethods.create({
+            type: 'card',
+            card: {
+                number: cardNumber,
+                exp_month: expMonth,
+                exp_year: expYear,
+                cvc: cvc,
+            },
+        });
+
+        // Create a Payment Intent with a custom description
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(price2 * 100), // Convert dollars to cents
+            currency: updatedCurrency,
+            payment_method: paymentMethod.id,
+            confirm: true, // Automatically confirms the payment
+            description: `Payment for order by Tourist with username: ${tourist.username}`, // Custom description
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: 'never', // Disallow redirect-based payment methods
+            },
+        });
+
+        // Payment successful, create the order
+        const order = await checkoutService.createOrderWithCard({
+            touristId,
+            productsIdsQuantity,
+            price:price2,
+            addressToBeDelivered,
+            paymentType: 'card',
+        });
+
+
+        for(let i = 0; i < productsIdsQuantity.length; i++){
+            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
+            console.log("PRODUCT: ",product);           
+            if(product.takenQuantity === product.originalQuantity){
+                const publisherId = product.sellerId.toString();
+                const publisher = await userRepository.findSellerById(publisherId);
+                console.log("PUBLISHER: ",publisher);
+        
+        
+                const body = `Product ${product.name} is out of stock`;
+                const notificationData = {
+                    body,
+                    user: {
+                        user_id: publisher._id,     // Match the schema key
+                        user_type: publisher.type   // Match the schema key
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+        
+        
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: publisher.email,
+                    subject: 'Product out of stock',
+                    text:` Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions);
+        
+            }
+        }
+
+        return res.status(201).json({
+            success: true,
+            data: order,
+            paymentStatus: paymentIntent.status,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: `Stripe Payment Failed: ${error.message}`,
+        });
+    }
+};
+
+
+
+const addOrder = async (req, res) => {
+    const { touristId, productIds, quantities, totalPrice, promoCode } = req.body;
+    console.log("BODY: ",req.body);
+
+    // Ensure all required fields are provided
+    if (!touristId || !productIds || !quantities || productIds.length === 0 || quantities.length === 0) {
+        console.log("touristId",touristId);
+        console.log("productIds",productIds);
+        console.log("quantities",quantities);
+
+        
+        return res.status(400).json({ message: "touristId, productIds, and quantities are required." });
+    }
+
+    // Check if the number of products matches the number of quantities
+    if (productIds.length !== quantities.length) {
+        return res.status(400).json({ message: "Each product must have a corresponding quantity." });
+    }
+
+    // Prepare order data
+    const orderData = {
+        touristId,
+        productIds,
+        quantities,
+        price: totalPrice,
+        status: 'pending', // Default status
+        dateDelivered: null // Initially null, can be updated later
+    };
+
+    const product = await checkoutRepository.getProductById(productIds[0]);
+    if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+    }
+    console.log("PRODUCT: ",product);
+    try {
+        // Call the service function to add the order
+        const newOrder = await checkoutService.addOrder(orderData);
+        const tourist = await userRepository.findTouristById(touristId);
+        if(promoCode){
+            const promo = await checkoutRepository.getPromoCode(promoCode);
+            console.log("PROMO: ",promo);
+            if(promo){
+                if(tourist.promoCodes.includes(promo)){
+                    tourist.wallet = tourist.wallet - (totalPrice * (30 / 100));
+                    tourist.save();
+                }
+                else{
+                    throw new Error("Invalid Promo Code");
+                }
+            }
+        }
+        else{
+            tourist.wallet = tourist.wallet - totalPrice;
+            tourist.save();
+        }
+
+        product.takenQuantity = product.takenQuantity + quantities[0];
+        console.log("Quantity: ",product.takenQuantity);
+        product.save();
+        console.log("SAVED PRODUCT: ",product);
+    
+        if(product.takenQuantity === product.originalQuantity){
+            const publisherId = product.sellerId.toString();
+            const publisher = await userRepository.findSellerById(publisherId);
+            console.log("PUBLISHER: ",publisher);
+    
+    
+            const body = `Product ${product.name} is out of stock`;
+            const notificationData = {
+                title: "Product out of stock",
+                body,
+                user: {
+                    user_id: publisher._id,     // Match the schema key
+                    user_type: publisher.type   // Match the schema key
+                }
+            };
+            const notification = await checkoutRepository.addNotification(notificationData);
+            console.log("NOTIFICATION: ",notification);
+    
+    
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL2_USER,
+                    pass: process.env.EMAIL2_PASS
+                }
+            });
+        
+            console.log("Transporter created");
+            
+            const mailOptions = {
+                from: process.env.EMAIL2_USER,
+                to: publisher.email,
+                subject: 'Product out of stock',
+                text: Hello `${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+            };
+        
+            await transporter.sendMail(mailOptions);
+    
+        }
+        res.status(201).json({ message: "Order added successfully", order: newOrder });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+const createOrderWalletOrCod = async (req, res) => {
+    const { touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType,promoCode,currency } = req.body;
+
+    if (
+        !touristId ||
+        !Array.isArray(productsIdsQuantity) ||
+        productsIdsQuantity.length === 0 ||
+        price === undefined ||
+        !paymentType
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: 'Tourist ID, products, price, and payment type are required.',
+        });
+    }
+
+    const validPaymentTypes = ['wallet', 'COD'];
+    if (!validPaymentTypes.includes(paymentType)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid payment type. Must be "wallet" or "COD".',
+        });
+    }
+
+    try {
+        const order = await checkoutService.createOrderWalletOrCod({
+            touristId,
+            productsIdsQuantity,
+            price,
+            addressToBeDelivered,
+            paymentType,
+            promoCode,
+            currency
+        });
+        
+        for(let i = 0; i < productsIdsQuantity.length; i++){
+            const product = await checkoutRepository.getProductById(productsIdsQuantity[i].id);
+            console.log("PRODUCT: ",product);           
+            if(product.takenQuantity === product.originalQuantity){
+                const publisherId = product.sellerId.toString();
+                const publisher = await userRepository.findSellerById(publisherId);
+                console.log("PUBLISHER: ",publisher);
+        
+        
+                const body = `Product ${product.name} is out of stock`;
+                const notificationData = {
+                    title: "Product out of stock",
+                    body,
+                    user: {
+                        user_id: publisher._id,     // Match the schema key
+                        user_type: publisher.type   // Match the schema key
+                    }
+                };
+                const notification = await checkoutRepository.addNotification(notificationData);
+                console.log("NOTIFICATION: ",notification);
+        
+        
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL2_USER,
+                        pass: process.env.EMAIL2_PASS
+                    }
+                });
+            
+                console.log("Transporter created");
+                
+                const mailOptions = {
+                    from: process.env.EMAIL2_USER,
+                    to: publisher.email,
+                    subject: 'Product out of stock',
+                    text: `Hello ${publisher.username},\n\nYour product ${product.name} is out of stock.\n\nBest regards,\n${process.env.EMAIL2_USER}`
+                };
+            
+                await transporter.sendMail(mailOptions);
+        
+            }
+        }
+
+        return res.status(201).json({
+            success: true,
+            data: order,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+const getAllNotifications = async (req, res) => {
+    try {
+        const {userId, type} = req.params;
+
+        const notifications = await checkoutService.getAllNotifications(userId, type);
+        res.status(200).json(notifications);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+
+
+
+
 module.exports = {
+    getAllNotifications,
     uploadImage,
     availableQuantityAndSales,
     archiveProduct,
@@ -422,5 +920,16 @@ module.exports = {
     reviewProduct,
     addOrder,
     getOrders,
-    updateOrder
+    updateOrder,
+    viewMyOrders,
+    cancelOrder,
+    createOrderWalletOrCod,
+    createOrderWithCard,
+    addWishlist,
+    getWishlist,
+    removeWishlist,
+    addCart,
+    getCart,
+    removeCart,
+    editQuantityInCart
 };

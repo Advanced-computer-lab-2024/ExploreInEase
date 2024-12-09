@@ -10,10 +10,10 @@ import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { LoadScript, GoogleMap, Marker,PlacesService } from '@react-google-maps/api';
+import { LoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 import Slider from '@mui/material/Slider';
 import dayjs from 'dayjs';
-import axios from 'axios'; // Ensure Axios is imported
+import axios from 'axios'; 
 import { useLocation } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -21,17 +21,18 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import NetworkService from '../NetworkService';
 import { Alert } from '@mui/material'; 
-  import Basketball from './ActivityImage/Basketball.jpg';
-  import Bowling from './ActivityImage/Bowling.jpg';
-  import Cycling from './ActivityImage/Cycling.webp';
-  import Fishing from './ActivityImage/Fishing.jpg';
-  import Football from './ActivityImage/FootBall.jpg';
-  import Handball from './ActivityImage/Handball.jpg';
-  import Hiking from './ActivityImage/Hiking.jpg';
-  import JetSki from './ActivityImage/JetSki.jpg';
-  import Mountain from './ActivityImage/Mountain.jpg';
-  import Skater from './ActivityImage/Skater.jpg';
-
+import Basketball from './ActivityImage/Basketball.jpg';
+import Bowling from './ActivityImage/Bowling.jpg';
+import Cycling from './ActivityImage/Cycling.webp';
+import Fishing from './ActivityImage/Fishing.jpg';
+import Football from './ActivityImage/FootBall.jpg';
+import Handball from './ActivityImage/Handball.jpg';
+import Hiking from './ActivityImage/Hiking.jpg';
+import JetSki from './ActivityImage/JetSki.jpg';
+import Mountain from './ActivityImage/Mountain.jpg';
+import Skater from './ActivityImage/Skater.jpg';
+import HomePage from './AdvertiserNavbar';
+import NodataFound from '../No data Found.avif';
 
   const activityImage =[Basketball,Bowling,Fishing,Cycling,Football,Handball,Hiking,JetSki,Mountain,Skater];
 
@@ -43,16 +44,8 @@ const defaultCenter = {
   lat: 30.033333, // Default to Egypt's latitude
   lng: 31.233334, // Default to Egypt's longitude
 };
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
+
+
 function Activity() {
   const location = useLocation();
   const { allActivity} = location.state||{};
@@ -61,16 +54,22 @@ function Activity() {
   const [activities, setActivities] = useState(allActivity); 
   const [open, setOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
-  const [map, setMap] = useState(null);
-  const [placesService, setPlacesService] = useState(null);
+  const [map,setMap] = useState(null);
+  const [ placesService,setPlacesService] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
   const [tagsList, setTagsList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
  const [address,setAddress]=useState('');
+ const [selectedImage, setSelectedImage] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [ searachInput,setSearchInput] = useState('');
+  const [ Location,setLocation] = useState('');
+
+  const [ isApiLoaded,setIsApiLoaded] = useState(false);
+  const [addresslocation,setAdressLocation]=useState('');
   const [activityForm, setActivityForm] = useState({
     _id: '',
     name: '',
@@ -86,9 +85,9 @@ function Activity() {
     tags: [],
     specialDiscounts: null,
     isOpen: true,
+    picture: null,
   });
-  const [searchInput, setSearchInput] = useState('');
-  const [isApiLoaded, setIsApiLoaded] = useState(false);
+
 
   useEffect(() => {
     getAllTags();
@@ -97,11 +96,9 @@ function Activity() {
     getAllCategory();
   }, []);
 
-useEffect(()=>
-{
+useEffect(()=>{
   getAllActivities();
-},[]
-);
+},[]);
 useEffect(() => {
   if (showSuccessMessage) {
     const timer = setTimeout(() => {
@@ -120,13 +117,22 @@ useEffect(() => {
   }
 }, [showErrorMessage]);
 
+useEffect(() => {  
+  const fetchAddress = async () => {    
+    if (activityForm?.location?.latitude && activityForm?.location?.longitude) {
+      const fetchedAddress = await fetchAddressFromCoordinates(
+        activityForm.location.latitude,
+        activityForm.location.longitude
+      ).then((address) => {
+        setAdressLocation(address);
+      });;
+    }
+  };
+
+  fetchAddress();
+},[activities]);
 
 
-
-const getRandomImage = () => {
-  const randomIndex = Math.floor(Math.random() * activityImage.length);
-  return activityImage[randomIndex];
-};
 const getAllActivities =async()=>{
   try {
     // Construct the API path
@@ -138,9 +144,16 @@ const getAllActivities =async()=>{
     // console.log('API Response:', response);
 
     // Pass the fetched activities to the Activities page
-      setActivities(response.data);
-      console.log("Activities:",response.data);
-            
+    console.log(response.data);
+      const adjustedActivities = response.data.map((activity) => ({
+        ...activity,
+        picture: localStorage.getItem(`activity-image-${activity._id}`) || null,
+      }));
+
+      setActivities(adjustedActivities);
+
+
+
   } catch (err) {
     // Check if there is a response from the server and handle error
     if (err.response) {
@@ -175,7 +188,10 @@ const getAllActivities =async()=>{
     setOpen(false);
     setSearchInput('');
   };
-
+  const handleImageChange = (event) => {
+    setSelectedImage(event.target.files[0]); // Save the selected file to state
+  };
+  
   const onLoad = (mapInstance) => {
     setMap(mapInstance);
     if(window.google){
@@ -224,7 +240,25 @@ const getAllTags=async ()=>{
     }
   }
 }
+async function fetchAddressFromCoordinates (  latitude, longitude)  {
+  const apiKey = "AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM";
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
 
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status === "OK") {
+      const address = data.results[0]?.formatted_address || "Address not found";
+      return address;
+    } else {
+      throw new Error(data.error_message || "Failed to fetch address");
+    }
+  } catch (error) {
+    console.error("Error fetching address:", error);
+    return "Error fetching address";
+  }
+};
 const getAllCategory=async ()=>{
   try {
     const apiPath = `http://localhost:3030/getAllCategories/advertiser`;  // Ensure this matches your API route
@@ -254,8 +288,6 @@ const getAllCategory=async ()=>{
     }
   }
 }
-
-
 function convertTimeToFullDate(timeString) {
   // Step 1: Get the current date
   const currentDate = new Date(); // This gives us the current date
@@ -278,13 +310,7 @@ function convertTimeToFullDate(timeString) {
 // console.log("Data",activities);
 
 const handleSaveActivity = async () => {
-  try {
-    const updatedPrice =
-      activityForm.price[0] === activityForm.price[1]
-        ? activityForm.price[0]
-        : activityForm.price;
-        // console.log("updatedPrice",activityForm.price[0]);
-        
+  try {        
     const updatedActivity = {
       ...activityForm,
       tags: Array.isArray(activityForm.tags) ? activityForm.tags : [], // Ensure tags is always an array of objects
@@ -332,29 +358,39 @@ const handleSaveActivity = async () => {
       const tagIds = tagsList.filter(tag => updatedActivity.tags.includes(tag.name)).map(tag => tag.id);
       const rangeArray = updatedActivity.price;
       const priceObject = Array.isArray(rangeArray) ? rangeArray.join('-') : "0-0"; // Default to "0-0" or any other fallback
-      // console.log("hehhe");
-      try{
-        const apiPath = `http://localhost:3030/activity`;
-        const body = {
-          name: updatedActivity.name,
-          date: dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-          // dayjs(updatedActivity.date).format('YYYY-MM-DD'),
-          time: dayjs(updatedActivity.time).format('hh:mm A'),
-          location: updatedActivity.location,
-          price: priceObject,
-          category: updatedActivity.categoryId,
-          tags: tagIds ||[],
-          specialDiscounts: updatedActivity.specialDiscounts||0,
-          isOpen: updatedActivity.isOpen || false,
-          created_by: id
-        }
-        const response = await axios.post(apiPath, body);
-        console.log(response);
+      try {
+        const formData = new FormData();
+        formData.append("file", selectedImage); 
+        formData.append("name", updatedActivity.name);
+        formData.append("date", dayjs(updatedActivity.date).format('YYYY-MM-DD'));
+        formData.append("time", dayjs(updatedActivity.time).format('hh:mm A'));
+        formData.append("latitude", updatedActivity.location.latitude);   
+        formData.append("longitude", updatedActivity.location.longitude);     
+        formData.append("price", JSON.stringify(priceObject)); // Convert objects to JSON strings
+        formData.append("category", updatedActivity.categoryId);
+        formData.append("tags", JSON.stringify(tagIds || []));
+        formData.append("specialDiscounts", updatedActivity.specialDiscounts || 0);
+        formData.append("isOpen", updatedActivity.isOpen || false);
+        formData.append("created_by", id);
+    
+        const response = await axios.post('http://localhost:3030/activity', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data', // Important for file uploads
+          },
+        });
+    
+        console.log(response.data);
+        const uploadedImageUrl = response.data.imageUrl;
+        localStorage.setItem(`activity-image-${response.data.finalActivity._id}`, uploadedImageUrl);
+        console.log(`activity-image-${response.data.finalActivity._id}`);
+        console.log('Image uploaded successfully:', uploadedImageUrl);
+
         getAllActivities();
         handleClose();
-        setSuccessMessage(response.data.message||"Edit Successfully!");
-        setShowSuccessMessage(true); 
-      }catch(error){
+        setSuccessMessage(response.data.message || "Activity Created Successfully!");
+        setShowSuccessMessage(true);
+      } catch (error) {
+        console.error('Error submitting activity:', error);
         setErrorMessage(error.response?.data?.message || 'An error occurred');
         setShowErrorMessage(true);
       }
@@ -411,7 +447,7 @@ const handleEditActivity = (activity) => {
       const options ={
          apiPath:`/activity/${activityid}/${id}`,
       };
-      const response = NetworkService.delete(options);
+      NetworkService.delete(options);
       setSuccessMessage("Deleted Activity Successfully!");
       setShowSuccessMessage(true);
        setActivities((prevActivities) => prevActivities.filter((_, i) => i !== index));
@@ -446,42 +482,6 @@ const handleEditActivity = (activity) => {
     else {
       setActivityForm((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const handlePriceChange = (event, newValue) => {
-    setActivityForm((prev) => ({ ...prev, price: newValue }));
-  };
-
-  const handleSearchInputChange = (event) => {
-    setSearchInput(event.target.value);
-  };
-
-  const handleSearch = () => {
-    const service = new window.google.maps.places.PlacesService(document.createElement('div'));
-    const request = {
-      query: searchInput,
-      fields: ['name', 'geometry'],
-    };
-
-    service.findPlaceFromQuery(request, (results, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        const place = results[0]; // Get the first result
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-
-        setActivityForm((prev) => ({
-          ...prev,
-          location: {
-            latitude: lat,
-            longitude: lng
-          },
-        }));
-        setMapCenter({ lat, lng });
-
-      } else {
-        console.log('Place search failed due to: ' + status);
-      }
-    });
   };
 
   const handleMapClick = useCallback((event) => {
@@ -524,9 +524,12 @@ const handleEditActivity = (activity) => {
   const handleCheckboxChange = (event) => {
     setActivityForm((prev) => ({ ...prev, isOpen: event.target.checked }));
   };
-console.log("Address mn Map",address);
 
   return (
+    <div>
+      <div>
+        <HomePage/>
+      </div>
     <div>
     <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -650,7 +653,7 @@ console.log("Address mn Map",address);
                         />
                       )}
               </GoogleMap>
-
+              
             <TextField
               fullWidth
               margin="normal"
@@ -659,6 +662,31 @@ console.log("Address mn Map",address);
               value={activityForm.specialDiscounts}
               onChange={handleInputChange}
             />
+            
+       <div>
+        <input
+        accept="image/*"
+        id="raised-button-file"
+        type="file"
+        onChange={handleImageChange}
+        style={{ display: 'none' }}
+      />
+      {/* Label that triggers the input */}
+      <label
+        htmlFor="raised-button-file"
+        style={{
+          display: 'inline-block',
+          padding: '5px 5px',
+          backgroundColor: 'DarkBlue',
+          color: '#fff',
+          textAlign: 'center',
+          cursor: 'pointer',
+          borderRadius: '4px',
+        }}
+      >
+        Upload Image
+      </label>    
+        </div>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
@@ -669,36 +697,61 @@ console.log("Address mn Map",address);
         </Dialog>
 
         <Grid container style={{ marginTop: 10}}>
-          {activities.map((activity, index) => (
+       {activities.length>0?(
+       activities.map((activity, index) => (
             
-            <Grid item xs={12} sm={6} md={4} key={index} >
-              <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
-              <CardMedia
-                  component="img"
-                  height="180"
-                  image={getRandomImage()}
-                  alt={activityImage?.name||"Image"}
-                />
-                <CardContent>
-                  <Typography variant="h5">{activity.name}</Typography>
-                  <Typography variant="body2"><strong>Date:</strong> {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
-                  <Typography variant="body2"><strong>Time:</strong> {activity.time}</Typography>
-                  <Typography variant="body2"><strong>Price: </strong>{activity.price}</Typography>
-                  <Typography variant="body2"><strong>Category:</strong> {categoryList.find(item =>item.id===activity.category)?.name}</Typography> 
-                  <Typography variant="body2"><strong>Tags:</strong> { activity.tags.map(tagId => { const tag = tagsList.find(t => t.id === tagId); return tag ? tag.name : 'No tag';}).filter(Boolean).join(', ') }</Typography>  
-                  <Typography variant="body2"><strong>Discounts:</strong> {activity.specialDiscounts}</Typography>
-                  <Typography variant="body2"><strong></strong>Location longitude: {activity.location?.longitude || mapCenter.lng}</Typography>
-                  <Typography variant="body2"><strong></strong>Location latitude: {activity.location?.latitude|| mapCenter.lat}</Typography>
-                  <Typography variant="body2"><strong>Booking:</strong> {activity.isOpen?"true":"false"}</Typography>
+    <Grid item xs={12} sm={6} md={4} key={index} >
+      <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
+      <CardMedia
+          component="img"
+          height="180"
+          image={activity.picture}
+          alt={activityImage?.name||"Image"}
+        />
+        <CardContent>
+          <Typography variant="h5">{activity.name}</Typography>
+          <Typography variant="body2"><strong>Date:</strong> {dayjs(activity.date).format('DD/MM/YYYY')}</Typography>
+          <Typography variant="body2"><strong>Time:</strong> {activity.time}</Typography>
+          <Typography variant="body2"><strong>Price: </strong>{activity.price}</Typography>
+          <Typography variant="body2"><strong>Category:</strong> {categoryList.find(item =>item.id===activity.category)?.name}</Typography> 
+          <Typography variant="body2"><strong>Tags:</strong> { activity.tags.map(tagId => { const tag = tagsList.find(t => t.id === tagId); return tag ? tag.name : 'No tag';}).filter(Boolean).join(', ') }</Typography>  
+          <Typography variant="body2"><strong>Discounts:</strong> {activity.specialDiscounts}</Typography>
+          <Typography variant="body2"><strong>Location:</strong> {addresslocation}</Typography>
+          <Typography variant="body2"><strong>Booking:</strong> {activity.isOpen?"true":"false"}</Typography>
 
-                </CardContent>
-                <CardActions style={{ justifyContent: 'center' }}>
-                  <Button size="meduim" onClick={() => handleEditActivity(activity)}>Edit</Button>
-                  <Button container='filled' color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
+        </CardContent>
+        <CardActions style={{ justifyContent: 'center' }}>
+          <Button size="meduim" onClick={() => handleEditActivity(activity)}>Edit</Button>
+          <Button container='filled' color="error" onClick={() => handleDeleteActivity(index)}>Delete</Button>
+        </CardActions>
+      </Card>
+    </Grid>
+  ))
+       ):(
+        <div
+        style={{
+          width: "400px", // Set a fixed width for the GIF
+          height: "400px", // Set a fixed height to match the width
+          position: "relative",
+          marginLeft:'600px',
+          marginTop:'100px',
+          alignContent:'center',
+          alignItems:'center'
+        }}
+      >
+        <img
+          src={NodataFound}
+          width="100%"
+          height="100%"
+
+        ></img>
+      </div>
+       )}
+       
+
+
+
+
         {showSuccessMessage && (
         <Alert severity="success" 
         sx={{
@@ -733,6 +786,8 @@ console.log("Address mn Map",address);
     </LocalizationProvider>
     </LoadScript>
     </div>
+    </div>
+
   );
 }
 

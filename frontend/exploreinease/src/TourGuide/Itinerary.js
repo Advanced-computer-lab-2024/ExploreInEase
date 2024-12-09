@@ -128,7 +128,7 @@ function Itinerary() {
           //  isSpecial
           };
           console.log("body:",body);
-          const response = await axios.put(apiPath,body);
+           await axios.put(apiPath,body);
         setItineraries((prevItineraries) =>
           prevItineraries.map((itinerary, index) =>
             index === currentItinerary ? updatedItinerary : itinerary

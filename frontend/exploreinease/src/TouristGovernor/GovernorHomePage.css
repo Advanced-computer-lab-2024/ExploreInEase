@@ -1,0 +1,186 @@
+.HomePage {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.photo-background {
+  min-height: 50.7vh;
+  background-image: url('../travel41.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.photo-background-advertiser{
+  min-height: 64.2vh;
+  background-image: url('../advertiserHP.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.photo-background-guide{
+  min-height: 64.2vh;
+  background-image: url('../travelG.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* .photo-background-guest{
+  min-height: 64.2vh;
+  background-image: url('../7109953.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+} */
+.photo-background-tourist{
+  min-height: 64.2vh;
+  background-image: url('../tourist.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.card {
+  flex: 1;
+  background: linear-gradient(145deg, #f8f9fa, #ffffff); /* Light gradient effect */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  transition: background 0.3s ease; /* Smooth transition for background */
+}
+
+.card-icon {
+  font-size: 5rem; /* Adjust the size of the icon */
+  /* margin-bottom: 1rem;  */
+}
+
+.card-button {
+  padding: 0.8rem 1.5rem;
+  background-color: #007bff; /* Button color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.card:hover {
+  background: linear-gradient(145deg, #ffffff, #f1f1f1); /* Slightly brighter gradient on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+}
+.navbarMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #003580;
+  padding: 10px 20px;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+.logo {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.website-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+/* Tab Section Styling */
+.card-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar-search {
+  width: 60%;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  font-size: 1rem;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.profile-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+.card-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.card-tab:hover {
+  background-color: white;
+  color: #003580; /* Match the blue from Booking.com */
+}
+
+.tab-icon {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+/* Right Section Buttons */
+.navbar-button {
+  background-color: white;
+  color: #003580;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.navbar-button:hover {
+  background-color: #f0f0f0;
+}
+
+.register-btn {
+  background-color: #0071c2;
+  color: white;
+}
+
+.register-btn:hover {
+  background-color: #005bb5;
+}
+

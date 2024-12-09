@@ -3,13 +3,14 @@ body {
   font-family: 'Arial', sans-serif; /* Modern font */
   background-color: #e9ecef; /* Light background */
   margin: 0;
-  padding: 20px;
+  /* padding: 20px; */
 }
 
 .itinerary-list-container {
+  margin:auto ;
   padding: 20px;
   max-width: 900px;
-  margin: auto;
+  margin-top: 20px;
   background-color: #ffffff; /* White background for cards */
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Shadow for depth */

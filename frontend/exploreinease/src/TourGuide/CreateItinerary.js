@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Theme, useTheme } from '@mui/material/styles';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
+import { useTheme } from '@mui/material/styles';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { Alert } from '@mui/material'; 
 import NetworkService from "../NetworkService";
 import { useLocation } from "react-router-dom";
+import TourGuideHP from "./TourGuideNavbar";
  import "./CreateItinerary.css"; // Import your CSS for styling
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -31,6 +30,7 @@ const getStyles = (name, selectedActivities, theme) => {
 const CreateItinerary = () => {
   const theme = useTheme();
   const [itineraryName, setItineraryName] = useState("");
+  const[imageUrl,setImageUrl]=useState('');
   const [activities, setActivities] = useState([]); // List of all activities from backend
   const [selectedActivityNames, setSelectedActivityNames] = useState([]); // Store selected activity names
   const [selectedActivityIds, setSelectedActivityIds] = useState([]); // Store corresponding selected activity IDs
@@ -50,8 +50,13 @@ const CreateItinerary = () => {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
   const location = useLocation();
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const { User } = location.state || {};
+  console.log("User",User);
+  
   const userId = User._id;
   console.log(userId);
 
@@ -71,7 +76,14 @@ const CreateItinerary = () => {
 
     fetchActivities();
   }, []);
+  const handleImageChange = (event) => {
+    setSelectedImage(event.target.files[0]); // Save the selected file to state
+  };
+  
+  console.log("setImage",Image);
+  console.log("imagePreviews",imagePreviews);
 
+  
   useEffect(() => {
     if (showSuccessMessage) {
       const timer = setTimeout(() => {
@@ -148,31 +160,48 @@ const CreateItinerary = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const itineraryData = {
-      name: itineraryName,
-      activities: selectedActivityIds, // Send the activity IDs instead of names
-      locations,
-      durations,
-      language,
-      price,
-      dateTimeAvailable: availableDates,
-      accessibility,
-      pickupLocation,
-      dropoffLocation,
-      timeline,
-      directions,
-      isActivated: activate ? 1 : 0,
-      isSpecial: special ? true : false,
-      created_by: userId,
-      flag: 1,
-    };
+    const formData = new FormData();
+
+    formData.append("name", itineraryName);
+    formData.append("activities", selectedActivityIds); // Array as a single index
+    formData.append("locations", locations); // Array as a single index
+    formData.append("timeline", timeline); // Array as a single index
+    formData.append("directions", directions); // Array as a single index
+    formData.append("language", language);
+    formData.append("price", price);
+    formData.append("dateTimeAvailable", availableDates); // Array as a single index
+    formData.append("accessibility", accessibility);
+    formData.append("pickupLocation", pickupLocation);
+    formData.append("dropoffLocation", dropoffLocation);
+    formData.append("isActivated", activate ? 1 : 0);
+    formData.append("isSpecial", special ? true : false);
+    formData.append("created_by", userId);
+    formData.append("flag", 1);
+    
+    if (selectedImage) {
+      formData.append("file", selectedImage); // File upload
+    }
+    
 
     // Make an API call to create the itinerary
     try{
 
-      const response = await NetworkService.post({ apiPath: '/itinerary', body: itineraryData });
+      const response = await NetworkService.post({
+        apiPath: '/itinerary',
+        body: formData, // Correct key for sending data
+        headers: {
+          'Content-Type': 'multipart/form-data', // Ensures proper encoding for file uploads
+        },
+      });
+      
       console.log(response);
       console.log("weslt henaa");
+
+      const uploadedImageUrl = response.imageUrl;
+      console.log("Image:  ",uploadedImageUrl);
+      localStorage.setItem(`itinerary-image-${response.Itinerary._id}`, uploadedImageUrl);
+      console.log(`itinerary-image-${response.Itinerary._id}`);
+      console.log('Image uploaded successfully:', uploadedImageUrl);
 
       setSuccessMessage(response.message||"save Successfully!");
       console.log("weslt henaa");
@@ -185,11 +214,13 @@ const CreateItinerary = () => {
       setErrorMessage(error.response?.data?.message || 'An error occurred');
       setShowErrorMessage(true);
     }
-
-    // Handle success/failure here
   };
-
+  
   return (
+    <div >
+      <div>
+        <TourGuideHP/>
+      </div>
     <div className="create-itinerary-container">
       <h2>Create Itinerary</h2>
       <form onSubmit={handleSubmit} className="itinerary-form">
@@ -207,15 +238,16 @@ const CreateItinerary = () => {
 
         <div className="form-group">
           <label>Select Activities:</label>
-          <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel id="activity-multiple-select-label">Activities</InputLabel>
+          <FormControl sx={{  width: 470,height:35 }}>
+            {/* <InputLabel id="activity-multiple-select-label">Activities</InputLabel> */}
             <Select
               labelId="activity-multiple-select-label"
               id="activity-multiple-select"
               multiple
+              sx={{height:35}}
               value={selectedActivityNames}
               onChange={handleActivityChange}
-              input={<OutlinedInput label="Activities" />}
+              // input={<OutlinedInput label="Activities" />}
               MenuProps={MenuProps}
             >
               {activities?.map((activity) => (
@@ -259,26 +291,6 @@ const CreateItinerary = () => {
             </div>
           </div>
         ))}
-
-        <div className="form-group">
-          <label>Available Dates:</label>
-          {availableDates.map((date, index) => (
-            <div key={index} className="date-input-group">
-              <input
-                type="datetime-local"
-                value={date}
-                onChange={(e) => handleDateChange(index, e.target.value)}
-                required
-              />
-              <button type="button" className="remove-date-button" onClick={() => removeDateInput(index)}>
-                x
-              </button>
-            </div>
-          ))}
-          <button type="button" className="add-date-button" onClick={addDateInput}>
-            +
-          </button>
-        </div>
 
         <div className="form-group">
           <label>
@@ -351,6 +363,52 @@ const CreateItinerary = () => {
             />
           </label>
         </div>
+        <div className="form-group">
+          <label>Available Dates:</label>
+          {availableDates.map((date, index) => (
+            <div key={index} className="date-input-group">
+              <input
+                type="datetime-local"
+                value={date}
+                onChange={(e) => handleDateChange(index, e.target.value)}
+                required
+              />
+              <button type="button" className="remove-date-button" onClick={() => removeDateInput(index)}>
+                x
+              </button>
+            </div>
+          ))}
+          <button type="button" className="add-date-button" onClick={addDateInput} > 
+            +
+          </button>
+        </div>
+        <div>
+        <input
+        accept="image/*"
+        id="raised-button-file"
+        type="file"
+        onChange={handleImageChange}
+        style={{ display: 'none' }}
+      />
+      {/* Label that triggers the input */}
+      <label
+        htmlFor="raised-button-file"
+        style={{
+          display: 'inline-block',
+          padding: '5px 5px',
+          backgroundColor: 'DarkBlue',
+          color: '#fff',
+          textAlign: 'center',
+          cursor: 'pointer',
+          borderRadius: '4px',
+        }}
+      >
+        Upload Image
+      </label>
+                
+                
+        </div>
+      
 
         <div className="form-group">
           <label>
@@ -385,11 +443,31 @@ const CreateItinerary = () => {
           </label>
         </div>
 
-        <div className="form-group">
-          <button type="submit" className="submit-button">
-            Create Itinerary
-          </button>
-        </div>
+                <div className="form-group">
+                    <button
+                      type="submit"
+                      style={{
+                        width: '100%',
+                        padding: '14px 20px',
+                        backgroundColor: 'Darkblue', // Updated color for a fresher look
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px', // Fixed typo and added smooth corners
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold', // Makes text bold for better readability
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Adds a subtle shadow for depth
+                        transition: 'background-color 0.3s ease, transform 0.2s ease', // Adds hover and click effects
+                      }}
+                      onMouseOver={(e) => (e.target.style.backgroundColor = 'Darkblue')} // Hover effect
+                      onMouseOut={(e) => (e.target.style.backgroundColor = 'Darkblue')} // Revert hover effect
+                      onMouseDown={(e) => (e.target.style.transform = 'scale(0.98)')} // Click effect
+                      onMouseUp={(e) => (e.target.style.transform = 'scale(1)')} // Revert click effect
+                    >
+                      Create Itinerary
+                    </button>
+                  </div>
+
       </form>
       {showSuccessMessage && (
         <Alert severity="success" 
@@ -419,6 +497,7 @@ const CreateItinerary = () => {
           {errorMessage}
         </Alert>
       )}
+    </div>
     </div>
   );
 };

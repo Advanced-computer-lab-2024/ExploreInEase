@@ -18,16 +18,7 @@ const UsersSchema = new Schema({
     },
     email: {
         type: String,
-        required: function() {
-            // Required for specific types
-            return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
-        },
-        unique: function() {
-            // Required for specific types
-            return this.type === 'tourGuide' || this.type === 'advertiser' || this.type === 'seller';
-        }
-        
-    },
+    }, 
     rating: {
         type: Number,
         min: 0,
@@ -149,7 +140,23 @@ const UsersSchema = new Schema({
         type: Boolean,
         default: false
     },
-    
+    promoCodes: [{
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+        },
+        promoCode: {
+            type: String,
+            ref: 'PromoCodes'
+        },
+    }],
+    otp: {
+        type: Number,
+        default: 0
+    },
+    currency: {
+        type: String,
+        default: 'EGP'
+    }
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
     versionKey: false // Disable the "__v" version key

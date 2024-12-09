@@ -1,0 +1,75 @@
+/* src/Shared/Components/ChangePassword.css */
+
+.change-password-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 83.7vh;
+    background-image: url('../changePassword2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 2rem;
+ }
+ .tags-background {
+   min-height: 83.7vh;
+   background-image: url('../BG.jpg');
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+   padding: 2rem;
+}
+
+.historicalPlaces-background {
+   min-height: 100vh !important;
+   /* background-image: url('../template.jpg')  !important; */
+   background-size: cover  !important;
+   background-position: center  !important;
+   background-repeat: no-repeat  !important;
+}
+
+ .change-password-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 1s ease-in-out;
+ }
+ 
+ .change-password-container h4 {
+    text-align: center;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1rem;
+ }
+ 
+ .error-text {
+    margin-top: 0.5rem;
+    color: #d32f2f;
+ }
+ 
+ .success-text {
+    margin-top: 0.5rem;
+    color: #388e3c;
+ }
+ 
+ .submit-button {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: #3f51b5;
+    color: white;
+    transition: background-color 0.3s ease;
+ }
+ 
+ .submit-button:hover {
+    background-color: #303f9f;
+ }
+ .no-scroll {
+   overflow: hidden;
+ }
+ 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import NetworkService from '../../../NetworkService';
 import axios from 'axios';
 import { Alert } from '@mui/material'; 
@@ -14,20 +14,25 @@ import {
   Edit as EditIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
+import { AddShoppingCart } from "@mui/icons-material";
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
 import ArchiveIcon from '@mui/icons-material/Archive';
 import InfoIcon from '@mui/icons-material/Info';
 import ShoppingBasket from '@mui/icons-material/ShoppingBasket';
 import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
 import Avatar from '@mui/material/Avatar';
+import HomePage from '../../../Seller/SellerNavbar';
+import TouristNavbar from '../../../Tourist/TouristNavbar';
+import NodataFound from '../../../No data Found.avif';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+
 const ProductCard = () => {
+  const Userr=localStorage.getItem('User');
    const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
-
   const location = useLocation();
-  const { User } = location.state || {};
+  const { User } = location.state || Userr||{};
   const userId = User ? User._id : adminIdd;
-  console.log("User",userId);
   const [products, setProducts] = useState([]);
   const [maxPrice, setMaxPrice] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,14 +55,12 @@ const ProductCard = () => {
   const [checkProductAdd,setCheckProductAdd]=useState(true);
   const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
-  const [productInterval,setProductInterval]=useState([]);
+  const [productInterval]=useState([]);
   const  Product = location.state?.Product || productInterval||[];
-  console.log("Product",Product);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-//   const {currency } = location.state || {};
   const [productData, setProductData] = useState({
     _id: null,
     name: '',
@@ -69,11 +72,10 @@ const ProductCard = () => {
     picture: null,
   });
   const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
 
   useEffect(()=>{
     handleGetAllProduct();
-  },[checkProductAdd]);
+  },[]);
 
   useEffect(() => {
     if (showSuccessMessage) {
@@ -92,7 +94,10 @@ const ProductCard = () => {
       return () => clearTimeout(timer);
     }
   }, [showErrorMessage]);
-
+  useEffect(() => {
+    console.log("Fetching products...");
+    handleGetAllProduct();
+  }, []);
 // Replace setProductData with setProducts in handleGetAllProduct
 const handleGetAllProduct = async () => {
   try {
@@ -122,15 +127,41 @@ const handleGetAllProduct = async () => {
     console.error('Error fetching products:', error);
   }
 };
+  const handleAddToCart = async (productId) => {
 
-// Ensure `products` is used in JSX rendering, not `productData`
+    const reqbody = {
+        productId: productId,
+        quantity:1
+    }
 
+    const userId = localStorage.getItem("UserId");
 
-  useEffect(() => {
-    console.log("Fetching products...");
-    handleGetAllProduct();
-  }, []);
-  
+    await axios.post(`http://localhost:3030/addCart/${userId}`,reqbody).then((res) => {
+        console.log(res.data);
+        console.log("Added to cart", productId);
+
+        }).catch((err) => {
+        console.log(err);
+        }
+    );
+};
+const handleAddToWishList = async (productId) => {
+
+  const reqbody = {
+      productId: productId
+  }
+
+  const userId = localStorage.getItem("UserId");
+
+  await axios.post(`http://localhost:3030/addWishlist/${userId}`,reqbody).then((res) => {
+      console.log(res.data);
+      console.log("Added to cart", productId);
+
+      }).catch((err) => {
+      console.log(err);
+      }
+  );
+};
 const handleClickPurchase = async (product, selectedQuantity) => {
   try {
     const options = { 
@@ -169,24 +200,17 @@ const handleClickPurchase = async (product, selectedQuantity) => {
     setOpenDialog(false); // Close dialog after purchase
   }
 };
-
-  
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handlePriceChange = (event, newValue) => setPriceRange(newValue);
   const handleRatingMinChange = (event) => setRatingFilter([Number(event.target.value), ratingFilter[1]]);
   const handleRatingMaxChange = (event) => setRatingFilter([ratingFilter[0], Number(event.target.value)]);
-  
   const handleOpenFilterDialog = () => setFilterDialogOpen(true);
   const handleCloseFilterDialog = () => setFilterDialogOpen(false);
-
   const handleOpenCreateDialog = () => setCreateDialogOpen(true);
-
   const handleOpenArchiveDialog = () => setArchiveDialogOpen(true);
   const handleCloseArchiveDialog = () => setArchiveDialogOpen(false);
-
   const handleOpenSalesDialog = () => setSalesDialogOpen(true);
   const handleCloseSalesDialog = () => setSalesDialogOpen(false);
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [openDialog, setOpenDialog] = useState(false);
@@ -199,7 +223,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
       
       const options = {
         apiPath: '/availableQuantityAndSales/{userType}/{productId}/{currency}',
-        urlParam: { userType: userType , productId: productId, currency: "EGP"},
+        urlParam: { userType: userType , productId: productId, currency: User.currency},
       }
       const response = await NetworkService.get(options);
       console.log(response);
@@ -446,6 +470,16 @@ const handleClickPurchase = async (product, selectedQuantity) => {
     );
 
   return (
+
+    <div>
+      <div>
+        {User.type==='seller' ?(
+            <HomePage/>
+        ):(
+          <TouristNavbar/>
+        )}
+      </div>
+    
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
       <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}   
       sx={{
@@ -536,18 +570,24 @@ const handleClickPurchase = async (product, selectedQuantity) => {
         </DialogActions>
       </Dialog>
 
+
+
+
 <Grid container spacing={2}>
-  {filteredProducts.map((product) => (
-          <Grid item xs={12} sm={6} md={3} key={product._id}>
-          <Card elevation={3} sx={{ borderRadius: 2, position: 'relative' }}>
-            <Box sx={{ position: 'relative', height: 140 }}>
-              <CardMedia
-                component="img"
-                height="140"
-                image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
-                alt={product.name}
-              />
-              <Box
+{
+  filteredProducts.length>0 ?(
+    filteredProducts.map((product) => (
+      <Grid item xs={12} sm={6} md={3} key={product._id}>
+      <Card elevation={3} sx={{ borderRadius: 2, position: 'relative' }}>
+        <Box sx={{ position: 'relative', height: 140 }}>
+          <CardMedia
+            component="img"
+            height="140"
+            image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
+            alt={product.name}
+          />
+          {User.type==='Seller' &&(
+                <Box
                 sx={{
                   position: 'absolute',
                   top: 0,
@@ -570,35 +610,35 @@ const handleClickPurchase = async (product, selectedQuantity) => {
                 >
                 Upload an Image
               </Box>
-            </Box>
-    
-            <input
-          type="file"
-          id={`file-input-${product._id}`}  // Unique ID for each product
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={(e) => handleInputChange(e, product._id)}  // Pass the specific product ID
-        />
-    
-    <CardContent>
-  <Typography variant="h6" gutterBottom>{product.name}</Typography>
-  <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Price: ${product.price}</Typography>
-  <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Description: {product.description}</Typography>
-  <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Quantity: {product.originalQuantity}</Typography>
-  <Typography variant="body2" color="text.secondary">Ratings: {product.ratings}</Typography>
+          )}
+       
+        </Box>
+
+        <input
+      type="file"
+      id={`file-input-${product._id}`}  // Unique ID for each product
+      accept="image/*"
+      style={{ display: 'none' }}
+      onChange={(e) => handleInputChange(e, product._id)}  // Pass the specific product ID
+    />
+
+<CardContent>
+<Typography variant="h6" gutterBottom>{product.name}</Typography>
+<Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Description: {product.description}</Typography>
+<Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Price: ${product.price}</Typography>
+
 </CardContent>
 
 <Box
-  sx={{
-    position: 'absolute',
-    top: 140,
-    right: 8,
-    display: 'flex',
-    gap: 1, // Space between icons
-  }}
+sx={{
+position: 'absolute',
+top: 140,
+right: 8,
+display: 'flex',
+gap: 1, // Space between icons
+}}
 >
-
-{(userType||User?.type === 'seller' || User?.type === 'admin') && (
+{(User?.type === 'seller' || User?.type === 'admin') && (
       <Tooltip title="Details" placement="top" arrow>
       <IconButton 
         onClick={() => { 
@@ -612,106 +652,144 @@ const handleClickPurchase = async (product, selectedQuantity) => {
       </IconButton>
     </Tooltip>
 )}
+
 </Box>
 
 <Box
-  sx={{
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    display: 'flex',
-    gap: 2, // Space between icons
-  }}
+sx={{
+position: 'absolute',
+bottom: 8,
+right: 8,
+display: 'flex',
+gap: 2, // Space between icons
+}}
 >
-  {userType==='seller'||userType==='admin' || User?.type === 'seller' || User?.type === 'admin'  ? (
-    <>
-      <Tooltip title="Reviews" placement="top" arrow>
-        <IconButton onClick={
-          () => { 
-          setSelectedProductId(product._id); 
-          handleViewReviews(product._id);
-          }} sx={{ color: '#1976d2',width:'3px' }}>
-          <RateReviewIcon />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Edit" placement="top" arrow>
-        <IconButton onClick={() => handleOpenEditDialog(product)} sx={{ color: '#1976d2',width:'3px' }}>
-          <EditIcon />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Archive" placement="top" arrow>
-        <IconButton 
-          onClick={() => { 
-            setSelectedProductId(product._id); 
-            handleOpenArchiveDialog(); 
-          }} 
-          sx={{ color: 'red',width:'3px' }}
+{userType==='seller'||userType==='admin' || User?.type === 'seller' || User?.type === 'admin'  ? (
+<>
+  <Tooltip title="Reviews" placement="top" arrow>
+    <IconButton onClick={
+      () => { 
+      setSelectedProductId(product._id); 
+      handleViewReviews(product._id);
+      }} sx={{ color: '#1976d2',width:'3px' }}>
+      <RateReviewIcon />
+    </IconButton>
+  </Tooltip>
+  <Tooltip title="Edit" placement="top" arrow>
+    <IconButton onClick={() => handleOpenEditDialog(product)} sx={{ color: '#1976d2',width:'3px' }}>
+      <EditIcon />
+    </IconButton>
+  </Tooltip>
+  <Tooltip title="Archive" placement="top" arrow>
+    <IconButton 
+      onClick={() => { 
+        setSelectedProductId(product._id); 
+        handleOpenArchiveDialog(); 
+      }} 
+      sx={{ color: 'red',width:'3px' }}
+    >
+      <ArchiveIcon />
+    </IconButton>
+  </Tooltip>
+</>
+) : ( 
+<>
+   <Tooltip title="add to Cart" placement="top" arrow>
+    <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
+      <AddShoppingCart />
+    </IconButton>
+  </Tooltip>
+  <Tooltip title="WishList">
+  <IconButton
+        onClick={() => {
+            // Add to cart
+            // console.log("Added to cart", product);
+            handleAddToWishList(product._id);
+        }}
         >
-          <ArchiveIcon />
+        <FavoriteIcon />
         </IconButton>
-      </Tooltip>
-    </>
-  ) : ( 
-    <>
-      <Tooltip title="Reviews" placement="top" arrow>
-        <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
-          <RateReviewIcon />
-        </IconButton>
-      </Tooltip>
+        </Tooltip>
+  <Tooltip title="Reviews" placement="top" arrow>
+    <IconButton onClick={() => handleViewReviews(product._id)} sx={{ color: '#1976d2',width:'30px' }}>
+      <RateReviewIcon />
+    </IconButton>
+  </Tooltip>
 
-      <Tooltip title="Purchase" placement="top" arrow>
-        <IconButton onClick={() => handleQuantity(product)} sx={{ color: '#1976d2',width:'30px' }}>
-          <ShoppingBasket />
-        </IconButton>
-      </Tooltip>
-    </>
-  )}
+  {/* <Tooltip title="Purchase" placement="top" arrow>
+    <IconButton onClick={() => handleQuantity(product)} sx={{ color: '#1976d2',width:'30px' }}>
+      <ShoppingBasket />
+    </IconButton>
+  </Tooltip> */}
+</>
+)}
 </Box>
 <div>
-{showSuccessMessage && (
-        <Alert severity="success" 
-        sx={{
-          position: 'fixed',
-          top: 80, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-      {showErrorMessage && (
-        <Alert severity="error" 
-        sx={{
-          position: 'fixed',
-          top: 60, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {errorMessage}
-        </Alert>
-      )}
+{/* {showSuccessMessage && (
+    <Alert severity="success" 
+    sx={{
+      position: 'fixed',
+      top: 80, // You can adjust this value to provide space between success and error alerts
+      right: 20,
+      width: 'auto',
+      fontSize: '1.2rem', // Adjust the size
+      padding: '16px',
+      zIndex: 9999, // Ensure it's visible above other content
+    }}>
+      {successMessage}
+    </Alert>
+  )}
+  {showErrorMessage && (
+    <Alert severity="error" 
+    sx={{
+      position: 'fixed',
+      top: 60, // You can adjust this value to provide space between success and error alerts
+      right: 20,
+      width: 'auto',
+      fontSize: '1.2rem', // Adjust the size
+      padding: '16px',
+      zIndex: 9999, // Ensure it's visible above other content
+    }}>
+      {errorMessage}
+    </Alert>
+  )} */}
 </div>
-          </Card>
-          {/* Archive Confirmation Dialog */}
-        <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
-          <DialogTitle>Confirm Archive</DialogTitle>
-          <DialogContent>
-            <Typography>Are you sure you want to archive this product?</Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseArchiveDialog} color="primary">Cancel</Button>
-            <Button onClick={() => handleArchiveProduct(selectedProductId)} color="error">Yes, Archive</Button>
-            </DialogActions>
-        </Dialog>
+      </Card>
+      {/* Archive Confirmation Dialog */}
+    <Dialog open={isArchiveDialogOpen} onClose={handleCloseArchiveDialog} fullWidth maxWidth="xs">
+      <DialogTitle>Confirm Archive</DialogTitle>
+      <DialogContent>
+        <Typography>Are you sure you want to archive this product?</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseArchiveDialog} color="primary">Cancel</Button>
+        <Button onClick={() => handleArchiveProduct(selectedProductId)} color="error">Yes, Archive</Button>
+        </DialogActions>
+    </Dialog>
 
-        </Grid>
-  ))}
+    </Grid>
+))
+  ):(
+    <div
+    style={{
+      width: "400px", // Set a fixed width for the GIF
+      height: "400px", // Set a fixed height to match the width
+      position: "relative",
+      marginLeft:'600px',
+      marginTop:'100px',
+      alignContent:'center',
+      alignItems:'center'
+    }}
+  >
+    <img
+      src={NodataFound}
+      width="100%"
+      height="100%"
+
+    ></img>
+  </div>
+  )
+}
 </Grid>
       {/* Create Product Dialog */}
       <Dialog open={createDialogOpen} onClose={handleCloseDialogs} fullWidth>
@@ -840,14 +918,20 @@ const handleClickPurchase = async (product, selectedQuantity) => {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Select Quantity</DialogTitle>
         <DialogContent>
+          <div>
           <TextField
+          sx={{
+              margin:'9px'
+          }}
             label="Quantity"
+            variant="outlined"
             type="number"
-            inputProps={{ min: 1, max: selectedProduct?.originalQuantity }}
             value={quantity}
             onChange={(e) => setQuantity(Math.min(Math.max(1, e.target.value), selectedProduct?.originalQuantity))}
-            fullWidth
+            
           />
+          </div>
+  
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
@@ -942,6 +1026,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
   </Tooltip>
 )}
     </Box>
+    </div>
   );
 };
 

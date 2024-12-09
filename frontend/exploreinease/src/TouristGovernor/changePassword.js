@@ -3,11 +3,15 @@ import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './changePassword.css';
-import { useLocation } from 'react-router-dom'; 
+import { useLocation, useNavigate } from 'react-router-dom'; 
 import NetworkService from "../NetworkService";
-
-
+import TourGuideHP from '../TourGuide/TourGuideNavbar';
+import AHomePage from '../Advertier/AdvertiserNavbar';
+import SHomePage from '../Seller/SellerNavbar';
+import GHomePage from '../TouristGovernor/GovernorNavbar';
+import TouristNavbar from '../Tourist/TouristNavbar';
 const ChangePassword = () => {
+   const User = JSON.parse(localStorage.getItem('User'));
    const adminIdd=localStorage.getItem('UserId');
    const [currentPassword, setCurrentPassword] = useState('');
    const [newPassword, setNewPassword] = useState('');
@@ -18,10 +22,13 @@ const ChangePassword = () => {
    const [error, setError] = useState('');
    const [success, setSuccess] = useState('');
    const location = useLocation();
+   const {userType}=location.state ||{};
+   const navigate=useNavigate();
    const userId  = adminIdd || location.state;
    console.log(userId);
 
    const handleSubmit = async (event) => {
+      
       event.preventDefault();
       setError('');
       setSuccess('');
@@ -30,21 +37,48 @@ const ChangePassword = () => {
          setError('New passwords do not match.');
          return;
       }
-      const options = {
-        apiPath: `/changePassword/${userId}`, // Use template literal to include userId in the path
-        body: {
-           oldPassword: currentPassword,
-           newPassword: newPassword
-        }
-     };
-      const response = await NetworkService.put(options);
-      console.log(response);
-      // TODO: Add password change logic here (API call)
-      setSuccess('Password changed successfully.');
+      try{
+         const options = {
+            apiPath: `/changePassword/${userId}`, // Use template literal to include userId in the path
+            body: {
+               oldPassword: currentPassword,
+               newPassword: newPassword
+            }
+         };
+          const response = await NetworkService.put(options);
+          console.log(response);
+          // TODO: Add password change logic here (API call)
+          setSuccess('Password changed successfully.');
+          navigate('/Login');
+      }catch{
+         setError('No Change');
+
+      }
+  
    };
 
    return (
+      <div>
+      <div>
+      {User?.type==='seller' &&(
+        <SHomePage/>
+      )}
+      {User?.type==='advertiser'&&(
+                <AHomePage/>
+      )}
+      {User?.type==='tourGuide' &&(
+        <TourGuideHP/>
+      )}
+          {User?.type==='tourismGovernor' &&(
+        <GHomePage/>
+      )}
+      {userType==='tourist'&&(
+         <TouristNavbar/>
+      )}
+      
+   </div>
       <Box className="change-password-background">
+       
          <Box className="change-password-container">
             <Typography variant="h4" gutterBottom>
                Change Password
@@ -64,7 +98,7 @@ const ChangePassword = () => {
                               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                               edge="end"
                            >
-                              {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                              {showCurrentPassword ? <Visibility /> : <VisibilityOff />}
                            </IconButton>
                         </InputAdornment>
                      ),
@@ -85,7 +119,7 @@ const ChangePassword = () => {
                               onClick={() => setShowNewPassword(!showNewPassword)}
                               edge="end"
                            >
-                              {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                              {showNewPassword ? <Visibility /> : <VisibilityOff />}
                            </IconButton>
                         </InputAdornment>
                      ),
@@ -106,7 +140,7 @@ const ChangePassword = () => {
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                               edge="end"
                            >
-                              {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                              {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                            </IconButton>
                         </InputAdornment>
                      ),
@@ -121,6 +155,7 @@ const ChangePassword = () => {
             </form>
          </Box>
       </Box>
+      </div>
    );
 };
 

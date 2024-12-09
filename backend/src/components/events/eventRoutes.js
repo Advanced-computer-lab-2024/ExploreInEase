@@ -2,6 +2,10 @@ const express = require('express')
 const mongoose = require('mongoose')
 const router = express.Router()
 const eventController = require('../events/eventController');
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
 
 router.put('/inappropriate', eventController.updateEventFlagController);
 
@@ -2507,17 +2511,17 @@ router.post('/createHistoricalTag/:_id', eventController.createHistoricalTag);
 router.get('/activity/:_id/:userId', eventController.getActivityById);
 router.get('/activity/user/:userId/allActivities', eventController.getAllActivities);
 router.get('/getAllActivities', eventController.getAllActivitiesInDatabase);
-router.post('/activity', eventController.addActivity);
+router.post('/activity', upload.single('file') ,eventController.addActivity);
 router.put('/activity/:_id/:userId', eventController.updateActivity);
 router.delete('/activity/:_id/:userId', eventController.deleteActivity);
 
 router.get('/itinerary/:_id/:userId', eventController.getItineraryById);
 router.get('/itinerary/user/:userId/allItineraries', eventController.getAllItineraries);
-router.post('/itinerary', eventController.createItinerary);
+router.post('/itinerary', upload.single('file'), eventController.createItinerary);
 router.put('/itinerary/:_id/:userId', eventController.updateItinerary);
 router.delete('/itinerary/:_id/:userId', eventController.deleteItinerary);
 
-router.post('/historical-places', eventController.createHistoricalPlace);
+router.post('/historical-places', upload.single('file'), eventController.createHistoricalPlace);
 router.get('/historical-places/:userId/allHistoricalPlaces', eventController.getAllHistoricalPlaces);
 router.get('/historical-places/:_id/:userId', eventController.getHistoricalPlaceById);
 router.put('/historical-places/:_id/:userId', eventController.updateHistoricalPlace);
@@ -2626,6 +2630,17 @@ router.post('/bookTransportation', eventController.bookTransportation);
 //Saif, Tasnim 
 
 router.put('/updateItineraryActivation/:itineraryId/:isActivated/:userId/:userType', eventController.updateItineraryActivation);
+
+
+//Buildo + saif apis 
+router.put('/bookEvent', eventController.bookEvent);
+router.post('/bookEventWithCard', eventController.bookEventWithCard);
+
+
+
+router.get('/notifyUpcomingEvents/:touristId', eventController.notifyUpcomingEvents);
+
+
 
 
 module.exports = router;

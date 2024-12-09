@@ -7,31 +7,30 @@ import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from "react-datepicker";
 import { Alert } from '@mui/material'; 
 import "react-datepicker/dist/react-datepicker.css"; // Import date picker styles
+import TourGuideHP from "./TourGuideNavbar";
 import "./ItineraryList.css"; 
+import NodataFound from '../No data Found.avif';
 
 const ItineraryList = () => {
   const location = useLocation();
   const { TourGuideItinerary, User } = location.state || {};
   console.log("User", User);
-  console.log(TourGuideItinerary);
+  // console.log(TourGuideItinerary);
 
   const userId = User._id;
-  const userType = User.type;
-
-  const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary.Itineraries);
+  const [itinerariesData, setItinerariesData] = useState(TourGuideItinerary?.Itineraries);
   const [activitiesData, setActivitiesData] = useState({});
-  const [selectedActivity, setSelectedActivity] = useState(null);
   const [editItineraryData, setEditItineraryData] = useState(null);
   const [newDateModalOpen, setNewDateModalOpen] = useState(false);
   const [newDate, setNewDate] = useState(null);
   const [removeDateModalOpen, setRemoveDateModalOpen] = useState(false);
   const [dateToRemove, setDateToRemove] = useState(null);
-  const [error, setError] = useState();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  
   useEffect(() => {
     if (showSuccessMessage) {
       const timer = setTimeout(() => {
@@ -140,12 +139,6 @@ const ItineraryList = () => {
     }));
   };
 
-  const handleDateChange = (dates) => {
-    setEditItineraryData((prevData) => ({
-      ...prevData,
-      dateTimeAvailable: dates,
-    }));
-  };
 
   const handleAddDate = () => {
     if (newDate) {
@@ -227,20 +220,13 @@ const ItineraryList = () => {
       }
   };
 
-  const toggleStatus = async (itineraryId, currentStatus) => {
-    const newStatus = currentStatus === 0 ? 1 : 0;
-    try {
-      const options = {
-        apiPath: `/updateItineraryActivation/${itineraryId}/${newStatus}/${userId}/${userType}`,
-      };
-      const response = await NetworkService.put(options);
-    } catch (err) {
-      setError(err.response?.data?.message || 'An unexpected error occurred.');
-    }
-  };
-  
-
   return (
+    <div>
+      <div>
+      <TourGuideHP/>
+      </div>
+      {        itinerariesData.length>0?(
+    
     <div className="itinerary-list-container">
       <h2>Your Created Itineraries</h2>
       <div className="itinerary-cards">
@@ -450,6 +436,30 @@ const ItineraryList = () => {
         </Alert>
       )}
 </div>
+    </div>
+    ):(   <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        backgroundColor: "#f0f0f0", // Optional: Set a background color for better visibility
+      }}
+    >
+      <div
+        style={{
+          width: "200px", // Set a fixed width for the GIF
+          height: "200px", // Set a fixed height to match the width
+          position: "relative",
+        }}
+      >
+        <img
+          src={NodataFound}
+          width="100%"
+          height="100%"
+        ></img>
+      </div>
+    </div>)} 
     </div>
   );
 };

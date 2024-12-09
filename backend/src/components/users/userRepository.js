@@ -4,6 +4,9 @@ const Itinerary = require('../../models/itinerary');
 const Activity = require('../../models/activity');
 const HistoricalPlace = require('../../models/historicalPlace');
 const Product = require('../../models/product');
+const Order = require('../../models/order');
+const PromoCode = require('../../models/promoCode');
+const Notification = require('../../models/notification');
 const fs = require('fs');
 const path = require('path');
 
@@ -104,14 +107,7 @@ const fetchAllUsers = async () => {
     }
 };
 
-// Fetch all tourists
-const fetchAllTourists = async () => {
-    try {
-        return await Tourist.find({});
-    } catch (error) {
-        throw new Error(`Error fetching tourists: ${error.message}`);
-    }
-};
+
 
 
 const updateUserData = async (id, updateData) => {
@@ -414,52 +410,56 @@ const updateHistoricalPlacesComments = async (historicalPlaceId, updateOperation
 
 const login = async (username, password) => {
     try {
+        console.log(`Looking for user with username: ${username}`);
+        
         const user = await Users.findOne({ username });
-        const tourist = await Tourist.findOne({ username });
-        console.log(tourist);
-        console.log(user);
         if (user !== null) {
-            const isMatch = await password === user.password;
+            console.log(`User found in Users table. Checking password for ${username}`);
+            const isMatch = password === user.password;
             if (!isMatch) {
+                console.log('Password mismatch for user');
                 throw new Error('Incorrect username or password');
             }
-            return "user";
-        }
-        else{
-            if(tourist !== null){
-                const isMatch = await password === tourist.password;
+            console.log(`Password matched for user: ${username}`);
+            return { user, userType: user.type };  // Return user object and type
+        } else {
+            console.log(`User not found in Users table. Checking Tourist table for ${username}`);
+            const tourist = await Tourist.findOne({ username });
+            if (tourist !== null) {
+                console.log(`Tourist found. Checking password for ${username}`);
+                const isMatch = password === tourist.password;
                 if (!isMatch) {
+                    console.log('Password mismatch for tourist');
                     throw new Error('Incorrect username or password');
                 }
-                console.log("Tourist: ",tourist);
-                return "tourist";
-            }
-            else{
+                console.log(`Password matched for tourist: ${username}`);
+                return { user: tourist, userType: "tourist" };  // Return tourist object and type
+            } else {
+                console.log(`User not found in either Users or Tourist tables for ${username}`);
                 throw new Error('Incorrect username or password');
             }
         }
-        
     } catch (error) {
-        console.error(`Error logging in: ${error.message}`);
-        return null;
+        console.error(`Error logging in: ${error.message}`);  // Log the error message
+        return { user: null, userType: null };
     }
-}
+};
+
+
 
 const getUserbyUsername = async (username) => {
-        const user = await Users.findOne({ username: username });
-        if(user){
-            return user;
+    const user = await Users.findOne({ username: username });
+    if (user) {
+        return user;
+    } else {
+        const tourist = await Tourist.findOne({ username: username });
+        if (tourist) {
+            return tourist;
+        } else {
+            return null;
         }
-        else{
-            const tourist = await Tourist.findOne({ username: username });
-            if(tourist){
-                return tourist;
-            }
-            else{
-                return null;
-            }
-        }
-}
+    }
+};
 
 const updateUserPassword = async (user, password) => {
     try {
@@ -718,7 +718,434 @@ const updateRequestDeletion = async (userId, type) => {
     return result;
 };
 
+
+const userReport = async (user) => {
+    try {
+        let tourists = [];
+        let eventObject = {};
+        let monthlyReport = {};
+
+        // Predefined array of months for sorting
+        const monthOrder = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        if (user.type === "tourGuide") {
+            const itineraries = await Itinerary.find({ created_by: user._id });
+            const itineraryIds = itineraries.map(itinerary => itinerary._id.toString());
+
+            tourists = await Tourist.find({
+                "itineraryId.id": { $in: itineraryIds }
+            });
+
+            for (const itinerary of itineraries) {
+                const count = tourists.filter(tourist => 
+                    tourist.itineraryId.some(itineraryRef => 
+                        itineraryRef.id.toString() === itinerary._id.toString()
+                    )
+                ).length;
+
+                const createdAt = new Date(itinerary.dateTimeAvailable[0]);
+                const month = createdAt.toLocaleString('default', { month: 'long' });
+
+                if (!eventObject[month]) {
+                    eventObject[month] = [];
+                }
+
+                eventObject[month].push({
+                    name: itinerary.name,
+                    price: itinerary.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        } else if (user.type === "advertiser") {
+            const activities = await Activity.find({ created_by: user._id });
+            const activityIds = activities.map(activity => activity._id.toString());
+
+            tourists = await Tourist.find({
+                "activityId.id": { $in: activityIds }
+            });
+
+            for (const activity of activities) {
+                const count = tourists.filter(tourist => 
+                    tourist.activityId.some(activityRef => 
+                        activityRef.id.toString() === activity._id.toString()
+                    )
+                ).length;
+
+                const createdAt = new Date(activity.date);
+                const month = createdAt.toLocaleString('default', { month: 'long' });
+
+                if (!eventObject[month]) {
+                    eventObject[month] = [];
+                }
+
+                eventObject[month].push({
+                    name: activity.name,
+                    price: activity.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        } else if (user.type === "seller") {
+            const products = await Product.find({ sellerId: user._id });
+            const productIds = products.map(product => product._id.toString());
+
+            const orders = await Order.find({
+                "productsIdsQuantity.id": { $in: productIds }
+            });
+
+            for (const product of products) {
+                const count = orders.reduce((total, order) => {
+                    const productExists = order.productsIdsQuantity.some(
+                        item => item.id.toString() === product._id.toString()
+                    );
+                    return productExists ? total + 1 : total;
+                }, 0);
+
+                const createdAt = new Date(product.createdAt);
+                const month = createdAt.toLocaleString('default', { month: 'long' });
+
+                if (!eventObject[month]) {
+                    eventObject[month] = [];
+                }
+
+                eventObject[month].push({
+                    name: product.name,
+                    price: product.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        }
+
+        // Group filtered tourists by their creation month and year
+        tourists.forEach((tourist) => {
+            const createdAt = new Date(tourist.createdAt);
+            const month = createdAt.toLocaleString('default', { month: 'long' });
+            const year = createdAt.getFullYear();
+            const key = `${month} ${year}`;
+
+            if (!monthlyReport[key]) {
+                monthlyReport[key] = 0;
+            }
+            monthlyReport[key]++;
+        });
+
+        // Transform and sort the monthlyReport into an array of objects
+        const monthlyReportArray = Object.keys(monthlyReport)
+            .map((key) => {
+                const [month, year] = key.split(" ");
+                return {
+                    Month: key,
+                    Tourists: monthlyReport[key],
+                    sortIndex: parseInt(year) * 12 + monthOrder.indexOf(month)
+                };
+            })
+            .sort((a, b) => a.sortIndex - b.sortIndex)
+            .map(({ Month, Tourists }) => ({ Month, Tourists }));
+
+            const formattedEventObject = Object.keys(eventObject).map(month => {
+                const key = user.type === "advertiser" ? "activities" : "itineraries";
+            
+                // Calculate total revenue and extract names
+                const itinerariesOrActivities = eventObject[month];
+                const names = itinerariesOrActivities.map(item => item.name);
+                const totalRevenue = itinerariesOrActivities.reduce((sum, item) => sum + item.price, 0);
+            
+                return {
+                    month,
+                    [key]: names,
+                    totalRevenue
+                };
+            });
+            
+
+
+            const totalTouristinEventObject = formattedEventObject.reduce((total, month) => {
+                const key = user.type === "advertiser" ? "activities" : "itineraries";
+                return total + (month[key] || []).reduce((sum, event) => sum + event.totalPeople, 0);
+            }, 0);
+
+            const sortedEventObject = formattedEventObject.sort((a, b) => {
+                return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+            });
+
+            const totalRevenueinAllMonthes = sortedEventObject.reduce((total, month) => total + month.totalRevenue, 0);
+
+        return {
+            eventObject: sortedEventObject,
+            totalRevenue: totalRevenueinAllMonthes,
+            monthlyReport: monthlyReportArray,
+        };
+    } catch (error) {
+        throw new Error(`Error fetching tourist report: ${error.message}`);
+    }
+};
+
+
+const findUserByEmail = async (email) => {
+    try {
+        const user = await Users.findOne({ email });
+        const tourist = await Tourist.findOne({ email });
+        if (user) {
+            return user;
+        } else if (tourist) {
+            return tourist;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        throw new Error(`Error finding user by email: ${error.message}`);
+    }
+};
+
+const updateUserOtp = async (email, otp) => {
+    try {
+        const user = await findUserByEmail(email);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        user.otp = otp;
+        await user.save();
+    } catch (error) {
+        throw new Error(`Error updating user OTP: ${error.message}`);
+    }
+}
+
+const findSellerById = async (id) => {
+    try {
+        const seller = await Users.findById({_id: id});
+        return seller;
+    } catch (error) {
+        console.error('Error fetching seller by ID:', error);
+        throw error;
+    }
+}
+
+const savePromoCode = async (promoCodes) => {
+    try {
+        const promoCode = {
+            promoCodes: promoCodes
+        }
+        const newPromoCode = new PromoCode(promoCode);
+        const savedPromoCode = await newPromoCode.save();
+        return savedPromoCode;
+    } catch (error) {
+        throw new Error(`Error saving promo code: ${error.message}`);
+    }
+};
+
+const updatePromoCode = async (touristIds, promoCodes) => {
+    try {
+        if (touristIds.length !== promoCodes.length) {
+            throw new Error('Number of tourist IDs and promo codes must be the same');
+        }
+        console.log('Tourist IDs:', touristIds);
+
+        // Validate that all touristIds are valid MongoDB ObjectIDs
+        touristIds.forEach((id) => {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                throw new Error(`Invalid tourist ID: ${id}`);
+            }
+        });
+
+        // Perform updates
+        const updates = touristIds.map(async (touristId, index) => {
+            const promoCode = promoCodes[index].promoCodes; // Fetch promo code directly
+
+            // Find the tourist by ID
+            const tourist = await Tourist.findOne({ _id: touristId });
+            if (!tourist) {
+                throw new Error(`Tourist with ID ${touristId} not found`);
+            }
+
+            // Add the promoCode to the tourist's promoCodes array
+            tourist.promoCodes.push(promoCode ); // Adjust based on your schema
+
+            // Save the updated tourist
+            const updatedTourist = await tourist.save();
+            return updatedTourist;
+        });
+
+        // Wait for all updates to complete
+        const updatedTourists = await Promise.all(updates);
+
+        return updatedTourists; // Return updated tourists
+    } catch (error) {
+        console.error(`Error updating promo codes: ${error.message}`);
+        throw new Error(`Error updating promo codes: ${error.message}`);
+    }
+};
+
+
+const fetchAllPromoCodes = async () => {
+    try {
+        const promoCodes = await PromoCode.find().select('promoCodes');
+        return promoCodes;
+    } catch (error) {
+        throw new Error(`Error fetching first user: ${error.message}`);
+    }
+};
+
+
+
+
+
+
+const addInterestedIn = async (user, eventId, eventType) => {
+    try {
+        const event = {
+            id: eventId,
+            type: eventType
+        };
+        user.interestedIn.push(event);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding interestedIn: ${error.message}`);
+    }
+};
+
+const addAddresses = async (user, address) => {
+    try {
+        user.addresses.push(address);
+        const updatedUser = await user.save();
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error adding address: ${error.message}`);
+    }
+}
+
+const getAddresses = async (user) => {
+    try {
+        return user.addresses;
+    } catch (error) {
+        throw new Error(`Error fetching user addresses: ${error.message}`);
+    }
+}
+
+
+const getAllNotifications = async (user) => {
+    try {
+        const notifications = await Notification.find({ 'user.user_id': user._id });
+        return notifications;
+    } catch (error) {
+        throw new Error(`Error fetching notifications: ${error.message}`);
+    }
+}
+const addBookmark = async (touristId, bookmark) => {
+    try {
+      const tourist = await Tourist.findById(touristId);
+      if (!tourist) {
+        throw new Error("Tourist not found");
+      }
+  
+      tourist.bookmark.push(bookmark);
+      await tourist.save();
+  
+      return {
+        message: "Bookmark added successfully",
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+  
+  const getBookmarks = async (touristId) => {
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      throw new Error("Tourist not found");
+    }
+  
+    // tourist.bookmark is an array of objects: { id: ObjectId, type: String }
+    return tourist.bookmark;
+  };
+
+  const fetchAllTourists = async () => {
+    try {
+        return await Tourist.find({});
+    } catch (error) {
+        throw new Error(`Error fetching tourists: ${error.message}`);
+    }
+};
+const fetchUserStatistics = async () => {
+    try {
+      return await userRepository.getUserStatistics();
+    } catch (error) {
+      throw new Error("Error fetching user statistics");
+    }
+  };
+
+
+
+  const getType = async (id) => {
+    const user = await Users.findOne({ _id: id });
+    const tourist = await Tourist.findOne({ _id: id });
+    if (user) {
+      return user.type;
+    } else if (tourist) {
+      return "tourist";
+    } else {
+      throw new Error("User not found");
+    }
+  };
+
+  const getUserStatistics = async () => {
+    const totalUsers = await Users.countDocuments({ type: { $ne: "admin" } }); // haysheel el admin  users
+    const toatlTourist = await Tourist.countDocuments();
+  
+    const total = totalUsers + toatlTourist;
+  
+    // Count new users grouped by month
+    const pipeline = [
+      {
+        $match: { type: { $ne: "admin" } }, // Exclude admin users
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ];
+  
+    const userStats = await Users.aggregate(pipeline);
+    const touristStats = await Tourist.aggregate(pipeline);
+  
+    //... da merge opertator fa negma3 both user and tourists
+    const combinedStats = [...userStats, ...touristStats].reduce((acc, cur) => {
+      const existing = acc.find((entry) => entry._id === cur._id);
+      if (existing) {
+        existing.count += cur.count;
+      } else {
+        acc.push(cur);
+      }
+      return acc;
+    }, []);
+  
+    return { total, newUsersPerMonth: combinedStats };
+  };
+
+
+
 module.exports = {
+    getType,
+    getUserStatistics,
+    
+    fetchUserStatistics,
+    getAllNotifications,
+    addAddresses,
+    getAddresses,
+    addBookmark,
+    getBookmarks,
+    addInterestedIn,
+    fetchAllPromoCodes,
+    updatePromoCode,
+    savePromoCode,
+    findSellerById,
+    updateUserOtp,
+    findUserByEmail,
     getLoyalityLevel,
     pointsAfterPayment,
     updateTermsAndConditions,
@@ -764,5 +1191,8 @@ module.exports = {
     checkTourGuideItineraryDates,
     checkSellerProductStatus,
     checkAdvertiserActivityStatus,
-    getTouristByUsername
+    getTouristByUsername,
+    userReport,
+    findSellerById
+
 };

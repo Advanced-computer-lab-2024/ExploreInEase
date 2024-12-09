@@ -555,4 +555,37 @@ router.get('/getArchivedProducts/:userId', checkoutController.getArchivedProduct
 router.put('/archiveProduct/:userId/:productId', checkoutController.archiveProduct);
 router.get('/availableQuantityAndSales/:userType/:productId/:currency', checkoutController.availableQuantityAndSales);
 
+// Route for viewing delivered orders
+router.get('/myOrders/:touristId/:currency', checkoutController.viewMyOrders);
+
+router.get('/allNotifications/:userId/:type', checkoutController.getAllNotifications);
+
+
+
+
+// Route for canceling an order
+router.delete('/cancelOrders', checkoutController.cancelOrder);
+
+router.post('/addWishlist/:userId', checkoutController.addWishlist);
+router.get('/getWishlist/:userId', checkoutController.getWishlist);
+router.delete('/removeWishlist/:userId/:productId', checkoutController.removeWishlist);
+
+router.post('/addCart/:userId', checkoutController.addCart);
+router.get('/getCart/:userId', checkoutController.getCart);
+router.delete('/removeCart/:userId/:cartItemId', checkoutController.removeCart);
+router.put('/editQuantityInCart/:userId/:cartItemId/:quantity', checkoutController.editQuantityInCart);
+
+
+
+//Buildo + saif apis 
+
+// Route to create an order
+router.post('/createOrderWalletOrCod', checkoutController.createOrderWalletOrCod);
+
+
+// Route to create an order with card payment
+router.post('/createOrderCard', checkoutController.createOrderWithCard);
+
+
+
 module.exports = router;

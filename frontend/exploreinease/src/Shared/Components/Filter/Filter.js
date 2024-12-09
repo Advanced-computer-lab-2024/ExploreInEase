@@ -16,39 +16,37 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
-  DialogTitle
+  DialogTitle,
+  CardMedia,
+  IconButton
 } from "@mui/material";
+import InfoIcon from '@mui/icons-material/Info';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';  
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import debounce from 'lodash.debounce';
 import NetworkService from "../../../NetworkService";
+import TouristNavbar from "../../../Tourist/TouristNavbar";
 import TravelItemsShareDialog from './TravelItemsShareDialog';
-// Sample data with 'type' field added
-const itemList = [];
-const addressCache = {};
-
-// Role-based fields
+import nodata from "../../../Shared/nodata.avif";
+import NodataFound from "../../../No data Found.avif";
 const roleFields = {
   HistoricalPlaces: ['Tag'],
   Activities: ['budget', 'date', 'category', 'rating'],
   Itineraries: ['budget', 'date', 'preferences', 'language'],
 };
-
-const Filter = () => {
+const Filter = ({ eventsG = [], typeeG = '' }) => {
+  const Userr = JSON.parse(localStorage.getItem('User'));
+  let typeTourist = localStorage.getItem('userType') || '';
+  localStorage.removeItem('userType');
   const location = useLocation();
-  const { events,userId } = location.state || {};
-  console.log("userId",userId);
-  
-  const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
-  console.log(events);
-  console.log(itemList);
-  // console.log("User:",User);
-  const [tagsList, setTagsList] = useState([]);
+  const { userType: userTypee } = location.state || '';
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogData, setDialogData] = useState(null);
+  const { events, userId = null, typee } = location.state || {};
+  const [itemList, setItemList] = useState(events?.flat() || eventsG?.flat() || []); // Flatten the array and ensure it's initialized
   const [filters, setFilters] = useState({
     budget: '',
     price: '',
@@ -61,22 +59,30 @@ const Filter = () => {
     search: '',
     sortBy: '',
   });
+  console.log('events',events);
+  console.log('itemList',itemList);
+  
   const [filteredData, setFilteredData] = useState([]);
   const [role, setRole] = useState('Activities'); // Default to Main to show all
-  const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
-  const [addressCache, setAddressCache] = useState({});
-  const [historicalTags, setHistoricalTags] = useState({});
+  const [addressCache] = useState({});
+  // const [historicalTags, setHistoricalTags] = useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [ shareDialogOpen,setShareDialogOpen] = useState(false);
   const [type, setType] = useState(''); 
   const [budget, setBudget] = useState('');
-  const [currency, setCurrency] = useState('');
+  const [currency, setCurrency] = useState(Userr.currency);
   const [success,setSuccess]=useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [ErrorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [payment, setPayment] = useState('');
+  const [cardNumber, setcardNumber] = useState('');
+  const [expYear, setexpYear] = useState('');
+  const [expMonth, setexpMonth] = useState('');
+  const [cvc, setcvc] = useState('');
+  const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
     if (showSuccessMessage) {
@@ -96,6 +102,56 @@ const Filter = () => {
     }
   }, [showErrorMessage]);
 
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(false); // Hide the alert after 3 seconds
+      }, 7000);
+  
+      return () => clearTimeout(timer); // Clean up the timer on component unmount
+    }
+  }, [success]);
+  useEffect(() => {
+    const initialData = itemList.filter(item =>
+      (role === 'Activities' && item.type === 'Activity') ||
+      (role === 'Itineraries' && item.type === 'Itinerary') ||
+      (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
+    );
+    console.log("itemList",itemList);
+    console.log("initalData",initialData);
+    
+        
+    const adjustedFilteredData = initialData.map((item) => ({
+      ...item,
+      picture: localStorage.getItem(`itinerary-image-${item.id}`) || null,
+    }));
+    console.log(adjustedFilteredData);
+
+    setFilteredData(adjustedFilteredData);
+
+  },[itemList]);
+
+  useEffect(() => {
+    fetchEvents();
+  },[currency]);
+
+  const  fetchEvents=async()=> {
+    try {
+      let currency=Userr.currency;
+      const options = {
+        apiPath: `/upcomingEvents/${Userr.currency}`,
+        urlParam: { currency },
+      };
+
+      const response = await NetworkService.get(options); // Fetch data from NetworkService
+      setItemList(response.flat());
+      console.log(response);
+        // setFilteredData(response.flat());
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      console.log("An unexpected error occurred.");
+    }
+  }
   const handleShareClick = (item) => {
     setSelectedItem(item);
     setShareDialogOpen(true);
@@ -103,54 +159,27 @@ const Filter = () => {
   const handleShareDialogClose = () => {
     setShareDialogOpen(false);
   };
-  const showSuccess=()=>{
-      setSuccess(true);
-      return true;
-  }
-  const getAddressFromCoordinates = async (coordinates) => {
-    if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
-      return 'Location not available';
-    }
-    const [longitude, latitude] = coordinates;
 
-    // Check cache first
-    const cacheKey = `${latitude},${longitude}`;
-    if (addressCache[cacheKey]) {
-      return addressCache[cacheKey];
-    }
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-        {
-          headers: {
-            'Accept-Language': 'en-US,en;q=0.9',
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Geocoding failed');
-      }
+  const handlePayment = (event) => {
 
-      const data = await response.json();
-      
-      // Create a readable address from the response
-      const address = data.display_name.split(',').slice(0, 3).join(',');
-      addressCache[cacheKey] = address;
-
-      // Cache the result
-      setAddressCache(prev => ({
-        ...prev,
-        [cacheKey]: address
-      }));
-
-      return address;
-    } catch (error) {
-      console.error('Error fetching address:', error);
-      // Fallback to coordinate display if geocoding fails
-      return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
-    }
+    const value = event.target.value; // Get the selected value
+    console.log(value);
+    setPayment(value); // Update the state
   };
+
+  const handlePromoCode = (event) => {
+    setPromoCode(event.target.value);
+  };
+  const handlecardNumber = (event) => {
+    setcardNumber(event.target.value);
+  }; const handleexpYear = (event) => {
+    setexpYear(event.target.value);
+  }; const handleexpMonth = (event) => {
+    setexpMonth(event.target.value);
+  }; const handlecvc = (event) => {
+    setcvc(event.target.value);
+  }
+
   const fetchAddressFromAPI = async (latitude, longitude) => {
     try {
       const response = await fetch(
@@ -210,16 +239,6 @@ const Filter = () => {
       </span>
     );
   };
-
-  useEffect(() => {
-    const initialData = itemList.filter(item =>
-      (role === 'Activities' && item.type === 'Activity') ||
-      (role === 'Itineraries' && item.type === 'Itinerary') ||
-      (role === 'HistoricalPlaces' && item.type === 'HistoricalPlace')
-    );
-    setFilteredData(initialData);
-  }, []);
-
   // Handle Input Change
   const handleFilterChange = (e) => {
     setFilters({
@@ -304,7 +323,27 @@ const Filter = () => {
     setFilteredData(data);
   };
 
+  const handleBookmarkClick = async (item) => {
+    const touristId = Userr._id;
+    const id = item.id;  // 'Activity', 'Itinerary', 'HistoricalPlace'
+    const type = item.type;
+    console.log(item);
+    console.log(id);
+    console.log(type);
 
+  
+    try {
+      const options = {
+        apiPath: `/bookmark/${touristId}/${id}/${type}` ,// POST request to the correct endpoint
+      };
+      
+      const response = await NetworkService.post(options);  // Use POST instead of PUT
+      console.log(response);
+    } catch (error) {
+      console.error('Error bookmarking event:', error);
+      alert('Failed to bookmark event. Please try again.');
+    }
+  };
   // Reset Filters
   const resetFilters = () => {
     setFilters({
@@ -336,18 +375,18 @@ const Filter = () => {
     return roleFields[role]?.includes(field);
   };
 
-  const getHistoricalTags = async (tagId) => {
-    try {
-      const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
-      const response = await axios.get(apiPath);
-      const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
-      setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
-      console.log("Historical Tags",historicalTags);
+  // const getHistoricalTags = async (tagId) => {
+  //   try {
+  //     const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
+  //     const response = await axios.get(apiPath);
+  //     const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
+  //     setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
+  //     console.log("Historical Tags",historicalTags);
       
-    } catch (err) {
-      console.log(err.response ? err.message : 'An unexpected error occurred.');
-    }
-  };
+  //   } catch (err) {
+  //     console.log(err.response ? err.message : 'An unexpected error occurred.');
+  //   }
+  // };
   // const getAllTags=async ()=>{
   //   try {
   //     const apiPath = `http://localhost:3030/getAllPreferenceTags/${id}`;  // Ensure this matches your API route
@@ -377,17 +416,17 @@ const Filter = () => {
   //     }
   //   }
   // }
-  const renderTags = (tagId) => {
-    console.log("Historical Tags",historicalTags);
+  // const renderTags = (tagId) => {
+  //   console.log("Historical Tags",historicalTags);
     
-    if (!historicalTags[tagId]) {
-      // Fetch tags only if they haven't been fetched yet
-      getHistoricalTags(tagId);
-      return 'Loading...';
-    }
-    // Display the cached tags
-    return historicalTags[tagId].join(', ');
-  };
+  //   if (!historicalTags[tagId]) {
+  //     // Fetch tags only if they haven't been fetched yet
+  //     getHistoricalTags(tagId);
+  //     return 'Loading...';
+  //   }
+  //   // Display the cached tags
+  //   return historicalTags[tagId].join(', ');
+  // };
   const handleClose = () => {
     setOpen(false);
     setType(null);
@@ -414,145 +453,332 @@ const Filter = () => {
     console.log(selectedItem);
     console.log("type:",type);
 
-    if (selectedItem.type === 'Activity'){
-      try {
-        const options = { apiPath: `/bookEvent`,
-        body:{
-          userType:'tourist',
-           touristId:userId,
-           eventType:'activity',
-           eventID:selectedItem.id,
-           ticketType:'',
-           currency:currency,
-           activityPrice:budget
-        }
-        };
-        const response = await NetworkService.put(options);
+    if (selectedItem.type === 'Activity') {
+      if (payment == 'wallet') {
+        try {
+          const options = {
+            apiPath: `/bookEvent`,
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'activity',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: budget
+            }
+          };
+          const response = await NetworkService.put(options);
           console.log(response);
           setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
           setSuccess(true);
-          setSuccessMessage(response.data.message||"Save Successfully!");
+          setSuccessMessage(response.data.message || "Save Successfully!");
           setShowSuccessMessage(true);
-          
-      } catch (error) {
-        setErrorMessage(error.response?.data?.message || 'An error occurred');
-        setShowErrorMessage(true);
-        console.log('Error fetching historical places:', error);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
+      } else {
+        try {
+          const options = {
+            apiPath: "/bookEventWithCard",
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'activity',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: budget,
+              paymentType: 'card',
+              cardNumber: cardNumber,
+              expMonth: expMonth,
+              expYear: expYear,
+              cvc: cvc
+            }
+          };
+          const response = await NetworkService.post(options);
+          console.log(response);
+          setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+          setSuccess(true);
+          setSuccessMessage(response.data.message || "Save Successfully!");
+          setShowSuccessMessage(true);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
       }
     }
-    else if (selectedItem.type === 'Itinerary'){
-      try {
-        const options = { apiPath: `/bookEvent`,
-        body:{
-          userType:'tourist',
-           touristId:userId,
-           eventType:'itinerary',
-           eventID:selectedItem.id,
-           ticketType:'',
-           currency:'',
-           activityPrice:selectedItem.price
-        }
-        };
-        const response = await NetworkService.put(options);
-        console.log(response);
-        setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
-          setSuccess(true);
 
-      } catch (error) {
-        console.log('Error fetching historical places:', error);
+    else if (selectedItem.type === 'Itinerary') {
+      console.log(selectedItem);
+      if (payment == 'Wallet') {
+        try {
+          const options = {
+            apiPath: `/bookEvent`,
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'itinerary',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: ''
+            }
+          };
+          const response = await NetworkService.put(options);
+          console.log(response);
+          setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+          setSuccess(true);
+          setSuccessMessage(response.data.message || "Save Successfully!");
+          setShowSuccessMessage(true);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
+      } else {
+        try {
+          const options = {
+            apiPath: `/bookEventWithCard`,
+            body: {
+              userType: 'tourist',
+              touristId: userId,
+              eventType: 'itinerary',
+              eventID: selectedItem.id,
+              ticketType: '',
+              currency: currency,
+              activityPrice: '',
+              paymentType: 'card',
+              cardNumber: cardNumber,
+              expMonth: expMonth,
+              expYear: expYear,
+              cvc: cvc
+            }
+          };
+          const response = await NetworkService.post(options);
+          console.log(response);
+          setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+          setSuccess(true);
+          setSuccessMessage(response.data.message || "Save Successfully!");
+          setShowSuccessMessage(true);
+
+        } catch (error) {
+          setErrorMessage(error.response?.data?.message || 'An error occurred');
+          setShowErrorMessage(true);
+          console.log('Error fetching historical places:', error);
+        }
       }
     }
     else {
-      if (type === 'student'){
-        try {
-          const options = { apiPath: `/bookEvent`,
-          body:{
-            userType:'tourist',
-             touristId:userId,
-             eventType:'historicalPlace',
-             eventID:selectedItem.id,
-             ticketType:type,
-             currency:'',
-             activityPrice:selectedItem.ticketPrice[0]
-          }
-          };
-          const response = await NetworkService.put(options);
+      if (type === 'student') {
+        if (payment == 'Wallet') {
+          try {
+            const options = {
+              apiPath: `/bookEvent`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0]
+              }
+            };
+            const response = await NetworkService.put(options);
             console.log(response);
-            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
             setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
 
-        } catch (error) {
-          console.log('Error fetching historical places:', error);
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
+        } else {
+          try {
+            const options = {
+              apiPath: `/bookEventWithCard`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0],
+                paymentType: 'card',
+                cardNumber: cardNumber,
+                expMonth: expMonth,
+                expYear: expYear,
+                cvc: cvc
+
+              }
+            };
+            const response = await NetworkService.post(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+            setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
+
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
         }
       }
-      else if (type ==='native'){
-        try {
-          const options = { apiPath: `/bookEvent`,
-          body:{
-            userType:'tourist',
-             touristId:userId,
-             eventType:'historicalPlace',
-             eventID:selectedItem.id,
-             ticketType:type,
-             currency:'',
-             activityPrice:selectedItem.ticketPrice[1]
-          }
-          };
-          const response = await NetworkService.put(options);
+      else if (type === 'native') {
+        if (payment == 'Wallet') {
+          try {
+            const options = {
+              apiPath: `/bookEvent`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0]
+              }
+            };
+            const response = await NetworkService.put(options);
             console.log(response);
-            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
             setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
 
-        } catch (error) {
-          console.log('Error fetching historical places:', error);
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
+        } else {
+          try {
+            const options = {
+              apiPath: `/bookEventWithCard`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0],
+                paymentType: 'card',
+                cardNumber: cardNumber,
+                expMonth: expMonth,
+                expYear: expYear,
+                cvc: cvc
+              }
+            };
+            const response = await NetworkService.post(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+            setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
+
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
         }
       }
-      else{
-        try {
-          const options = { apiPath: `/bookEvent`,
-          body:{
-            userType:'tourist',
-             touristId:userId,
-             eventType:'historicalPlace',
-             eventID:selectedItem.id,
-             ticketType:type,
-             currency:'',
-             activityPrice:selectedItem.ticketPrice[2]
-          }
-          };
-          const response = await NetworkService.put(options);
+      else {
+        if (payment == 'Wallet') {
+          try {
+            const options = {
+              apiPath: `/bookEvent`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0]
+              }
+            };
+            const response = await NetworkService.put(options);
             console.log(response);
-            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));  
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
             setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
 
-        } catch (error) {
-          console.log('Error fetching historical places:', error);
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
+        } else {
+          try {
+            const options = {
+              apiPath: `/bookEventWithCard`,
+              body: {
+                userType: 'tourist',
+                touristId: userId,
+                eventType: 'historicalPlace',
+                eventID: selectedItem.id,
+                ticketType: type,
+                currency: '',
+                activityPrice: selectedItem.ticketPrice[0],
+                paymentType: 'card',
+                cardNumber: cardNumber,
+                expMonth: expMonth,
+                expYear: expYear,
+                cvc: cvc
+              }
+            };
+            const response = await NetworkService.post(options);
+            console.log(response);
+            setFilteredData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+            setSuccess(true);
+            setSuccessMessage(response.data.message || "Save Successfully!");
+            setShowSuccessMessage(true);
+
+          } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred');
+            setShowErrorMessage(true);
+            console.log('Error fetching historical places:', error);
+          }
         }
       }
-     
+
     }
     handleClose();
   }
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        setSuccess(false); // Hide the alert after 3 seconds
-      }, 7000);
-  
-      return () => clearTimeout(timer); // Clean up the timer on component unmount
-    }
-  }, [success]);
-  // useEffect(() => {
-  //   filteredData.forEach((item) => {
-  //     if (item.type === 'HistoricalPlace' && item.tags && !historicalTags[item.tags]) {
-  //       getHistoricalTags(item.tags);
-  //     }
-  //   });
-  // }, [filteredData, historicalTags]);
-// getHistoricalTags('66ffdb0eb9e6b2a03ef530cc');
-console.log("filteredData",filteredData);
+
+const handleOpenDialog = (data) => {
+  setDialogData(data);
+  setDialogOpen(true);
+};
+
+const handleCloseDialog = () => {
+  setDialogOpen(false);
+  setDialogData(null);
+};
 
   return (
+<div>
+      {
+        userTypee==='tourist' &&(
+          <TouristNavbar/>
+        )
+      }
 
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
      <div style={{ position: 'absolute', top: '20px', right: '20px', width: '300px' }}>
@@ -585,7 +811,7 @@ console.log("filteredData",filteredData);
             fullWidth
             style={{ marginBottom: '20px' }}
           />
-          {role == 'Itineraries' && (
+          {role ==='Itineraries' && (
             <FormControl fullWidth style={{ marginBottom: '20px' }}>
               <InputLabel>Sort By</InputLabel>
               <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
@@ -594,7 +820,7 @@ console.log("filteredData",filteredData);
               </Select>
             </FormControl>
           )}
-          {role == 'Activities' && (
+          {role === 'Activities' && (
             <FormControl fullWidth style={{ marginBottom: '20px' }}>
               <InputLabel>Sort By</InputLabel>
               <Select value={filters.sortBy} onChange={handleFilterChange} name="sortBy">
@@ -702,85 +928,170 @@ console.log("filteredData",filteredData);
           </div>
         </div>
 
-        <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
-          {filteredData.map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item.id}>
-              <Card    
-               style={{
-                 width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '320px' : '380px',
-                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '340px',
-                }}>
-                <CardContent>
-                  <Typography variant="h5" component="div">
-                    {item.name}
-                  </Typography>
-                  {item.type === 'Activity' && (
-                    <>
-                      <Typography ><strong>Budget:</strong>{item.budget}</Typography>
-                      <Typography ><strong>Date:</strong> {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
-                      <Typography><strong>Category:</strong> {item.category}</Typography>
-                      <Typography><strong>Locations:</strong>
-                           { 
-                              <LocationDisplay coordinates={item.location} />
-                         }
-                      </Typography> 
-                       {item.specialDiscount && (
-                        <Typography ><strong>Special Discount:</strong> {item.specialDiscount}%</Typography>
-                      )}
-                    </>
-                  )}
-                  {item.type === 'Itinerary' && (
-                    <>
-                      <Typography ><strong>Activities:</strong> {item.activities.join(', ')}</Typography>
-                      <Typography ><strong>Locations:</strong> {item.locations.join(', ')}</Typography>   
-                      <Typography><strong>Price: </strong>{item.price}</Typography>
-                      <Typography><strong>Rating:</strong> {item.rating.length ==0 ?0:item.rating}</Typography>
-                      <Typography><strong>Language:</strong> {item.language}</Typography>
-                      <Typography><strong>Dropoff location:</strong> {item.dropoffLocation}</Typography>
-                      <Typography><strong>Pickup location:</strong>{item.pickupLocation}</Typography>
-                      <Typography><strong>Directions:</strong> {item.directions}</Typography>
-                    </>
-                  )}
-                  {item.type === 'HistoricalPlace' && (
-                    <>
-                      <Typography><strong>Description:</strong> {item.description}</Typography>
-                      <Typography><strong>Locations:</strong>
-                          { 
-                              <LocationDisplay coordinates={item.location} />
-                         }
-                      </Typography>
-                      <Typography><strong>Opening Hours:</strong> {item.openingHours}</Typography>
-                      <Typography><strong>Students ticket price: </strong> {item.ticketPrice[0]}</Typography>
-                      <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
-                      <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography>
-                      <Typography><strong> Tags:</strong>
-                          {item.tags ? renderTags(item.tags) : 'No tags available'}
-                      </Typography>                      </>
-                  )}
-                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                 <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
+{filteredData.length>0 ?(
+  <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
+  {filteredData.map((item) => (
+    <Grid item xs={12} sm={6} md={4} key={item.id}>
+      <Card    
+        style={{
+          width: 'auto',
+          height: 'auto',
+          margin: '16px',
+          padding: '16px',
+          border: '1px solid #ddd',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '8px',
+      }}
+      onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.2)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+        }}
+        >
+       <CardMedia
+                        component="img"
+                        height="150"
+                        image={item.picture || nodata} // Default placeholder if no image URL is provided
+                        alt={item.name}
+                        style={{ borderRadius: '8px 8px 0 0' }}
+                        />
+        <CardContent>
+        <div style={{ display: 'flex', alignItems: 'center'}}>  
+         <Typography variant="h5" component="div">
+           {item.name}
+         </Typography>
+         <IconButton onClick={() => handleOpenDialog(item)} style={{ marginTop: '8px' }}>
+            <InfoIcon color="primary" />
+          </IconButton>
+          </div>
+          {item.type === 'Activity' && (
+            <>
+              <Typography><strong>Locations:</strong>
+                   { 
+                      <LocationDisplay coordinates={item.location} />
+                 }
+              </Typography> 
+               {item.specialDiscount && (
+                <Typography ><strong>Special Discount:</strong> {item.specialDiscount}%</Typography>
+              )}
+            </>
+          )}
+          {item.type === 'Itinerary' && (
+            <>
+              <Typography ><strong>Activities:</strong> {item.activities.join(', ')}</Typography>
+              <Typography ><strong>Locations:</strong> {item.locations.join(', ')}</Typography>   
+     
+            </>
+          )}
+          {item.type === 'HistoricalPlace' && (
+            <>
+              <Typography><strong>Description:</strong> {item.description}</Typography>
+              <Typography><strong>Locations:</strong>
+                  { 
+                      <LocationDisplay coordinates={item.location} />
+                 }
+              </Typography>
+            </>
+          )}
+              {userTypee==="tourist" && (<>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+               <Button variant="contained" color="primary" onClick={() => handleClickOpen(item)}>
                  Book a ticket 
-                  </Button> 
-                  <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleShareClick(item)}
-                      style={{ marginLeft: '10px' }}
-                    >
-                      Share
-                    </Button>
-                   </div>
-                   {shareDialogOpen && (
+                </Button> 
+              <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleShareClick(item)}
+              style={{ marginLeft: '10px' }}
+             >
+              Share
+            </Button>
+                
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleBookmarkClick(item)}
+              style={{ marginLeft: '10px' }}
+            >
+              Bookmark
+            </Button>
+           </div>
+        
+      
+                       <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+<DialogTitle>More Details  </DialogTitle>
+<DialogContent>
+  {dialogData && (
+    <div>
+      {item.type === 'Activity' && (
+        <>
+          <Typography><strong>Budget:</strong> {dialogData.budget}</Typography>
+          <Typography><strong>Date:</strong> {dialogData.date}</Typography>
+          <Typography><strong>Category:</strong> {dialogData.category}</Typography>
+          {dialogData.specialDiscount && (
+            <Typography><strong>Special Discount:</strong> {dialogData.specialDiscount}%</Typography>
+          )}
+        </>
+      )}
+      {item.type === 'Itinerary' && (
+        <>
+          <Typography><strong>Price:</strong> {dialogData.price}</Typography>
+          <Typography><strong>Rating:</strong> {dialogData.rating.length === 0 ? 0 : dialogData.rating}</Typography>
+          <Typography><strong>Language:</strong> {dialogData.language}</Typography>
+          <Typography><strong>Dropoff location:</strong> {dialogData.dropoffLocation}</Typography>
+          <Typography><strong>Pickup location:</strong> {dialogData.pickupLocation}</Typography>
+          <Typography><strong>Directions:</strong> {dialogData.directions}</Typography>
+        </>
+      )}
+      {item.type === 'HistoricalPlace' && (
+        <>
+          <Typography><strong>Students ticket price:</strong> {dialogData.ticketPrice[0]}</Typography>
+          <Typography><strong>Native ticket price:</strong> {dialogData.ticketPrice[1]}</Typography>
+          <Typography><strong>Foreign ticket price:</strong> {dialogData.ticketPrice[2]}</Typography>
+        </>
+      )}
+    </div>
+  )}
+</DialogContent>
+</Dialog> 
+        </>)}
+          </CardContent>
+
+          </Card> 
+     
+        </Grid>
+          ))}
+
+        </Grid>
+):(
+  <div
+  style={{
+    width: "400px", // Set a fixed width for the GIF
+    height: "400px", // Set a fixed height to match the width
+    position: "relative",
+    marginLeft:'600px',
+    marginTop:'100px',
+    alignContent:'center',
+    alignItems:'center'
+  }}
+>
+  <img
+    src={NodataFound}
+    width="100%"
+    height="100%"
+
+  ></img>
+</div>
+ )}
+      
+
+                {shareDialogOpen && (
                     <TravelItemsShareDialog item={selectedItem} onClose={handleShareDialogClose} />
-                  )}
-                  </CardContent>
-                  </Card>    
-                </Grid>
-                  ))}
-                </Grid>
-
-
-
+                  )} 
+                
                 <Dialog
                   open={open}
                   onClose={handleClose}
@@ -794,110 +1105,378 @@ console.log("filteredData",filteredData);
         <>
           {selectedItem.type === 'Activity' && (
             <>
-              <Typography>Budget for Activity: {selectedItem.budget}</Typography>
-              <div style={{ display: 'flex', alignItems: 'center',  }}>
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your currency:</span>
-                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
-                   <InputLabel id="demo-simple-select-label">currency</InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          value={currency}
-                          label="currency"
-                          onChange={handleChangeCurrency}
+<Typography>Budget for Activity: {selectedItem.budget}</Typography>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your payment type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">payment</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={payment}
+                            label="payment"
+                            onChange={handlePayment}
+                            required
+                          >
+                            <MenuItem value={'Wallet'}>Wallet</MenuItem>
+                            <MenuItem value={'Card'}>Card</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your currency:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">currency</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={currency}
+                            label="currency"
+                            onChange={handleChangeCurrency}
+                            required
+                          >
+                            <MenuItem value={'EGP'}>EGP</MenuItem>
+                            <MenuItem value={'euro'}>euro</MenuItem>
+                            <MenuItem value={'dollar'}>USD</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Write your Budget for the Activity:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="budget"
+                          type="number"
+                          variant="standard"
+                          style={{ width: '150px' }}
                           required
-                        >
-                          <MenuItem value={'EGP'}>EGP</MenuItem>
-                          <MenuItem value={'euro'}>euro</MenuItem>
-                          <MenuItem value={'dollar'}>USD</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </div>
-              <div  style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-                  
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Write your Budget for the Activity:</span>
-                     <TextField id="standard-basic" label="budget" type="number" variant="standard" style={{ width: '150px' }}
-                       required value={budget} onChange={handleBudgetChange}  />  
-                    </div>
-            </>
-          )}
-          {selectedItem.type === 'Itinerary' && (
-            <>
-              <Typography>Activities: {selectedItem.activities.join(', ')}</Typography>
-              {/* Add more Itinerary-specific fields here */}
-            </>
-          )}
-          {selectedItem.type === 'HistoricalPlace' && (
-            <>
-                     <div style={{ display: 'flex', alignItems: 'center',  }}>
-                    <span style={{ marginRight: '8px',marginTop:'10px' }}>Choose your Type:</span>
-                    <FormControl variant="standard" style={{ minWidth: '165px',}}>
-                   <InputLabel id="demo-simple-select-label">Type</InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          value={type}
-                          label="Type"
-                          onChange={handleChange}
+                          value={budget}
+                          onChange={handleBudgetChange}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>PromoCode:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="PromoCode"
+                          type="string"
+                          variant="standard"
+                          style={{ width: '150px' }}
                           required
-                        >
-                          <MenuItem value={'native'}>Native</MenuItem>
-                          <MenuItem value={'student'}>Student</MenuItem>
-                          <MenuItem value={'foreigner'}>Foreigner</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </div>
+                          value={promoCode}
+                          onChange={handlePromoCode}
+                        />
+                      </div>
 
-                            </>
-                          )}
-                        </>
+                      {payment === 'Card' && (
+                        <div style={{ marginTop: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Card Number:</span>
+                            <TextField
+                              id="card-number"
+                              label="Card Number"
+                              variant="standard"
+                              style={{ width: '200px' }}
+                              required
+                              value={cardNumber}
+                              onChange={handlecardNumber}
+                              inputProps={{ maxLength: 16 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>CVV:</span>
+                            <TextField
+                              id="cvv"
+                              label="CVV"
+                              variant="standard"
+                              type="password"
+                              style={{ width: '100px' }}
+                              required
+                              value={cvc}
+                              onChange={handlecvc}
+                              inputProps={{ maxLength: 3 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Expiration Date:</span>
+                            <TextField
+                              id="expiry-month"
+                              label="MM"
+                              variant="standard"
+                              style={{ width: '60px', marginRight: '8px' }}
+                              required
+                              value={expMonth}
+                              onChange={handleexpMonth}
+                              inputProps={{ maxLength: 2 }}
+                            />
+                            <span style={{ marginRight: '8px' }}>/</span>
+                            <TextField
+                              id="expiry-year"
+                              label="YY"
+                              variant="standard"
+                              style={{ width: '60px' }}
+                              required
+                              value={expYear}
+                              onChange={handleexpYear}
+                              inputProps={{ maxLength: 4 }}
+                            />
+                          </div>
+                        </div>
                       )}
-                    <div>
-                    <strong>Important Note:</strong>
-                    <p>*Please note that you must bring a Student ID/Passport/National ID to the location*</p>
-                    </div>
+                    </>
+                  )}
+                  {selectedItem.type === 'Itinerary' && (
+                    <>
+                      <Typography>Activities: {selectedItem.activities.join(', ')}</Typography>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your payment type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">payment</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={payment}
+                            label="payment"
+                            onChange={handlePayment}
+                            required
+                          >
+                            <MenuItem value={'Wallet'}>Wallet</MenuItem>
+                            <MenuItem value={'Card'}>Card</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your currency:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">currency</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={currency}
+                            label="currency"
+                            onChange={handleChangeCurrency}
+                            required
+                          >
+                            <MenuItem value={'EGP'}>EGP</MenuItem>
+                            <MenuItem value={'euro'}>euro</MenuItem>
+                            <MenuItem value={'dollar'}>USD</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
 
-                </DialogContent>
-                <DialogActions>
-                <Button onClick={()=>handleSaveBook(selectedItem,budget,type,currency)} autoFocus>
-                    Book
-                  </Button>
-                  <Button onClick={handleClose}>Close</Button>
-                </DialogActions>
-              </Dialog>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>PromoCode:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="PromoCode"
+                          type="string"
+                          variant="standard"
+                          style={{ width: '150px' }}
+                          required
+                          value={promoCode}
+                          onChange={handlePromoCode}
+                        />
+                      </div>
 
+                      {payment === 'Card' && (
+                        <div style={{ marginTop: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Card Number:</span>
+                            <TextField
+                              id="card-number"
+                              label="Card Number"
+                              variant="standard"
+                              style={{ width: '200px' }}
+                              required
+                              inputProps={{ maxLength: 16 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>CVV:</span>
+                            <TextField
+                              id="cvv"
+                              label="CVV"
+                              variant="standard"
+                              type="password"
+                              style={{ width: '100px' }}
+                              required
+                              inputProps={{ maxLength: 3 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Expiration Date:</span>
+                            <TextField
+                              id="expiry-month"
+                              label="MM"
+                              variant="standard"
+                              style={{ width: '60px', marginRight: '8px' }}
+                              required
+                              inputProps={{ maxLength: 2 }}
+                            />
+                            <span style={{ marginRight: '8px' }}>/</span>
+                            <TextField
+                              id="expiry-year"
+                              label="YY"
+                              variant="standard"
+                              style={{ width: '60px' }}
+                              required
+                              inputProps={{ maxLength: 4 }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {selectedItem.type === 'HistoricalPlace' && (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your Type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={type}
+                            label="Type"
+                            onChange={handleChange}
+                            required
+                          >
+                            <MenuItem value={'native'}>Native</MenuItem>
+                            <MenuItem value={'student'}>Student</MenuItem>
+                            <MenuItem value={'foreigner'}>Foreigner</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your payment type:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">payment</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={payment}
+                            label="payment"
+                            onChange={handlePayment}
+                            required
+                          >
+                            <MenuItem value={'Wallet'}>Wallet</MenuItem>
+                            <MenuItem value={'Card'}>Card</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>Choose your currency:</span>
+                        <FormControl variant="standard" style={{ minWidth: '165px' }}>
+                          <InputLabel id="demo-simple-select-label">currency</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={currency}
+                            label="currency"
+                            onChange={handleChangeCurrency}
+                            required
+                          >
+                            <MenuItem value={'EGP'}>EGP</MenuItem>
+                            <MenuItem value={'euro'}>euro</MenuItem>
+                            <MenuItem value={'dollar'}>USD</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ marginRight: '8px', marginTop: '10px' }}>PromoCode:</span>
+                        <TextField
+                          id="standard-basic"
+                          label="PromoCode"
+                          type="string"
+                          variant="standard"
+                          style={{ width: '150px' }}
+                          required
+                          value={promoCode}
+                          onChange={handlePromoCode}
+                        />
+                      </div>
+
+                      {payment === 'Card' && (
+                        <div style={{ marginTop: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Card Number:</span>
+                            <TextField
+                              id="card-number"
+                              label="Card Number"
+                              variant="standard"
+                              style={{ width: '200px' }}
+                              required
+                              inputProps={{ maxLength: 16 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>CVV:</span>
+                            <TextField
+                              id="cvv"
+                              label="CVV"
+                              variant="standard"
+                              type="password"
+                              style={{ width: '100px' }}
+                              required
+                              inputProps={{ maxLength: 3 }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>Expiration Date:</span>
+                            <TextField
+                              id="expiry-month"
+                              label="MM"
+                              variant="standard"
+                              style={{ width: '60px', marginRight: '8px' }}
+                              required
+                              inputProps={{ maxLength: 2 }}
+                            />
+                            <span style={{ marginRight: '8px' }}>/</span>
+                            <TextField
+                              id="expiry-year"
+                              label="YY"
+                              variant="standard"
+                              style={{ width: '60px' }}
+                              required
+                              inputProps={{ maxLength: 4 }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+              <div>
+                <strong>Important Note:</strong>
+                <p>Please note that you must bring a Student ID/Passport/National ID to the location</p>
               </div>
-{showSuccessMessage && (
-        <Alert severity="success" 
-        sx={{
-          position: 'fixed',
-          top: 80, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-      {/* {showErrorMessage && (
-        <Alert severity="error" 
-        sx={{
-          position: 'fixed',
-          top: 60, // You can adjust this value to provide space between success and error alerts
-          right: 20,
-          width: 'auto',
-          fontSize: '1.2rem', // Adjust the size
-          padding: '16px',
-          zIndex: 9999, // Ensure it's visible above other content
-        }}>
-          {errorMessage}
-        </Alert>
-      )} */}
-            </div>
-          );
-        };
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => handleSaveBook(selectedItem, budget, type, currency)} autoFocus>
+                Book
+              </Button>
+              <Button onClick={handleClose}>Close</Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+        {showSuccessMessage && (
+          <Alert severity="success"
+            sx={{
+              position: 'fixed',
+              top: 80, // You can adjust this value to provide space between success and error alerts
+              right: 20,
+              width: 'auto',
+              fontSize: '1.2rem', // Adjust the size
+              padding: '16px',
+              zIndex: 9999, // Ensure it's visible above other content
+            }}>
+            {successMessage}
+          </Alert>
+        )}
+      </div>
+    </div>
+  );
+};
 export default Filter;
-
-

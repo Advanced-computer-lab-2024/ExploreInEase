@@ -11,6 +11,10 @@ const historicalPlace = require('../../models/historicalPlace');
 const Transportation = require('../../models/transportation');
 const BookedFlight = require('../../models/bookedFlights');
 const BookedHotel = require('../../models/bookedHotels');
+require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const nodemailer = require("nodemailer");
+
 
 const getActivitiesByUserId = async (userId) => {
   return await Activity.find({ created_by: userId })
@@ -437,87 +441,6 @@ const bookedEvents = async ({ touristId }) => {
 };
 
 
-const bookEvent = async (touristId, eventType, eventId, ticketType, currency, activityPrice) => {
-  const tourist = await Tourist.findById(touristId);
-  if (!tourist) {
-    throw new Error('Tourist not found');
-  }
-
-  let eventPrice = 0;
-
-  switch (eventType) {
-    case 'itinerary':
-      const itinerary = await Itinerary.findById(eventId);
-      if (!itinerary) {
-        throw new Error('Itinerary not found');
-      }
-      if (tourist.itineraryId.some(event => event.id.toString() === eventId)) {
-        throw new Error('This itinerary has already been booked.');
-      }
-      eventPrice = itinerary.price;
-      break;
-
-    case 'activity':
-      if (tourist.activityId.some(event => event.id.toString() === eventId)) {
-        throw new Error('This activity has already been booked.');
-      }
-      switch (currency) {
-        case 'euro':
-          eventPrice = (activityPrice * 55).toFixed(2);
-          break;
-        case 'dollar':
-          eventPrice = (activityPrice * 50).toFixed(2);
-          break;
-        case 'EGP':
-          eventPrice = (activityPrice * 1).toFixed(2);
-          break;
-        default:
-          throw new Error('Invalid currency');
-      }
-      break;
-
-    case 'historicalPlace':
-      const historicalPlace = await HistoricalPlace.findById(eventId);
-      if (!historicalPlace) {
-        throw new Error('Historical place not found');
-      }
-      if (tourist.historicalplaceId.some(event => event.id.toString() === eventId)) {
-        throw new Error('This historical place has already been booked.');
-      }
-      eventPrice = ticketType === "student" ? historicalPlace.ticketPrice.student :
-                   ticketType === "native" ? historicalPlace.ticketPrice.native :
-                   historicalPlace.ticketPrice.foreign;
-      break;
-
-    default:
-      throw new Error('Invalid event type');
-  }
-
-  if (tourist.wallet < eventPrice) {
-    throw new Error('Insufficient funds to book this event');
-  }
-
-  
-  tourist.wallet -= eventPrice;
-
-  const eventData = { id: eventId, pricePaid: eventPrice };
-  switch (eventType) {
-    case 'itinerary':
-      tourist.itineraryId.push(eventData);
-      break;
-    case 'activity':
-      tourist.activityId.push(eventData);
-      break;
-    case 'historicalPlace':
-      tourist.historicalplaceId.push(eventData);
-      break;
-  }
-
- 
-  await tourist.save();
-
-  return tourist;
-};
 
 const cancelEvent = async (touristId, eventType, eventId) => {
   const currentTime = new Date();
@@ -842,6 +765,408 @@ const updateItineraryActivation = async (itineraryId, isActivated, userId) => {
   return updatedItinerary; 
 };
 
+
+
+//Buildo + saif apis 
+
+const bookEvent = async (
+  touristId,
+  eventType,
+  eventId,
+  ticketType,
+  currency,
+  activityPrice,
+  promoCode
+) => {
+  const tourist = await Tourist.findById(touristId);
+  if (!tourist) {
+    throw new Error("Tourist not found");
+  }
+
+  let eventPrice = 0;
+  let eventName = ""; // Add this for email purposes
+
+  if (promoCode) {
+    const validPromo = tourist.promoCodes.includes(promoCode);
+    if (validPromo) {
+      tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+      await tourist.save();
+    } else {
+      throw new Error("Invalid promo code");
+    }
+  }
+
+  switch (eventType) {
+    case "itinerary":
+      const itinerary = await Itinerary.findById(eventId);
+      if (!itinerary) {
+        throw new Error("Itinerary not found");
+      }
+      if (
+        tourist.itineraryId.some((event) => event.id.toString() === eventId)
+      ) {
+        throw new Error("This itinerary has already been booked.");
+      }
+      eventPrice = itinerary.price;
+      eventName = itinerary.name; // For email
+
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      }
+      break;
+
+    case "activity":
+      if (tourist.activityId.some((event) => event.id.toString() === eventId)) {
+        throw new Error("This activity has already been booked.");
+      }
+      const activity = await Activity.findById(eventId);
+      if (!activity) {
+        throw new Error("Activity not found");
+      }
+      eventName = activity.name; // For email
+
+      switch (currency) {
+        case "euro":
+          eventPrice = (activityPrice * 55).toFixed(2);
+          break;
+        case "dollar":
+          eventPrice = (activityPrice * 50).toFixed(2);
+          break;
+        case "EGP":
+          eventPrice = (activityPrice * 1).toFixed(2);
+          break;
+        default:
+          throw new Error("Invalid currency");
+      }
+
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      }
+      break;
+
+    case "historicalPlace":
+      const historicalPlace = await HistoricalPlace.findById(eventId);
+      if (!historicalPlace) {
+        throw new Error("Historical place not found");
+      }
+      if (
+        tourist.historicalplaceId.some(
+          (event) => event.id.toString() === eventId
+        )
+      ) {
+        throw new Error("This historical place has already been booked.");
+      }
+      eventPrice =
+        ticketType === "student"
+          ? historicalPlace.ticketPrice.student
+          : ticketType === "native"
+          ? historicalPlace.ticketPrice.native
+          : historicalPlace.ticketPrice.foreign;
+      eventName = historicalPlace.name; // For email
+
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      }
+      break;
+
+    default:
+      throw new Error("Invalid event type");
+  }
+
+  if (tourist.wallet < eventPrice) {
+    throw new Error("Insufficient funds to book this event");
+  }
+
+  tourist.wallet -= eventPrice;
+
+  const eventData = { id: eventId, pricePaid: eventPrice };
+  switch (eventType) {
+    case "itinerary":
+      tourist.itineraryId.push(eventData);
+      break;
+    case "activity":
+      tourist.activityId.push(eventData);
+      break;
+    case "historicalPlace":
+      tourist.historicalplaceId.push(eventData);
+      break;
+  }
+
+  await tourist.save();
+
+  // Send a booking confirmation email
+  await sendBookingConfirmationEmail(
+    tourist.email,
+    tourist.username,
+    eventName,
+    eventPrice
+  );
+
+  return tourist;
+};
+
+
+
+const sendBookingConfirmationEmail = async (
+  touristEmail,
+  username,
+  eventName,
+  pricePaid
+) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "aclproject7@gmail.com",
+      pass: "qodo imkr adxs jred", // Store securely in environment variables
+    },
+  });
+
+  const mailOptions = {
+    from: "aclproject7@gmail.com",
+    to: touristEmail,
+    subject: "Booking Confirmation for Your Event",
+    text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid by wallet: ${pricePaid} EGP\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+
+
+const bookEventWithCard = async (
+  touristId,
+  eventType,
+  eventId,
+  ticketType,
+  currency,
+  activityPrice,
+  cardNumber,
+  expMonth,
+  expYear,
+  cvc,
+  promoCode
+) => {
+  const tourist = await Tourist.findById(touristId);
+  if (!tourist) {
+    throw new Error("Tourist not found");
+  }
+
+  let eventPrice = 0;
+  let eventName = "";
+
+
+
+
+  if (promoCode) {
+    const validPromo = tourist.promoCodes.includes(promoCode); // Correct validation
+    if (validPromo) {
+      // Remove the promo code from the array
+      tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+      await tourist.save(); // Save the updated promo codes
+    } else {
+      throw new Error("Invalid promo code");
+    }
+  }
+
+  // Determine event price and name based on the event type
+  switch (eventType) {
+    case "itinerary":
+      const itinerary = await Itinerary.findById(eventId);
+      if (!itinerary) {
+        throw new Error("Itinerary not found");
+      }
+      if (tourist.itineraryId.some((event) => event.id.toString() === eventId)) {
+        throw new Error("This itinerary has already been booked.");
+      }
+      eventPrice = itinerary.price;
+      eventName = itinerary.name;
+
+      // Apply discount if promo code was valid
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      } 
+
+      break;
+
+    case "activity":
+      if (tourist.activityId.some((event) => event.id.toString() === eventId)) {
+        throw new Error("This activity has already been booked.");
+      }
+      const activity = await Activity.findById(eventId);
+      if (!activity) {
+        throw new Error("Activity not found");
+      }
+      eventName = activity.name;
+
+      switch (currency) {
+        case "euro":
+          eventPrice = (activityPrice * 55).toFixed(2);
+          break;
+        case "dollar":
+          eventPrice = (activityPrice * 50).toFixed(2);
+          break;
+        case "EGP":
+          eventPrice = (activityPrice * 1).toFixed(2);
+          break;
+        default:
+          throw new Error("Invalid currency");
+      }
+
+      // Apply discount if promo code was valid
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      }
+      break;
+
+    case "historicalPlace":
+      const historicalPlace = await HistoricalPlace.findById(eventId);
+      if (!historicalPlace) {
+        throw new Error("Historical place not found");
+      }
+      if (
+        tourist.historicalplaceId.some(
+          (event) => event.id.toString() === eventId
+        )
+      ) {
+        throw new Error("This historical place has already been booked.");
+      }
+      eventPrice =
+        ticketType === "student"
+          ? historicalPlace.ticketPrice.student
+          : ticketType === "native"
+          ? historicalPlace.ticketPrice.native
+          : historicalPlace.ticketPrice.foreign;
+      eventName = historicalPlace.name;
+
+
+      // Apply discount if promo code was valid
+      if (promoCode) {
+        eventPrice *= 0.7; // Apply 30% discount
+      }
+      break;
+
+    default:
+      throw new Error("Invalid event type");
+  }
+
+  try {
+    // Create a Payment Method
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: "card",
+      card: {
+        number: cardNumber,
+        exp_month: expMonth,
+        exp_year: expYear,
+        cvc: cvc,
+      },
+    });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(eventPrice * 100), // Convert to cents
+      currency: "EGP",
+      payment_method: paymentMethod.id,
+      confirm: true, // Automatically confirm the payment
+      description: `Payment for order by Tourist with username: ${tourist.username}`,
+      automatic_payment_methods: {
+        enabled: true, // Enable automatic methods
+        allow_redirects: "never", // Explicitly disable redirect-based methods
+      },
+    });
+    
+
+    // Add the event to the tourist's record
+    const eventData = { id: eventId, pricePaid: eventPrice };
+    switch (eventType) {
+      case "itinerary":
+        tourist.itineraryId.push(eventData);
+        break;
+      case "activity":
+        tourist.activityId.push(eventData);
+        break;
+      case "historicalPlace":
+        tourist.historicalplaceId.push(eventData);
+        break;
+    }
+
+    await tourist.save();
+
+    // Send a payment receipt email
+    const lastFourDigits = paymentMethod.card.last4;
+    await sendPaymentReceiptEmail(
+      tourist.email,
+      tourist.username,
+      eventName,
+      eventPrice,
+      lastFourDigits
+    );
+
+    // Return a success object
+    return {
+      success: true,
+      tourist,
+      paymentStatus: paymentIntent.status,
+    };
+  } catch (error) {
+    throw new Error(`Stripe Payment Failed: ${error.message}`);
+  }
+};
+
+const sendPaymentReceiptEmail = async (
+  touristEmail,
+  username,
+  eventName,
+  pricePaid,
+  lastFourDigits
+) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "aclproject7@gmail.com",
+      pass: "qodo imkr adxs jred", // Ensure this is stored securely (e.g., using environment variables)
+    },
+  });
+
+  const mailOptions = {
+    from: "aclproject7@gmail.com",
+    to: touristEmail,
+    subject: "Payment Receipt for Your Booking",
+    text: `Hello ${username},\n\nThank you for your booking!\n\nEvent Name: ${eventName}\nAmount Paid: ${pricePaid} EGP\nPayment Method: Card ending in ****${lastFourDigits}\n\nWe hope you enjoy your event!\n\nBest regards,\nThe ExploreInEase Team`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+
+
+
+//saif functions 
+const findTourists = async () => {
+  return await Tourist.find();
+};
+
+
+
+
+const findEventById = async (eventId) => {
+  const activity = await Activity.findById(eventId);
+  const historicalPlace = await HistoricalPlace.findById(eventId);
+  const itinerary = await Itinerary.findById(eventId);
+
+  if(activity){
+    return activity;
+  }
+
+  if(historicalPlace){
+    return historicalPlace;
+  }
+
+  if(itinerary){
+    return itinerary;
+  }
+
+  return null;
+}
+
 module.exports = {
   updateItineraryActivation,
   getHistoricalTagDetails,
@@ -898,7 +1223,13 @@ module.exports = {
   setFlagToZeroForItinerary,
   setFlagToZeroForActivity,
   getAllItineraries2,
-  getTouristEmailById
+  getTouristEmailById,
+  bookEventWithCard,
+  findTourists,
+  findEventById
+
+
+
   
 };
 

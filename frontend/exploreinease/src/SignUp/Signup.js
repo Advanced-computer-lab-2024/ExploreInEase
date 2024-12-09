@@ -1,6 +1,6 @@
 // src/components/Signup.js
 import React, { useState } from 'react';
-import { Box, Typography, Button, Tabs, Tab, Paper } from '@mui/material';
+import { Box, Typography, Tabs, Tab, Paper } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom'; // Import the hook
 import TouristSignUp from './TouristSignUp';
@@ -69,6 +69,15 @@ const Signup = () => {
             Login
           </span>
         </LoginPrompt>
+        <LoginPrompt>
+        Back to  
+        <span className="signup-link" style={{ cursor: 'pointer', color: '#007bff', marginLeft: '5px' }} onClick={() => navigate('/')}> Home Page</span>
+
+        </LoginPrompt>
+        {/* <p className="signup-prompt">
+          Back to Home Page
+          <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>
+        </p> */}
       </SignUpCard>
     </BackgroundContainer>
   );

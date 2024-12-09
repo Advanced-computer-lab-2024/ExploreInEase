@@ -1025,7 +1025,30 @@ router.post('/register/:type', userController.registerUser);
 
 router.post('/login', userController.login);
 
+router.post('/forgetPassword', userController.forgetPassword);
+router.get('/verifyOTP/:userId/:otp', userController.verifyOtP);
+router.put('/changePasswordAfterOTP/:userId', userController.changePasswordAfterOTP);
+
+router.get('/getPromoCodes', userController.getPromoCodes);
+
+router.post('/creatingPromoCode', userController.creatingPromoCode);
+router.put('/updatePromoCode', userController.updatePromoCode);
+
+router.put('/addInterestedIn/:_id/:eventId/:eventType', userController.addInterestedIn);
+router.get('/getAllNotifications/:userId', userController.getAllNotifications);
+
 router.put('/requestDeletion/:userId/:type', userController.requestDeletion);
+router.get('/userReport/:userId', userController.userReport);
+
+
+router.post("/bookmark/:touristId/:id/:type", userController.addBookmark);
+router.get("/fetchbookmark/:touristId", userController.getBookmarks);
+
+router.post('/addAddresses/:userId/:address', userController.addAddresses);
+router.get('/getAddresses/:userId', userController.getAddresses);
+router.get('/adminReport/:userId', userController.adminReport);
+router.get('/fetchUserStats/:adminid', userController.getUserStatistics);
+
 
 module.exports = {
     router,

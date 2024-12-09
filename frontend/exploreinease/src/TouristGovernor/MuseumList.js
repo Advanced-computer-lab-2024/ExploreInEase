@@ -12,7 +12,6 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"; // Import Leaflet components
 import L from "leaflet"; // Import Leaflet
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS

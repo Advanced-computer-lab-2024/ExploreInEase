@@ -1,6 +1,8 @@
 const eventRepository = require('../events/eventRepository');
 const User = require('../../models/user'); 
 const HistoricalPlace = require('../../models/historicalPlace');
+const checkoutRepository = require('../checkouts/checkoutRepository');
+const userRepository = require('../users/userRepository');
 const nodemailer = require('nodemailer');
 require('dotenv').config({ path: "src/.env" });
 
@@ -153,6 +155,18 @@ const getFilteredUpcomingActivities = async (filters) => {
   }
 };
 
+function handleBudget(activityPrice, rate) {
+  // Split the price by "-"
+  const [minPrice, maxPrice] = activityPrice.split('-');
+
+  // Convert to numbers and divide by the rate
+  const minBudget = (parseFloat(minPrice) / rate).toFixed(2);
+  const maxBudget = (parseFloat(maxPrice) / rate).toFixed(2);
+
+  // Return the result as a string
+  return { budget:`${minBudget}-${maxBudget}` };
+}
+
 const getAllUpcomingEvents = async (currency) => {
   try {
 
@@ -188,8 +202,7 @@ const getAllUpcomingEvents = async (currency) => {
         date: activity.date,
         time: activity.time,
         location: loc, // Include location details (latitude, longitude)
-        budget: activity.price/rate, // Handle budget or price depending on schema
-        category: category, // Assuming category is populated and has a 'name' field
+        budget: handleBudget(activity.price, rate).budget, // Handle budget or price depending on schemaactivity.price, // Handle budget or price depending on schema        category: category, // Assuming category is populated and has a 'name' field
         tags: activity.tags, // Include tags if applicable
         specialDiscounts: activity.specialDiscounts,
         created_by: activity.created_by,
@@ -696,10 +709,6 @@ const bookedEvents = async (touristId) => {
   ];
 };
 
-const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice) => {
-  
-  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice);
-};
 
 const cancelEventToTourist= async (userType, touristId, eventType, eventId) => {
     
@@ -904,7 +913,139 @@ const updateItineraryActivation = async (itineraryId, isActivated, userId, userT
   return await eventRepository.updateItineraryActivation(itineraryId, isActivated, userId);
 };
 
+
+
+
+
+//Buildo + saif apis 
+
+
+const addEventToTourist = async (userType, touristId, eventType, eventId,ticketType,currency,activityPrice,promoCode) => {
+  
+  return await eventRepository.bookEvent(touristId, eventType, eventId,ticketType,currency,activityPrice,promoCode);
+};
+
+
+const addEventToTouristWithCard = async (userType,touristId,eventType,eventId,ticketType,currency,activityPrice,cardNumber,expMonth,expYear,cvc,promoCode) => {
+  return await eventRepository.bookEventWithCard(
+    touristId,
+    eventType,
+    eventId,
+    ticketType,
+    currency,
+    activityPrice,
+    cardNumber,
+    expMonth,
+    expYear,
+    cvc,promoCode
+  );
+};
+
+
+const notifyUpcomingEvents = async (touristId) => {
+  const tourist = await userRepository.getTouristById(touristId);
+  if (!tourist) {
+    throw new Error('Tourist not found');
+  }
+  const allActivities = tourist.activityId;
+  console.log("ALL ACTIVITIES: ",allActivities);
+  allActivities.map(async (activity) => {
+    const activityDetails = await eventRepository.getActivityById(activity.id);
+    console.log("ACTIVITY DETAILS: ",activityDetails);
+    console.log(activityDetails.date - Date.now());
+    if (activityDetails.date - Date.now() <= 86400000) {
+      const allNotifications = await userRepository.getAllNotifications(tourist);
+      const notificationExists = allNotifications.some(notification => notification.body === `We want to remind you that your activity with name ${activityDetails.name} and id ${activityDetails.id} is on 24 hours!`);
+      if(notificationExists) {
+        return;
+      }
+
+      // Send email to tourist
+      const publisher = tourist;
+      const body = `We want to remind you that your activity with name ${activityDetails.name} and id ${activityDetails.id} is on 24 hours!`;
+        const notificationData = {
+            body,
+            user: {
+                user_id: publisher._id,     // Match the schema key
+                user_type: "tourist"   // Match the schema key
+            }
+        };
+        const notification = await checkoutRepository.addNotification(notificationData);
+        console.log("NOTIFICATION: ",notification);
+
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL2_USER,
+                pass: process.env.EMAIL2_PASS
+            }
+        });
+    
+        console.log("Transporter created");
+        
+        const mailOptions = {
+            from: process.env.EMAIL2_USER,
+            to: publisher.email,
+            subject: 'Reminding of your upcoming activity',
+            text: `Hello ${publisher.username},\n\n${body}\n\nBest regards,\n${process.env.EMAIL2_USER}`
+        };
+    
+        await transporter.sendMail(mailOptions);
+    }
+  });
+
+  const allItineraries = tourist.itineraryId;
+  allItineraries.map(async (itinerary) => {
+    const itineraryDetails = await eventRepository.getItineraryById(itinerary.id);
+
+    if (itineraryDetails.dateTimeAvailable[0] - Date.now() <= 86400000) {
+      const allNotifications = await userRepository.getAllNotifications(tourist);
+      const notificationExists = allNotifications.some(notification => notification.body === `We want to remind you that your itinerary with name ${itineraryDetails.name} and id ${itineraryDetails.id} is on 24 hours!`);
+      if(notificationExists) {
+        return { message: 'Emails already sent before' };
+      }
+
+      // Send email to tourist
+      const publisher = tourist;
+      const body = `We want to remind you that your itinerary with name ${itineraryDetails.name} and id ${itineraryDetails.id} is on 24 hours!`;
+        const notificationData = {
+            body,
+            user: {
+                user_id: publisher._id,     // Match the schema key
+                user_type: "tourist"   // Match the schema key
+            }
+        };
+        const notification = await checkoutRepository.addNotification(notificationData);
+        console.log("NOTIFICATION: ",notification);
+
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL2_USER,
+                pass: process.env.EMAIL2_PASS
+            }
+        });
+    
+        console.log("Transporter created");
+        
+        const mailOptions = {
+            from: process.env.EMAIL2_USER,
+            to: publisher.email,
+            subject: 'Reminding of your upcoming itinerary with id: ' + itinerary._id,
+            text: `Hello ${publisher.username},\n\n${body}\n\nBest regards,\n${process.env.EMAIL2_USER}`
+        };
+    
+        await transporter.sendMail(mailOptions);
+    }
+  });
+
+  return { message: 'Emails sent successfully' };
+};
+
 module.exports = {
+  notifyUpcomingEvents,
   updateItineraryActivation,
   getHistoricalTagDetails,
   getUserEvents,
@@ -954,6 +1095,7 @@ module.exports = {
   bookTransportation,
   sendEventEmail,
   updateEventFlag,
-  getAllEvents
+  getAllEvents,
+  addEventToTouristWithCard
 };
 

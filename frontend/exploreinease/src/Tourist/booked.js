@@ -5,7 +5,6 @@ import {
   InputLabel,
   FormControl,
   Button,
-  Rating,
   Card,
   CardContent,
   Typography,
@@ -16,41 +15,27 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
+
   DialogTitle
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { format, parseISO } from 'date-fns';
 import React, { useState, useEffect } from "react";
 import { differenceInHours } from 'date-fns'; // Use date-fns or a similar library
-import axios from "axios";
 import { Alert } from '@mui/material'; 
 import NetworkService from "../NetworkService";
-// Sample data with 'type' field added
-const itemList = [];
-
-// Role-based fields
-const roleFields = {
-  HistoricalPlaces: ['Tag'],
-  Activities: ['budget', 'date', 'category', 'rating'],
-  Itineraries: ['budget', 'date', 'preferences', 'language'],
-};
-
+import TouristNavbar from "./TouristNavbar";
+import NodataFound from '../No data Found.avif';
 const Booked = () => {
   const location = useLocation();
   const { events ,userId} = location.state || {};
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  console.log(events);
-  
-  const itemList = events?.flat() || []; // Flatten the array and ensure it's initialized
-  console.log("event",events);
-  console.log("user",userId);
-  console.log("itemList",itemList);
-
-  const [filters, setFilters] = useState({
+  const [successMessage, setSuccessMessage] = useState(''); 
+  const [eventss, setEvents] = useState([]); 
+  const itemList = eventss?.flat()||[]; // Flatten the array and ensure it's initialized
+  const [filters] = useState({
     budget: '',
     price: '',
     date: '',
@@ -64,9 +49,7 @@ const Booked = () => {
   });
   const [filteredData, setFilteredData] = useState([]);
   const [role, setRole] = useState('Activities'); // Default to Main to show all
-  const [ratingRange, setRatingRange] = useState([0, 5]); // Added state for rating range
-  const [addressCache, setAddressCache] = useState({});
-  const [historicalTags, setHistoricalTags] = useState({});
+  const [historicalTags] = useState({});
   const [openCancelation, setOpenCancelation] = React.useState(false);
   const [openComment, setOpenComment] = React.useState(false);
   const [openRate, setOpenRate] = React.useState(false);
@@ -74,10 +57,10 @@ const Booked = () => {
   const [rateType, setRateType] = useState(''); 
   const [rating, setRating] = useState(''); 
   const [commentType, setCommentType] = useState(''); 
-  const [comment, setComment] = useState(''); 
-  const [budget, setBudget] = useState('');
-   
-   
+  const [comment, setComment] = useState('');    
+  useEffect(() => {
+    fetchEvents();
+  },[]);
   useEffect(() => {
     if (showSuccessMessage) {
       const timer = setTimeout(() => {
@@ -95,79 +78,80 @@ const Booked = () => {
       return () => clearTimeout(timer);
     }
   }, [showErrorMessage]);
-  const getAddressFromCoordinates = async (coordinates) => {
-    if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
-      return 'Location not available';
-    }
-    const [longitude, latitude] = coordinates;
 
-    // Check cache first
-    const cacheKey = `${latitude},${longitude}`;
-    if (addressCache[cacheKey]) {
-      return addressCache[cacheKey];
-    }
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-        {
-          headers: {
-            'Accept-Language': 'en-US,en;q=0.9',
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Geocoding failed');
-      }
+  // const getAddressFromCoordinates = async (coordinates) => {
+  //   if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+  //     return 'Location not available';
+  //   }
+  //   const [longitude, latitude] = coordinates;
 
-      const data = await response.json();
+  //   // Check cache first
+  //   const cacheKey = `${latitude},${longitude}`;
+  //   if (addressCache[cacheKey]) {
+  //     return addressCache[cacheKey];
+  //   }
+  //   try {
+  //     const response = await fetch(
+  //       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+  //       {
+  //         headers: {
+  //           'Accept-Language': 'en-US,en;q=0.9',
+  //         },
+  //       }
+  //     );
       
-      // Create a readable address from the response
-      const address = data.display_name.split(',').slice(0, 3).join(',');
-      
-      // Cache the result
-      setAddressCache(prev => ({
-        ...prev,
-        [cacheKey]: address
-      }));
+  //     if (!response.ok) {
+  //       throw new Error('Geocoding failed');
+  //     }
 
-      return address;
-    } catch (error) {
-      console.error('Error fetching address:', error);
-      // Fallback to coordinate display if geocoding fails
-      return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
-    }
-  };
+  //     const data = await response.json();
+      
+  //     // Create a readable address from the response
+  //     const address = data.display_name.split(',').slice(0, 3).join(',');
+      
+  //     // Cache the result
+  //     setAddressCache(prev => ({
+  //       ...prev,
+  //       [cacheKey]: address
+  //     }));
+
+  //     return address;
+  //   } catch (error) {
+  //     console.error('Error fetching address:', error);
+  //     // Fallback to coordinate display if geocoding fails
+  //     return `${Math.abs(latitude)}°${latitude >= 0 ? 'N' : 'S'}, ${Math.abs(longitude)}°${longitude >= 0 ? 'E' : 'W'}`;
+  //   }
+  // };
   
-  const LocationDisplay = ({ coordinates }) => {
-    const [address, setAddress] = useState('Loading...');
+  // const LocationDisplay = ({ coordinates }) => {
+  //   const [address, setAddress] = useState('Loading...');
 
-      useEffect(() => {
-        const fetchAddress = async () => {
-          const result = await getAddressFromCoordinates(coordinates);
-          console.log(result);
+  //     useEffect(() => {
+  //       const fetchAddress = async () => {
+  //         const result = await getAddressFromCoordinates(coordinates);
+  //         console.log(result);
           
-          setAddress(result);
-        };
-        fetchAddress();
-      }, [coordinates]);
-    return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {address}
-        <Button
-          size="small"
-          onClick= 
-          {() => {
-            const [longitude,latitude] = coordinates;
-            window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
-          }}
-          style={{ minWidth: 'auto', padding: '4px' }}
-        >
-          🗺️
-        </Button>
-      </span>
-    );
-  };
+  //         setAddress(result);
+  //       };
+  //       fetchAddress();
+  //     }, [coordinates]);
+  //   return (
+  //     <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+  //       {address}
+  //       <Button
+  //         size="small"
+  //         onClick= 
+  //         {() => {
+  //           const [longitude,latitude] = coordinates;
+  //           window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
+  //         }}
+  //         style={{ minWidth: 'auto', padding: '4px' }}
+  //       >
+  //         🗺️
+  //       </Button>
+  //     </span>
+  //   );
+  // };
 
   useEffect(() => {
     const initialData = itemList.filter(item =>
@@ -178,22 +162,21 @@ const Booked = () => {
     setFilteredData(initialData);
   }, []);
 
-  // Handle Input Change
-  const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   // Handle Rating Change
-  const handleRatingChange = (event, newRating) => {
-    setFilters({
-      ...filters,
-      rating: newRating,
-    });
-  };
+const fetchEvents=async()=>{
+  try {
+    const touristId=userId;
+    const options = { 
+      apiPath: `/bookedEvents/${touristId}`
+    };
+    const response = await NetworkService.get(options);
+    setEvents(response);
+    // navigate(`/ViewListofBooked`,{state:{events:response,userId:Userr._id}});          
 
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
   const handleRoleChange = (event, newValue) => {
     setRole(newValue);
     applyFilters(newValue); // Apply filters immediately when changing tabs
@@ -262,48 +245,7 @@ const Booked = () => {
     setFilteredData(data);
   };
 
-
-  // Reset Filters
-  const resetFilters = () => {
-    setFilters({
-      budget: '',
-      price: '',
-      date: '',
-      rating: 0,
-      category: '',
-      language: '',
-      preferences: '',
-      Tag: '',
-      search: '',
-      sortBy: '',
-    });
-
-    // Filter items based on the current role
-    const resetData = itemList.filter(item => {
-      if (role === 'Activities') return item.type === 'Activity';
-      if (role === 'Itineraries') return item.type === 'Itinerary';
-      if (role === 'HistoricalPlaces') return item.type === 'HistoricalPlace';
-      return false;
-    });
-
-    setFilteredData(resetData);
-  };
-
   // Helper function to check if a field should be displayed for the current role
-  const shouldDisplayField = (field) => {
-    return roleFields[role]?.includes(field);
-  };
-
-  const getHistoricalTags = async (tagId) => {
-    try {
-      const apiPath = `http://localhost:3030/getHistoricalTagDetails/${tagId}`;
-      const response = await axios.get(apiPath);
-      const tagsArray = response.data.tags.map((tag) => `${tag.period} ${tag.type}`);
-      setHistoricalTags((prevTags) => ({ ...prevTags, [tagId]: tagsArray }));
-    } catch (err) {
-      console.log(err.response ? err.message : 'An unexpected error occurred.');
-    }
-  };
   const handleClose = () => {
     setOpenCancelation(false);
     setOpenComment(false);
@@ -337,9 +279,6 @@ const Booked = () => {
     const handleCommentValuesChange = (event) => {
       setComment(event.target.value);
     };
-  const handleBudgetChange = (event) => {
-    setBudget(event.target.value);
-  };
   const handleRatingValuesChange=(event)=>{
       setRating(event.target.value);
   }
@@ -578,6 +517,9 @@ const Booked = () => {
   console.log("Filtered Data",filteredData);
 
   return (
+    <div>
+      <TouristNavbar/>
+
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2, display: 'flex', justifyContent: 'center' }}>
         <Tabs value={role} onChange={handleRoleChange}>
@@ -589,111 +531,133 @@ const Booked = () => {
 
       <div style={{ display: 'flex', flex: 1 }}>
         <Grid container spacing={2} style={{ padding: '20px', flex: 1 }}>
-          {filteredData.map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item.id}>
-              <Card    
-               style={{
-                 width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '380px',
-                 height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '450px' : '390px',
-                }}>
-                <CardContent>
-                  <Typography variant="h5" component="div">
-                    {item.name}
-                  </Typography>
-                  {item.type === 'Activity' && (
-                    <>
-                      <Typography color="text.secondary">Budget: {item.budget}</Typography>
-                      <Typography color="text.secondary">Date: {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
-                      <Typography color="text.secondary">Category: {item.category}</Typography>
-                      {/* <Typography color="text.secondary">
-                          Locations: {Array.isArray(item.location[0]) ? 
-                          item.location.map((loc, index) => (
-                            <span key={index}>
-                              <LocationDisplay coordinates={loc} />
-                              {index < item.location.length - 1 ? ', ' : ''}
-                            </span>
-                          )) : 
-                          <LocationDisplay coordinates={item.location} />}
-                      </Typography> */}
-                      <Typography color="text.secondary">Tags: {item.tags}</Typography>
-                      {item.specialDiscount && (
-                        <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
+        {filteredData.length>0?(
+              filteredData.map((item) => (
+                <Grid item xs={12} sm={6} md={4} key={item.id}>
+                  <Card    
+                   style={{
+                     width: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '400px' : '380px',
+                     height: item.type === 'Activity' ? '300px' : item.type === 'Itinerary' ? '450px' : '390px',
+                    }}>
+                    <CardContent>
+                      <Typography variant="h5" component="div">
+                        {item.name}
+                      </Typography>
+                      {item.type === 'Activity' && (
+                        <>
+                          <Typography color="text.secondary">Budget: {item.budget}</Typography>
+                          <Typography color="text.secondary">Date: {format(parseISO(item.date), 'MMMM d, yyyy')}</Typography>
+                          <Typography color="text.secondary">Category: {item.category}</Typography>
+                          {/* <Typography color="text.secondary">
+                              Locations: {Array.isArray(item.location[0]) ? 
+                              item.location.map((loc, index) => (
+                                <span key={index}>
+                                  <LocationDisplay coordinates={loc} />
+                                  {index < item.location.length - 1 ? ', ' : ''}
+                                </span>
+                              )) : 
+                              <LocationDisplay coordinates={item.location} />}
+                          </Typography> */}
+                          <Typography color="text.secondary">Tags: {item.tags}</Typography>
+                          {item.specialDiscount && (
+                            <Typography color="text.secondary">Special Discount: {item.specialDiscount}%</Typography>
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
-                  {item.type === 'Itinerary' && (
-                    <>
-                      <Typography ><strong>Activities: </strong>{item.activities.join(', ')}</Typography>
-                      <Typography ><strong> Locations:</strong> {item.locations.join(', ')}</Typography>
-                      <Typography ><strong> Price:</strong> {item.price}</Typography>
-                      <Typography ><strong> Rating: </strong> {item.rating.length ==0 ?0:item.rating}</Typography>
-                      <Typography ><strong> Language:</strong> {item.language}</Typography>
-                      <Typography ><strong>Dropoff location:</strong>  {item.dropoffLocation}</Typography>
-                      <Typography ><strong>Pickup location:</strong>  {item.pickupLocation}</Typography>
-                      <Typography ><strong>Directions:</strong>  {item.directions}</Typography>
-                    </>
-                  )}
-                  {item.type === 'HistoricalPlace' && (
-                    <>
-                      <Typography ><strong>Description: </strong>{item.description}</Typography>
-                      {/* <Typography color="text.secondary">
-                          Locations: {Array.isArray(item.location[0]) ? 
-                          item.location.map((loc, index) => (
-                            <span key={index}>
-                              <LocationDisplay coordinates={loc} />
-                              {index < item.location.length - 1 ? ', ' : ''}
-                            </span>
-                          )) : 
-                          <LocationDisplay coordinates={item.location} />}
-                      </Typography> */}
-                      <Typography><strong>Opening Hours:</strong> {item.openingHours}</Typography>
-                      <Typography><strong>Students ticket price:</strong> {item.ticketPrice[0]}</Typography>
-                      <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
-                      <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography>
-
-                      <strong>Tags:</strong> {historicalTags[item.tags] ? historicalTags[item.tags].join(', ') : item.tags}
-                      </>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                  {!canCancelBooking(item.startDate) ? (
-                          <Button
-                          style={{ height: "50px", width: "80px", marginRight: '7px' }}
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleClickOpenCancelation(item)}
-                          >
-                          Cancel Booking
-                          </Button>
-                      ) : (
-                          <Button
-                          style={{ height: "50px", width: "80px", marginRight: '7px' }}
-                          variant="contained"
-                          color="primary"
-                          disabled
-                          >
-                          Cancel Booking
-                          </Button>
+                      {item.type === 'Itinerary' && (
+                        <>
+                          <Typography ><strong>Activities: </strong>{item.activities.join(', ')}</Typography>
+                          <Typography ><strong> Locations:</strong> {item.locations.join(', ')}</Typography>
+                          <Typography ><strong> Price:</strong> {item.price}</Typography>
+                          <Typography ><strong> Rating: </strong> {item.rating.length ===0 ?0:item.rating}</Typography>
+                          <Typography ><strong> Language:</strong> {item.language}</Typography>
+                          <Typography ><strong>Dropoff location:</strong>  {item.dropoffLocation}</Typography>
+                          <Typography ><strong>Pickup location:</strong>  {item.pickupLocation}</Typography>
+                          <Typography ><strong>Directions:</strong>  {item.directions}</Typography>
+                        </>
                       )}
+                      {item.type === 'HistoricalPlace' && (
+                        <>
+                          <Typography ><strong>Description: </strong>{item.description}</Typography>
+                          {/* <Typography color="text.secondary">
+                              Locations: {Array.isArray(item.location[0]) ? 
+                              item.location.map((loc, index) => (
+                                <span key={index}>
+                                  <LocationDisplay coordinates={loc} />
+                                  {index < item.location.length - 1 ? ', ' : ''}
+                                </span>
+                              )) : 
+                              <LocationDisplay coordinates={item.location} />}
+                          </Typography> */}
+                          <Typography><strong>Opening Hours:</strong> {item.openingHours}</Typography>
+                          <Typography><strong>Students ticket price:</strong> {item.ticketPrice[0]}</Typography>
+                          <Typography><strong>Native ticket price:</strong> {item.ticketPrice[1]}</Typography>
+                          <Typography><strong>Foreign ticket price:</strong> {item.ticketPrice[2]}</Typography>
+    
+                          <strong>Tags:</strong> {historicalTags[item.tags] ? historicalTags[item.tags].join(', ') : item.tags}
+                          </>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                      {!canCancelBooking(item.startDate) ? (
+                              <Button
+                              style={{ height: "50px", width: "80px", marginRight: '7px' }}
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handleClickOpenCancelation(item)}
+                              >
+                              Cancel Booking
+                              </Button>
+                          ) : (
+                              <Button
+                              style={{ height: "50px", width: "80px", marginRight: '7px' }}
+                              variant="contained"
+                              color="primary"
+                              disabled
+                              >
+                              Cancel Booking
+                              </Button>
+                          )}
+                          
                       
-                  
-                             
-                    <Button style={{width:"80px",marginRight: '7px'}} variant="contained"
-                     color="primary" onClick={() => handleClickOpenComment(item)}>
-                      Comment 
-                   </Button>    
-                        <Button style={{width:"20px"}}
-                          variant="contained" 
-                          color="primary" 
-                          onClick={() => handleClickOpenRate(item)}>
-                             Rate 
-                        </Button> 
-                      
-
-                      </div>
-                  </CardContent>
-                  </Card>    
-                </Grid>
-                  ))}
+                                 
+                        <Button style={{width:"80px",marginRight: '7px'}} variant="contained"
+                         color="primary" onClick={() => handleClickOpenComment(item)}>
+                          Comment 
+                       </Button>    
+                            <Button style={{width:"20px"}}
+                              variant="contained" 
+                              color="primary" 
+                              onClick={() => handleClickOpenRate(item)}>
+                                 Rate 
+                            </Button> 
+                          
+    
+                          </div>
+                      </CardContent>
+                      </Card>    
+                    </Grid>
+                      ))
+                          ):(
+                            <div
+                            style={{
+                              width: "400px", // Set a fixed width for the GIF
+                              height: "400px", // Set a fixed height to match the width
+                              position: "relative",
+                              marginLeft:'600px',
+                              marginTop:'100px',
+                              alignContent:'center',
+                              alignItems:'center'
+                            }}
+                          >
+                            <img
+                              src={NodataFound}
+                              width="100%"
+                              height="100%"
+                    
+                            ></img>
+                          </div>
+                          )}
+      
                 </Grid>
 
 
@@ -971,6 +935,8 @@ const Booked = () => {
     )}
               </div>
             </div>
+                </div>
+
           );
         };
 export default Booked;

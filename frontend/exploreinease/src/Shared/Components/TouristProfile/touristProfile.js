@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
-import { Visibility, VisibilityOff, Email, Phone, Cake, Flag, LocationOn, Wc, Lock } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Email, Phone, Cake, Flag, Lock } from '@mui/icons-material';
 import WorkIcon from '@mui/icons-material/Work';
 import NetworkService from '../../../NetworkService';
 import { useLocation } from 'react-router-dom';
@@ -15,13 +14,12 @@ import bronze from './bronze.png';
 import gold from './gold.png';
 import Tooltip from '@mui/material/Tooltip';
 import Sky from '../Sky2.jpeg';
-import { styled } from '@mui/system';
-
+import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const TouristProfile = (props) => {
   const location = useLocation();
   const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
-  console.log(Tourist);
+  // console.log(Tourist);
 
   const initialData = {
     email: Tourist?.email || '',
@@ -59,7 +57,7 @@ const TouristProfile = (props) => {
     profession: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [level, setLevel] = useState(1);
+  const [setLevel] = useState(1);
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -80,7 +78,6 @@ const TouristProfile = (props) => {
           points: response.data.points,
           password: response.data.password,
           wallet: response.data.wallet,
-          points: response.data.points,
         });
       } catch (error) {
         console.error('Error fetching tourist data:', error);
@@ -155,6 +152,9 @@ const TouristProfile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
+    <div>
+
+    <TouristNavbar/>
     <Box
     sx={{
       backgroundImage: `url(${Sky})`,
@@ -166,6 +166,7 @@ const TouristProfile = (props) => {
       justifyContent: 'center',
     }}
   >
+  
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       {/* Flex container to center the card */}
       <Box
@@ -372,6 +373,8 @@ const TouristProfile = (props) => {
       </Box>
     </LocalizationProvider>
     </Box>
+    </div>
+
   );
 };
 

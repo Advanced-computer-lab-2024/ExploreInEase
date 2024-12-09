@@ -11,7 +11,8 @@ import {
 } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import NetworkService from '../NetworkService';
-
+import TouristNavbar from './TouristNavbar';
+import NodataFound from ".././No data Found.avif";
 const Complaints = () => {
     const location = useLocation();
     const { userId } = location.state || {};
@@ -78,7 +79,7 @@ const Complaints = () => {
         };
 
         try {
-            const response = await NetworkService.post(option);
+             await NetworkService.post(option);
             setSuccessMessage("Complaint added successfully!");
             setShowSuccessMessage(true);
 
@@ -108,6 +109,8 @@ const Complaints = () => {
     
 
     return (
+        <div>
+            <TouristNavbar/>    
         <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>My Complaints</h1>
@@ -128,9 +131,24 @@ const Complaints = () => {
 
             <div style={{ display: 'grid', gap: '16px' }}>
                 {complaints.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '32px', color: '#666' }}>
-                        No complaints available.
-                    </div>
+                         <div
+                         style={{
+                           width: "400px", // Set a fixed width for the GIF
+                           height: "400px", // Set a fixed height to match the width
+                           position: "relative",
+                           marginLeft:'400px',
+                           marginTop:'50px',
+                           alignContent:'center',
+                           alignItems:'center'
+                         }}
+                       >
+                         <img
+                           src={NodataFound}
+                           width="100%"
+                           height="100%"
+                 
+                         ></img>
+                       </div>
                 ) : (
                     complaints.map((complaint, index) => (
                         <div key={index} style={{
@@ -200,6 +218,7 @@ const Complaints = () => {
                     {errorMessage}
                 </Alert>
             )}
+        </div>
         </div>
     );
 };

@@ -1,7 +1,7 @@
 const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
-
+const Order = require('../../models/order');
 
 
 // Controller to handle request for users with requestDeletion set to true
@@ -328,7 +328,6 @@ const updateTourist = async (req, res) => {
     }
 };
 
-
 const checkUsername = (username) => {
     return /^[a-zA-Z0-9]+$/.test(username);
 }
@@ -477,8 +476,6 @@ const changePassword = async (req, res) => {
     }
 };
 
-
-
 const uploadImage = async (req, res) => {
     const { userId } = req.params;
     const file = req.file;
@@ -581,10 +578,6 @@ const acceptTerms = async (req, res) => {
 
 const requestDeletion = async (req, res) => {
     const { userId, type } = req.params;
-    
-
-
-    
     if (!userId || !type) {
         return res.status(400).json({ message: "ID and type are required." });
     }
@@ -597,7 +590,7 @@ const requestDeletion = async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
         
-        res.status(200).json({ message: "Request to be deleted accepted.", user: result });
+        res.status(200).json({ message: "Request is Made.", user: result });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -605,7 +598,7 @@ const requestDeletion = async (req, res) => {
 
 const registerUser = async (req, res) => {
     const { type } = req.params;
-    const { email, username, password, mobileNum, nation, dob,  profession} = req.body;
+    const { email, username, password, mobileNum, nation, dob,  profession, currency} = req.body;
     if (!type) {
         return res.status(400).json({ message: "User type is required" });
     }
@@ -618,17 +611,17 @@ const registerUser = async (req, res) => {
         return res.status(409).json({ message: "Username already exists" });
     }
 
-    const emailExists = await userRepository.checkUserExistsByEmail(email);
-    if (emailExists) {
-        return res.status(409).json({ message: "Email already exists" });
-    }
+    // const emailExists = await userRepository.checkUserExistsByEmail(email);
+    // if (emailExists) {
+    //     return res.status(409).json({ message: "Email already exists" });
+    // }
 
     if(type == 'tourist') {
-        if (!email||!username||!password||!mobileNum||!nation||!dob||!profession) {
+        if (!email||!username||!password||!mobileNum||!nation||!dob||!profession||!currency) {
             return res.status(400).json({ message: "Missing Input" });
         }
         try {
-            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob,  profession);
+            const result = await userService.registerTourist(email, username, password, mobileNum, nation, dob,  profession, currency);
             res.status(result.status).json(result.response);
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -636,11 +629,11 @@ const registerUser = async (req, res) => {
     }
     else{
         if(type == 'tourGuide' || type == 'advertiser' || type == 'seller'){
-            if (!email||!username||!password) {
+            if (!email||!username||!password||!currency) {
                 return res.status(400).json({ message: "Missing Input" });
             }
             try {
-                const result = await userService.registerUser(type, email, username, password);
+                const result = await userService.registerUser(type, email, username, password, currency);
                 res.status(result.status).json(result.response);
             } catch (error) {
                 res.status(500).json({ message: error.message });
@@ -654,6 +647,7 @@ const registerUser = async (req, res) => {
 
 const login = async (req, res) => {
     const { username, password } = req.body;
+
     if (!username || !password) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
@@ -661,29 +655,388 @@ const login = async (req, res) => {
     if (typeof username !== 'string' || typeof password !== 'string') {
         return res.status(400).json({ error: 'Invalid parameter types' });
     }
-    try{
-        const user = await userService.login(username, password);
-        if (!(user == "user") && !(user == "tourist")) {
+
+    try {
+        // Fetch user or tourist from the service
+        const { user, userType } = await userService.login(username, password);   
+        if (!user || !userType) {
             return res.status(404).json({ error: 'Invalid username or password' });
         }
-        let imageUrl;
-        const allUser = await userRepository.getUserbyUsername(username);
-        if(user != 'tourist'){
-            imageUrl = await userRepository.getUserProfilePicture(allUser._id);
-            if(!allUser.termsAndConditions){
-                return res.status(200).json({message: "Terms and Conditions not accepted", user: allUser});
+        let imageUrl = null;
+        if (userType !== 'tourist') {
+            imageUrl = await userRepository.getUserProfilePicture(user._id);
+            // If terms and conditions are not accepted, return the formatted response
+            if (!user.termsAndConditions) {
+                return res.status(200).json({
+                    message: "Terms and Conditions not accepted",
+                    user: {
+                        documents: user.documents,
+                        photo: user.photo,
+                        _id: user._id,
+                        username: user.username,
+                        password: user.password,
+                        email: user.email,
+                        ratingSum: user.ratingSum,
+                        ratingCount: user.ratingCount,
+                        hotline: user.hotline,
+                        type: user.type,
+                        comment: user.comment,
+                        docStatus: user.docStatus,
+                        termsAndConditions: user.termsAndConditions,
+                        requestDeletion: user.requestDeletion,
+                        specialist: user.specialist,
+                        status: user.status,
+                        otp: user.otp,
+                        currency: user.currency,
+                        sellerType: user.sellerType,
+                        promoCodes: user.promoCodes,
+                        createdAt: user.createdAt,
+                        updatedAt: user.updatedAt
+                    },
+                    userType: user.type
+                });
             }
         }
-        console.log("User: ",allUser);
 
-        return res.status(200).json({message: "Logged in Successfully", user: allUser, imageUrl: imageUrl});
+        // If terms and conditions are accepted or for tourists
+        return res.status(200).json({
+            message: "Logged in Successfully",
+            user: {
+                documents: user.documents || {},
+                photo: user.photo || {},
+                _id: user._id,
+                username: user.username,
+                password: user.password,
+                email: user.email,
+                ratingSum: user.ratingSum,
+                ratingCount: user.ratingCount,
+                hotline: user.hotline || '',
+                type: user.type,
+                comment: user.comment || [],
+                docStatus: user.docStatus || '',
+                termsAndConditions: user.termsAndConditions || false,
+                requestDeletion: user.requestDeletion || false,
+                specialist: user.specialist || '',
+                status: user.status || false,
+                otp: user.otp || 0,
+                currency: user.currency || 'EGP',
+                sellerType: user.sellerType || '',
+                promoCodes: user.promoCodes || [],
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt
+            },
+            userType: userType,
+            imageUrl
+        });
+
+    } catch (error) {
+        console.error("Error in login controller:", error.message);  // Log the error message
+        return res.status(500).json({ error: 'An error occurred while logging in the user' });
+    }
+};
+
+const forgetPassword = async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
+
+    try{
+        const user = await userService.forgetPassword(email);
+        if (!user) {
+            return res.status(404).json({ error: 'Invalid email' });
+        }
+        return res.status(200).json({message: "Email sent successfully", status: user.status, response: user.response});
     }catch(error){
         return res.status(500).json({ error: 'An error occurred while logging in the user' });
     }
 }
 
+const creatingPromoCode = async (req, res) => {
+    try{
+        const {promoCode} = req.body;
+        const promoCodeResult = await userService.creatingPromoCode(promoCode);
+        return res.status(200).json({message: "Promo code created successfully", promoCode: promoCodeResult});
+    }catch(error){
+        return res.status(500).json({ error: 'An error occurred while logging in the user' });
+    }
+}
+
+const updatePromoCode = async (req, res) => {
+    try {
+        // Fetch all tourists
+        const tourists = await Tourist.find();
+
+        // Get today's date (month and day only, ignoring year)
+        const today = new Date();
+        const todayMonth = today.getMonth() + 1; // JavaScript months are 0-based
+        const todayDay = today.getDate();
+
+        // Loop through tourists to check if it's their birthday today
+        const birthdayTourists = await Promise.all(tourists.map(async (tourist) => {
+            const birthDate = new Date(tourist.dob);
+            const isBirthdayToday = birthDate.getMonth() + 1 === todayMonth && birthDate.getDate() === todayDay;
+
+            // If it's their birthday, set the flag to true, otherwise false
+            if (isBirthdayToday && !tourist.promoCodeFlag) {
+                // Update the tourist's flag and save
+                tourist.promoCodeFlag = true;
+                await tourist.save();
+
+                // Return the tourist's ID if the flag is true (birthday today)
+                return tourist._id;
+            } else if (!isBirthdayToday && tourist.promoCodeFlag) {
+                // If not their birthday, and the flag was previously true, reset it to false
+                tourist.promoCodeFlag = false;
+                await tourist.save();
+            }
+            // If it's not the tourist's birthday today and the flag is already false, return null
+            return null;
+        }));
+
+        // Filter out nulls (tourists whose birthday isn't today or whose flag was already true)
+        const birthdayTouristIds = birthdayTourists.filter(id => id !== null);
+
+        console.log("Birthday Tourists: ", birthdayTouristIds); // Log the IDs for debugging
+
+        if (birthdayTouristIds.length === 0) {
+            return res.status(404).json({
+                message: "No tourists with birthdays today or all have already received a promo code",
+            });
+        }
+
+        // Pass the tourist IDs to update the promo code
+        const promoCodeResult = await userService.updatePromoCode(birthdayTouristIds);
+
+        return res.status(200).json({
+            message: "Promo code updated successfully",
+            promoCode: promoCodeResult,
+        });
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return res.status(500).json({
+            error: 'An error occurred while updating the promo code',
+        });
+    }
+};
+
+const addInterestedIn = async (req, res) => {
+    const { _id, eventId, eventType } = req.params;
+    if(!eventId || !_id || !eventType){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.addInterestedIn(_id, eventId, eventType);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const changePasswordAfterOTP = async (req, res) => {
+    const { userId } = req.params;
+    const { newPassword } = req.body;
+    if(!userId || !newPassword){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.changePasswordAfterOTP(userId, newPassword);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const verifyOtP = async (req, res) => {
+    const { userId, otp } = req.params;
+    if(!userId || !otp){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.verifyOtP(userId, otp);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+
+const addAddresses = async (req, res) => {
+    const { userId,address } = req.params;
+
+    //console.log(address);
+    //console.log(userId);
+
+    if(!userId || !address){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.addAddresses(userId, address);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const getAddresses = async (req, res) => {
+    const { userId } = req.params;
+    //console.log(userId);
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.getAddresses(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const userReport = async (req, res) => {
+    const { userId } = req.params;
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.userReport(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const getAllNotifications = async (req, res) => {
+    const { userId } = req.params;
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.getAllNotifications(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+const addBookmark = async (req, res) => {
+    const { touristId,id,type } = req.params;
+    console.log(touristId);
+    console.log(type);
+    console.log(id);
+
+    
+  
+    if (!id || !type) {
+      return res.status(400).json({
+        success: false,
+        message: "Both id and type are required",
+      });
+    }
+  
+    try {
+      const bookmark = { id, type };
+      console.log(bookmark);
+      const updatedBookmarks = await userService.addBookmark(touristId, bookmark);
+      res.status(201).json({
+        success: true,
+        data: updatedBookmarks,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+  
+  // Controller method to handle retrieving all bookmarks
+  const getBookmarks = async (req, res) => {
+    const { touristId } = req.params;
+  
+    try {
+      const bookmarks = await userService.getBookmarks(touristId);
+  
+      res.status(200).json({
+        success: true,
+        data: bookmarks,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+  const adminReport = async (req, res) => {
+    const { userId } = req.params;
+    if(!userId){
+        return res.status(400).json({ message: "Missing parameters" });
+    }
+    try {
+        const result = await userService.adminReport(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+const getUserStatistics = async (req, res) => {
+    console.log("ia am here");
+    const { adminid } = req.params;
+    if (!adminid) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin ID is required",
+      });
+    }
+    const type = await userRepository.getType(adminid);
+    if (type !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access. Only admins access.",
+      });
+    }
+    try {
+      // Fetch user statistics
+      const stats = await userService.fetchUserStatistics();
+      res.status(200).json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Error fetching user statistics:", error);
+      res.status(500).json({
+        success: false,
+        error: error.message || "Internal Server Error",
+      });
+    }
+  };
+
+
+  const getPromoCodes = async (req, res) => {
+    try{
+        const promoCodes = await userRepository.fetchAllPromoCodes();
+        return res.status(200).json({message: "Promo codes fetched successfully", promoCodes
+        });
+        }catch(error){
+            return res.status(500).json({ error: 'An error occurred while logging in the user'});
+        }
+    }
+
 
 module.exports = {
+    getPromoCodes,
+    getAllNotifications,
+    getUserStatistics,
+    addInterestedIn,
+    adminReport,
+    changePasswordAfterOTP,
+    verifyOtP,
+    addAddresses,
+    addBookmark,
+    getBookmarks,
+    getAddresses,
+    forgetPassword,
+    creatingPromoCode,
+    updatePromoCode,
     changePassword,
     uploadImage,
     acceptTerms,
@@ -718,5 +1071,7 @@ module.exports = {
   redeemPoints,
   getUsersForDeletion,
   getNotAcceptedUsers,
-  updatingStatusUser
+  updatingStatusUser,
+  userReport,
+
 };

@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NetworkService from '../NetworkService';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+
 import './Signup.css';
 
 const TouristSignUp = () => {
@@ -13,7 +16,8 @@ const TouristSignUp = () => {
     mobileNumber: '',
     nationality: '',
     dob: '',
-    jobOrStudent: ''
+    jobOrStudent: '',
+    currency:'EGP'
   });
 
   const [error, setError] = useState('');
@@ -52,13 +56,15 @@ const TouristSignUp = () => {
           mobileNum: formData.mobileNumber,
           nation: formData.nationality,
           dob: formData.dob,
-          profession: formData.jobOrStudent
+          profession: formData.jobOrStudent,
+          currency:formData.currency
         }
       };
       console.log(options);
       
       const response = await NetworkService.post(options);
-      const tourist = response.tourist;
+      console.log(response);
+      
       setSuccess(response.message);
       navigate(`/Login`);
 
@@ -72,7 +78,21 @@ const TouristSignUp = () => {
   };
 
   return (
+    
     <form onSubmit={handleSubmit}>
+      {success!='' && (
+          <div>   <Alert severity="success">
+          <AlertTitle>Success</AlertTitle>
+         {success}
+        </Alert></div>
+              )}
+     {error!='' && (
+          <div>   <Alert severity="error">
+          <AlertTitle>Error</AlertTitle>
+         {error}
+        </Alert></div>
+              )}
+        
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {success && <p style={{ color: 'green' }}>{success}</p>}
       <label>Email:</label>
@@ -87,9 +107,17 @@ const TouristSignUp = () => {
       <input type="text" name="nationality" value={formData.nationality} onChange={handleInputChange} required />
       <label>Date of Birth:</label>
       <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} required />
-      <label>Job/Student:</label>
+      <label>Currency prefered:</label>
+      <select name="currency" value={formData.currency} onChange={handleInputChange} required>
+        <option value="EGP">EGP</option>
+        <option value="euro">Euro</option>
+        <option value="dollar">Dollar</option>
+      </select>
+      <label>Job/Student:</label> 
       <input type="text" name="jobOrStudent" value={formData.jobOrStudent} onChange={handleInputChange} required />
       <button type="submit">Register as Tourist</button>
+  
+   
     </form>
   );
 };

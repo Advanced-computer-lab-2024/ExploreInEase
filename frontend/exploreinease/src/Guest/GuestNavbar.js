@@ -1,68 +1,95 @@
 // src/Shared/Components/GuestHP.js
+// import { useState,useEffect } from 'react';
 import React from 'react';
 import './GuestHP.css'; // Import the CSS file
-import Avatar from '@mui/material/Avatar';
 import HomePageLogo from '../HomePageLogo.png';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
-import axios from 'axios';
+// import NetworkService from '../NetworkService';
+import "../TouristGovernor/GovernorHomePage.css"; // Import CSS file for styling
+import { FaClipboardList } from 'react-icons/fa';
+import {  FaRegCalendarCheck } from 'react-icons/fa';
 
 const HomePage = () => {
   const navigate = useNavigate(); // Hook for navigation
-  const initialUsername ="TAST";
-  const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-  function handleLoginClick(){
-    navigate('/Login');
-  }
+  // async function fetchEvents() {
+  //   try {
+  //     const options = {
+  //       apiPath: `/upcomingEvents/${currency}`,
+  //       urlParam: { currency: currency },
+  //     };
+  //     console.log("Request Options:", options);
+
+  //     const response = await NetworkService.get(options);
+  //     setEvents(response); // Store the events in the state
+  //     console.log(events);
+      
+  //   } catch (err) {
+  //     if (err.response) {
+  //       console.log("Error Message:", err.message);
+  //       setError(err.message);
+  //     } else {
+  //       console.log("An unexpected error occurred.");
+  //       setError("An unexpected error occurred.");
+  //     }
+
+  //     // Clear error after 3 seconds
+  //     setTimeout(() => setError(""), 3000);
+  //   }
+  // }
+
   async function handleRegisterClick(title){
-    if (title == "Register"){
+    if (title === "Register"){
     navigate('/register'); 
   }
-  else if (title=="Activity Categories"){
-    const response= await axios.get('http://localhost:3030/upcomingEvents')
-    const events=response.data;
-    navigate('/explore',{state:{events:events}});
+  else if (title ==="Login"){
+    navigate('/Login');
+  }else if (title==="Events") {
+    navigate('/Events');
+  }else {
+
   }
   };
   return (
-    <div className="homepage">
-      <nav className="navbar">
-        <div className="logo-container">
-          <img
-            src={HomePageLogo} // Use the imported logo
-            alt="ExploreInEase Logo"
-            className="logo"
-          />
-          <span className="website-name">ExploreInEase</span>
-        </div>
-        <div className="nav-links">
-        <button
-         onClick={() => handleLoginClick()}
-          className="small-button" >
-          Login
-        </button>
-        </div>
-        <div className="nav-links">
-        <button 
-         onClick={() => handleRegisterClick("Register")}
-          className="small-button"
-         >Register</button>
-          <button 
-           className="small-button">Upload Required Documents</button>
-          <button  className="small-button">View Step-by-Step Guide</button>
-          <button onClick={() => handleRegisterClick("Activity Categories")}  className="small-button">Activity Categories</button>
-        </div>
-        <div className="currency-selector">
-          <span className="currency-symbol"></span>
-          <select>
-            <option value="usd">USD ($)</option>
-            <option value="eur">EUR (€)</option>
-            <option value="egp">EGP (ج.م)</option>
-          </select>
-        </div>
-  
-      </nav>
-      {/* Other homepage content goes here */}
+<nav className="navbarMain">
+  <div className="navbar-left">
+    <div className="logo-container">
+      <img
+        src={HomePageLogo} // Replace with your logo's import
+        alt="ExploreInEase Logo"
+        className="logo"
+      />
+      <span className="website-name">ExploreInEase</span>
     </div>
+  </div>
+  <div className="navbar-center">
+    <div className="card-container">
+      {/* Tab 3 - Step-by-Step Guide */}
+      <div
+        className="card-tab"
+        onClick={() => handleRegisterClick('View Step-by-Step Guide')}
+      >
+        <FaClipboardList className="tab-icon" />
+        <span>Step-by-Step Guide</span>
+      </div>
+
+      {/* Tab 4 - Events */}
+      <div className="card-tab" onClick={() => handleRegisterClick('Events')}>
+        <FaRegCalendarCheck className="tab-icon" />
+        <span>Events</span>
+      </div>
+    </div>
+  </div>
+  <div className="navbar-right">
+    <button className="navbar-button" onClick={() => navigate('/login')}>
+      Login
+    </button>
+    <button className="navbar-button register-btn" onClick={() => navigate('/register')}>
+      Register
+    </button>
+  </div>
+</nav>
+
+  
   );
 };
 

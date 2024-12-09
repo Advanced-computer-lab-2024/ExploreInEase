@@ -1,7 +1,6 @@
 // src/components/GuideAdvertiserSignUp.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Make sure to import axios
 import NetworkService from '../NetworkService';
 import './Signup.css';
 
@@ -12,6 +11,7 @@ const GuideAdvertiserSignUp = () => {
     username: '',
     password: '',
     type: 'tourGuide',
+    currency:'EGP',
     id: null,
     taxRegistry: null,
     certificates: null,
@@ -40,6 +40,7 @@ const GuideAdvertiserSignUp = () => {
             username: formData.username,
             password: formData.password,
             type: formData.type,
+            currency:formData.currency
         };
 
         // Step 2: Register user
@@ -105,6 +106,12 @@ const GuideAdvertiserSignUp = () => {
       <input type="text" name="username" value={formData.username} onChange={handleInputChange} required />
       <label>Password:</label>
       <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
+      <label>Currency prefered:</label>
+      <select name="currency" value={formData.currency} onChange={handleInputChange} required>
+        <option value="EGP">EGP</option>
+        <option value="euro">Euro</option>
+        <option value="dollar">Dollar</option>
+      </select>
       <label>Select Role:</label>
       <select name="type" value={formData.type} onChange={handleInputChange} required>
         <option value="tourGuide">Tour Guide</option>

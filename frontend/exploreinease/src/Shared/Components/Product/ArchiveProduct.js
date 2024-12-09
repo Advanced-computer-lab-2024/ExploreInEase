@@ -1,26 +1,23 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import NetworkService from '../../../NetworkService';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import {
   TextField, InputAdornment, IconButton, Grid, Card, CardMedia, CardContent,
-  DialogContentText, Fab, Dialog, DialogTitle, DialogContent, DialogActions,
+  DialogContentText, Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Typography, Slider, Box,Tooltip 
 } from '@mui/material';
 import {
   Search as SearchIcon,
   FilterList as FilterListIcon,
-  Edit as EditIcon,
-  Add as AddIcon,
 } from '@mui/icons-material';
 import { Alert } from '@mui/material'; 
 import RateReviewIcon from '@mui/icons-material/RateReview'; // Import review icon
 import ArchiveIcon from '@mui/icons-material/Unarchive';
 import Avatar from '@mui/material/Avatar';
 import SwapVert from '@mui/icons-material/SwapVert'; // Import the Sort icon
-
-
+import HomePage from '../../../Seller/SellerNavbar';
+import NodataFound from '../../../No data Found.avif';
 
 
 
@@ -46,20 +43,20 @@ const ArchiveProduct = () => {
 
 
   const [selectedProductName, setSelectedProductName] = useState('');
-  const [selectedProductPrice, setSelectedProductPrice] = useState('');
-  const [selectedProductSales, setSelectedProductSales] = useState('');
-  const [selectedProductQuantity, setSelectedProductQuantity] = useState('');
+  const [ setSelectedProductPrice] = useState('');
+  const [ setSelectedProductSales] = useState('');
+  const [ setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
   const [productInterval,setProductInterval]=useState([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [checkProductArchived,setCheckProductArchived]=useState(true);
+  const [checkProductArchived]=useState(true);
   const Product = location.state?.Product || productInterval;
 
 
-  const [productData, setProductData] = useState({
+  const [ setProductData] = useState({
     _id: null,
     name: '',
     price: '',
@@ -69,8 +66,6 @@ const ArchiveProduct = () => {
     originalQuantity: '',
     picture: null,
   },);
-  const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
   useEffect(()=>{
     handleGetAllProduct();
   },[checkProductArchived]);
@@ -242,6 +237,10 @@ const ArchiveProduct = () => {
     );
 
   return (
+    <div>
+    <div>
+      <HomePage/>
+    </div>
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
       <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}      
        sx={{
@@ -332,92 +331,114 @@ const ArchiveProduct = () => {
       </Dialog>
 
 <Grid container spacing={2}>
-  {filteredProducts.map((product) => (
-          <Grid item xs={12} sm={6} md={3} key={product._id}>
-          <Card elevation={3} sx={{ borderRadius: 2, position: 'relative' }}>
-            <Box sx={{ position: 'relative', height: 140 }}>
-              <CardMedia
-                component="img"
-                height="140"
-                image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
-                alt={product.name}
-              />
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  color: 'white',
-                  cursor: 'pointer',
-                  opacity: 0,
-                  transition: 'opacity 0.3s ease',
-                  '&:hover': {
-                    opacity: 1,
-                  },
-                }}
-                onClick={() => document.getElementById(`file-input-${product._id}`).click()}
-                >
-                Upload an Image
-              </Box>
-            </Box>
-    
-            <input
-          type="file"
-          id={`file-input-${product._id}`}  // Unique ID for each product
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={(e) => handleInputChange(e, product._id)}  // Pass the specific product ID
-        />
-    
-            <CardContent>
-              <Typography variant="h6" gutterBottom>{product.name}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Price: ${product.price}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Description: {product.description}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Quantity: {product.originalQuantity}</Typography>
-              <Typography variant="body2" color="text.secondary">Ratings: {product.ratings}</Typography>
-            </CardContent>
-    
-            {/* Icon Buttons at the bottom-right corner */}
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 8,
-                right: 8,
-                display: 'flex',
-                gap: 1, // Space between icons
-              }}
+{filteredProducts.length>0?(
+    filteredProducts.map((product) => (
+      <Grid item xs={12} sm={6} md={3} key={product._id}>
+      <Card elevation={3} sx={{ borderRadius: 2, position: 'relative' }}>
+        <Box sx={{ position: 'relative', height: 140 }}>
+          <CardMedia
+            component="img"
+            height="140"
+            image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
+            alt={product.name}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              color: 'white',
+              cursor: 'pointer',
+              opacity: 0,
+              transition: 'opacity 0.3s ease',
+              '&:hover': {
+                opacity: 1,
+              },
+            }}
+            onClick={() => document.getElementById(`file-input-${product._id}`).click()}
             >
-              <Tooltip title="Reviews" placement="top" arrow>
-        <IconButton onClick={
-          () => { 
-          setSelectedProductId(product._id); 
-          handleViewReviews(product._id);
-          }} sx={{ color: '#1976d2',width:'1px' }}>
-          <RateReviewIcon />
-        </IconButton>
-      </Tooltip>
-              <Tooltip title="Unarchive" placement="top" arrow>
-                <IconButton 
-                
-                  onClick={() => { 
-                    setSelectedProductId(product._id); 
-                    handleOpenArchiveDialog(); 
-                  }} 
-                  sx={{ color: 'red',width:'1px' }}
-                >
-                  <ArchiveIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Card>
-        </Grid>
-  ))}
+            Upload an Image
+          </Box>
+        </Box>
+
+        <input
+      type="file"
+      id={`file-input-${product._id}`}  // Unique ID for each product
+      accept="image/*"
+      style={{ display: 'none' }}
+      onChange={(e) => handleInputChange(e, product._id)}  // Pass the specific product ID
+    />
+
+        <CardContent>
+          <Typography variant="h6" gutterBottom>{product.name}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Price: ${product.price}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Description: {product.description}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 1 }}>Quantity: {product.originalQuantity}</Typography>
+          <Typography variant="body2" color="text.secondary">Ratings: {product.ratings}</Typography>
+        </CardContent>
+
+        {/* Icon Buttons at the bottom-right corner */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 8,
+            right: 8,
+            display: 'flex',
+            gap: 1, // Space between icons
+          }}
+        >
+          <Tooltip title="Reviews" placement="top" arrow>
+    <IconButton onClick={
+      () => { 
+      setSelectedProductId(product._id); 
+      handleViewReviews(product._id);
+      }} sx={{ color: '#1976d2',width:'1px' }}>
+      <RateReviewIcon />
+    </IconButton>
+  </Tooltip>
+          <Tooltip title="Unarchive" placement="top" arrow>
+            <IconButton 
+            
+              onClick={() => { 
+                setSelectedProductId(product._id); 
+                handleOpenArchiveDialog(); 
+              }} 
+              sx={{ color: 'red',width:'1px' }}
+            >
+              <ArchiveIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Card>
+    </Grid>
+))
+):(
+  <div
+  style={{
+    width: "400px", // Set a fixed width for the GIF
+    height: "400px", // Set a fixed height to match the width
+    position: "relative",
+    marginLeft:'600px',
+    marginTop:'100px',
+    alignContent:'center',
+    alignItems:'center'
+  }}
+>
+  <img
+    src={NodataFound}
+    width="100%"
+    height="100%"
+
+  ></img>
+</div>
+)}
+
 </Grid>
 
           {/* Reviews Dialog */}
@@ -526,6 +547,7 @@ const ArchiveProduct = () => {
       )}
 </div>
     </Box>
+    </div>
   );
 };
 

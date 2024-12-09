@@ -2,6 +2,7 @@ const checkoutRepository = require('../checkouts/checkoutRepository');
 const Product = require('../../models/product'); 
 const Order = require('../../models/order');
 const path = require('path');
+const Tourist = require('../../models/tourist');
 
 const addProduct = async (productData) => {
     return await checkoutRepository.addProduct(productData);
@@ -9,6 +10,33 @@ const addProduct = async (productData) => {
 
 const getAvailableProducts = async () => {
     return await checkoutRepository.getAllAvailableProducts();
+}
+const addWishlist = async (userId, productId) => {
+    return await checkoutRepository.addWishlist(userId, productId);
+}
+
+const getWishlist = async (userId) => {
+    return await checkoutRepository.getWishlist(userId);
+}
+
+const removeWishlist = async (userId, productId) => {
+    return await checkoutRepository.removeWishlist(userId, productId);
+}
+
+const addCart = async (userId, productId, quantity) => {
+    return await checkoutRepository.addCart(userId, productId, quantity);
+}
+
+const getCart = async (userId) => {
+    return await checkoutRepository.getCart(userId);
+}
+
+const removeCart = async (userId, cartItemId) => {
+    return await checkoutRepository.removeCart(userId, cartItemId);
+}
+
+const editQuantityInCart = async (userId, cartItemId, quantity) => {
+    return await checkoutRepository.editQuantityInCart(userId, cartItemId, quantity);
 }
 
 const getProductsByPriceRange = async (minPrice, maxPrice) => {
@@ -119,6 +147,26 @@ const uploadImage = async (productId, file) => {
     return { message: 'Image uploaded successfully', imageUrl: imageUrl };
 };
 
+const uploadEventImage = async (eventId, file, type) => {
+    console.log('Service');
+    const validExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+        throw new Error('Only image files are allowed (jpg, jpeg, png).');
+    }
+
+    const fileName = `${eventId}-${Date.now()}${fileExtension}`;
+    const fileBuffer = file.buffer;
+
+    await checkoutRepository.uploadImage(eventId, fileName, fileBuffer); 
+    const imageUrl = `http://localhost:3030/images/${fileName}`; // Adjust to match how you access images
+
+    await checkoutRepository.updateEventImage(eventId, fileName, type);
+
+    return { message: 'Image uploaded successfully', imageUrl: imageUrl };
+};
+
 const archiveProduct = async (product) => {
      await checkoutRepository.archiveProduct(product);
 };
@@ -222,7 +270,141 @@ const updateOrder = async (orderId, updatedOrderData) => {
 };
 
 
+
+// Service for retrieving orders by status and touristId
+const getOrdersByStatusAndTouristId = async (touristId,currency) => {
+    const orders = await checkoutRepository.findOrdersByStatusAndTouristId(touristId,currency);
+    console.log(orders);
+    return orders;
+};
+
+
+
+
+
+// Service to cancel an order
+const cancelOrder = async (orderId, touristId) => {
+    // Fetch the order details
+    const order = await checkoutRepository.getOrderById(orderId);
+
+    if (!order) {
+        throw new Error('Order not found');
+    }
+
+    if (order.touristId.toString() !== touristId) {
+        throw new Error('Order does not belong to the provided tourist.');
+    }
+
+    // Fetch the tourist
+    const tourist = await checkoutRepository.getTouristById(touristId);
+
+    if (!tourist) {
+        throw new Error('Tourist not found');
+    }
+    if (order.paymentType === 'wallet' || order.paymentType === 'card') {
+        // Refund the tourist wallet
+        tourist.wallet += order.price;
+        await tourist.save();
+    }
+    
+
+    // Delete the order
+    await checkoutRepository.deleteOrderById(orderId);
+};
+
+
+
+//Buildo+saif apis
+
+
+// Service to create an order with wallet or COD payment
+const createOrderWalletOrCod = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType,promoCode,currency }) => {
+    if (paymentType === 'wallet') {
+        const tourist = await Tourist.findById(touristId);
+
+        if (!tourist) {
+            throw new Error('Tourist not found.');
+        }
+        switch (currency) {
+            case 'euro':
+                price = (price * 55).toFixed(2); 
+                break;
+            case 'dollar':
+                price = (price * 50).toFixed(2); 
+                break;
+            case 'EGP':
+                price = price.toFixed(2); 
+                break;
+            default:
+                throw new Error('Invalid currency'); 
+        }
+        
+        if (promoCode) {
+            const validPromo = tourist.promoCodes.includes(promoCode); // Correct validation
+            if (validPromo) {
+              // Remove the promo code from the array
+              tourist.promoCodes = tourist.promoCodes.filter((pc) => pc !== promoCode);
+              await tourist.save(); // Save the updated promo codes
+            } else {
+              throw new Error("Invalid promo code");
+            }
+        }
+        // Apply discount if promo code was valid
+        if (promoCode) {
+            price *= 0.7; // Apply 30% discount
+        } 
+        
+        if (tourist.wallet < price) {
+            throw new Error('Insufficient wallet balance.');
+        }
+
+
+
+        // Deduct the amount from the tourist's wallet
+        tourist.wallet -= price;
+        await tourist.save();
+    }
+
+    // Create the order
+    const order = await checkoutRepository.createOrder({
+        touristId,
+        productIds: productsIdsQuantity.map(product => product.id),
+        productsIdsQuantity,
+        price,
+        addressToBeDelivered,
+        paymentType,
+    });
+
+    return order;
+};
+
+
+
+
+
+
+
+// Service to create an order with card payment
+const createOrderWithCard = async ({ touristId, productsIdsQuantity, price, addressToBeDelivered, paymentType }) => {
+    // Create the order
+    const order = await checkoutRepository.createOrder({
+        touristId,
+        productIds: productsIdsQuantity.map(product => product.id),
+        productsIdsQuantity,
+        price,
+        addressToBeDelivered,
+        paymentType,
+    });
+
+    return order;
+};
+
+const getAllNotifications = async (id, type) => {
+    return await checkoutRepository.getAllNotifications(id, type);
+}
+
 module.exports = {
+    getAllNotifications,
     uploadImage,
     archiveProduct,
     calculateSalesAndAvailability,
@@ -238,5 +420,11 @@ module.exports = {
     addOrder,
     getAllOrders,
     getOrdersByTouristId,
-    updateOrder
+    updateOrder,
+    getOrdersByStatusAndTouristId,
+    cancelOrder,
+    createOrderWalletOrCod,
+    createOrderWithCard,
+    uploadEventImage
+
 };
