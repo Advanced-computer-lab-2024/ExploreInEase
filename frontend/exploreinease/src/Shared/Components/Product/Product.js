@@ -627,7 +627,7 @@ const handleClickPurchase = async (product, selectedQuantity) => {
             image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
             alt={product.name}
           />
-          {Userr.type==='seller' || userType==='admin' &&(
+          {Userr.type!='tourist' &&(
                 <Box
                 sx={{
                   position: 'absolute',
