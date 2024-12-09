@@ -44,7 +44,7 @@ import ArchiveProduct from '../Shared/Components/Product/ArchiveProduct';
 import ViewProduct from '../Shared/Components/Product/Product';
 import ChangePassword from '../TouristGovernor/changePassword';
 import Login from '../Login/login';
-
+import CreatePromo from './AdminPromoCode';
 // import AdminHomePage from './AdminHomePage';
 
 
@@ -81,8 +81,7 @@ const ResponsiveDrawer = (props) => {
 
   useEffect(() => {
     const tab = () => {
-      localStorage.getItem("openTab") &&
-        setOpenTab(localStorage.getItem("openTab"));
+      localStorage.getItem("openTab") && setOpenTab(localStorage.getItem("openTab"));
   
       switch (openTab) {
         case "AdminHomePage":
@@ -91,7 +90,7 @@ const ResponsiveDrawer = (props) => {
         case "Complaints":
           setTab(<ComplaintsTable />);
           return <ComplaintsTable />;
-        case "AdminSalesReport": // Add this case
+        case "AdminSalesReport":
           setTab(<AdminSalesReport />);
           return <AdminSalesReport />;
         case "Deletion Requests":
@@ -124,6 +123,9 @@ const ResponsiveDrawer = (props) => {
         case "Change Password":
           setTab(<ChangePassword />);
           return <ChangePassword />;
+        case "Create Promo Code":
+          setTab(<CreatePromo />);
+          return <CreatePromo />;
         default:
           setTab(<AdminHomePage />);
           return <AdminHomePage />;
@@ -132,7 +134,6 @@ const ResponsiveDrawer = (props) => {
   
     tab();
   }, [openTab]);
-  
   const handleTabChange = (tab) => {
     setOpenTab(tab);
     localStorage.setItem("openTab", tab);
@@ -185,28 +186,28 @@ const ResponsiveDrawer = (props) => {
           </List>
         </Collapse>
         <ListItemButton onClick={handleCollapseToggle}>
-          <ListItemText primary="Events" />
-          {collapseOpen ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding sx={{ backgroundColor: "#156fb7", color: "fff" }}>
-            {[
-              
-              "View Product",
-              "Preference tags",
-              "Activity Category",
-              "Archive Product",
-            ].map((text) => (
-              <ListItemButton
-                key={text}
-                sx={{ pl: 4 }}
-                onClick={() => handleTabChange(text)}
-              >
-                <ListItemText primary={text} />
-              </ListItemButton>
-            ))}
-          </List>
-        </Collapse>
+  <ListItemText primary="Events" />
+  {collapseOpen ? <ExpandLess /> : <ExpandMore />}
+</ListItemButton>
+<Collapse in={collapseOpen} timeout="auto" unmountOnExit>
+  <List component="div" disablePadding sx={{ backgroundColor: "#156fb7", color: "fff" }}>
+    {[
+      "View Product",
+      "Preference tags",
+      "Activity Category",
+      "Archive Product",
+      "Create Promo Code" // Add "Create Promo Code" here
+    ].map((text) => (
+      <ListItemButton
+        key={text}
+        sx={{ pl: 4 }}
+        onClick={() => handleTabChange(text)}
+      >
+        <ListItemText primary={text} />
+      </ListItemButton>
+    ))}
+  </List>
+</Collapse>
       </List>
       <Divider />
     </div>

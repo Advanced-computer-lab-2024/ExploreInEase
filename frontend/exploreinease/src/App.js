@@ -7,7 +7,7 @@ import MyCart from './Tourist/components/cart';
 import CartPage from './Tourist/components/cart2';
 import WishList from './Tourist/components/wishlist';
 // import AdminSideMenu from './Admin/AdminSideMenu';
-
+import CreatePromo from './Admin/AdminPromoCode';
 
 
 

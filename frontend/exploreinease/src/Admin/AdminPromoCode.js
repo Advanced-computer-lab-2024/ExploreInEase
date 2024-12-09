@@ -1,99 +1,130 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import './AddUser.css'; // Import the CSS file for styling
-import NetworkService from "../NetworkService";
-const AddUser = () => {
-  const navigate = useNavigate();
-  const [promo, setPromo] = useState({
-    type: "admin", // Default role as admin (lowercase to match API enum)
-    username: "",
-    password: "",
-  });
+import axios from "axios";
 
-  const [showSuccess, setShowSuccess] = useState(false); // To handle success popup
-  const [showError, setShowError] = useState(null); // To handle error messages
+// MUI Imports
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
+import ListSubheader from '@mui/material/ListSubheader';
+
+const CreatePromo = () => {
+  const navigate = useNavigate();
+  const [promo, setPromo] = useState('');
+  const [promoCodesList, setPromoCodesList] = useState([]);
+
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(null);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setPromo((prevUser) => ({
-      ...prevUser,
-      [name]: value,  // Update user state for each field
-    }));
+    setPromo(e.target.value);
   };
+
+  useEffect(() => {
+    const getPromoCodes = async () => {
+      try {
+        const response = await axios.get('http://localhost:3030/getPromoCodes');
+        console.log(response.data);
+        setPromoCodesList(response.data.promoCodes);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getPromoCodes();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const body = { promoCode: promo };
     
-    const options = {
-      apiPath: '/addGovernorOrAdmin', 
-      body: { username: promo.username, password: promo.password, type: promo.type }, // Request body
-
-    };
-
-    try {
-      const data = await NetworkService.post(options); // Call the POST method
-      console.log("User added:", data);
-      setShowSuccess(true); // Show success message
-      setTimeout(() => setShowSuccess(false), 3000); // Hide after 3 seconds
-      setPromo({ type: "admin", username: "", password: "" }); // Reset form
-    } catch (error) {
-      setShowError('An error occurred while adding the user.');
-    }
+    await axios.post('http://localhost:3030/creatingPromoCode', body)
+      .then((response) => {
+        console.log(response.data);
+        setShowSuccess(true);
+        // Re-fetch promo codes if needed
+      })
+      .catch((error) => {
+        setShowError(error.message);
+      });
   };
 
   return (
-    <div className="form-container">
+    <Box 
+      sx={{ 
+        width: '100%', 
+        maxWidth: 600, 
+        margin: '0 auto', 
+        marginTop: 4, 
+        padding: 2, 
+        bgcolor: '#f9f9f9', 
+        borderRadius: 1 
+      }}
+    >
       <form onSubmit={handleSubmit}>
-        <h2>Add User</h2>
-        <h2>(Admin/Tourism Governor)</h2>
-
+        <h2>Create Promo Code</h2>
         <label>
-          Role:
-          <select name="type" value={promo.type} onChange={handleInputChange}>
-            <option value="admin">Admin</option>
-            <option value="tourismGovernor">Tourism Governor</option>
-          </select>
-        </label>
-        <br />
-
-        <label>
-          Username:
           <input
             type="text"
-            name="username"
-            value={promo.username}
+            value={promo}
             onChange={handleInputChange}
             required
           />
         </label>
         <br />
+        <button type="submit">Create</button>
 
-        <label>
-          Password:
-          <input
-            type="password"
-            name="password"
-            value={promo.password}
-            onChange={handleInputChange}
-            required
-          />
-        </label>
-        <br />
-
-        <button type="submit">Add User</button>
-
-        {/* Popup Success Message */}
         {showSuccess && (
-          <div className="success-popup">User created successfully!</div>
+          <div className="success-popup">Promo Code created successfully!</div>
         )}
 
-        {/* Popup Error Message */}
         {showError && (
           <div className="error-popup">{showError}</div>
         )}
       </form>
-    </div>
+
+      {/* Promo Codes Box appears directly under the form */}
+      <Box
+        sx={{
+          bgcolor: 'white',
+          border: '1px solid #ccc',
+          marginTop: 4,
+          borderRadius: 1,
+          padding: 2
+        }}
+      >
+        <nav aria-label="promo codes">
+          <List
+            sx={{ width: '100%', bgcolor: 'background.paper' }}
+            subheader={
+              <ListSubheader
+                sx={{
+                  fontWeight: 'bold',
+                  fontSize: '1.25rem',
+                  color: 'black'
+                }}
+              >
+                Available Promo Codes
+              </ListSubheader>
+            }
+          >
+            {promoCodesList.map((code, index) => (
+              <React.Fragment key={code._id}>
+                <ListItem
+                  sx={{ display: 'flex', justifyContent: 'space-between' }}
+                >
+                  <ListItemText primary={code.promoCodes} />
+                </ListItem>
+                {index < promoCodesList.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+        </nav>
+      </Box>
+    </Box>
   );
 };
 
- export default AddUser;
+export default CreatePromo;

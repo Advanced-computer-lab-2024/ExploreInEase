@@ -765,6 +765,16 @@ const creatingPromoCode = async (req, res) => {
     }
 }
 
+const getPromoCodes = async (req, res) => {
+    try{
+        const promoCodes = await userRepository.fetchAllPromoCodes();
+        return res.status(200).json({message: "Promo codes fetched successfully", promoCodes
+        });
+        }catch(error){
+            return res.status(500).json({ error: 'An error occurred while logging in the user'});
+        }
+    }
+
 const updatePromoCode = async (req, res) => {
     try {
         // Fetch all tourists
@@ -970,5 +980,6 @@ module.exports = {
   getUsersForDeletion,
   getNotAcceptedUsers,
   updatingStatusUser,
-  getUserStatistics
+  getUserStatistics,
+  getPromoCodes
 };
