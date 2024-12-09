@@ -30,14 +30,7 @@ const TourGuideHP = () => {
   const imageUrl=localStorage.getItem('imageUrl');
  const navigate = useNavigate();
     const location = useLocation();
-    const [menuItems]=useState( [
-      { title: 'New Message', body: 'You have received a new message from Alex.' },
-      { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
-      { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
-      { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
-      { title: 'Project Deadline', body: 'Project submission is due next week.' },
-      { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
-      { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
+    const [menuItems,setMenuItem]=useState( []);
     
       const [anchorProfileEl, setAnchorProfileEl] = useState(null);
     const [selectedTab, setSelectedTab] = useState("Sales Report");  
@@ -132,22 +125,25 @@ const TourGuideHP = () => {
       return; 
     }
 };
-
+    // useEffect(()=>{
+        //   checkPromoCode();
+        // },[]);
+        // const checkPromoCode=async()=>{
+        //   const options = {
+        //     apiPath: '/updatePromoCode',
+        //   };
+        //   await NetworkService.put(options);
+        // }
 const handleClickNotification = async(event) => {
-  // try{
-  //   const options = {
-  //     apiPath: `/getAllNotifications/${Userr._id}`,
-  //     urlParam: Userr._id
-  //   };
-    
-  //   const response = await NetworkService.get(options);
-  //   console.log("Notification",response);
-    
-  // }catch(err){
-  //   console.log(err);
-    
-  // }
   setAnchorEl1(event.currentTarget);
+  const options = { 
+    apiPath: `/getAllNotifications/${Userr._id}`
+   };
+  const response =await NetworkService.get(options);
+  setMenuItem(response);
+  console.log(response);
+  console.log(menuItems);
+
 };
 
  async function handleRegisterClick(title) {

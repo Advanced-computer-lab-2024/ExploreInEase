@@ -47,15 +47,18 @@ const TouristNavbar = () => {
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
-     const [menuItems]=useState( [
-      { title: 'New Message', body: 'You have received a new message from Alex.' },
-      { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
-      { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
-      { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
-      { title: 'Project Deadline', body: 'Project submission is due next week.' },
-      { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
-      { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
+     const [menuItems,setMenuItem]=useState( []);
 
+
+//      useEffect(()=>{
+//   checkPromoCode();
+// },[]);
+// const checkPromoCode=async()=>{
+//   const options = {
+//     apiPath: '/updatePromoCode',
+//   };
+//   await NetworkService.put(options);
+// }
 useEffect(() => {
          // Update the avatar URL when the component mounts if a new image URL exists
          if (savedAvatarUrl || imageUrl) {
@@ -129,14 +132,15 @@ const handleCloseMenu = () => {
   setAnchorProfileEl(null);
 };
 const handleClickNotification = async(event) => {
+  setAnchorEl1(event.currentTarget);
   const options = { 
     apiPath: `/getAllNotifications/${Userr._id}`
    };
   const response =await NetworkService.get(options);
-    setAnchorEl1(event.currentTarget);
-
+  setMenuItem(response);
   console.log(response);
-  
+  console.log(menuItems);
+
 };
 const handleOpenMenu = (event) => {
   setAnchorProfileEl(event.currentTarget);

@@ -37,6 +37,16 @@ const GovernorNavbar = () => {
    const governorId=tourist?._id;
    const firstInitial = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
 
+
+       // useEffect(()=>{
+        //   checkPromoCode();
+        // },[]);
+        // const checkPromoCode=async()=>{
+        //   const options = {
+        //     apiPath: '/updatePromoCode',
+        //   };
+        //   await NetworkService.put(options);
+        // }
    useEffect(() => {
     const savedTab = localStorage.getItem('selectedTab');
     if (savedTab) {

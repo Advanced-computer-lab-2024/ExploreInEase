@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';  
 import TextField from '@mui/material/TextField';
 import './login.css';
+import axios from 'axios'; 
 import backgroundImage1 from '../rerere.jpg';
 import {  Visibility, VisibilityOff } from '@mui/icons-material';
 import {  InputAdornment, IconButton } from '@mui/material';
@@ -26,18 +27,21 @@ const ResetPassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handleEmailChange = (event) => {
-    setFormData({
-      ...formData,
-      email: event.target.value,
-    });
+    console.log("hereee1");
+    // setFormData({
+    //   ...formData,
+    //   email: event.target.value,
+    // });
   };
   const setNewPassword =(event)=>{
+    console.log("hereee2");
     setFormData({
       ...formData,
       password:event.target.value,
     });
   }
   const setConfirmPassword=(event)=>{
+    console.log("hereee3");
     setFormData({
       ...formData,
       repeatPassword:event.target.value,
@@ -45,6 +49,7 @@ const ResetPassword = () => {
   }
 
   const handleOtpChange = (index, value) => {
+    console.log("hereee4");
     if (value.length > 1 || isNaN(value)) return; // Ensure it's a single digit
     const otpArray = formData.otp.split('');
     otpArray[index] = value || ' '; // Replace or reset the specific digit
@@ -52,17 +57,42 @@ const ResetPassword = () => {
     console.log("OTP",formData.otp);
   };
 
-  const handleSendEmailOTP = () => {
-    setClicked(true);
-    console.log('Email OTP sent to:', formData.email);
+  const handleSendEmailOTP =async () => {
+    console.log("hereee5");
+    try{
+      const options = { 
+        apiPath: `/forgetPassword`,
+       };
+       const body={
+        email:formData.email
+       }
+       const response = await axios.post(options,body);
+       console.log(response);
+       
+      localStorage("user",response.response.response.user); 
+       if (response.message==='Email sent successfully'){
+        // setClicked(true);
+       }
+    }catch{
+      console.log('Email OTP sent to:', formData.email);
+
+    }
+
+  
   };
 
   const verifyEmailOTP = () => {
+    console.log("hereee6");
+    const options = { 
+      apiPath: `/verifyOTP/{}/:otp`,
+     };
     setClickedT(true);
     setClickedOTP(true);
     console.log('Verifying OTP:', formData.otp.trim());
   };
   const changePasswords=()=>{
+    console.log("hereee7");
+
     navigate('/Login');
   }
 

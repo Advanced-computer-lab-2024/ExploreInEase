@@ -73,11 +73,10 @@ const Login = () => {
       if(response.message === 'Terms and Conditions not accepted') {
         navigate('/TermsAcceptance', { state: { User: response.user } });
       }
-
       if (response.message === 'Logged in Successfully') {
         console.log(response);
         setSuccess(`Sign-in successful! Welcome, ${response.user.username}`);
-         navigateToHomePage(response,response.user, response.imageUrl);
+        navigateToHomePage(response,response.user, response.imageUrl);
       }
     } catch (error)  {
       setError(

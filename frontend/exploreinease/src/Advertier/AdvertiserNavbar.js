@@ -40,14 +40,7 @@ const HomePage = () => {
     const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
     const userType = User.User?.type || User.type;
     const [selectedTab, setSelectedTab] = useState("Sales Report");
-    const [menuItems] = useState([
-        { title: 'New Message', body: 'You have received a new message from Alex.' },
-        { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
-        { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
-        { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
-        { title: 'Project Deadline', body: 'Project submission is due next week.' },
-        { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
-        { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
+    const [menuItems,setMenuItem] = useState([]);
     // Retrieve avatar URL from localStorage or fallback to the default avatar
     const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
     const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
@@ -90,7 +83,15 @@ const HomePage = () => {
         }
       }, []);
 
-
+      // useEffect(()=>{
+        //   checkPromoCode();
+        // },[]);
+        // const checkPromoCode=async()=>{
+        //   const options = {
+        //     apiPath: '/updatePromoCode',
+        //   };
+        //   await NetworkService.put(options);
+        // }
     const handleOpenMenu = (event) => {
         setAnchorProfileEl(event.currentTarget);
       };
@@ -136,8 +137,17 @@ const HomePage = () => {
             }
         }
     };
-    const handleClick = (event) => {
+    const handleClick = async(event) => {
         setAnchorEl1(event.currentTarget);
+        const options = { 
+          apiPath: `/getAllNotifications/${Userr._id}`
+         };
+        const response =await NetworkService.get(options);
+        setMenuItem(response);
+        console.log(response);
+        console.log(menuItems);
+      
+
     };
     const handleClose = () => {
         setAnchorEl1(null);
@@ -296,6 +306,7 @@ const HomePage = () => {
                             vertical: 'top',
                             horizontal: 'center',
                             }}
+                            sx={{height:'700px'}}
                         >
                             <MenuItem onClick={()=>handleRegisterClick('profile')} component="label" sx={{cursor:'pointer', alignItems: 'center', padding: 0 , marginLeft: '8px'}} >
                               <ListItemIcon sx={{cursor:'pointer', minWidth: 0, marginRight: '8px' }}>
@@ -354,9 +365,7 @@ const HomePage = () => {
                             }}
                         >
                             <Tooltip title="Notification">
-                            <Badge badgeContent={4} color="success">
                                 <NotificationsNoneOutlinedIcon sx={{ fontSize:23}} />
-                            </Badge>
                             </Tooltip>
                         </IconButton>
                         <Menu

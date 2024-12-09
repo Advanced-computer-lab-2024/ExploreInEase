@@ -10,6 +10,7 @@ import Tooltip from '@mui/material/Tooltip';
 import StarIcon from '@mui/icons-material/Star';
 import Sky from '../Sky2.jpeg';
 import '../TourGuideProfile/tourGuideProfile.css';
+import SHomePage from '../../../Seller/SellerNavbar';
 const SellerProfile = (props) => {
   const initialData = {
     username: '',
@@ -116,6 +117,7 @@ const SellerProfile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
+    <><SHomePage/>
     <Box
       sx={{
         backgroundImage: `url(${Sky})`,
@@ -128,6 +130,7 @@ const SellerProfile = (props) => {
       }}
     >
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+   
     <Box
         sx={{
           display: 'flex',
@@ -256,6 +259,7 @@ const SellerProfile = (props) => {
       </Box>
     </LocalizationProvider>
     </Box>
+  </>
   );
 };
 

@@ -10,6 +10,7 @@ import Tooltip from '@mui/material/Tooltip';
 import HistoryEduIcon from '@mui/icons-material/History';
 import Sky from '../Sky2.jpeg';
 import './tourGuideProfile.css';
+import TourGuideHP from '../../../TourGuide/TourGuideNavbar';
 const TourGuideProfile = (props) => {
   const navigate = useNavigate();
   const initialData = {
@@ -125,6 +126,7 @@ const TourGuideProfile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
+    <><TourGuideHP/>
     <Box
       sx={{
         backgroundImage: `url(${Sky})`,
@@ -303,6 +305,7 @@ const TourGuideProfile = (props) => {
       </Box>
     </LocalizationProvider>
   </Box>
+  </>
   );
 };
 

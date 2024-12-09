@@ -11,6 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import Sky from '../Sky2.jpeg';
 import '../TourGuideProfile/tourGuideProfile.css';
+import HomePage from '../../../Advertier/AdvertiserNavbar';
 const AdvertiserProfile = (props) => {
   const initialData = {
     username: '',
@@ -136,6 +137,8 @@ const AdvertiserProfile = (props) => {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   return (
+    <>
+       <HomePage/>
     <Box
     sx={{
       backgroundImage: `url(${Sky})`,
@@ -145,8 +148,10 @@ const AdvertiserProfile = (props) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      marginTop:'10px'
     }}
   >
+ 
     <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Box
         sx={{
@@ -360,6 +365,7 @@ const AdvertiserProfile = (props) => {
       </Box>
     </LocalizationProvider>
     </Box>
+    </>
   );
 };
 

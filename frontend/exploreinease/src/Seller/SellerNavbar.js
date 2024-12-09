@@ -28,14 +28,7 @@ const SHomePage = () => {
   const [anchorProfileEl, setAnchorProfileEl] = useState(null);
   
   const navigate = useNavigate();
-  const [menuItems] = useState([
-    { title: 'New Message', body: 'You have received a new message from Alex.' },
-    { title: 'Task Update', body: 'Your task "Design Mockup" is due tomorrow.' },
-    { title: 'System Alert', body: 'Server maintenance scheduled for tonight.' },
-    { title: 'Meeting Reminder', body: 'Team meeting scheduled at 3 PM.' },
-    { title: 'Project Deadline', body: 'Project submission is due next week.' },
-    { title: 'Event Invitation', body: 'You are invited to the annual gala dinner.' },
-    { title: 'Feedback Request', body: 'Please provide feedback on the new design.' }]);
+  const [menuItems,setMenuItem] = useState([]);
   const [ setSuccess] = useState();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [ setError] = useState();
@@ -58,6 +51,15 @@ const SHomePage = () => {
   // Retrieve avatar URL from localStorage or fallback to the default avatar
   const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
   const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
+      // useEffect(()=>{
+        //   checkPromoCode();
+        // },[]);
+        // const checkPromoCode=async()=>{
+        //   const options = {
+        //     apiPath: '/updatePromoCode',
+        //   };
+        //   await NetworkService.put(options);
+        // }
   useEffect(() => {
     const savedTab = localStorage.getItem('selectedTab');
     if (savedTab) {
@@ -131,8 +133,15 @@ const SHomePage = () => {
       }
     }
   };
-  const handleClickNotification = (event) => {
+  const handleClickNotification = async(event) => {
     setAnchorEl1(event.currentTarget);
+    const options = { 
+      apiPath: `/getAllNotifications/${Userr._id}`
+     };
+    const response =await NetworkService.get(options);
+    setMenuItem(response);
+    console.log(response);
+    console.log(menuItems);
   };
   async function handleClick(title) {
     if (title === "Profile") {

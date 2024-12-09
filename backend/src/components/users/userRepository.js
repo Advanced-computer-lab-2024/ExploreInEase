@@ -107,14 +107,7 @@ const fetchAllUsers = async () => {
     }
 };
 
-// Fetch all tourists
-const fetchAllTourists = async () => {
-    try {
-        return await Tourist.find({});
-    } catch (error) {
-        throw new Error(`Error fetching tourists: ${error.message}`);
-    }
-};
+
 
 
 const updateUserData = async (id, updateData) => {
@@ -1068,7 +1061,13 @@ const addBookmark = async (touristId, bookmark) => {
     return tourist.bookmark;
   };
 
-
+  const fetchAllTourists = async () => {
+    try {
+        return await Tourist.find({});
+    } catch (error) {
+        throw new Error(`Error fetching tourists: ${error.message}`);
+    }
+};
 
 module.exports = {
     getAllNotifications,

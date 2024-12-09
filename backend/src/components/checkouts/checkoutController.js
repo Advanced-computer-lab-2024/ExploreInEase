@@ -404,7 +404,87 @@ const availableQuantityAndSales = async (req, res) => {
         });
     }
 };
+const addWishlist = async (req, res) => {
+    const {userId} = req.params;
+    const { productId } = req.body;
 
+    try {
+        const result = await checkoutService.addWishlist(userId, productId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const getWishlist = async (req, res) => {
+    const {userId} = req.params;
+
+    try {
+        const result = await checkoutService.getWishlist(userId);
+        return res.status(200).json({message: "Fetched wishlist successfully!", wishlist: result});
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const removeWishlist = async (req, res) => {
+    const {userId, productId} = req.params;
+
+    try {
+        const result = await checkoutService.removeWishlist(userId, productId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const addCart = async (req, res) => {
+    const {userId} = req.params;
+    const { productId, quantity } = req.body;
+
+    try {
+        const result = await checkoutService.addCart(userId, productId, quantity);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }    
+}
+
+const getCart = async (req, res) => {
+    const {userId} = req.params;
+
+    try {
+        const result = await checkoutService.getCart(userId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const removeCart = async (req, res) => {
+    const {userId, cartItemId} = req.params;
+
+    try {
+        const result = await checkoutService.removeCart(userId, cartItemId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
+
+const editQuantityInCart = async (req, res) => {
+    const {userId, cartItemId, quantity} = req.params;
+
+    console.log(req.params);
+    console.log(quantity);
+
+    try {
+        const result = await checkoutService.editQuantityInCart(userId, cartItemId, quantity);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
 const getAvailableProducts = async (req, res) => {
     const {userId} = req.params;
     console.log(userId);
