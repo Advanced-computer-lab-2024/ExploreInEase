@@ -327,27 +327,38 @@ const  handleRegisterClick=async(title)=> {
                 console.log(errorMessage);
               }
             }
-            else if(title==='BookMarks'){
-              try { 
+            else if (title === 'BookMarks') {
+              try {
                 const options = {
                   apiPath: `/fetchbookmark/${Userr._id}`,
                 };
                 const response = await NetworkService.get(options);
-                console.log(response); // Set success message
-                const events=response.data;
-                setSelectedTab(title);
-                localStorage.setItem('selectedTab', title);
-                navigate('/MyBookmarks',{state:{events:events,userId}});  
-              }
-               catch (err) {
-                if (err.response) {
-                    console.log(err.message);
-                  console.log(err.response.data.message); // Set error message from server response if exists
+            
+                // Step 1: Log the API response to verify the data
+                console.log('API Response:', response?.data); // Use optional chaining to handle unexpected errors
+            
+                if (response?.data) {
+                  // Continue with your logic
+                  const events = response.data; // Assuming the response has the structure { success: true, data: [...] }
+                  console.log('Fetched Events:', events); // Log the extracted events
+            
+                  setSelectedTab(title);
+                  localStorage.setItem('selectedTab', title);
+                  navigate('/MyBookmarks', { state: { events, userId: Userr._id } });
                 } else {
-                  console.log('An unexpected error occurred.'); // Generic error message
+                  console.error('No data found in the response');
                 }
-              }  
+              } catch (err) {
+                if (err.response) {
+                  console.error('Error:', err.message);
+                  console.error('Server Response:', err.response?.data?.message);
+                } else {
+                  console.error('An unexpected error occurred.');
+                }
+              }
             }
+            
+            
             else if(title==='Log Out'){
               console.log('yes here');
               localStorage.removeItem('User');

@@ -1,120 +1,216 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Divider, Grid } from '@mui/material';
-import { useLocation } from 'react-router-dom';
-import { Alert } from '@mui/material';
-import TouristNavbar from '../Tourist/TouristNavbar';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Typography, Card, CardContent, CardMedia, Button, Grid } from '@mui/material';
+import NetworkService from '../NetworkService';
+
 const MyBookmarks = () => {
-    const { state } = useLocation();
-    const { events } = state || {}; // Get events and userId from navigation state
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const [activeCategory, setActiveCategory] = useState('activities'); // Default to 'activities'
-    const [filteredEvents, setFilteredEvents] = useState([]);
-    const [showSuccessMessage] = useState(false);
-    const [showErrorMessage ] = useState(false);
-    const [errorMessage] = useState('');
-    const [successMessage] = useState('');
+  const userId = location.state?.userId;
+  const [bookmarkedEvents, setBookmarkedEvents] = useState([]);  // Store bookmarked events
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        // Filter events based on the selected category
-        if (events) {
-            const filtered = events.filter(event => event.category === activeCategory);
-            setFilteredEvents(filtered);
-            console.log('filteredEvents',filteredEvents);
-            
+  // Categorize events
+  const [activities, setActivities] = useState([]);
+  const [itineraries, setItineraries] = useState([]);
+  const [historicalPlaces, setHistoricalPlaces] = useState([]);
+
+  useEffect(() => {
+    if (userId) {
+      const fetchBookmarkedEvents = async () => {
+        try {
+          const options = { apiPath: `/fetchbookmark/${userId}` };
+          const response = await NetworkService.get(options);
+          console.log('API Response:', response.data);
+
+          // Initialize arrays for categorized events
+          const activities = [];
+          const itineraries = [];
+          const historicalPlaces = [];
+
+          // Categorize the fetched bookmarks based on their type
+          response.data.forEach((event) => {
+            if (event.data && event.type && event.type !== 'undefined') {
+              if (event.type === 'Activity') {
+                activities.push(event);
+              } else if (event.type === 'Itinerary') {
+                itineraries.push(event);
+              } else if (event.type === 'HistoricalPlace') {
+                historicalPlaces.push(event);
+              }
+            }
+          });
+
+          // Set the categorized events in state
+          setActivities(activities);
+          setItineraries(itineraries);
+          setHistoricalPlaces(historicalPlaces);
+
+        } catch (err) {
+          console.error('Error fetching bookmarks:', err.message);
+          setError('Failed to fetch bookmarks');
+        } finally {
+          setLoading(false);
         }
-    }, [activeCategory, events]);
+      };
 
-    const handleCategoryChange = (category) => {
-        setActiveCategory(category);
-    };
+      fetchBookmarkedEvents();
+    } else {
+      setError('User ID is missing.');
+      setLoading(false);
+    }
+  }, [userId]);
 
-    return (
-        <div>
-            <TouristNavbar/>
-        <div style={{ padding: '20px' }}>
-        <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    textAlign: "center",
-                    flexDirection: "column",
-                }}
-                >
-                <Typography variant="h4" gutterBottom>
-                    My Saved Events
-                </Typography>
-                </div>
+  // Function to handle button click
+  const handleMapClick = (location) => {
+    if (location && location.latitude && location.longitude) {
+      window.open(`https://www.google.com/maps?q=${location.latitude},${location.longitude}`, '_blank');
+    } else if (typeof location === 'string') {
+      // If location is a string, open the location in Google Maps as a search query
+      window.open(`https://www.google.com/maps?q=${location}`, '_blank');
+    } else {
+      alert("Location data is not available.");
+    }
+  };
 
+  return (
+    <div style={{ padding: '20px' }}>
+      <Typography variant="h4" gutterBottom>
+        Bookmarked Events
+      </Typography>
 
-            {/* Buttons for filtering categories */}
-            <div style={{ marginBottom: '20px',alignContent:'center',alignItems:'center',display: "flex" }}>
-                <Button
-                    variant={activeCategory === 'activities' ? 'contained' : 'outlined'}
-                    color="primary"
-                    onClick={() => handleCategoryChange('activities')}
-                    style={{ marginRight: '10px' }}
-                >
-                    Activities
-                </Button>
-                <Button
-                    variant={activeCategory === 'itineraries' ? 'contained' : 'outlined'}
-                    color="primary"
-                    onClick={() => handleCategoryChange('itineraries')}
-                    style={{ marginRight: '10px' }}
-                >
-                    Itineraries
-                </Button>
-                <Button
-                    variant={activeCategory === 'historicalPlaces' ? 'contained' : 'outlined'}
-                    color="primary"
-                    onClick={() => handleCategoryChange('historicalPlaces')}
-                >
-                    Historical Places
-                </Button>
-            </div>
+      {loading && <Typography variant="body1" color="text.secondary">Loading...</Typography>}
 
-            {/* Success and Error Messages */}
-            {showSuccessMessage && (
-                <Alert severity="success" sx={{ marginBottom: '20px' }}>
-                    {successMessage}
-                </Alert>
-            )}
-            {showErrorMessage && (
-                <Alert severity="error" sx={{ marginBottom: '20px' }}>
-                    {errorMessage}
-                </Alert>
-            )}
+      {error && <Typography variant="body1" color="error">{error}</Typography>}
 
-            {/* Events List */}
+      <div>
+        {/* Activities Section */}
+        {activities.length > 0 && (
+          <div style={{ marginBottom: '40px' }}>
+            <Typography variant="h5" gutterBottom>Activities</Typography>
             <Grid container spacing={3}>
-                {events.length > 0 ? (
-                    events.map((event, index) => (
-                        <Grid item xs={12} sm={6} md={4} key={index}>
-                            <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px' }}>
-                                <Typography variant="h6">{event.name}</Typography>
-                                <Typography variant="body2">{event.description}</Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Category: {event.category}
-                                </Typography>
-                                <Button variant="outlined" color="primary" style={{ marginTop: '10px' }}>
-                                    View Details
-                                </Button>
-                            </div>
-                        </Grid>
-                    ))
-                ) : (
-                    <Typography variant="h6" color="textSecondary">
-                        No saved events found for this category.
-                    </Typography>
-                )}
+              {activities.map((event, index) => (
+                event.data && (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Card sx={{ maxWidth: 345 }}>
+                      <CardMedia
+                        component="img"
+                        alt={event.data.name}
+                        height="140"
+                        image={event.data.image || '/default-image.jpg'}  // Default image if no image is available
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h6" component="div">
+                          {event.data.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {event.data.date} - {event.data.location?.latitude}, {event.data.location?.longitude}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleMapClick(event.data.location)}
+                          style={{ marginTop: '10px' }}
+                        >
+                          View on Google Maps
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                )
+              ))}
             </Grid>
+          </div>
+        )}
 
-            {/* Divider */}
-            <Divider style={{ margin: '20px 0' }} />
-        </div>
-        </div>
-    );
+        {/* Itineraries Section */}
+        {itineraries.length > 0 && (
+          <div style={{ marginBottom: '40px' }}>
+            <Typography variant="h5" gutterBottom>Itineraries</Typography>
+            <Grid container spacing={3}>
+              {itineraries.map((item, index) => (
+                item.data && (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Card sx={{ maxWidth: 345 }}>
+                      <CardMedia
+                        component="img"
+                        alt={item.data.name}
+                        height="140"
+                        image={item.data.image || '/default-image.jpg'}  // Default image if no image is available
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h6" component="div">
+                          {item.data.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.data.date}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Activities:</strong> {item.data.activities?.join(', ')}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Locations:</strong> {item.data.locations?.join(', ')}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleMapClick(item.data.locations?.[0])}  // Assuming the first location is what we want to map
+                          style={{ marginTop: '10px' }}
+                        >
+                          View on Google Maps
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                )
+              ))}
+            </Grid>
+          </div>
+        )}
+
+        {/* Historical Places Section */}
+        {historicalPlaces.length > 0 && (
+          <div style={{ marginBottom: '40px' }}>
+            <Typography variant="h5" gutterBottom>Historical Places</Typography>
+            <Grid container spacing={3}>
+              {historicalPlaces.map((event, index) => (
+                event.data && (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Card sx={{ maxWidth: 345 }}>
+                      <CardMedia
+                        component="img"
+                        alt={event.data.name}
+                        height="140"
+                        image={event.data.image || '/default-image.jpg'}  // Default image if no image is available
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h6" component="div">
+                          {event.data.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {event.data.date} - {event.data.location}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleMapClick(event.data.location)}
+                          style={{ marginTop: '10px' }}
+                        >
+                          View on Google Maps
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                )
+              ))}
+            </Grid>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default MyBookmarks;

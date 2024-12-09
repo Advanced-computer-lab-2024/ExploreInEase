@@ -291,7 +291,7 @@ const Filter = ({eventsG=[],typeeG=''}) => {
   };
 
   const handleBookmarkClick = async (item) => {
-    const touristId = Userr._id;
+    const touristId = userId;
     const id = item.id;  // 'Activity', 'Itinerary', 'HistoricalPlace'
     const type = item.type;
     console.log(item);
