@@ -75,7 +75,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
   const [success,setSuccess]=useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [ setErrorMessage] = useState('');
+  const [ErrorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [payment, setPayment] = useState('');
   const [cardNumber, setcardNumber] = useState('');
