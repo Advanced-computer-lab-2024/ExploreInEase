@@ -756,8 +756,12 @@ const verifyOtP = async (_id, otp) => {
             throw new Error('User not found');
         }
     }
+
+    console.log(user);
     const savedOTP = user.otp;
-    if (savedOTP === otp) {
+    console.log(savedOTP);
+    console.log(otp);
+    if (savedOTP === parseInt(otp)) {
         return true;
     } else {
         return false;

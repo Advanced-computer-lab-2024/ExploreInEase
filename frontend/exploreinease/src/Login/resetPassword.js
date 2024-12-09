@@ -12,6 +12,7 @@ import axios from 'axios';
 import backgroundImage1 from '../rerere.jpg';
 import {  Visibility, VisibilityOff } from '@mui/icons-material';
 import {  InputAdornment, IconButton } from '@mui/material';
+import NetworkService from '../NetworkService';
 
 const ResetPassword = () => {
     const navigate = useNavigate(); // Move useNavigate inside the component
@@ -28,10 +29,10 @@ const ResetPassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handleEmailChange = (event) => {
     console.log("hereee1");
-    // setFormData({
-    //   ...formData,
-    //   email: event.target.value,
-    // });
+    setFormData({
+      ...formData,
+      email: event.target.value,
+    });
   };
   const setNewPassword =(event)=>{
     console.log("hereee2");
@@ -61,38 +62,69 @@ const ResetPassword = () => {
     console.log("hereee5");
     try{
       const options = { 
-        apiPath: `/forgetPassword`,
+        apiPath: '/forgetPassword',
+        body: {
+          email:formData.email
+         }
        };
-       const body={
-        email:formData.email
-       }
-       const response = await axios.post(options,body);
-       console.log(response);
        
-      localStorage("user",response.response.response.user); 
-       if (response.message==='Email sent successfully'){
-        // setClicked(true);
+       const response = await NetworkService.post(options);
+        console.log(response);  
+        console.log(response.message == 'Email sent successfully');
+
+        localStorage.setItem("user", JSON.stringify(response.response.user._id));
+        console.log(localStorage.getItem("user")); 
+       if (response.message == 'Email sent successfully'){
+        console.log('Email OTP sent to:', formData.email);
+        setClicked(true);
+        clickedT(false);
+       }
+       else{
+        console.log(response.message === 'Email sent successfully');
        }
     }catch{
-      console.log('Email OTP sent to:', formData.email);
+      console.log('A7a Email OTP sent to:', formData.email);
 
     }
 
   
   };
-
-  const verifyEmailOTP = () => {
+  const verifyEmailOTP = async () => {
+    const user = JSON.parse(localStorage.getItem("user")); // Use JSON.parse if you stored it as a stringified object
+    console.log(user);
     console.log("hereee6");
     const options = { 
-      apiPath: `/verifyOTP/{}/:otp`,
-     };
-    setClickedT(true);
-    setClickedOTP(true);
+      apiPath: `/verifyOTP/${user}/${formData.otp}`, // Remove the ':' before formData.otp
+    };
+
+     const response = await NetworkService.get(options);
+     console.log(response);
+     if(response){
+      setClickedT(true);
+      setClickedOTP(true);
+     }
+     else{
+        console.log("Invalid OTP");
+     }
+
     console.log('Verifying OTP:', formData.otp.trim());
   };
-  const changePasswords=()=>{
+  const changePasswords=async ()=>{
     console.log("hereee7");
+    const user = JSON.parse(localStorage.getItem("user")); // Use JSON.parse if you stored it as a stringified object
+    console.log(user);
+    const options = { 
+      apiPath: `/changePasswordAfterOTP/${user}`, // Remove the ':' before formData.otp
+      body: {
+        newPassword:formData.password,
+      }
+    };
 
+     const response = await NetworkService.put(options);
+     console.log(response);
+      if(response){
+        console.log("Password Changed Successfully");
+      }
     navigate('/Login');
   }
 
