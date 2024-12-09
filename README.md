@@ -2546,348 +2546,359 @@ npm (comes with Node.js)
         ```
         Updates the activation status of an itinerary.
 
+### userRoutes
 
-        ### userRoutes
+#### User Management
 
-        #### User Management
-        - **Get Not Accepted Users**
+**Get Not Accepted Users**
             ```http
             GET /notAcceptedUsers
             ```
             Retrieves users who have not been accepted yet.
 
-        - **Get Users for Deletion**
+**Get Users for Deletion**
             ```http
             GET /deletionrequests
             ```
             Retrieves users who have requested deletion.
 
-        - **Update User Status**
+**Update User Status**
             ```http
             PUT /user/updatingStatus/:userId/:status
             ```
             Updates the status of a user.
 
-        - **Delete User by ID and Type**
+**Delete User by ID and Type**
             ```http
             DELETE /deleteUserByIdAndType
             ```
             Deletes a user by ID and type.
 
-        - **Add Governor or Admin**
+**Add Governor or Admin**
             ```http
             POST /addGovernorOrAdmin
             ```
             Adds a new governor or admin.
 
-        - **Fetch All Users and Tourists**
+**Fetch All Users and Tourists**
             ```http
             GET /fetchAllUsersAndTourists/:_id
             ```
             Fetches all users and tourists.
 
-        #### Tour Guide Management
-        - **Create Tour Guide**
+#### Tour Guide Management
+
+**Create Tour Guide**
             ```http
             POST /createTourGuide/:_id
             ```
             Creates a new tour guide.
 
-        - **Get Tour Guide**
+**Get Tour Guide**
             ```http
             GET /getTourGuide/:_id
             ```
             Retrieves a tour guide by ID.
 
-        - **Update Tour Guide**
+**Update Tour Guide**
             ```http
             PUT /updateTourGuide/:_id
             ```
             Updates a tour guide by ID.
 
-        #### Advertiser Management
-        - **Create Advertiser**
+#### Advertiser Management
+
+**Create Advertiser**
             ```http
             POST /createAdvertiser/:_id
             ```
             Creates a new advertiser.
 
-        - **Get Advertiser**
+**Get Advertiser**
             ```http
             GET /getAdvertiser/:_id
             ```
             Retrieves an advertiser by ID.
 
-        - **Update Advertiser**
+**Update Advertiser**
             ```http
             PUT /updateAdvertiser/:_id
             ```
             Updates an advertiser by ID.
 
-        #### Seller Management
-        - **Create Seller**
+#### Seller Management
+
+**Create Seller**
             ```http
             POST /createSeller/:_id
             ```
             Creates a new seller.
 
-        - **Get Seller**
+**Get Seller**
             ```http
             GET /getSeller/:_id
             ```
             Retrieves a seller by ID.
 
-        - **Update Seller**
+**Update Seller**
             ```http
             PUT /updateSeller/:_id
             ```
             Updates a seller by ID.
 
-        #### Tourist Management
-        - **Get Tourist**
+#### Tourist Management
+
+**Get Tourist**
             ```http
             GET /getTourist/:_id
             ```
             Retrieves a tourist by ID.
 
-        - **Update Tourist**
+**Update Tourist**
             ```http
             PUT /updateTourist/:_id
             ```
             Updates a tourist by ID.
 
-        #### Rating and Commenting
-        - **Rate Tour Guide**
+#### Rating and Commenting
+
+**Rate Tour Guide**
             ```http
             POST /rateTourGuide/:touristId
             ```
             Rates a tour guide.
 
-        - **Comment on Tour Guide**
+**Comment on Tour Guide**
             ```http
             POST /commentTourGuide/:touristId
             ```
             Comments on a tour guide.
 
-        - **Rate Itinerary**
+**Rate Itinerary**
             ```http
             POST /rateItinerary/:touristId
             ```
             Rates an itinerary.
 
-        - **Comment on Itinerary**
+**Comment on Itinerary**
             ```http
             POST /commentItinerary/:touristId
             ```
             Comments on an itinerary.
 
-        - **Rate Activity**
+**Rate Activity**
             ```http
             POST /rateActivity/:touristId
             ```
             Rates an activity.
 
-        - **Comment on Activity**
+**Comment on Activity**
             ```http
             POST /commentActivity/:touristId
             ```
             Comments on an activity.
 
-        - **Rate Historical Place**
+**Rate Historical Place**
             ```http
             POST /rateHistoricalPlace/:touristId
             ```
             Rates a historical place.
 
-        - **Comment on Historical Place**
+**Comment on Historical Place**
             ```http
             POST /commentHistoricalPlace/:touristId
             ```
             Comments on a historical place.
 
-        #### Password Management
-        - **Change Password**
+#### Password Management
+
+**Change Password**
             ```http
             PUT /changePassword/:userId
             ```
             Changes the password of a user.
 
-        - **Forget Password**
+**Forget Password**
             ```http
             POST /forgetPassword
             ```
             Initiates the forget password process.
 
-        - **Verify OTP**
+**Verify OTP**
             ```http
             GET /verifyOTP/:userId/:otp
             ```
             Verifies the OTP for password reset.
 
-        - **Change Password After OTP**
+**Change Password After OTP**
             ```http
             PUT /changePasswordAfterOTP/:userId
             ```
             Changes the password after OTP verification.
 
-        #### Promo Code Management
-        - **Create Promo Code**
+#### Promo Code Management
+
+**Create Promo Code**
             ```http
             POST /creatingPromoCode
             ```
             Creates a new promo code.
 
-        - **Update Promo Code**
+**Update Promo Code**
             ```http
             PUT /updatePromoCode
             ```
             Updates an existing promo code.
 
-        #### Notification Management
-        - **Get All Notifications**
+#### Notification Management
+
+**Get All Notifications**
             ```http
             GET /getAllNotifications/:userId
             ```
             Retrieves all notifications for a user.
 
-        #### Address Management
-        - **Add Address**
+#### Address Management
+
+**Add Address**
             ```http
             POST /addAddresses/:userId/:address
             ```
             Adds a new address for a user.
 
-        - **Get Addresses**
+**Get Addresses**
             ```http
             GET /getAddresses/:userId
             ```
             Retrieves addresses for a user.
 
-        #### Miscellaneous
-        - **Upload Image**
+#### Miscellaneous
+
+**Upload Image**
             ```http
             POST /uploadImage/:userId
             ```
             Uploads an image for a user.
 
-        - **Redeem Points**
+**Redeem Points**
             ```http
             GET /redeemPoints/:userId/:points
             ```
             Redeems points for a user.
 
-        - **Points After Payment**
+**Points After Payment**
             ```http
             PUT /pointsAfterPayment/:userId/:amount
             ```
             Updates points after payment.
 
-        - **Get Level**
+**Get Level**
             ```http
             GET /level/:userId
             ```
             Retrieves the level of a user.
 
-        - **Accept Terms**
+**Accept Terms**
             ```http
             PUT /acceptTerms/:_id/:type
             ```
             Accepts terms for a user.
 
-        - **Register User**
+**Register User**
             ```http
             POST /register/:type
             ```
             Registers a new user.
 
-        - **Login**
+**Login**
             ```http
             POST /login
             ```
             Logs in a user.
 
-        - **Add Interested In**
+**Add Interested In**
             ```http
             PUT /addInterestedIn/:_id/:eventId/:eventType
             ```
             Adds an interest for a user.
 
-        - **Request Deletion**
+**Request Deletion**
             ```http
             PUT /requestDeletion/:userId/:type
             ```
             Requests deletion of a user account.
 
-        - **User Report**
+**User Report**
             ```http
             GET /userReport/:userId
             ```
             Retrieves a user report.
 
-        - **Admin Report**
+**Admin Report**
             ```http
             GET /adminReport/:userId
             ```
             Retrieves an admin report.
 
-        - **Fetch User Statistics**
+**Fetch User Statistics**
             ```http
             GET /fetchUserStats/:adminid
             ```
             Fetches user statistics.
 
-        - **Bookmark**
+**Bookmark**
             ```http
             POST /bookmark/:touristId/:id/:type
             ```
             Adds a bookmark for a user.
 
-        - **Fetch Bookmarks**
+**Fetch Bookmarks**
             ```http
             GET /fetchbookmark/:touristId
             ```
             Retrieves bookmarks for a user.
 
-        ### complaintRoutes
+### complaintRoutes
 
-        #### Complaint Management
-        - **File Complaint**
+#### Complaint Management
+
+**File Complaint**
             ```http
             POST /fileComplaint/:touristId/:problem/:title
             ```
             Files a complaint by a tourist.
 
-        - **View Complaints**
+**View Complaints**
             ```http
             GET /ViewComplaints
             ```
             Admin views all complaints.
 
-        - **View Selected Complaint**
+**View Selected Complaint**
             ```http
             GET /ViewSelectedComplaint/:complaintId
             ```
             Admin views a selected complaint.
 
-        - **Mark Complaint**
+**Mark Complaint**
             ```http
             PATCH /markComplaint/:complaintId
             ```
             Marks a complaint as resolved.
 
-        - **Reply to Complaint**
+**Reply to Complaint**
             ```http
             PATCH /replyComplaint/:complaintId
             ```
             Admin replies to a complaint.
 
-        - **Get My Complaints**
+**Get My Complaints**
             ```http
             GET /myComplaints/:touristId
             ```
             Retrieves complaints filed by a tourist.
 
-        - **Delete All Complaints**
+**Delete All Complaints**
             ```http
             DELETE /deleteAllComplaints
             ```
