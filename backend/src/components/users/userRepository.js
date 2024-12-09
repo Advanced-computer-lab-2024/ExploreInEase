@@ -1076,7 +1076,63 @@ const fetchUserStatistics = async () => {
     }
   };
 
+
+
+  const getType = async (id) => {
+    const user = await Users.findOne({ _id: id });
+    const tourist = await Tourist.findOne({ _id: id });
+    if (user) {
+      return user.type;
+    } else if (tourist) {
+      return "tourist";
+    } else {
+      throw new Error("User not found");
+    }
+  };
+
+  const getUserStatistics = async () => {
+    const totalUsers = await Users.countDocuments({ type: { $ne: "admin" } }); // haysheel el admin  users
+    const toatlTourist = await Tourist.countDocuments();
+  
+    const total = totalUsers + toatlTourist;
+  
+    // Count new users grouped by month
+    const pipeline = [
+      {
+        $match: { type: { $ne: "admin" } }, // Exclude admin users
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ];
+  
+    const userStats = await Users.aggregate(pipeline);
+    const touristStats = await Tourist.aggregate(pipeline);
+  
+    //... da merge opertator fa negma3 both user and tourists
+    const combinedStats = [...userStats, ...touristStats].reduce((acc, cur) => {
+      const existing = acc.find((entry) => entry._id === cur._id);
+      if (existing) {
+        existing.count += cur.count;
+      } else {
+        acc.push(cur);
+      }
+      return acc;
+    }, []);
+  
+    return { total, newUsersPerMonth: combinedStats };
+  };
+
+
+
 module.exports = {
+    getType,
+    getUserStatistics,
+    
     fetchUserStatistics,
     getAllNotifications,
     addAddresses,
