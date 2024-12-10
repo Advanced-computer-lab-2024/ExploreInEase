@@ -27,8 +27,8 @@ const HomePage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
-    const [ setSuccess] = useState('');
-    const [setError] = useState(null);
+    const [ success,setSuccess] = useState('');
+    const [error,setError] = useState(null);
     const User = state?.User || Userr;
     const imageUrl = state?.imageUrl || imageUrll;
     const [anchorEl, setAnchorEl] = useState(null);
@@ -174,13 +174,15 @@ const HomePage = () => {
         else if (title === 'Sales Report'){
             try {
               const options = {
-                apiPath: `/userReport/${userId}`,
+                apiPath: `/userReport/${Userr._id}`,
               };
       
               const response = await NetworkService.get(options);
               const data = response.eventObject;
+              console.log(response);
+              
               console.log(data);
-      
+              console.log(Userr._id);
       
       
               console.log(response.message); // Set success message

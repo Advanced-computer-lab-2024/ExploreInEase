@@ -1,5 +1,5 @@
 import TouristNavbar from "./Tourist/TouristNavbar";
-const stepbystepGuide=()=>{
+const stepbystepGuide=()=>{ 
 return(
     <div>
 
