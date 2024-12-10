@@ -701,7 +701,7 @@ const handleEditActivity = (activity) => {
        activities.map((activity, index) => (
             
     <Grid item xs={12} sm={6} md={4} key={index} >
-      <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
+      <Card sx={{width:'400px',height:'470px',marginLeft:5,marginBottom:5}}>
       <CardMedia
           component="img"
           height="180"
