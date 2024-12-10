@@ -56,8 +56,25 @@ const TouristNavbar = () => {
 
 useEffect(()=>{
   checkPromoCode();
+  notifyUpcomingEvents();
 },[]);
+useEffect(() => {
+  // Update the avatar URL when the component mounts if a new image URL exists
+  if (savedAvatarUrl || imageUrl) {
+      setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+  } else {
+      setAvatarImage(defaultAvatarUrl);
+  }
+}, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
 
+useEffect(() => {
+if (showSuccessMessage) {
+ const timer = setTimeout(() => {
+   setShowSuccessMessage(false);
+ }, 5000);
+ return () => clearTimeout(timer);
+}
+}, [showSuccessMessage]);
 useEffect(() => {
   if (message || errorMessage) {
     const timer = setTimeout(() => {
@@ -76,23 +93,6 @@ const checkPromoCode=async()=>{
   const response = await NetworkService.put(options);
   console.log(response);
 }
-useEffect(() => {
-         // Update the avatar URL when the component mounts if a new image URL exists
-         if (savedAvatarUrl || imageUrl) {
-             setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
-         } else {
-             setAvatarImage(defaultAvatarUrl);
-         }
-}, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
-     
- useEffect(() => {
-      if (showSuccessMessage) {
-        const timer = setTimeout(() => {
-          setShowSuccessMessage(false);
-        }, 5000);
-        return () => clearTimeout(timer);
-      }
-}, [showSuccessMessage]);
     
 useEffect(() => {
       if (showErrorMessage) {
@@ -109,6 +109,14 @@ useEffect(() => {
     setSelectedTab(savedTab); // Restore the selected tab
   }
 }, []);
+
+const notifyUpcomingEvents =async()=>{
+  const options = {
+    apiPath: `/notifyUpcomingEvents/${Userr._id}`,
+  };
+  const response = await NetworkService.get(options); 
+  console.log(response);
+};
  const handleAvatarUpload = async (event) => {
   const file = event.target.files[0];
   if (file) {

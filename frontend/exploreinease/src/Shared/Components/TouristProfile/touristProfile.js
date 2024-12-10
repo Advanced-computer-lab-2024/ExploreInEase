@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
+import { Card, Box, Typography, IconButton, TextField, Divider,FormControl,InputLabel,Select,MenuItem, Avatar, Grid, InputAdornment } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
@@ -17,6 +17,7 @@ import Sky from '../Sky2.jpeg';
 import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const TouristProfile = (props) => {
+  const [level, setLevel] = useState(1);
   const User = JSON.parse(localStorage.getItem('User'));
   const location = useLocation();
   const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
@@ -38,7 +39,6 @@ const TouristProfile = (props) => {
   const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
   const [formValues, setFormValues] = useState(initialData);
   const [showPassword, setShowPassword] = useState(false);
-  const [setLevel] = useState(1);
   const [isEditable, setIsEditable] = useState({
     email: false,
     mobileNum: false,
@@ -306,7 +306,20 @@ const TouristProfile = (props) => {
                 <Flag color="action" />
                 <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
                 {isEditable.currency ? (
-                  <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+                  <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Currency</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={formValues.currency}
+                    label="Currency"
+                    onChange={handleChange('currency')}
+                  >
+                       <MenuItem value={'EGP'}>EGP</MenuItem>
+                       <MenuItem value={'euro'}>EURO</MenuItem>
+                       <MenuItem value={'dollar'}>Dollar</MenuItem>  
+                  </Select>
+                </FormControl>
                 ) : (
                   <Typography>{formValues.currency}</Typography>
                 )}

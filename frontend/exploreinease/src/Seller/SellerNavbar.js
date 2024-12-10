@@ -168,7 +168,7 @@ const SHomePage = () => {
 
         const response = await NetworkService.get(options);
         console.log("res",response);
-        navigate(`/viewSellerProfile`, { state: { tourist: Userr } });
+        navigate(`/viewSellerProfile`, { state: { tourist: response.seller } });
 
       } catch (err) {
         if (err.response) {

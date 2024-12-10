@@ -18,7 +18,7 @@ import Alert from '@mui/material/Alert';
 const Flights = () => {
   const User = JSON.parse(localStorage.getItem('User'));
   const location = useLocation();
-  const { userId } = location.state || {};
+  const { userId } = location.state || User._id;
   const [iatCodeTo,setIatCodeTo]=useState([]);
   const [iatCodeFrom,setIatCodeFrom]=useState([]);
   const[flightDataa,setFlightDataa]=useState([]);
@@ -96,7 +96,7 @@ console.log("IatCode From and IatCode To",iatCodeFrom,iatCodeTo);
                     .map(result => result.value)                     // Extract value from successful responses
                     .flat();                                         // Flatten if responses are arrays
                   console.log("Combined Flight data:", combinedFlightData);
-                  setFlightDataa(combinedFlightData);
+                  setFlightDataa(response);
                   }
   
   

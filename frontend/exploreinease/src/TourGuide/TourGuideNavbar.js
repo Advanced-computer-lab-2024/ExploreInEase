@@ -32,8 +32,7 @@ const TourGuideHP = () => {
  const navigate = useNavigate();
     const location = useLocation();
     const [menuItems,setMenuItem]=useState( []);
-    
-      const [anchorProfileEl, setAnchorProfileEl] = useState(null);
+    const [anchorProfileEl, setAnchorProfileEl] = useState(null);
     const [selectedTab, setSelectedTab] = useState("Sales Report");  
     const { state } = location;
     const User = state?.User || Userr;    

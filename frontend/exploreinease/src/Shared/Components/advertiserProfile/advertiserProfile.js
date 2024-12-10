@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
+import { Card, Box, Typography, IconButton, TextField,FormControl,InputLabel,MenuItem,Select, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -236,7 +236,21 @@ const AdvertiserProfile = (props) => {
             <EmailIcon color="action" />
             <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
             {isEditable.currency ? (
-              <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+              // <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+              <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Currency</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={formValues.currency}
+                label="Currency"
+                onChange={handleChange('currency')}
+              >
+                   <MenuItem value={'EGP'}>EGP</MenuItem>
+                   <MenuItem value={'euro'}>EURO</MenuItem>
+                   <MenuItem value={'dollar'}>Dollar</MenuItem>  
+              </Select>
+            </FormControl>
             ) : (
               <Typography>{formValues.currency}</Typography>
             )}

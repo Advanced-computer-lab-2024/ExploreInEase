@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
+import { Card, Box, Typography, IconButton,FormControl,Select,InputLabel,MenuItem, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { Edit as EditIcon, Save as SaveIcon, Visibility, VisibilityOff, AccountCircle as AccountCircleIcon, Email as EmailIcon, Lock as LockIcon , Phone as PhoneIcon , Work as WorkIcon    } from '@mui/icons-material';
@@ -253,11 +253,24 @@ const TourGuideProfile = (props) => {
         <EmailIcon color="action" />
         <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
         {isEditable.currency ? (
-          <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+          <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label">Currency</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={formValues.currency}
+            label="Currency"
+            onChange={handleChange('currency')}
+          >
+               <MenuItem value={'EGP'}>EGP</MenuItem>
+               <MenuItem value={'euro'}>EURO</MenuItem>
+               <MenuItem value={'dollar'}>Dollar</MenuItem>  
+          </Select>
+        </FormControl>
         ) : (
           <Typography>{formValues.currency}</Typography>
         )}
-        <IconButton onClick={() => { toggleEdit('email'); if (isEditable.currency) handleSave(); }}>
+        <IconButton onClick={() => { toggleEdit('currency'); if (isEditable.currency) handleSave(); }}>
           {isEditable.currency ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
         </IconButton>
       </Box>
