@@ -95,16 +95,6 @@ const HomePage = () => {
           setSelectedTab(savedTab); // Restore the selected tab
         }
       }, []);
-
-      // useEffect(()=>{
-      //     checkPromoCode();
-      //   },[]);
-      //   const checkPromoCode=async()=>{
-      //     const options = {
-      //       apiPath: '/updatePromoCode',
-      //     };
-      //     await NetworkService.put(options);
-      //   }
     const handleOpenMenu = (event) => {
         setAnchorProfileEl(event.currentTarget);
       };
@@ -120,14 +110,6 @@ const HomePage = () => {
         setAnchorEl(null);
     };
 
-    const handleMenuClick = (action) => {
-        handleMenuClose();
-        if (action === 'changePassword') {
-            navigate('/change-password', { state: { userId: userId } });
-        } else if (action === 'logout') {
-            navigate('/login');
-        }
-    };
 
     const handleAvatarUpload = async (event) => {
         const file = event.target.files[0];

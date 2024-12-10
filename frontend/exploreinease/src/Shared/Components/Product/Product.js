@@ -25,9 +25,9 @@ import HomePage from '../../../Seller/SellerNavbar';
 import TouristNavbar from '../../../Tourist/TouristNavbar';
 import NodataFound from '../../../No data Found.avif';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-
 const ProductCard = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
+  
   const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
    console.log("User Type", userType);
@@ -175,13 +175,10 @@ const handleGetAllProduct = async () => {
     );
 };
 const handleAddToWishList = async (productId) => {
-
   const reqbody = {
       productId: productId
   }
-
   const userId = localStorage.getItem("UserId");
-
   await axios.post(`http://localhost:3030/addWishlist/${userId}`,reqbody).then((res) => {
       console.log(res.data);
       console.log("Added to Wishlist", productId);
@@ -509,12 +506,14 @@ const handleClickPurchase = async (product, selectedQuantity) => {
   return (
 
     <div>
+          
 <div>
-        {userType==='seller' &&(
+
+        {Userr.type==='seller'&&(
             <HomePage/>
         )}
 
-        {userType==='tourist'&&(
+        {Userr.type!='seller' && Userr.type!='admin'&&(
           <TouristNavbar/>
         )
       }

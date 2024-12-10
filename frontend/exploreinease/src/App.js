@@ -14,8 +14,6 @@ const SellerProfile = React.lazy(() => import('./Shared/Components/SellerProfile
 const TouristProfile = React.lazy(() => import('./Shared/Components/TouristProfile/touristProfile'));
 const AdminUserProfiles = React.lazy(() => import('./Admin/adminUserProfiles'));
 const Tags = React.lazy(() => import('./TouristGovernor/tags'));
-
-
 const Preferencetags = React.lazy(() => import('./Admin/preferenceTags'));
 const ActivityCategory = React.lazy(() => import('./Admin/activityCategories'));
 const HistoricalPlaces = React.lazy(() => import('./TouristGovernor/historicPlaces'));
@@ -56,40 +54,42 @@ const SalesReport = React.lazy(() => import('./Shared/Components/Reports/SalesRe
 const OrderHistory = React.lazy(() => import('./Tourist/OrderHistory'));
 const MyBookmarks = React.lazy(() => import('./Shared/MyBookmarks'));
 const Events= React.lazy(() => import('./Guest/Events'));
+const WishList= React.lazy(() => import('./Tourist/components/wishlist'));
 const App = () => {
   useEffect(() => {
     document.title = 'ExploreInEase';
 }, []);
+
   return (
     <Router>
       {/* Wrapping Routes with Suspense to handle loading */}
       <Suspense fallback={<div>Loading</div>}>
         <Routes>
-          <Route path="/" element={<Events />} />
-          <Route path="/register" element={<Signup />} />
-          <Route path="/explore" element={<Filter />} />
-          <Route path="/viewProduct" element={<Product />} />
-          <Route path="/viewTouristProfile" element={<TouristProfile />} />
-          <Route path="/HistoricalPlaces" element={<HistoricalPlaces />} />
-          <Route path="/viewAllGovernorCreatedMuseum" element={<MuseumList />} />
-          <Route path="/viewHistoricalTags" element={<Tags />} />
-          <Route path="/viewSellerProfile" element={<SellerProfile />} />
-          <Route path="/viewAdvertiserProfile" element={<AdvertiserProfile />} />
-          <Route path="/viewAllCreatedActivities" element={<ActivityList />} />
-          <Route path="/viewTourGuideProfile" element={<TourGuideProfile />} />
-          <Route path="/viewCreatedItineraryList" element={<ItineraryList />} />
-          <Route path="/viewMyItinerary" element={<ItineraryForm />} />
-          <Route path="/CreateItinerary" element={<CreateItinerary />} />
-          <Route path="/viewActivityCategory" element={<ActivityCategory />} />
+          <Route path="/" element={<Events/>} />
+          <Route path="/register" element={<Signup/>} />
+          <Route path="/explore" element={<Filter/>} />
+          <Route path="/viewProduct" element={<Product/>} />
+          <Route path="/viewTouristProfile" element={<TouristProfile/>} />
+          <Route path="/HistoricalPlaces" element={<HistoricalPlaces/>} />
+          <Route path="/viewAllGovernorCreatedMuseum" element={<MuseumList/>} />
+          <Route path="/viewHistoricalTags" element={<Tags/>} />
+          <Route path="/viewSellerProfile" element={<SellerProfile/>} />
+          <Route path="/viewAdvertiserProfile" element={<AdvertiserProfile/>} />
+          <Route path="/viewAllCreatedActivities" element={<ActivityList/>} />
+          <Route path="/viewTourGuideProfile" element={<TourGuideProfile/>} />
+          <Route path="/viewCreatedItineraryList" element={<ItineraryList/>} />
+          <Route path="/viewMyItinerary" element={<ItineraryForm/>} />
+          <Route path="/CreateItinerary" element={<CreateItinerary/>} />
+          <Route path="/viewActivityCategory" element={<ActivityCategory/>} />
           <Route path="/viewPreferencatags" element={<Preferencetags />} />
-          <Route path="/viewAddedUsers" element={<AddUser />} />
+          <Route path="/viewAddedUsers" element={<AddUser/>} />
           <Route path="/viewAllUserProfiles" element={<AdminUserProfiles />} />
           <Route path="/TouristHomePage" element={<Filter />} />
           <Route path="/SellerHomePage" element={<SalesReport />} />
           <Route path="/TourGuideHomePage" element={<SalesReport />} />
           <Route path="/AdminHomePage" element={<AdminSideMenu/>} />
-          <Route path="/AdvertiserNavbar" element={<AdvertiserNavbar />} />
-          <Route path="/GovernorHomePage" element={<HistoricalPlaces />} />
+          <Route path="/AdvertiserNavbar" element={<AdvertiserNavbar/>} />
+          <Route path="/GovernorHomePage" element={<HistoricalPlaces/>} />
           <Route path="/AdvertiserHomePage" element={<SalesReport/>}/>
           <Route path="/Activities" element={<Activity />} />
           <Route path="/Login" element={<SignIn />} />
@@ -113,6 +113,7 @@ const App = () => {
           <Route path="/myBookmarks" element={<MyBookmarks/>}/>
           <Route path="/Events" element={<Events/>}/>
           <Route path="/touristNavbar" element={<TouristNavbar/>}/>
+          <Route path="/WishList" element={<WishList/>}/>
         </Routes>
       </Suspense>
     </Router>

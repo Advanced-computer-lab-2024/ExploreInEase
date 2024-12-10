@@ -12,6 +12,7 @@ import Sky from '../Sky2.jpeg';
 import '../TourGuideProfile/tourGuideProfile.css';
 import SHomePage from '../../../Seller/SellerNavbar';
 const SellerProfile = (props) => {
+  
   const initialData = {
     username: '',
     email: '',

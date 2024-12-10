@@ -162,13 +162,12 @@ const SHomePage = () => {
   async function handleClick(title) {
     if (title === "Profile") {
       try {
-        // const options = {
-        //   apiPath: `/getSeller/${userId}`,
-        // };
+        const options = {
+          apiPath: `/getSeller/${userId}`,
+        };
 
-        // const response = await NetworkService.get(options);
-        // setSuccess(response.message); // Set success message
-        // console.log(response.seller);
+        const response = await NetworkService.get(options);
+        console.log("res",response);
         navigate(`/viewSellerProfile`, { state: { tourist: Userr } });
 
       } catch (err) {

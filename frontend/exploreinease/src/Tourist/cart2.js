@@ -21,6 +21,7 @@ import {
   useTheme,
   Modal
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,19 +29,22 @@ import {
   Remove as RemoveIcon
 } from '@mui/icons-material';
 import { Remove, Add, Close } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
-
+import { Navigate, useLocation } from "react-router-dom";
 import StepperNavigation from "./StepperNavigtion";
 import NetworkService from "../NetworkService";
 import axios from "axios";
+import TouristNavbar from './TouristNavbar';
+
 // import AddToWishListButton from "./AddToWishListButton";
 // import AddToCartButton from "./AddToCartButton";
 
 // import CheckoutPage from "./CheckoutPage";
 import './Payment.css'; // Add your styles here
 const CartPage = () => {
+  const User = JSON.parse(localStorage.getItem('User'));
+  console.log("currency",User.currency);
+  const navigate = useNavigate();
   const location = useLocation();
-  const { userId, currency } = location.state || {};
   const [promoCode, setPromoCode] = useState("");
   const [activeStep, setActiveStep] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -52,8 +56,6 @@ const CartPage = () => {
   const [isBackVisible, setIsBackVisible] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
   const [isOrderConfirmed, setIsOrderConfirmed] = useState(false);
-
-
   const [selectedAddressId, setSelectedAddressId] = useState('new');
 
   // Sample saved addresses - in a real app, this would come from an API/database
@@ -126,13 +128,10 @@ const CartPage = () => {
     expMonth: '',
     expYear: '',
   });
+console.log(cardDetails);
 
   useEffect(() => {
-
     //Fetch cart items from API
-
-
-
     const fetchCart = async () => {
       try {
         const res = await axios.get(`http://localhost:3030/getCart/${UserId}`);
@@ -142,7 +141,7 @@ const CartPage = () => {
           id: product._id,
           product_id: product._id,
           name: product.name,
-          color: product.color || "N/A", // If no color provided
+          color: product.color , // If no color provided
           price: product.price,
           count: product.quantity,
           image: `http://localhost:3030/uploads/${product.picture}` // Adjust base URL as needed
@@ -157,7 +156,6 @@ const CartPage = () => {
     };
 
     fetchCart();
-
   }, []);
 
   const handleChange = (field, value) => {
@@ -166,7 +164,6 @@ const CartPage = () => {
       [field]: value,
     }));
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCardDetails((prev) => ({ ...prev, [name]: value }));
@@ -251,13 +248,14 @@ const CartPage = () => {
             addressToBeDelivered: deliveryInfo,
             paymentType: selectedPaymentMethod,
             price: calculateTotal(),
-            currency: currency
+            currency: User.currency
           }
         });
         console.log(response);
 
         if (response.success) {
           setIsOrderConfirmed(true); // Show the popup
+          // Navigate('');
         } else {
           alert('Failed to confirm order. Please try again.');
         }
@@ -280,7 +278,7 @@ const CartPage = () => {
             addressToBeDelivered: deliveryInfo,
             paymentType: selectedPaymentMethod,
             price: calculateTotal(),
-            currency: "EGP",
+            currency: User.currency,
             cardNumber: cardDetails.number,
             expMonth: cardDetails.expMonth,
             expYear: cardDetails.expYear,
@@ -402,12 +400,17 @@ const CartPage = () => {
     return cartItems.reduce((acc, item) => acc + item.price * item.count, 0);
   };
 
+  const handleConfirmeButton=()=>{
+    setIsOrderConfirmed(false);
+  }
   return (
+    <>
+    <TouristNavbar/>
     <Box sx={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
       <div>
         <Modal
           open={isOrderConfirmed}
-          onClose={() => setIsOrderConfirmed(false)}
+          onClose={handleConfirmeButton}
           aria-labelledby="order-confirmed-title"
           aria-describedby="order-confirmed-description"
         >
@@ -447,7 +450,7 @@ const CartPage = () => {
               Your order has been successfully placed!
             </Typography>
             <Button
-              onClick={() => setIsOrderConfirmed(false)}
+              onClick={handleConfirmeButton}
               variant="contained"
               color="primary"
               sx={{
@@ -1104,7 +1107,7 @@ const CartPage = () => {
                       }}
                     />
                     <Typography variant="h6" sx={{ letterSpacing: 2 }}>
-                      {cardDetails.cardNumber || "•••• •••• •••• ••••"}
+                      {cardDetails.number || "•••• •••• •••• ••••"}
                     </Typography>
                     <Box
                       sx={{
@@ -1116,10 +1119,10 @@ const CartPage = () => {
                       }}
                     >
                       <Typography variant="body1">
-                        {cardDetails.expiryDate || "MM/YY"}
+                        {cardDetails.expMonth +`/`+ cardDetails.expYear || "MM"}
                       </Typography>
                       <Typography variant="body1">
-                        {cardDetails.cardholderName || "Cardholder Name"}
+                        {cardDetails.name || "Cardholder Name"}
                       </Typography>
                     </Box>
                   </Paper>
@@ -1181,7 +1184,7 @@ const CartPage = () => {
                     /><TextField
                       label="Expiry Year"
                       type="text"
-                      placeholder="MM/YY"
+                      placeholder="YY"
                       value={cardDetails.expYear}
                       onChange={(e) => handleChange("expYear", e.target.value)}
                       onFocus={() => setIsFlipped(false)} // Ensure card stays on front
@@ -1338,6 +1341,8 @@ const CartPage = () => {
       }
 
     </Box>
+    </>
+ 
   );
 };
 

@@ -23,7 +23,7 @@ import {
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
-
+import TouristNavbar from './TouristNavbar';
 
 const OrdersDashboard = () => {
 
@@ -138,7 +138,9 @@ const OrdersDashboard = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: '4xl', mx: 'auto', p: 4 }}>
+    <>
+      <TouristNavbar/>
+      <Box sx={{ maxWidth: '4xl', mx: 'auto', p: 4 }}>
       <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 4 }}>
         Orders Dashboard
       </Typography>
@@ -162,6 +164,8 @@ const OrdersDashboard = () => {
         </Alert>
       )}
     </Box>
+    </>
+
   );
 };
 

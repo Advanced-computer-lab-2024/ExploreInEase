@@ -17,13 +17,16 @@ import Sky from '../Sky2.jpeg';
 import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const TouristProfile = (props) => {
+  const User = JSON.parse(localStorage.getItem('User'));
+  console.log(User);
+  
   const location = useLocation();
   const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
   // console.log(Tourist);
 
   const initialData = {
-    email: Tourist?.email || '',
-    mobileNum: Tourist?.mobileNum || '',
+    email: Tourist?.email || User?.email,
+    mobileNum: Tourist?.mobileNum || User?.mobileNum,
     nationality: Tourist?.nation || '',
     dob: Tourist?.dob ? dayjs(Tourist.dob) : null,
     profession: Tourist?.profession || '',

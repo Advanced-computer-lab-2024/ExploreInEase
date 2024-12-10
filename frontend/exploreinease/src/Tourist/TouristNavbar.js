@@ -23,7 +23,7 @@ import Delete from '@mui/icons-material/Delete';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 const TouristNavbar = () => {
    const Userr = JSON.parse(localStorage.getItem('User'));
    const imageUrll = localStorage.getItem('imageUrl');
@@ -54,7 +54,7 @@ const TouristNavbar = () => {
     const [errorMessage,setErrorMessage]=useState('');
 
 
-     useEffect(()=>{
+useEffect(()=>{
   checkPromoCode();
 },[]);
 
@@ -109,8 +109,6 @@ useEffect(() => {
     setSelectedTab(savedTab); // Restore the selected tab
   }
 }, []);
-
-
  const handleAvatarUpload = async (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -163,7 +161,7 @@ const handleClickNotification = async(event) => {
 const handleOpenMenu = (event) => {
   setAnchorProfileEl(event.currentTarget);
 };
-   const handleMenuClose = () => {
+const handleMenuClose = () => {
       setAnchorEl(null);
 };
 const  handleRegisterClick=async(title)=> {
@@ -194,6 +192,29 @@ const  handleRegisterClick=async(title)=> {
               localStorage.setItem('selectedTab', title);
               navigate(`/BookFlight`,{state:{userId}});          
             }
+            else if(title ==="Order History"){
+              try {
+                const options = {
+                  apiPath: `/myOrders/${Userr._id}/${Userr.currency}`,
+                };
+                
+                const response = await NetworkService.get(options);
+                console.log(response);
+                console.log(response.message); // Set success message
+                const Type='tourist';
+                const Orders = response.data;
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
+                navigate(`/OrderHistory`,{ state: { Orders, Type ,User:Userr} });          
+              } catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                    console.log(err.response.data.message); // Set error message from server response if exists
+                } else {
+                  console.log('An unexpected error occurred.'); // Generic error message
+                }
+              } 
+            }
            else if (title==="Products") {
 
             try {
@@ -221,7 +242,13 @@ const  handleRegisterClick=async(title)=> {
              }
             else if (title==='profile'){
               try {
-                  navigate(`/viewTouristProfile`,{state:{Tourist:Userr}});
+                const options = {
+                  apiPath: `/getTourist/${Userr._id}`,
+                };
+                const response = await NetworkService.get(options);
+                console.log("res",response);
+                
+                  navigate(`/viewTouristProfile`,{state:{Tourist:response}});
                 } catch (err) {
                   if (err.response) {
                       console.log(err.message);
@@ -359,7 +386,7 @@ const  handleRegisterClick=async(title)=> {
                 console.log(errorMessage);
               }
             }
-            else if(title==='BookMarks'){
+            else if(title==='Book Marks'){
               try { 
                 const options = {
                   apiPath: `/fetchbookmark/${Userr._id}`,
@@ -417,7 +444,7 @@ const  handleRegisterClick=async(title)=> {
 
 return (
   <>
-      <nav className="navbarMain">
+    <nav className="navbarMain">
     <div className="navbar-left">
     <div className="logo-container">
       <img
@@ -442,11 +469,22 @@ return (
           <Tooltip title="Cart">
           <AddShoppingCart />
           </Tooltip>
+        </IconButton> 
 
-        </IconButton>   
+        <IconButton
+          style={{
+            color: 'blue',
+            backgroundColor: '#e0f7fa',
+          }}
+          onClick={() => {
+            navigate('/wishList');
+          }}
+        >
+          <Tooltip title="WishList">
+          <FavoriteBorderIcon />
+          </Tooltip>
+        </IconButton>  
 
-  {/* Notification Button */}
-{/* Notification Icon Button */}
 <IconButton
         aria-controls={openNotfication ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -457,10 +495,13 @@ return (
           backgroundColor: "#e0f7fa",
         }}
       >
+        <Tooltip title="Notifications">
         <Badge badgeContent={menuItems?.length || 0} color="error">
           <NotificationsIcon />
         </Badge>
-      </IconButton>
+        </Tooltip>
+
+     </IconButton>
 
       {/* Notification Menu */}
       <Menu
@@ -600,7 +641,7 @@ return (
       )}
     </div>
     <nav className="navbarSecondary">
-    {['Events',,"Products","Transportation","Complaints","Book Hotels","Book Flights","Purchased Product",,"Booked items","BookMarks"].map((tab) => (
+    {['Events',"Products","Transportation","Complaints","Book Hotels","Book Flights","Order History",,"Booked items","Book Marks"].map((tab) => (
           <div
             key={tab}
             className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}

@@ -687,6 +687,7 @@ const login = async (req, res) => {
                         termsAndConditions: user.termsAndConditions,
                         requestDeletion: user.requestDeletion,
                         specialist: user.specialist,
+                        wallet: user.wallet,
                         status: user.status,
                         otp: user.otp,
                         currency: user.currency,
@@ -695,6 +696,7 @@ const login = async (req, res) => {
                         createdAt: user.createdAt,
                         updatedAt: user.updatedAt
                     },
+                    
                     userType: user.type
                 });
             }
@@ -710,6 +712,11 @@ const login = async (req, res) => {
                 username: user.username,
                 password: user.password,
                 email: user.email,
+                mobileNum: user.mobileNum || '',
+                nation: user.nation || '',
+                dob: user.dob || '',
+                profession: user.profession || '',
+                wallet: user.wallet || 0,
                 ratingSum: user.ratingSum,
                 ratingCount: user.ratingCount,
                 hotline: user.hotline || '',

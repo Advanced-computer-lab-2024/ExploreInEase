@@ -478,44 +478,43 @@ const Events = () => {
                      </Typography>           */}
                    </>
                  )}
-        
                  </CardContent>
                  </Card>   
                  <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>More Details about</DialogTitle>
-        <DialogContent>
-          {dialogData && (
-            <div>
-              {item.type === 'Activity' && (
-                <>
-                  <Typography><strong>Budget:</strong> {dialogData.budget}||0</Typography>
-                  <Typography><strong>Date:</strong> {dialogData.date}||No Date</Typography>
-                  <Typography><strong>Category:</strong> {dialogData.category}||NO Category</Typography>
-                  {dialogData.specialDiscount && (
-                    <Typography><strong>Special Discount:</strong> {dialogData.specialDiscount}%</Typography>
-                  )}
-                </>
-              )}
-              {item.type === 'Itinerary' && (
-                <>
-                  <Typography><strong>Price:</strong> {dialogData.price}</Typography>
-                  <Typography><strong>Rating:</strong> {dialogData.rating.length === 0 ? 0 : dialogData.rating}</Typography>
-                  <Typography><strong>Language:</strong> {dialogData.language}</Typography>
-                  <Typography><strong>Directions:</strong> {dialogData.directions}</Typography>
-                </>
-              )}
-              {item.type === 'HistoricalPlace' && (
-                <>
-                  <Typography><strong>Opening Hours:</strong> {dialogData.openingHours}</Typography>
-                  <Typography><strong>Students ticket price:</strong> {dialogData.ticketPrice[0]}</Typography>
-                  <Typography><strong>Native ticket price:</strong> {dialogData.ticketPrice[1]}</Typography>
-                  <Typography><strong>Foreign ticket price:</strong> {dialogData.ticketPrice[2]}</Typography>
-                </>
-              )}
-            </div>
-          )}
+                 <DialogTitle>More Details about</DialogTitle>
+             <DialogContent>
+                    {dialogData && (
+                      <div>
+                        {item.type === 'Activity' && (
+                          <>
+                            <Typography><strong>Budget:</strong> {dialogData.budget}||0</Typography>
+                            <Typography><strong>Date:</strong> {dialogData.date}||No Date</Typography>
+                            <Typography><strong>Category:</strong> {dialogData.category}||NO Category</Typography>
+                            {dialogData.specialDiscount && (
+                              <Typography><strong>Special Discount:</strong> {dialogData.specialDiscount}%</Typography>
+                            )}
+                          </>
+                        )}
+                        {item.type === 'Itinerary' && (
+                          <>
+                            <Typography><strong>Price:</strong> {dialogData.price}</Typography>
+                            <Typography><strong>Rating:</strong> {dialogData.rating.length === 0 ? 0 : dialogData.rating}</Typography>
+                            <Typography><strong>Language:</strong> {dialogData.language}</Typography>
+                            <Typography><strong>Directions:</strong> {dialogData.directions}</Typography>
+                          </>
+                        )}
+                        {item.type === 'HistoricalPlace' && (
+                          <>
+                            <Typography><strong>Opening Hours:</strong> {dialogData.openingHours}</Typography>
+                            <Typography><strong>Students ticket price:</strong> {dialogData.ticketPrice[0]}</Typography>
+                            <Typography><strong>Native ticket price:</strong> {dialogData.ticketPrice[1]}</Typography>
+                            <Typography><strong>Foreign ticket price:</strong> {dialogData.ticketPrice[2]}</Typography>
+                          </>
+                        )}
+                      </div>
+                    )}
         </DialogContent>
-      </Dialog> 
+                  </Dialog> 
                </Grid>
                
                  ))}

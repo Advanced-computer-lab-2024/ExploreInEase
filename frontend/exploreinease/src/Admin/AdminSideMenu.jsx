@@ -8,15 +8,13 @@ import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
-import LogoutIcon from '@mui/icons-material/Logout';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import '../Login/login.css';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-
 import HomeIcon from "@mui/icons-material/Home";
-
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
@@ -30,12 +28,9 @@ import ComplaintsTable from './AdminComplaintsTable';
 import RegistringUsers from './AdminRegistringUsers';
 import DeletionRequests from './DeletionRequests';
 import EventsAndItineraries from './EventsAndItenararies';
-
 import AdminHomePage from './AdminHomePage';
 import AdminSalesReport from './AdminSalesReport';
-
 import AdminSalesReport2 from './AdminSalesReport2';
-
 import ActivityCategory from './activityCategories';//done
 import AddUser from './AddUser';//done
 import Preferencetags from './preferenceTags';//done
@@ -45,6 +40,7 @@ import ViewProduct from '../Shared/Components/Product/Product';
 import ChangePassword from '../TouristGovernor/changePassword';
 import Login from '../Login/login';
 import CreatePromo from './AdminPromoCode';
+import LogoutIcon from '@mui/icons-material/Logout';
 // import AdminHomePage from './AdminHomePage';
 
 
@@ -161,6 +157,13 @@ const ResponsiveDrawer = (props) => {
           <ListItemText primary="Sales Report" />
         </ListItemButton>
         <Divider />
+        <ListItemButton onClick={() =>navigate('/')}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Log Out" />
+        </ListItemButton>
+        <Divider />
         <ListItemButton onClick={handleUserCollapseToggle}>
           <ListItemText primary="Users" />
           {UsercollapseOpen ? <ExpandLess /> : <ExpandMore />}
@@ -187,6 +190,7 @@ const ResponsiveDrawer = (props) => {
         </Collapse>
         <ListItemButton onClick={handleCollapseToggle}>
   <ListItemText primary="Events" />
+  
   {collapseOpen ? <ExpandLess /> : <ExpandMore />}
 </ListItemButton>
 <Collapse in={collapseOpen} timeout="auto" unmountOnExit>
