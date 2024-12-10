@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const Order = require('../../models/order');
 const Tourist = require('../../models/tourist');
 const mongoose = require('mongoose');
+const Products = require('../../models/product');
 
 
 // Controller to handle request for users with requestDeletion set to true
@@ -903,18 +904,184 @@ const getAddresses = async (req, res) => {
     }
 }
 
-const userReport = async (req, res) => {
-    const { userId } = req.params;
-    if(!userId){
-        return res.status(400).json({ message: "Missing parameters" });
-    }
+const userReport = async (user) => {
     try {
-        const result = await userService.userReport(userId);
-        return res.status(200).json(result);
+        let tourists = [];
+        let eventObject = {};
+        let monthlyReport = {};
+
+        // Predefined array of months for sorting
+        const monthOrder = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        if (user.type === "tourGuide") {
+            const itineraries = await Itinerary.find({ created_by: user._id });
+            console.log(itineraries);
+            const itineraryIds = itineraries.map(itinerary => itinerary._id.toString());
+
+            tourists = await Tourist.find({
+                "itineraryId.id": { $in: itineraryIds }
+            });
+
+            for (const itinerary of itineraries) {
+                const count = tourists.filter(tourist => 
+                    tourist.itineraryId.some(itineraryRef => 
+                        itineraryRef.id.toString() === itinerary.id.toString()
+                    )
+                ).length;
+                const createdAt = new Date(itinerary.dateTimeAvailable[0]);
+                const month = createdAt.toLocaleString('default', { month: 'long' });
+
+
+                if (!eventObject[month]) {
+                    eventObject[month] = [];
+                }
+
+                eventObject[month].push({
+                    name: itinerary.name,
+                    price: itinerary.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        } else if (user.type === "advertiser") {
+            const activities = await Activity.find({ created_by: user._id });
+            const activityIds = activities.map(activity => activity.id.toString());
+        
+            tourists = await Tourist.find({
+                "activityId.id": { $in: activityIds }
+            });
+        
+            for (const activity of activities) {
+                // Calculate total number of tourists for the activity
+                const matchingTourists = tourists.filter(tourist => 
+                    tourist.activityId.some(activityRef => 
+                        activityRef.id.toString() === activity.id.toString()
+                    )
+                );
+        
+                const count = matchingTourists.length;
+        
+                // Calculate total pricePaid for the activity
+                const totalPrice = matchingTourists.reduce((sum, tourist) => {
+                    const matchingActivity = tourist.activityId.find(activityRef => 
+                        activityRef.id.toString() === activity.id.toString()
+                    );
+                    return sum + (matchingActivity ? matchingActivity.pricePaid : 0);
+                }, 0);
+        
+                // Group activities by month
+                const createdAt = new Date(activity.date);
+                const month = createdAt.toLocaleString('default', { month: 'long' });
+        
+                if (!eventObject[month]) {
+                    eventObject[month] = [];
+                }
+        
+                eventObject[month].push({
+                    name: activity.name,
+                    price: totalPrice * 0.9,
+                    totalPeople: count,
+                });
+            }
+        }
+         else if (user.type === "seller") {
+            const products = await Products.find({ sellerId: user._id });
+            const productIds = products.map(product => product._id.toString());
+
+            const orders = await Order.find({
+                "productsIdsQuantity.id": { $in: productIds }
+            });
+
+            for (const product of products) {
+                const count = orders.reduce((total, order) => {
+                    const productExists = order.productsIdsQuantity.some(
+                        item => item.id.toString() === product._id.toString()
+                    );
+                    return productExists ? total + 1 : total;
+                }, 0);
+
+                const createdAt = new Date(product.createdAt);
+                const month = createdAt.toLocaleString('default', { month: 'long' });
+
+                if (!eventObject[month]) {
+                    eventObject[month] = [];
+                }
+
+                eventObject[month].push({
+                    name: product.name,
+                    price: product.price * 0.9,
+                    totalPeople: count
+                });
+            }
+        }
+
+        // Group filtered tourists by their creation month and year
+        tourists.forEach((tourist) => {
+            const createdAt = new Date(tourist.createdAt);
+            const month = createdAt.toLocaleString('default', { month: 'long' });
+            const year = createdAt.getFullYear();
+            const key = `${month} ${year}`;
+
+            if (!monthlyReport[key]) {
+                monthlyReport[key] = 0;
+            }
+            monthlyReport[key]++;
+        });
+
+        // Transform and sort the monthlyReport into an array of objects
+        const monthlyReportArray = Object.keys(monthlyReport)
+            .map((key) => {
+                const [month, year] = key.split(" ");
+                return {
+                    Month: key,
+                    Tourists: monthlyReport[key],
+                    sortIndex: parseInt(year) * 12 + monthOrder.indexOf(month)
+                };
+            })
+            .sort((a, b) => a.sortIndex - b.sortIndex)
+            .map(({ Month, Tourists }) => ({ Month, Tourists }));
+
+            const formattedEventObject = Object.keys(eventObject).map(month => {
+                const key = user.type === "advertiser" ? "activities" : "itineraries";
+            
+                // Calculate total revenue and extract names
+                const itinerariesOrActivities = eventObject[month];
+                console.log("EventObject: ", itinerariesOrActivities);
+                const names = itinerariesOrActivities.map(item => item.name);
+                console.log("Names: ", names);
+                const totalRevenue = itinerariesOrActivities.reduce((sum, item) => sum + item.price, 0);
+            
+                return {
+                    month,
+                    [key]: names,
+                    totalRevenue
+                };
+            });
+            
+
+
+            const totalTouristinEventObject = formattedEventObject.reduce((total, month) => {
+                const key = user.type === "advertiser" ? "activities" : "itineraries";
+                return total + (month[key] || []).reduce((sum, event) => sum + event.totalPeople, 0);
+            }, 0);
+
+            const sortedEventObject = formattedEventObject.sort((a, b) => {
+                return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+            });
+
+            const totalRevenueinAllMonthes = sortedEventObject.reduce((total, month) => total + month.totalRevenue, 0);
+
+        return {
+            eventObject: sortedEventObject,
+            totalRevenue: totalRevenueinAllMonthes,
+            monthlyReport: monthlyReportArray,
+        };
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        throw new Error(`Error fetching tourist report: ${error.message}`);
     }
-}
+};
 
 const getAllNotifications = async (req, res) => {
     const { userId } = req.params;
