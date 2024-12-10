@@ -735,6 +735,7 @@ const userReport = async (user) => {
 
         if (user.type === "tourGuide") {
             const itineraries = await Itinerary.find({ created_by: user._id });
+            console.log(itineraries);
             const itineraryIds = itineraries.map(itinerary => itinerary._id.toString());
 
             tourists = await Tourist.find({
@@ -744,12 +745,12 @@ const userReport = async (user) => {
             for (const itinerary of itineraries) {
                 const count = tourists.filter(tourist => 
                     tourist.itineraryId.some(itineraryRef => 
-                        itineraryRef.id.toString() === itinerary._id.toString()
+                        itineraryRef.id.toString() === itinerary.id.toString()
                     )
                 ).length;
-
                 const createdAt = new Date(itinerary.dateTimeAvailable[0]);
                 const month = createdAt.toLocaleString('default', { month: 'long' });
+
 
                 if (!eventObject[month]) {
                     eventObject[month] = [];
@@ -763,33 +764,46 @@ const userReport = async (user) => {
             }
         } else if (user.type === "advertiser") {
             const activities = await Activity.find({ created_by: user._id });
-            const activityIds = activities.map(activity => activity._id.toString());
-
+            const activityIds = activities.map(activity => activity.id.toString());
+        
             tourists = await Tourist.find({
                 "activityId.id": { $in: activityIds }
             });
-
+        
             for (const activity of activities) {
-                const count = tourists.filter(tourist => 
+                // Calculate total number of tourists for the activity
+                const matchingTourists = tourists.filter(tourist => 
                     tourist.activityId.some(activityRef => 
-                        activityRef.id.toString() === activity._id.toString()
+                        activityRef.id.toString() === activity.id.toString()
                     )
-                ).length;
-
+                );
+        
+                const count = matchingTourists.length;
+        
+                // Calculate total pricePaid for the activity
+                const totalPrice = matchingTourists.reduce((sum, tourist) => {
+                    const matchingActivity = tourist.activityId.find(activityRef => 
+                        activityRef.id.toString() === activity.id.toString()
+                    );
+                    return sum + (matchingActivity ? matchingActivity.pricePaid : 0);
+                }, 0);
+        
+                // Group activities by month
                 const createdAt = new Date(activity.date);
                 const month = createdAt.toLocaleString('default', { month: 'long' });
-
+        
                 if (!eventObject[month]) {
                     eventObject[month] = [];
                 }
-
+        
                 eventObject[month].push({
                     name: activity.name,
-                    price: activity.price * 0.9,
-                    totalPeople: count
+                    price: totalPrice * 0.9,
+                    totalPeople: count,
                 });
             }
-        } else if (user.type === "seller") {
+        }
+         else if (user.type === "seller") {
             const products = await Product.find({ sellerId: user._id });
             const productIds = products.map(product => product._id.toString());
 
@@ -851,7 +865,9 @@ const userReport = async (user) => {
             
                 // Calculate total revenue and extract names
                 const itinerariesOrActivities = eventObject[month];
+                console.log("EventObject: ", itinerariesOrActivities);
                 const names = itinerariesOrActivities.map(item => item.name);
+                console.log("Names: ", names);
                 const totalRevenue = itinerariesOrActivities.reduce((sum, item) => sum + item.price, 0);
             
                 return {
