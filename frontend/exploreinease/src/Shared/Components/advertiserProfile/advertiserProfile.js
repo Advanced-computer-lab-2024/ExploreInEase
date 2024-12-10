@@ -23,6 +23,7 @@ const AdvertiserProfile = (props) => {
     industry: '',
     noEmployees: '',
     founded: null,
+    currency:''
   };
   const navigate=useNavigate();
   const location = useLocation();
@@ -57,6 +58,7 @@ const AdvertiserProfile = (props) => {
     industry: false,
     noEmployees: false,
     founded: false,
+    currency:false
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -74,6 +76,7 @@ const AdvertiserProfile = (props) => {
           industry: response.advertiser.industry,
           noEmployees: response.advertiser.noEmployees,
           founded: response.advertiser.founded ? dayjs(response.advertiser.founded) : null,
+          currency:response.advertiser.currency
         });
         console.log(response.advertiser);
       } catch (error) {
@@ -109,6 +112,7 @@ const AdvertiserProfile = (props) => {
         industry: false,
         noEmployees: false,
         founded: false,
+        currency:false
       });
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -226,6 +230,21 @@ const AdvertiserProfile = (props) => {
         </IconButton>
       </Box>
     </Grid>
+          {/* currency */}
+          <Grid item xs={12}>
+          <Box display="flex" alignItems="center">
+            <EmailIcon color="action" />
+            <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
+            {isEditable.currency ? (
+              <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+            ) : (
+              <Typography>{formValues.currency}</Typography>
+            )}
+            <IconButton onClick={() => { toggleEdit('currency'); if (isEditable.currency) handleSave(); }}>
+              {isEditable.currency ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+            </IconButton>
+          </Box>
+         </Grid>
 
     {/* Password */}
     <Grid item xs={12}>
@@ -357,10 +376,6 @@ const AdvertiserProfile = (props) => {
       </Box>
     </Grid>
 </Grid>
-<p className='signup-promptadvance'>
-          Back to 
-          <span className='signup-link' onClick={() => navigate('/AdvertiserHomePage')}>Home Page</span>
-        </p>
         </Card>
       </Box>
     </LocalizationProvider>

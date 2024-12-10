@@ -55,6 +55,7 @@ const OrderHistory = React.lazy(() => import('./Tourist/OrderHistory'));
 const MyBookmarks = React.lazy(() => import('./Shared/MyBookmarks'));
 const Events= React.lazy(() => import('./Guest/Events'));
 const WishList= React.lazy(() => import('./Tourist/components/wishlist'));
+const stepbystepGuide=React.lazy(() => import('./stepbystepGuide'));
 const App = () => {
   useEffect(() => {
     document.title = 'ExploreInEase';
@@ -114,6 +115,7 @@ const App = () => {
           <Route path="/Events" element={<Events/>}/>
           <Route path="/touristNavbar" element={<TouristNavbar/>}/>
           <Route path="/WishList" element={<WishList/>}/>
+          <Route path="/stepbystepGuide" element={<stepbystepGuide/>}/>
         </Routes>
       </Suspense>
     </Router>

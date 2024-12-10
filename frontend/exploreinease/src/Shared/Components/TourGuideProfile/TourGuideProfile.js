@@ -19,7 +19,8 @@ const TourGuideProfile = (props) => {
     password: '',
     hotline: '',
     experience: '',
-    previousWork: ''
+    previousWork: '',
+    currency:''
   };
   const location = useLocation();
   const { TourGuide, imageUrl } = location.state || {};
@@ -49,7 +50,8 @@ const TourGuideProfile = (props) => {
     password: false,
     hotline: false,
     experience: false,
-    previousWork: false
+    previousWork: false,
+    currency:false
     });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -65,7 +67,8 @@ const TourGuideProfile = (props) => {
           password: response.tourGuide.password,
           hotline: response.tourGuide.hotline,
           experience: response.tourGuide.experience,
-          previousWork: response.tourGuide.previousWork
+          previousWork: response.tourGuide.previousWork,
+          currency:response.tourGuide.currency
         });
         console.log(response.tourGuide);
       } catch (error) {
@@ -96,7 +99,8 @@ const TourGuideProfile = (props) => {
         password: false,
         hotline: false,
         experience: false,
-        previousWork: false
+        previousWork: false,
+        currency:false
       });
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -243,6 +247,22 @@ const TourGuideProfile = (props) => {
       </Box>
     </Grid>
 
+        {/* Currency */}
+        <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <EmailIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
+        {isEditable.currency ? (
+          <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+        ) : (
+          <Typography>{formValues.currency}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('email'); if (isEditable.currency) handleSave(); }}>
+          {isEditable.currency ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
+
 {/* hotline */}
 <Grid item xs={12}>
   <Box display="flex" alignItems="center">
@@ -297,10 +317,7 @@ const TourGuideProfile = (props) => {
 </Grid>
 
 </Grid>
-        <p className='signup-promptadvance'>
-          Back to 
-          <span className='signup-link' onClick={() => navigate('/TourGuideHomePage')}>Home Page</span>
-        </p>
+
         </Card>
       </Box>
     </LocalizationProvider>

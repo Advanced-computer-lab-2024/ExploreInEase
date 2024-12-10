@@ -18,12 +18,8 @@ import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const TouristProfile = (props) => {
   const User = JSON.parse(localStorage.getItem('User'));
-  console.log(User);
-  
   const location = useLocation();
   const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
-  // console.log(Tourist);
-
   const initialData = {
     email: Tourist?.email || User?.email,
     mobileNum: Tourist?.mobileNum || User?.mobileNum,
@@ -33,13 +29,25 @@ const TouristProfile = (props) => {
     password: Tourist?.password || '',
     wallet: Tourist?.wallet || 0,
     points: Tourist?.points || 0,
+    currency:Tourist?.currency||User.currency,
   };
-  const userId = Tourist._id;
+  const userId = Tourist._id||User._id;
   const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
   const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
   const initialUsername = Tourist.username;
   const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-
+  const [formValues, setFormValues] = useState(initialData);
+  const [showPassword, setShowPassword] = useState(false);
+  const [setLevel] = useState(1);
+  const [isEditable, setIsEditable] = useState({
+    email: false,
+    mobileNum: false,
+    nationality: false,
+    dob: false,
+    password: false,
+    profession: false,
+    currency:false,
+  });
 
   useEffect(() => {
     // Update the avatar URL when the component mounts if a new image URL exists
@@ -49,18 +57,6 @@ const TouristProfile = (props) => {
         setAvatarImage(defaultAvatarUrl);
     }
 }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
-
-  const [formValues, setFormValues] = useState(initialData);
-  const [isEditable, setIsEditable] = useState({
-    email: false,
-    mobileNum: false,
-    nationality: false,
-    dob: false,
-    password: false,
-    profession: false,
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [setLevel] = useState(1);
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -116,6 +112,7 @@ const TouristProfile = (props) => {
         dob: formValues.dob,
         profession: formValues.profession,
         password: formValues.password,
+        currency:formValues.currency
       };
       const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`, body);
       console.log(response.message);
@@ -126,6 +123,7 @@ const TouristProfile = (props) => {
         dob: false,
         password: false,
         profession: false,
+        currency:false,
       });
     } catch (error) {
       console.error('Error updating tourist:', error);
@@ -169,7 +167,6 @@ const TouristProfile = (props) => {
       justifyContent: 'center',
     }}
   >
-  
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       {/* Flex container to center the card */}
       <Box
@@ -240,7 +237,7 @@ const TouristProfile = (props) => {
               {/* Redeem button */}
               <IconButton onClick={handleRedeemPoints} color="primary" sx={{ ml: 0.5 }}>
                 <Redeem />
-              </IconButton>
+              </IconButton>Hoe
             </Box>
           </Box>
 
@@ -249,13 +246,13 @@ const TouristProfile = (props) => {
           {/* Profile Fields */}
           <Grid container spacing={2}>
                 {/* Username */}
-    <Grid item xs={12}>
-      <Box display="flex" alignItems="center">
-        <AccountCircleIcon color="action" />
-        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
-        <Typography sx={{ mr: 5 }}>{Tourist.username}</Typography>
-      </Box>
-    </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <AccountCircleIcon color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
+                <Typography sx={{ mr: 5 }}>{Tourist.username}</Typography>
+              </Box>
+            </Grid>
             {/* Email */}
             <Grid item xs={12}>
               <Box display="flex" alignItems="center">
@@ -300,6 +297,21 @@ const TouristProfile = (props) => {
                 )}
                 <IconButton onClick={() => { toggleEdit('nationality'); if (isEditable.nationality) handleSave(); }}>
                   {isEditable.nationality ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
+            {/* currency */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Flag color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
+                {isEditable.currency ? (
+                  <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+                ) : (
+                  <Typography>{formValues.currency}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('currency'); if (isEditable.currency) handleSave(); }}>
+                  {isEditable.currency ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
                 </IconButton>
               </Box>
             </Grid>

@@ -18,6 +18,7 @@ const SellerProfile = (props) => {
     email: '',
     password: '',
     specialist: '',
+    currency:''
   };
   const location = useLocation();
   const navigate=useNavigate();
@@ -47,6 +48,7 @@ const SellerProfile = (props) => {
     email: false,
     password: false,
     specialist: false,
+    currency:false
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -60,6 +62,7 @@ const SellerProfile = (props) => {
           email: response.seller.email,
           password: response.seller.password,
           specialist: response.seller.specialist,
+          currency:response.seller.currency
         });
         console.log(response.seller.specialist);
       } catch (error) {
@@ -89,6 +92,7 @@ const SellerProfile = (props) => {
         email: false,
         password: false,
         specialist: false,
+        currency:false
       });
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -251,11 +255,22 @@ const SellerProfile = (props) => {
         </IconButton>
       </Box>
     </Grid>
+    
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <StarIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
+        {isEditable.currency ? (
+          <TextField fullWidth value={formValues.currency} onChange={handleChange('currency')} />
+        ) : (
+          <Typography>{formValues.currency}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('specialist'); if (isEditable.currency) handleSave(); }}>
+          {isEditable.currency ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 </Grid>
-        <p className='signup-promptadvance'>
-          Back to 
-          <span className='signup-link' onClick={() => navigate('/SellerHomePage')}>Home Page</span>
-        </p>
         </Card>
       </Box>
     </LocalizationProvider>
