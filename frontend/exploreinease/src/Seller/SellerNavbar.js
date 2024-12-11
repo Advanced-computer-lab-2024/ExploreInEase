@@ -255,6 +255,7 @@ const SHomePage = () => {
       else if(title==='Log Out'){
         console.log('yes here');
         localStorage.removeItem('Userr');
+        localStorage.removeItem('User');
         localStorage.removeItem('imageUrll');
         localStorage.removeItem('UserId');
         localStorage.removeItem('UserType');

@@ -13,7 +13,7 @@ import flight from "../Hotels Images/flight.png"
 import TouristNavbar from './TouristNavbar';
 import Select from '@mui/material/Select';
 import Alert from '@mui/material/Alert';
-
+import NodataFound from '../No data Found.avif';
 
 const Flights = () => {
   const User = JSON.parse(localStorage.getItem('User'));
@@ -165,6 +165,7 @@ console.log(searchParams);
     <div>
       <TouristNavbar/>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+
       <Grid container spacing={4} sx={{ mt: 5, px: 3 }}>
       <div style={{ position: 'relative' }}>
       {smessage !== '' && (
@@ -308,57 +309,79 @@ console.log(searchParams);
 
         {/* Right Column - Flight Cards */}
         <Grid item xs={12} md={8}>
-          <Grid container spacing={2} marginBottom={3}>
-            {flightDataa.map((flight) => (
-              <Grid item xs={12} sm={6} md={4} key={flight.id}>
-                <Card sx={{ width: '100%', boxShadow: 3, height: 400, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <CardMedia
-                    component="img"
-                    height="120"
-                    sx={{ width: 'auto', maxWidth: '50%' }}  // Optional: controls the width
-                    image={flightsImage[0]}
-                    alt={`flight`}
-                  />
-                  <CardContent>
-                    <Typography variant="h7" gutterBottom>
-                     <strong>Flight from {flight.departure.iataCode} to {flight.arrival.iataCode}</strong> 
-                    </Typography>
-                    <Box display="flex" justifyContent="space-between" mb={2} mt={2}>
-                      <Box>
-                        <Typography variant="h7" color="black">
-                          <strong>Departure</strong><br />
-                         <strong>Date:</strong> {formatDate(flight.departure.at)} <br />
-                         <Typography variant="body1" color="black">
-                      <strong>Price:</strong> {flight.price} {User.currency.toUpperCase()}
-                    </Typography>
-                        </Typography>
-                        
-                      </Box>
-                      <Box>
-                        <Typography variant="h7" color="black">
-                          <strong>Arrival</strong><br />
-                          <strong>Date:</strong>  {formatDate(flight.arrival.at)} <br />
-                        </Typography>
-                        <Typography variant="body1" color="black">
-                    <strong>Terminal: </strong> 
-                    {flight.departure.terminal}     
-                   </Typography>
-                      </Box>
-                    </Box>
-                  
-                 
-                  </CardContent>
-                  <CardActions >
-                    <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                      <Button   onClick={() =>handleBookFlight(flight)} variant="contained" color="primary">
-                        Book Now
-                      </Button>
-                    </Box>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          {flightDataa.length>0?(
+  <Grid container spacing={2} marginBottom={3}>
+  {flightDataa.map((flight) => (
+    <Grid item xs={12} sm={6} md={4} key={flight.id}>
+      <Card sx={{ width: '100%', boxShadow: 3, height: 400, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <CardMedia
+          component="img"
+          height="120"
+          sx={{ width: 'auto', maxWidth: '50%' }}  // Optional: controls the width
+          image={flightsImage[0]}
+          alt={`flight`}
+        />
+        <CardContent>
+          <Typography variant="h7" gutterBottom>
+           <strong>Flight from {flight.departure.iataCode} to {flight.arrival.iataCode}</strong> 
+          </Typography>
+          <Box display="flex" justifyContent="space-between" mb={2} mt={2}>
+            <Box>
+              <Typography variant="h7" color="black">
+                <strong>Departure</strong><br />
+               <strong>Date:</strong> {formatDate(flight.departure.at)} <br />
+               <Typography variant="body1" color="black">
+            <strong>Price:</strong> {flight.price} {User.currency.toUpperCase()}
+          </Typography>
+              </Typography>
+              
+            </Box>
+            <Box>
+              <Typography variant="h7" color="black">
+                <strong>Arrival</strong><br />
+                <strong>Date:</strong>  {formatDate(flight.arrival.at)} <br />
+              </Typography>
+              <Typography variant="body1" color="black">
+          <strong>Terminal: </strong> 
+          {flight.departure.terminal}     
+         </Typography>
+            </Box>
+          </Box>
+        
+       
+        </CardContent>
+        <CardActions >
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Button   onClick={() =>handleBookFlight(flight)} variant="contained" color="primary">
+              Book Now
+            </Button>
+          </Box>
+        </CardActions>
+      </Card>
+    </Grid>
+  ))}
+</Grid>
+          ):(
+            <div
+            style={{
+              width: "400px", // Set a fixed width for the GIF
+              height: "400px", // Set a fixed height to match the width
+              position: "relative",
+              marginLeft:'200px',
+              marginTop:'100px',
+              alignContent:'center',
+              alignItems:'center'
+            }}
+          >
+            <img
+              src={NodataFound}
+              width="100%"
+              height="100%"
+    
+            ></img>
+          </div>
+          )}
+        
         </Grid>
 
       </Grid>

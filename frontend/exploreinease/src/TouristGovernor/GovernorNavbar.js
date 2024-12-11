@@ -111,6 +111,7 @@ const GovernorNavbar = () => {
     } else if (title === 'Log Out') {
       console.log('yes here');
       localStorage.removeItem('User');
+      localStorage.removeItem('Userr');
       localStorage.removeItem('imageUrl');
       localStorage.removeItem('UserId');
       localStorage.removeItem('UserType');

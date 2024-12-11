@@ -704,8 +704,8 @@ const handleEditActivity = (activity) => {
       <Card sx={{width:'400px',height:'470px',marginLeft:5,marginBottom:5}}>
       <CardMedia
           component="img"
-          height="180"
-          image={activity.picture}
+          height="200"
+          image={activity.picture||NodataFound}
           alt={activityImage?.name||"Image"}
         />
         <CardContent>

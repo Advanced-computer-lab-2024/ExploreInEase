@@ -417,6 +417,8 @@ const  handleRegisterClick=async(title)=> {
             }
             else if(title==='Log Out'){
               console.log('yes here');
+              localStorage.removeItem('Userr');
+              localStorage.removeItem("UserId");
               localStorage.removeItem('User');
               localStorage.removeItem('imageUrl');
               localStorage.removeItem('UserId');

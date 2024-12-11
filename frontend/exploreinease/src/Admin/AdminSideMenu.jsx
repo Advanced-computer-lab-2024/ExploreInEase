@@ -70,9 +70,15 @@ const ResponsiveDrawer = (props) => {
   const handleUserCollapseToggle = () => {
     setUserCollapseOpen(!UsercollapseOpen);
   };
-
-  const [openTab, setOpenTab] = useState("AdminHomePage");
-
+const handleLogOut=()=>{
+  localStorage.removeItem('User');
+  localStorage.removeItem('Userr');
+  localStorage.removeItem('imageUrl');
+  localStorage.removeItem('UserId');
+  localStorage.removeItem('UserType');
+  navigate('/');    
+};
+  const [openTab, setOpenTab] = useState("AdminHomePage");  
   const [tab, setTab] = useState(<AdminHomePage />);
 
   useEffect(() => {
@@ -157,11 +163,11 @@ const ResponsiveDrawer = (props) => {
           <ListItemText primary="Sales Report" />
         </ListItemButton>
         <Divider />
-        <ListItemButton onClick={() =>navigate('/')}>
+        <ListItemButton onClick={handleLogOut}>
           <ListItemIcon>
             <LogoutIcon />
           </ListItemIcon>
-          <ListItemText primary="Log Out" />
+          <ListItemText  primary="Log Out" />
         </ListItemButton>
         <Divider />
         <ListItemButton onClick={handleUserCollapseToggle}>

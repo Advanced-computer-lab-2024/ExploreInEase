@@ -27,6 +27,7 @@ import NodataFound from '../../../No data Found.avif';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 const ProductCard = () => {
   const Userr = JSON.parse(localStorage.getItem('User'));
+  console.log(Userr);
   
   const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
@@ -402,7 +403,6 @@ const handleClickPurchase = async (product, selectedQuantity) => {
           originalQuantity: productData.originalQuantity,
           name: productData.name,
         };
-
         const options = {
           apiPath: '/editProducts/{userId}/{_id}',
           urlParam: { userId, _id: productData._id },
@@ -623,10 +623,10 @@ const handleClickPurchase = async (product, selectedQuantity) => {
           <CardMedia
             component="img"
             height="140"
-            image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
+            image={NodataFound || product.picture  }
             alt={product.name}
           />
-          {Userr.type!='tourist' &&(
+          {Userr.type === 'admin' || Userr.type ==='seller'  &&(
                 <Box
                 sx={{
                   position: 'absolute',
@@ -1059,7 +1059,7 @@ gap: 2, // Space between icons
   </DialogActions>
 </Dialog>
 
-      {(userType ==='seller'||userType==='admin'|| User?.type === 'seller' || User?.type === 'admin') && (
+      {(userType ==="seller"||userType==='admin'|| User?.type === 'seller' || User?.type === 'admin') && (
   <Tooltip title="Create" placement="top" arrow>
     <Fab
       color="primary"

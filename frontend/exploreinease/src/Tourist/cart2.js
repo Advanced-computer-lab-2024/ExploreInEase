@@ -42,7 +42,7 @@ import TouristNavbar from './TouristNavbar';
 import './Payment.css'; // Add your styles here
 const CartPage = () => {
   const User = JSON.parse(localStorage.getItem('User'));
-  console.log("currency",User.currency);
+  console.log("currency",User);
   const navigate = useNavigate();
   const location = useLocation();
   const [promoCode, setPromoCode] = useState("");
@@ -134,7 +134,7 @@ console.log(cardDetails);
     //Fetch cart items from API
     const fetchCart = async () => {
       try {
-        const res = await axios.get(`http://localhost:3030/getCart/${UserId}`);
+        const res = await axios.get(`http://localhost:3030/getCart/${User._id}`);
         const fetchedProducts = res.data.products || [];
 
         const formattedItems = fetchedProducts.map((product) => ({
@@ -196,8 +196,8 @@ console.log(cardDetails);
       try {
         console.log(UserId);
         const options = {
-          apiPath: `/getAddresses/${UserId}`,
-          urlParam: `/${UserId}`,
+          apiPath: `/getAddresses/${User._id}`,
+          urlParam: `/${User._id}`,
         };
         const response = await NetworkService.get(options);
         console.log(response);
@@ -216,8 +216,8 @@ console.log(cardDetails);
           console.log(UserId);
           console.log(deliveryInfo.address);
           const options = {
-            apiPath: `/addAddresses/${UserId}/${deliveryInfo.address}`,
-            urlParam: `${UserId}/${deliveryInfo.address}`
+            apiPath: `/addAddresses/${User._id}/${deliveryInfo.address}`,
+            urlParam: `${User._id}/${deliveryInfo.address}`
           };
           await NetworkService.post(options);
         } catch (error) {
@@ -243,7 +243,7 @@ console.log(cardDetails);
         const response = await NetworkService.post({
           apiPath: `/createOrderWalletOrCod`,
           body: {
-            touristId: UserId,
+            touristId: User._id,
             productsIdsQuantity: cartItems,
             addressToBeDelivered: deliveryInfo,
             paymentType: selectedPaymentMethod,
@@ -273,7 +273,7 @@ console.log(cardDetails);
         const response = await NetworkService.post({
           apiPath: `/createOrderCard`,
           body: {
-            touristId: UserId,
+            touristId: User._id,
             productsIdsQuantity: cartItems,
             addressToBeDelivered: deliveryInfo,
             paymentType: selectedPaymentMethod,

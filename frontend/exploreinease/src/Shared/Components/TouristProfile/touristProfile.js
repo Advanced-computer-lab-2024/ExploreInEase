@@ -237,7 +237,7 @@ const TouristProfile = (props) => {
               {/* Redeem button */}
               <IconButton onClick={handleRedeemPoints} color="primary" sx={{ ml: 0.5 }}>
                 <Redeem />
-              </IconButton>Hoe
+              </IconButton>
             </Box>
           </Box>
 
