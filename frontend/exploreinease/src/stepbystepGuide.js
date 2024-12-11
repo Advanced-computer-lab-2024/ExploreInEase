@@ -1,14 +1,25 @@
 import React from 'react';
 import HomePage from './Guest/GuestNavbar';
-const stepbystepGuide=()=>{ 
-return(
+import ReactPlayer from 'react-player';
+import myVideo from '../src/stepbystep.mp4';
+
+const StepByStepGuide = () => {
+  return (
     <div>
-        <HomePage/>
-      <video width="600" controls>
-        <source src="path-to-your-video-file.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-      </video>
+      <HomePage />
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+        <ReactPlayer
+          url={myVideo}
+          controls
+          width="850px"
+          height="450px"
+          playing={true} // Autoplay disabled by default
+          loop={false} // Looping disabled by default
+          muted={false} // Unmuted by default
+        />
+      </div>
     </div>
-);
+  );
 };
-export default stepbystepGuide;
+
+export default StepByStepGuide;
