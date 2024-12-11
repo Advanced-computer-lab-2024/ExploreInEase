@@ -24,6 +24,10 @@ This project uses 2-space indentation for all JavaScript and JSON files. Formatt
 
 ## Screenshots
 
+here is the link of our website guide :
+
+[here is the link of our website guide](https://drive.google.com/file/d/1haoG9qjFnxt1c_Ge00kqn4UIuXMpTaTz/view?usp=sharing)
+
 ## Tech/Framework Used
 
 1. Frontend: React.js
