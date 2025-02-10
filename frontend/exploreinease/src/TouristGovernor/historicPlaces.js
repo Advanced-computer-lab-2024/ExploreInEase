@@ -454,7 +454,7 @@ const getAllTags=async ()=>{
       
         ):
         (
-          <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
+          <LoadScript googleMapsApiKey={'AIzaSyDifIZGHTwXaBJG610aJc9SWAe6sOAuwZE'} libraries={["places"]}>
           <div>
             <Button variant="contained" onClick={handleClickOpen} sx={{ height: 50, marginTop: 2, marginLeft: 2 }}>
               Add Historical Places

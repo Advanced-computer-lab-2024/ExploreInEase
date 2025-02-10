@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
+import { Card, Box, Typography, IconButton, FormControl,InputLabel,Select,MenuItem,TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { Edit as EditIcon, Save as SaveIcon, Visibility, VisibilityOff, AccountCircle as AccountCircleIcon, Email as EmailIcon, Lock as LockIcon   } from '@mui/icons-material';
@@ -12,11 +12,13 @@ import Sky from '../Sky2.jpeg';
 import '../TourGuideProfile/tourGuideProfile.css';
 import SHomePage from '../../../Seller/SellerNavbar';
 const SellerProfile = (props) => {
+  
   const initialData = {
     username: '',
     email: '',
     password: '',
     specialist: '',
+    currency:''
   };
   const location = useLocation();
   const navigate=useNavigate();
@@ -46,6 +48,7 @@ const SellerProfile = (props) => {
     email: false,
     password: false,
     specialist: false,
+    currency:false
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -59,6 +62,7 @@ const SellerProfile = (props) => {
           email: response.seller.email,
           password: response.seller.password,
           specialist: response.seller.specialist,
+          currency:response.seller.currency
         });
         console.log(response.seller.specialist);
       } catch (error) {
@@ -88,6 +92,7 @@ const SellerProfile = (props) => {
         email: false,
         password: false,
         specialist: false,
+        currency:false
       });
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -250,11 +255,35 @@ const SellerProfile = (props) => {
         </IconButton>
       </Box>
     </Grid>
+    
+    <Grid item xs={12}>
+      <Box display="flex" alignItems="center">
+        <StarIcon color="action" />
+        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
+        {isEditable.currency ? (
+          <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label">Currency</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={formValues.currency}
+            label="Currency"
+            onChange={handleChange('currency')}
+          >
+               <MenuItem value={'EGP'}>EGP</MenuItem>
+               <MenuItem value={'euro'}>EURO</MenuItem>
+               <MenuItem value={'dollar'}>Dollar</MenuItem>  
+          </Select>
+        </FormControl>
+        ) : (
+          <Typography>{formValues.currency}</Typography>
+        )}
+        <IconButton onClick={() => { toggleEdit('currency'); if (isEditable.currency) handleSave(); }}>
+          {isEditable.currency ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+        </IconButton>
+      </Box>
+    </Grid>
 </Grid>
-        <p className='signup-promptadvance'>
-          Back to 
-          <span className='signup-link' onClick={() => navigate('/SellerHomePage')}>Home Page</span>
-        </p>
         </Card>
       </Box>
     </LocalizationProvider>

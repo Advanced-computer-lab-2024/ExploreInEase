@@ -23,6 +23,7 @@ import NodataFound from '../../../No data Found.avif';
 
 const ArchiveProduct = () => {
   const adminIdd = localStorage.getItem('UserId');
+  const userType = localStorage.getItem('UserType');
   const location = useLocation();
   const {User} = location.state || {};
   const userId = User ? User._id : adminIdd;
@@ -43,9 +44,9 @@ const ArchiveProduct = () => {
 
 
   const [selectedProductName, setSelectedProductName] = useState('');
-  const [ setSelectedProductPrice] = useState('');
-  const [ setSelectedProductSales] = useState('');
-  const [ setSelectedProductQuantity] = useState('');
+  const [ selectProductPrice,setSelectedProductPrice] = useState('');
+  const [ selectedSales,setSelectedProductSales] = useState('');
+  const [ selectedQuantity,setSelectedProductQuantity] = useState('');
   const [selectedProductReviews, setSelectedProductReviews] = useState([]);
   const [productInterval,setProductInterval]=useState([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -113,13 +114,15 @@ const ArchiveProduct = () => {
   const handleArchiveProduct = async (productId) => {
     try {
       // Replace with your API endpoint
+      console.log('Archiving product:', userId);
       const options = {
-        apiPath: '/archiveProduct/{userId}/{productId}',
+        apiPath: `/archiveProduct/${userId}/${productId}`,
         urlParam: {
           userId: userId,
           productId: productId,
         },
       }
+      console.log('options:', options);
       const response = await NetworkService.put(options);
       console.log(response);
       setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
@@ -137,7 +140,9 @@ const ArchiveProduct = () => {
 
   const handleGetAllProduct=async()=>{
     try{
+      console.log('getting archieve product: ', userId);
      const options = { apiPath: `/getArchivedProducts/${userId}` };
+     console.log('options:', options);
       const response = await NetworkService.get(options);
       console.log(response);
       
@@ -239,7 +244,10 @@ const ArchiveProduct = () => {
   return (
     <div>
     <div>
-      <HomePage/>
+      {userType==='seller'&&
+      (
+        <HomePage/>
+      )}
     </div>
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
       <Box display="flex" alignItems="center" mb={3} width="100%" maxWidth={600}      

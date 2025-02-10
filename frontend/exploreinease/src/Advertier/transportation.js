@@ -18,7 +18,6 @@ import NodataFound from '../No data Found.avif';
 function Transportation() {
   const location = useLocation();
   const { advertiserId} = location.state||{};
-
   const [transportation, setTransportion] = useState([]); 
   const [open, setOpen] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);

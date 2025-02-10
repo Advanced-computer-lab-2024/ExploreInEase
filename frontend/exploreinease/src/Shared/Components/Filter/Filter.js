@@ -59,9 +59,6 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
     search: '',
     sortBy: '',
   });
-  console.log('events',events);
-  console.log('itemList',itemList);
-  
   const [filteredData, setFilteredData] = useState([]);
   const [role, setRole] = useState('Activities'); // Default to Main to show all
   const [addressCache] = useState({});
@@ -447,7 +444,6 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
      setSelectedItem(null); 
     
   };
-
   const handleClickOpen = (item) => {
      setSelectedItem(item);   
     setOpen(true);
@@ -534,7 +530,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
             apiPath: `/bookEvent`,
             body: {
               userType: 'tourist',
-              touristId: userId,
+              touristId: Userr._id,
               eventType: 'itinerary',
               eventID: selectedItem.id,
               ticketType: '',
@@ -560,7 +556,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
             apiPath: `/bookEventWithCard`,
             body: {
               userType: 'tourist',
-              touristId: userId,
+              touristId: Userr._id,
               eventType: 'itinerary',
               eventID: selectedItem.id,
               ticketType: '',
@@ -595,7 +591,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
               apiPath: `/bookEvent`,
               body: {
                 userType: 'tourist',
-                touristId: userId,
+                touristId: Userr._id,
                 eventType: 'historicalPlace',
                 eventID: selectedItem.id,
                 ticketType: type,
@@ -621,7 +617,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
               apiPath: `/bookEventWithCard`,
               body: {
                 userType: 'tourist',
-                touristId: userId,
+                touristId: Userr._id,
                 eventType: 'historicalPlace',
                 eventID: selectedItem.id,
                 ticketType: type,
@@ -656,7 +652,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
               apiPath: `/bookEvent`,
               body: {
                 userType: 'tourist',
-                touristId: userId,
+                touristId: Userr._id,
                 eventType: 'historicalPlace',
                 eventID: selectedItem.id,
                 ticketType: type,
@@ -682,7 +678,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
               apiPath: `/bookEventWithCard`,
               body: {
                 userType: 'tourist',
-                touristId: userId,
+                touristId: Userr._id,
                 eventType: 'historicalPlace',
                 eventID: selectedItem.id,
                 ticketType: type,
@@ -716,7 +712,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
               apiPath: `/bookEvent`,
               body: {
                 userType: 'tourist',
-                touristId: userId,
+                touristId: Userr._id,
                 eventType: 'historicalPlace',
                 eventID: selectedItem.id,
                 ticketType: type,
@@ -742,7 +738,7 @@ const Filter = ({ eventsG = [], typeeG = '' }) => {
               apiPath: `/bookEventWithCard`,
               body: {
                 userType: 'tourist',
-                touristId: userId,
+                touristId: Userr._id,
                 eventType: 'historicalPlace',
                 eventID: selectedItem.id,
                 ticketType: type,
@@ -1300,6 +1296,8 @@ const handleCloseDialog = () => {
                               variant="standard"
                               style={{ width: '200px' }}
                               required
+                              value={cardNumber}
+                              onChange={handlecardNumber}
                               inputProps={{ maxLength: 16 }}
                             />
                           </div>
@@ -1312,6 +1310,8 @@ const handleCloseDialog = () => {
                               type="password"
                               style={{ width: '100px' }}
                               required
+                              value={cvc}
+                              onChange={handlecvc}
                               inputProps={{ maxLength: 3 }}
                             />
                           </div>
@@ -1323,6 +1323,8 @@ const handleCloseDialog = () => {
                               variant="standard"
                               style={{ width: '60px', marginRight: '8px' }}
                               required
+                              value={expMonth}
+                              onChange={handleexpMonth}
                               inputProps={{ maxLength: 2 }}
                             />
                             <span style={{ marginRight: '8px' }}>/</span>
@@ -1332,6 +1334,8 @@ const handleCloseDialog = () => {
                               variant="standard"
                               style={{ width: '60px' }}
                               required
+                              value={expYear}
+                              onChange={handleexpYear}
                               inputProps={{ maxLength: 4 }}
                             />
                           </div>
@@ -1409,7 +1413,7 @@ const handleCloseDialog = () => {
                         />
                       </div>
 
-                      {payment === 'Card' && (
+                        {payment === 'Card' && (
                         <div style={{ marginTop: '20px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
                             <span style={{ marginRight: '8px' }}>Card Number:</span>
@@ -1419,6 +1423,8 @@ const handleCloseDialog = () => {
                               variant="standard"
                               style={{ width: '200px' }}
                               required
+                              value={cardNumber}
+                              onChange={handlecardNumber}
                               inputProps={{ maxLength: 16 }}
                             />
                           </div>
@@ -1431,6 +1437,8 @@ const handleCloseDialog = () => {
                               type="password"
                               style={{ width: '100px' }}
                               required
+                              value={cvc}
+                              onChange={handlecvc}
                               inputProps={{ maxLength: 3 }}
                             />
                           </div>
@@ -1442,6 +1450,8 @@ const handleCloseDialog = () => {
                               variant="standard"
                               style={{ width: '60px', marginRight: '8px' }}
                               required
+                              value={expMonth}
+                              onChange={handleexpMonth}
                               inputProps={{ maxLength: 2 }}
                             />
                             <span style={{ marginRight: '8px' }}>/</span>
@@ -1451,6 +1461,8 @@ const handleCloseDialog = () => {
                               variant="standard"
                               style={{ width: '60px' }}
                               required
+                              value={expYear}
+                              onChange={handleexpYear}
                               inputProps={{ maxLength: 4 }}
                             />
                           </div>

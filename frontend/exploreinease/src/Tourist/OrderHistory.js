@@ -23,9 +23,17 @@ import {
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
+import TouristNavbar from './TouristNavbar';
+import NetworkService from '../../src/NetworkService';
+
 
 
 const OrdersDashboard = () => {
+
+  const Userr = JSON.parse(localStorage.getItem('User'));
+
+  
+
 
   const location = useLocation();
   const { Orders  } = location.state || {};
@@ -37,14 +45,39 @@ const OrdersDashboard = () => {
     return products.reduce((total, product) => total + (product.price * product.quantity), 0);
   };
 
-  const handleCancelOrder = (orderId) => {
+  const handleCancelOrder = async (orderId) => {
+    let alo='';
+      orders.map(
+        order=>order.id===orderId &&(
+          alo=order
+        )
+      );
+
+    console.log("hhhhhh",alo.OrderId);
+
     if (window.confirm('Are you sure you want to cancel this order?')) {
       setOrders(orders.map(order => 
         order.id === orderId 
           ? { ...order, status: 'cancelled' }
           : order
-      ));
+      )
+    );
     }
+    
+
+    const options = {
+      apiPath: `/cancelOrders`,
+      body: {
+        touristId: Userr._id, 
+        orderId: alo.OrderId
+        
+      }
+    };
+
+    await NetworkService.delete(options);
+    
+    
+
   };
 
   const getStatusChip = (status) => {
@@ -138,7 +171,9 @@ const OrdersDashboard = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: '4xl', mx: 'auto', p: 4 }}>
+    <>
+      <TouristNavbar/>
+      <Box sx={{ maxWidth: '4xl', mx: 'auto', p: 4 }}>
       <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 4 }}>
         Orders Dashboard
       </Typography>
@@ -162,6 +197,8 @@ const OrdersDashboard = () => {
         </Alert>
       )}
     </Box>
+    </>
+
   );
 };
 

@@ -45,7 +45,8 @@ const HomePage = () => {
     navigate('/Login');
   }else if (title==="Events") {
     navigate('/Events');
-  }else {
+  }else if (title==="View Step-by-Step Guide") {
+    navigate('/stepbystepGuide');
 
   }
   };

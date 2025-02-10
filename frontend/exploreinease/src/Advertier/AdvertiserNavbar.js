@@ -18,6 +18,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import Divider from '@mui/material/Divider';
+import Alert from '@mui/material/Alert';
 import Tooltip from '@mui/material/Tooltip';
 
 const HomePage = () => {
@@ -26,12 +27,14 @@ const HomePage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
-    const [ setSuccess] = useState('');
-    const [setError] = useState(null);
+    const [ success,setSuccess] = useState('');
+    const [error,setError] = useState(null);
     const User = state?.User || Userr;
     const imageUrl = state?.imageUrl || imageUrll;
     const [anchorEl, setAnchorEl] = useState(null);
     const [anchorEl1, setAnchorEl1] = React.useState(null);
+    const [message,setMessage]=useState('');
+  const [errorMessage,setErrorMessage]=useState('');
     const [anchorProfileEl, setAnchorProfileEl] = useState(null);
     const openNotfication = Boolean(anchorEl1);
     const open = Boolean(anchorEl);    
@@ -46,7 +49,6 @@ const HomePage = () => {
     const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [showErrorMessage, setShowErrorMessage] = useState(false);
-    const [setErrorMessage] = useState('');
     const [ setSuccessMessage] = useState('');
 
     useEffect(() => {
@@ -68,6 +70,17 @@ const HomePage = () => {
     }, [showSuccessMessage]);
 
     useEffect(() => {
+      if (message || errorMessage) {
+        const timer = setTimeout(() => {
+          setMessage('');
+          setErrorMessage('');
+        }, 3000); // Disappear after 3 seconds
+  
+        return () => clearTimeout(timer); // Cleanup on component unmount
+      }
+    }, [message, errorMessage]);
+
+    useEffect(() => {
         if (showErrorMessage) {
             const timer = setTimeout(() => {
                 setShowErrorMessage(false);
@@ -82,16 +95,6 @@ const HomePage = () => {
           setSelectedTab(savedTab); // Restore the selected tab
         }
       }, []);
-
-      // useEffect(()=>{
-        //   checkPromoCode();
-        // },[]);
-        // const checkPromoCode=async()=>{
-        //   const options = {
-        //     apiPath: '/updatePromoCode',
-        //   };
-        //   await NetworkService.put(options);
-        // }
     const handleOpenMenu = (event) => {
         setAnchorProfileEl(event.currentTarget);
       };
@@ -107,14 +110,6 @@ const HomePage = () => {
         setAnchorEl(null);
     };
 
-    const handleMenuClick = (action) => {
-        handleMenuClose();
-        if (action === 'changePassword') {
-            navigate('/change-password', { state: { userId: userId } });
-        } else if (action === 'logout') {
-            navigate('/login');
-        }
-    };
 
     const handleAvatarUpload = async (event) => {
         const file = event.target.files[0];
@@ -179,13 +174,15 @@ const HomePage = () => {
         else if (title === 'Sales Report'){
             try {
               const options = {
-                apiPath: `/userReport/${userId}`,
+                apiPath: `/userReport/${Userr._id}`,
               };
       
               const response = await NetworkService.get(options);
               const data = response.eventObject;
+              console.log(response);
+              
               console.log(data);
-      
+              console.log(Userr._id);
       
       
               console.log(response.message); // Set success message
@@ -235,6 +232,7 @@ const HomePage = () => {
         }
        else if(title==='Log Out'){
             console.log('yes here');
+            localStorage.removeItem('Userr');
             localStorage.removeItem('User');
             localStorage.removeItem('imageUrl');
             localStorage.removeItem('UserId');
@@ -245,18 +243,17 @@ const HomePage = () => {
             navigate('/change-password', { state: { userId: Userr._id } });
 
            }
-  else if(title==='Delete Account'){
-            console.log('hereee');
+           else if(title==='Delete Account'){
             try {
-              console.log(userId, userType);
+              // console.log(userId, userType);
               const options = {
-                apiPath: `/requestDeletion/${Userr._id}/${Userr.type}`,
+                apiPath: `/requestDeletion/${userId}/${userType}`,
                 useParams: userId,
                 userType,
               };
               const response = await NetworkService.put(options);
               console.log(response);
-          
+              setMessage(response.message);
               setSuccessMessage(response.message || "Delete Successfully!");
               setShowSuccessMessage(true);
           
@@ -268,11 +265,12 @@ const HomePage = () => {
             } catch (err) {
               // Access the error message from the response data
               const errorMessage = err.response?.data?.message || "An error occurred";
-            //   setErrorMessage(errorMessage);
-            //   setShowErrorMessage(true);
-              console.log(err);
+              console.log(errorMessage);
+              setErrorMessage(errorMessage);
+              setShowErrorMessage(true);
+              console.log(errorMessage);
             }
-           }
+          }
     };
 
     return (
@@ -406,7 +404,38 @@ const HomePage = () => {
                         </Menu>
      </div>
             </nav>
-
+            <div style={{ position: 'relative' }}>
+      {message !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px', // Adjust this for horizontal positioning
+            width: '300px', // Customize the width
+            zIndex: 1000, // Ensure it appears above other elements
+          }}
+        >
+          <Alert severity="success" style={{ width: '100%' }}>
+            {message}
+          </Alert>
+        </div>
+      )}
+      {errorMessage !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '60px', // Stack the alerts vertically
+            left: '20px',
+            width: '300px',
+            zIndex: 1000,
+          }}
+        >
+          <Alert severity="error" style={{ width: '100%' }}>
+            {errorMessage}
+          </Alert>
+        </div>
+      )}
+    </div>
             <nav className="navbarSecondary">
               {[  "Sales Report","Tourists Report","Activities", "Transportation"].map((tab) => (
           <div

@@ -144,10 +144,12 @@ const Login = () => {
            <span className="reset-password" onClick={() => navigate('/resetPassword')}>Forgot Password?</span>
         </div>
         <div>
-        <p className="signup-prompt">
-          Don't have an account? 
-          <span className="signup-link" onClick={() => navigate('/register')}> Sign Up</span>
-        </p>
+        {activeTab==='Others'&&(
+                  <p className="signup-prompt">
+                  Don't have an account? 
+                  <span className="signup-link" onClick={() => navigate('/register')}> Sign Up</span>
+                </p>
+          )}
         <p className="signup-promptadvance">
           Back to 
           <span className="signup-link" onClick={() => navigate('/')}>Home Page</span>

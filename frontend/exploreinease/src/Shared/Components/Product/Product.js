@@ -25,11 +25,14 @@ import HomePage from '../../../Seller/SellerNavbar';
 import TouristNavbar from '../../../Tourist/TouristNavbar';
 import NodataFound from '../../../No data Found.avif';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-
 const ProductCard = () => {
-  const Userr=localStorage.getItem('User');
-   const adminIdd = localStorage.getItem('UserId');
+  const Userr = JSON.parse(localStorage.getItem('User'));
+  console.log(Userr);
+  
+  const adminIdd = localStorage.getItem('UserId');
    const userType= localStorage.getItem('UserType');
+   console.log("User Type", userType);
+   console.log(Userr.type);
   const location = useLocation();
   const { User } = location.state || Userr||{};
   const userId = User ? User._id : adminIdd;
@@ -173,13 +176,10 @@ const handleGetAllProduct = async () => {
     );
 };
 const handleAddToWishList = async (productId) => {
-
   const reqbody = {
       productId: productId
   }
-
   const userId = localStorage.getItem("UserId");
-
   await axios.post(`http://localhost:3030/addWishlist/${userId}`,reqbody).then((res) => {
       console.log(res.data);
       console.log("Added to Wishlist", productId);
@@ -278,12 +278,13 @@ const handleClickPurchase = async (product, selectedQuantity) => {
     try {
       // Replace with your API endpoint
       const options = {
-        apiPath: '/archiveProduct/{userId}/{productId}',
+        apiPath: `/archiveProduct/${userId}/${productId}`,
         urlParam: {
           userId: userId,
           productId: productId,
         },
       }
+      console.log('options:', options);
       const response = await NetworkService.put(options);
       console.log(response);
       setSuccessMessage("Successfully!");
@@ -402,7 +403,6 @@ const handleClickPurchase = async (product, selectedQuantity) => {
           originalQuantity: productData.originalQuantity,
           name: productData.name,
         };
-
         const options = {
           apiPath: '/editProducts/{userId}/{_id}',
           urlParam: { userId, _id: productData._id },
@@ -506,12 +506,18 @@ const handleClickPurchase = async (product, selectedQuantity) => {
   return (
 
     <div>
-      <div>
-        {User.type==='seller' ?(
+          
+<div>
+
+        {Userr.type==='seller'&&(
             <HomePage/>
-        ):(
-          <TouristNavbar/>
         )}
+
+        {Userr.type!='seller' && Userr.type!='admin'&&(
+          <TouristNavbar/>
+        )
+      }
+        
       </div>
     
     <Box display="flex" flexDirection="column" alignItems="center" py={3}>
@@ -617,10 +623,10 @@ const handleClickPurchase = async (product, selectedQuantity) => {
           <CardMedia
             component="img"
             height="140"
-            image={product.picture || 'http://localhost:3030/images/changePassword.jpg'}
+            image={NodataFound || product.picture  }
             alt={product.name}
           />
-          {User.type==='Seller' &&(
+          {Userr.type === 'admin' || Userr.type ==='seller'  &&(
                 <Box
                 sx={{
                   position: 'absolute',
@@ -1053,7 +1059,7 @@ gap: 2, // Space between icons
   </DialogActions>
 </Dialog>
 
-      {(userType ==='seller'||userType==='admin'|| User?.type === 'seller' || User?.type === 'admin') && (
+      {(userType ==="seller"||userType==='admin'|| User?.type === 'seller' || User?.type === 'admin') && (
   <Tooltip title="Create" placement="top" arrow>
     <Fab
       color="primary"

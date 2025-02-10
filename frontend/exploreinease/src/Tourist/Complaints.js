@@ -16,7 +16,6 @@ import NodataFound from ".././No data Found.avif";
 const Complaints = () => {
     const location = useLocation();
     const { userId } = location.state || {};
-
     const [formData, setFormData] = useState({
         title: '',
         problem: '',

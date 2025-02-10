@@ -17,12 +17,13 @@ import Tooltip from '@mui/material/Tooltip';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import UploadIcon from '@mui/icons-material/Upload';
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import Alert from '@mui/material/Alert';
 import axios from 'axios';
 import Delete from '@mui/icons-material/Delete';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 const TouristNavbar = () => {
    const Userr = JSON.parse(localStorage.getItem('User'));
    const imageUrll = localStorage.getItem('imageUrl');
@@ -44,39 +45,54 @@ const TouristNavbar = () => {
      const [anchorProfileEl, setAnchorProfileEl] = useState(null);
      const [showSuccessMessage, setShowSuccessMessage] = useState(false);
      const [showErrorMessage, setShowErrorMessage] = useState(false);
-     const [ setErrorMessage] = useState('');
+     const [setSuccess, setSuccessMessage] = useState('');
      const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
      const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
      const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
      const [menuItems,setMenuItem]=useState( []);
+     const [message,setMessage]=useState('');
+    const [errorMessage,setErrorMessage]=useState('');
 
 
-//      useEffect(()=>{
-//   checkPromoCode();
-// },[]);
-// const checkPromoCode=async()=>{
-//   const options = {
-//     apiPath: '/updatePromoCode',
-//   };
-//   await NetworkService.put(options);
-// }
+useEffect(()=>{
+  checkPromoCode();
+  notifyUpcomingEvents();
+},[]);
 useEffect(() => {
-         // Update the avatar URL when the component mounts if a new image URL exists
-         if (savedAvatarUrl || imageUrl) {
-             setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
-         } else {
-             setAvatarImage(defaultAvatarUrl);
-         }
+  // Update the avatar URL when the component mounts if a new image URL exists
+  if (savedAvatarUrl || imageUrl) {
+      setAvatarImage(savedAvatarUrl || `http://localhost:3030/images/${imageUrl}`);
+  } else {
+      setAvatarImage(defaultAvatarUrl);
+  }
 }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
-     
- useEffect(() => {
-      if (showSuccessMessage) {
-        const timer = setTimeout(() => {
-          setShowSuccessMessage(false);
-        }, 5000);
-        return () => clearTimeout(timer);
-      }
+
+useEffect(() => {
+if (showSuccessMessage) {
+ const timer = setTimeout(() => {
+   setShowSuccessMessage(false);
+ }, 5000);
+ return () => clearTimeout(timer);
+}
 }, [showSuccessMessage]);
+useEffect(() => {
+  if (message || errorMessage) {
+    const timer = setTimeout(() => {
+      setMessage('');
+      setErrorMessage('');
+    }, 3000); // Disappear after 3 seconds
+
+    return () => clearTimeout(timer); // Cleanup on component unmount
+  }
+}, [message, errorMessage]);
+
+const checkPromoCode=async()=>{
+  const options = {
+    apiPath: '/updatePromoCode',
+  };
+  const response = await NetworkService.put(options);
+  console.log(response);
+}
     
 useEffect(() => {
       if (showErrorMessage) {
@@ -94,7 +110,13 @@ useEffect(() => {
   }
 }, []);
 
-
+const notifyUpcomingEvents =async()=>{
+  const options = {
+    apiPath: `/notifyUpcomingEvents/${Userr._id}`,
+  };
+  const response = await NetworkService.get(options); 
+  console.log(response);
+};
  const handleAvatarUpload = async (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -147,7 +169,7 @@ const handleClickNotification = async(event) => {
 const handleOpenMenu = (event) => {
   setAnchorProfileEl(event.currentTarget);
 };
-   const handleMenuClose = () => {
+const handleMenuClose = () => {
       setAnchorEl(null);
 };
 const  handleRegisterClick=async(title)=> {
@@ -178,6 +200,29 @@ const  handleRegisterClick=async(title)=> {
               localStorage.setItem('selectedTab', title);
               navigate(`/BookFlight`,{state:{userId}});          
             }
+            else if(title ==="Order History"){
+              try {
+                const options = {
+                  apiPath: `/myOrders/${Userr._id}/${Userr.currency}`,
+                };
+                
+                const response = await NetworkService.get(options);
+                console.log(response);
+                console.log(response.message); // Set success message
+                const Type='tourist';
+                const Orders = response.data;
+                setSelectedTab(title);
+                localStorage.setItem('selectedTab', title);
+                navigate(`/OrderHistory`,{ state: { Orders, Type ,User:Userr} });          
+              } catch (err) {
+                if (err.response) {
+                    console.log(err.message);
+                    console.log(err.response.data.message); // Set error message from server response if exists
+                } else {
+                  console.log('An unexpected error occurred.'); // Generic error message
+                }
+              } 
+            }
            else if (title==="Products") {
 
             try {
@@ -205,7 +250,13 @@ const  handleRegisterClick=async(title)=> {
              }
             else if (title==='profile'){
               try {
-                  navigate(`/viewTouristProfile`,{state:{Tourist:Userr}});
+                const options = {
+                  apiPath: `/getTourist/${Userr._id}`,
+                };
+                const response = await NetworkService.get(options);
+                console.log("res",response);
+                
+                  navigate(`/viewTouristProfile`,{state:{Tourist:response}});
                 } catch (err) {
                   if (err.response) {
                       console.log(err.message);
@@ -317,29 +368,33 @@ const  handleRegisterClick=async(title)=> {
             }
             else if(title==='Delete Account'){
               try {
+                // console.log(userId, userType);
                 const options = {
-                  apiPath: `/requestDeletion/${Userr._id}/${userType}`,
-                  useParams: Userr._id,
+                  apiPath: `/requestDeletion/${userId}/${userType}`,
+                  useParams: userId,
                   userType,
                 };
                 const response = await NetworkService.put(options);
                 console.log(response);
+                setMessage(response.message);
+                setSuccessMessage(response.message || "Delete Successfully!");
+                setShowSuccessMessage(true);
             
-                console.log(response.message || "Delete Successfully!");            
                 if (response.success) {
-                  console.log("Account deletion requested successfully.");
+                  setSuccess("Account deletion requested successfully.");
                 } else {
                   console.log(response.message || "Account deletion request failed.");
                 }
               } catch (err) {
                 // Access the error message from the response data
                 const errorMessage = err.response?.data?.message || "An error occurred";
+                console.log(errorMessage);
                 setErrorMessage(errorMessage);
                 setShowErrorMessage(true);
                 console.log(errorMessage);
               }
             }
-            else if(title==='BookMarks'){
+            else if(title==='Book Marks'){
               try { 
                 const options = {
                   apiPath: `/fetchbookmark/${Userr._id}`,
@@ -362,6 +417,8 @@ const  handleRegisterClick=async(title)=> {
             }
             else if(title==='Log Out'){
               console.log('yes here');
+              localStorage.removeItem('Userr');
+              localStorage.removeItem("UserId");
               localStorage.removeItem('User');
               localStorage.removeItem('imageUrl');
               localStorage.removeItem('UserId');
@@ -397,7 +454,7 @@ const  handleRegisterClick=async(title)=> {
 
 return (
   <>
-      <nav className="navbarMain">
+    <nav className="navbarMain">
     <div className="navbar-left">
     <div className="logo-container">
       <img
@@ -422,11 +479,22 @@ return (
           <Tooltip title="Cart">
           <AddShoppingCart />
           </Tooltip>
+        </IconButton> 
 
-        </IconButton>   
+        <IconButton
+          style={{
+            color: 'blue',
+            backgroundColor: '#e0f7fa',
+          }}
+          onClick={() => {
+            navigate('/wishList');
+          }}
+        >
+          <Tooltip title="WishList">
+          <FavoriteBorderIcon />
+          </Tooltip>
+        </IconButton>  
 
-  {/* Notification Button */}
-{/* Notification Icon Button */}
 <IconButton
         aria-controls={openNotfication ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -437,10 +505,13 @@ return (
           backgroundColor: "#e0f7fa",
         }}
       >
+        <Tooltip title="Notifications">
         <Badge badgeContent={menuItems?.length || 0} color="error">
           <NotificationsIcon />
         </Badge>
-      </IconButton>
+        </Tooltip>
+
+     </IconButton>
 
       {/* Notification Menu */}
       <Menu
@@ -547,8 +618,40 @@ return (
      </Menu>           
      </div>
     </nav>
+    <div style={{ position: 'relative' }}>
+      {message !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px', // Adjust this for horizontal positioning
+            width: '300px', // Customize the width
+            zIndex: 1000, // Ensure it appears above other elements
+          }}
+        >
+          <Alert severity="success" style={{ width: '100%' }}>
+            {message}
+          </Alert>
+        </div>
+      )}
+      {errorMessage !== '' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '60px', // Stack the alerts vertically
+            left: '20px',
+            width: '300px',
+            zIndex: 1000,
+          }}
+        >
+          <Alert severity="error" style={{ width: '100%' }}>
+            {errorMessage}
+          </Alert>
+        </div>
+      )}
+    </div>
     <nav className="navbarSecondary">
-    {['Events',,"Products","Transportation","Complaints","Book Hotels","Book Flights","Purchased Product",,"Booked items","BookMarks"].map((tab) => (
+    {['Events',"Products","Transportation","Complaints","Book Hotels","Book Flights","Order History",,"Booked items","Book Marks"].map((tab) => (
           <div
             key={tab}
             className={`navbar-tab ${selectedTab === tab ? 'selected' : ''}`}

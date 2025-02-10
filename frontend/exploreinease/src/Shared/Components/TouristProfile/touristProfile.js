@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Box, Typography, IconButton, TextField, Divider, Avatar, Grid, InputAdornment } from '@mui/material';
+import { Card, Box, Typography, IconButton, TextField, Divider,FormControl,InputLabel,Select,MenuItem, Avatar, Grid, InputAdornment } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { Edit as EditIcon, Save as SaveIcon, Star as StarIcon, Wallet, Redeem, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
@@ -17,26 +17,37 @@ import Sky from '../Sky2.jpeg';
 import TouristNavbar from '../../../Tourist/TouristNavbar';
 
 const TouristProfile = (props) => {
+  const [level, setLevel] = useState(1);
+  const User = JSON.parse(localStorage.getItem('User'));
   const location = useLocation();
   const { Tourist, imageUrl } = location.state || {}; // Destructure Tourist from location.state
-  // console.log(Tourist);
-
   const initialData = {
-    email: Tourist?.email || '',
-    mobileNum: Tourist?.mobileNum || '',
+    email: Tourist?.email || User?.email,
+    mobileNum: Tourist?.mobileNum || User?.mobileNum,
     nationality: Tourist?.nation || '',
     dob: Tourist?.dob ? dayjs(Tourist.dob) : null,
     profession: Tourist?.profession || '',
     password: Tourist?.password || '',
     wallet: Tourist?.wallet || 0,
     points: Tourist?.points || 0,
+    currency:Tourist?.currency||User.currency,
   };
-  const userId = Tourist._id;
+  const userId = Tourist._id||User._id;
   const savedAvatarUrl = localStorage.getItem(`${userId}`) || '';
   const [avatarImage, setAvatarImage] = useState(savedAvatarUrl || `http://localhost:3030/images/${imageUrl || ''}`);
   const initialUsername = Tourist.username;
   const defaultAvatarUrl = initialUsername ? initialUsername.charAt(0).toUpperCase() : '?';
-
+  const [formValues, setFormValues] = useState(initialData);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isEditable, setIsEditable] = useState({
+    email: false,
+    mobileNum: false,
+    nationality: false,
+    dob: false,
+    password: false,
+    profession: false,
+    currency:false,
+  });
 
   useEffect(() => {
     // Update the avatar URL when the component mounts if a new image URL exists
@@ -46,18 +57,6 @@ const TouristProfile = (props) => {
         setAvatarImage(defaultAvatarUrl);
     }
 }, [imageUrl, savedAvatarUrl, defaultAvatarUrl]);
-
-  const [formValues, setFormValues] = useState(initialData);
-  const [isEditable, setIsEditable] = useState({
-    email: false,
-    mobileNum: false,
-    nationality: false,
-    dob: false,
-    password: false,
-    profession: false,
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [setLevel] = useState(1);
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -113,6 +112,7 @@ const TouristProfile = (props) => {
         dob: formValues.dob,
         profession: formValues.profession,
         password: formValues.password,
+        currency:formValues.currency
       };
       const response = await axios.put(`http://localhost:3030/updateTourist/${Tourist._id}`, body);
       console.log(response.message);
@@ -123,6 +123,7 @@ const TouristProfile = (props) => {
         dob: false,
         password: false,
         profession: false,
+        currency:false,
       });
     } catch (error) {
       console.error('Error updating tourist:', error);
@@ -166,7 +167,6 @@ const TouristProfile = (props) => {
       justifyContent: 'center',
     }}
   >
-  
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       {/* Flex container to center the card */}
       <Box
@@ -246,13 +246,13 @@ const TouristProfile = (props) => {
           {/* Profile Fields */}
           <Grid container spacing={2}>
                 {/* Username */}
-    <Grid item xs={12}>
-      <Box display="flex" alignItems="center">
-        <AccountCircleIcon color="action" />
-        <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
-        <Typography sx={{ mr: 5 }}>{Tourist.username}</Typography>
-      </Box>
-    </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <AccountCircleIcon color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Username:</Typography>
+                <Typography sx={{ mr: 5 }}>{Tourist.username}</Typography>
+              </Box>
+            </Grid>
             {/* Email */}
             <Grid item xs={12}>
               <Box display="flex" alignItems="center">
@@ -297,6 +297,34 @@ const TouristProfile = (props) => {
                 )}
                 <IconButton onClick={() => { toggleEdit('nationality'); if (isEditable.nationality) handleSave(); }}>
                   {isEditable.nationality ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
+                </IconButton>
+              </Box>
+            </Grid>
+            {/* currency */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center">
+                <Flag color="action" />
+                <Typography sx={{ fontWeight: 'bold', ml: 1, flex: 1 }}>Currency:</Typography>
+                {isEditable.currency ? (
+                  <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Currency</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={formValues.currency}
+                    label="Currency"
+                    onChange={handleChange('currency')}
+                  >
+                       <MenuItem value={'EGP'}>EGP</MenuItem>
+                       <MenuItem value={'euro'}>EURO</MenuItem>
+                       <MenuItem value={'dollar'}>Dollar</MenuItem>  
+                  </Select>
+                </FormControl>
+                ) : (
+                  <Typography>{formValues.currency}</Typography>
+                )}
+                <IconButton onClick={() => { toggleEdit('currency'); if (isEditable.currency) handleSave(); }}>
+                  {isEditable.currency ? <SaveIcon color="primary" /> : <EditIcon color="action" />}
                 </IconButton>
               </Box>
             </Grid>

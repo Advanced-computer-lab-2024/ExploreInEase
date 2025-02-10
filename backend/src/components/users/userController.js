@@ -2,6 +2,8 @@ const userService = require('../users/userService');
 const userRepository = require('../users/userRepository');
 const bcrypt = require('bcrypt');
 const Order = require('../../models/order');
+const Tourist = require('../../models/tourist');
+const mongoose = require('mongoose');
 
 
 // Controller to handle request for users with requestDeletion set to true
@@ -685,6 +687,7 @@ const login = async (req, res) => {
                         termsAndConditions: user.termsAndConditions,
                         requestDeletion: user.requestDeletion,
                         specialist: user.specialist,
+                        wallet: user.wallet,
                         status: user.status,
                         otp: user.otp,
                         currency: user.currency,
@@ -693,6 +696,7 @@ const login = async (req, res) => {
                         createdAt: user.createdAt,
                         updatedAt: user.updatedAt
                     },
+                    
                     userType: user.type
                 });
             }
@@ -708,6 +712,11 @@ const login = async (req, res) => {
                 username: user.username,
                 password: user.password,
                 email: user.email,
+                mobileNum: user.mobileNum || '',
+                nation: user.nation || '',
+                dob: user.dob || '',
+                profession: user.profession || '',
+                wallet: user.wallet || 0,
                 ratingSum: user.ratingSum,
                 ratingCount: user.ratingCount,
                 hotline: user.hotline || '',
@@ -765,6 +774,7 @@ const creatingPromoCode = async (req, res) => {
 
 const updatePromoCode = async (req, res) => {
     try {
+        console.log("update");
         // Fetch all tourists
         const tourists = await Tourist.find();
 
@@ -777,7 +787,7 @@ const updatePromoCode = async (req, res) => {
         const birthdayTourists = await Promise.all(tourists.map(async (tourist) => {
             const birthDate = new Date(tourist.dob);
             const isBirthdayToday = birthDate.getMonth() + 1 === todayMonth && birthDate.getDate() === todayDay;
-
+            console.log("Birthday: ", isBirthdayToday); // Log the result for debugging
             // If it's their birthday, set the flag to true, otherwise false
             if (isBirthdayToday && !tourist.promoCodeFlag) {
                 // Update the tourist's flag and save
@@ -801,7 +811,7 @@ const updatePromoCode = async (req, res) => {
         console.log("Birthday Tourists: ", birthdayTouristIds); // Log the IDs for debugging
 
         if (birthdayTouristIds.length === 0) {
-            return res.status(404).json({
+            return res.status(200).json({
                 message: "No tourists with birthdays today or all have already received a promo code",
             });
         }

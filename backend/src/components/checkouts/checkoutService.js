@@ -287,11 +287,15 @@ const cancelOrder = async (orderId, touristId) => {
     // Fetch the order details
     const order = await checkoutRepository.getOrderById(orderId);
 
+    console.log("yaraaaaaabbbb",order);
+    console.log("yaraaaaaabbbb2222222",touristId);
+
     if (!order) {
         throw new Error('Order not found');
     }
 
-    if (order.touristId.toString() !== touristId) {
+    if (order.touristId._id.toString() !== touristId) {
+        console.log("yaraaaaaabbbb3333333",order.touristId._id.toString());
         throw new Error('Order does not belong to the provided tourist.');
     }
 

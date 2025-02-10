@@ -3,6 +3,7 @@ const eventService = require('../events/eventService');
 const { validationResult } = require('express-validator');
 const eventRepository = require('../events/eventRepository');
 const checkoutRepository = require('../checkouts/checkoutRepository');
+const userRepository = require('../users/userRepository');
 const checkoutService = require('../checkouts/checkoutService');
 const nodemailer = require('nodemailer');
 
@@ -32,7 +33,8 @@ const updateEventFlagController = async (req, res) => {
       if (!updatedEvent) {
           return res.status(404).json({ message: 'Event not found.' });
       }
-      const publisher = await eventRepository.getPublisher(updatedEvent.created_by);
+      console.log("Updated Event: ",updatedEvent.created_by);
+      const publisher = await userRepository.findUserById(updatedEvent.created_by);
 
 
       const body =` ${eventType} with ID ${eventID} has been flagged Inappropriate.`;
@@ -714,7 +716,16 @@ const createItinerary = async (req, res) => {
     console.log(req.body);
     const file = req.file;
 
-    if (!file) {
+    const activitiesArray = activities.split(',');
+    
+      // Convert locations into an array of strings
+  const locationsArray = locations.split(',');
+
+  // Convert dateTimeAvailable into an array of strings
+  const dateTimeAvailableArray = dateTimeAvailable.split(',');
+
+
+    if (!file) {  
       return res.status(400).send('No file uploaded.');
     }
     if(!name || !activities || !locations || !timeline || !directions || !language || !price || !dateTimeAvailable || !pickupLocation || !dropoffLocation) {
@@ -758,15 +769,18 @@ const createItinerary = async (req, res) => {
     if(!allActivities) {
       return res.status(404).json({ message: 'Activities not found.' });
     }
-    console.log(activities);
+    console.log(activitiesArray);
     const allActivitiesIds = allActivities.map(activity => activity._id.toString());
-    const areAllActivitiesValid = activities.every(activityId => allActivitiesIds.includes(activityId));
+    console.log(allActivitiesIds);
+    console.log(activitiesArray);
+    const areAllActivitiesValid = activitiesArray.every(activityId => allActivitiesIds.includes(activityId));
+    console.log(areAllActivitiesValid);
 
     if (!areAllActivitiesValid) {
       return res.status(400).json({ message: 'One or more provided activities are invalid.' });
     }
     
-    const itineraryData = { name, activities, locations, timeline, directions, language, price, dateTimeAvailable, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
+    const itineraryData = { name, activities: activitiesArray, locations: locationsArray, timeline, directions, language, price, dateTimeAvailable: dateTimeAvailableArray, accessibility, pickupLocation, dropoffLocation, isActivated, created_by, flag, isSpecial };
     
     // Call the service to create the itinerary
     const newItinerary = await eventService.createItinerary(itineraryData);
@@ -775,7 +789,8 @@ const createItinerary = async (req, res) => {
     if(itineraryImage.message != 'Image uploaded successfully') {
       return res.status(400).json({ message: 'Error uploading image' });
     } 
-    return res.status(200).json({message: "Itinerary created successfully", Itinerary: newItinerary});
+    console.log("Itinerary Done");
+    return res.status(200).json({message: "Itinerary created successfully", Itinerary: newItinerary, imageUrl: itineraryImage.imageUrl});
   } catch (error) {
     console.error('Error creating itinerary:', error.message);
     return res.status(500).json({ message: 'Server error.' });

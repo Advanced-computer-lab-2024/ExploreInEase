@@ -241,7 +241,7 @@ const getAllTags=async ()=>{
   }
 }
 async function fetchAddressFromCoordinates (  latitude, longitude)  {
-  const apiKey = "AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM";
+  const apiKey = "AIzaSyDifIZGHTwXaBJG610aJc9SWAe6sOAuwZE";
   const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
 
   try {
@@ -531,7 +531,7 @@ const handleEditActivity = (activity) => {
         <HomePage/>
       </div>
     <div>
-    <LoadScript googleMapsApiKey={'AIzaSyBl4qzmCWbzkAdQlzt8hRYrvTfU-LSxWRM'} libraries={["places"]}>
+    <LoadScript googleMapsApiKey={'AIzaSyDifIZGHTwXaBJG610aJc9SWAe6sOAuwZE'} libraries={["places"]}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div>
         <Button variant="contained" onClick={handleClickOpen} sx={{ maxWidth: 150, marginTop: 2, marginLeft: 2 }}>
@@ -701,11 +701,11 @@ const handleEditActivity = (activity) => {
        activities.map((activity, index) => (
             
     <Grid item xs={12} sm={6} md={4} key={index} >
-      <Card sx={{width:'400px',height:'470px',marginLeft:5}}>
+      <Card sx={{width:'400px',height:'470px',marginLeft:5,marginBottom:5}}>
       <CardMedia
           component="img"
-          height="180"
-          image={activity.picture}
+          height="200"
+          image={activity.picture||NodataFound}
           alt={activityImage?.name||"Image"}
         />
         <CardContent>
